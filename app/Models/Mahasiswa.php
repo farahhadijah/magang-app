@@ -9,7 +9,7 @@ use App\Models\PengajuanPkl;
 class Mahasiswa extends Model
 {
     protected $table = 'mahasiswa';
-
+    public $timestamps = false;
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
@@ -20,4 +20,3 @@ class Mahasiswa extends Model
         return $this->hasMany(PengajuanPkl::class, 'id_mhs');
     }
 }
-?>
