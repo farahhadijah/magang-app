@@ -12,12 +12,14 @@ class MahasiswaSeeder extends Seeder
     {
         $user = User::where('role', 'mahasiswa')->first();
 
-        Mahasiswa::create([
-            'id_user' => $user->id,
-            'nim' => '20210001',
-            'prodi' => 'Informatika',
-            'angkatan' => 2021,
-            'no_hp' => '08123456789'
-        ]);
+        Mahasiswa::updateOrCreate(
+            ['nim' => '112310090'], // kolom UNIQUE
+            [
+                'id_user' => 4,
+                'prodi' => 'Teknik Informatika',
+                'angkatan' => 2023,
+                'no_hp' => '08123456789',
+            ]
+        );
     }
 }

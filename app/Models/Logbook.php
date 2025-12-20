@@ -7,6 +7,7 @@ use App\Models\Pkl;
 
 class Logbook extends Model
 {
+    public $timestamps = true;
     protected $table = 'logbook';
 
     public function pkl()

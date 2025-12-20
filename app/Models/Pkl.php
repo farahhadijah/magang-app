@@ -12,6 +12,7 @@ use App\Models\NilaiPkl;
 
 class Pkl extends Model
 {
+    public $timestamps = true;
     protected $table = 'pkl';
 
     public function pengajuanPkl()

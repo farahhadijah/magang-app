@@ -8,6 +8,7 @@ use App\Models\User;
 
 class Verifikasi extends Model
 {
+    public $timestamps = true;
     protected $table = 'verifikasi';
 
     public function pengajuanPkl()

@@ -18,8 +18,6 @@ return new class extends Migration
             $table->string('prodi', 100);
             $table->year('angkatan');
             $table->string('no_hp', 15)->nullable();
-
-            $table->timestamps();
         });
     }
 

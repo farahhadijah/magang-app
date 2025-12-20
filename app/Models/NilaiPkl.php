@@ -7,6 +7,7 @@ use App\Models\Pkl;
 
 class NilaiPkl extends Model
 {
+    public $timestamps = true;
     protected $table = 'nilai_pkl';
 
     public function pkl()

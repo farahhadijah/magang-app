@@ -11,6 +11,7 @@ use App\Models\Pkl;
 
 class PengajuanPkl extends Model
 {
+    public $timestamps = true;
     protected $table = 'pengajuan_pkl';
 
     public function mahasiswa()

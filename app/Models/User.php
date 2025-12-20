@@ -9,6 +9,7 @@ use App\Models\Pkl;
 
 class User extends Model
 {
+    public $timestamps = true;
     protected $table = 'users';
 
     public function mahasiswa()

@@ -8,8 +8,8 @@ use App\Models\PengajuanPkl;
 
 class Mahasiswa extends Model
 {
+    public $timestamps = true;
     protected $table = 'mahasiswa';
-    public $timestamps = false;
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');

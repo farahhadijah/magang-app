@@ -11,35 +11,40 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Staff TU
-        User::create([
-            'nama' => 'Staff TU',
-            'email' => 'staff_tu@unisla.ac.id',
-            'password' => Hash::make('stafftu#123'),
-            'role' => 'staff_tu'
-        ]);
-
+        User::updateOrCreate(
+            ['email' => 'staff_tu@unisla.ac.id'], // key unik
+            [
+                'nama' => 'Staff TU',
+                'password' => Hash::make('password123'),
+                'role' => 'staff_tu',
+            ]
+        );
         // Kaprodi
-        User::create([
-            'nama' => 'Kaprodi',
-            'email' => 'kaprodi@unisla.ac.id',
-            'password' => Hash::make('kaprodi#123'),
-            'role' => 'kaprodi'
-        ]);
-
+        User::updateOrCreate(
+            ['email' => 'kaprodi@unisla.ac.id'], // key unik
+            [
+                'nama' => 'Kaprodi',
+                'password' => Hash::make('password123'),
+                'role' => 'kaprodi',
+            ]
+        );
         // Dosen
-        User::create([
-            'nama' => 'Dosen Pembimbing',
-            'email' => 'dosen@unisla.ac.id',
-            'password' => Hash::make('dosen#123'),
-            'role' => 'dosen'
-        ]);
-
+        User::updateOrCreate(
+            ['email' => 'dosen@unisla.ac.id'], // key unik
+            [
+                'nama' => 'Dosen Pembimbing',
+                'password' => Hash::make('password123'),
+                'role' => 'dosen',
+            ]
+        );
         // Mahasiswa
-        User::create([
-            'nama' => 'Mahasiswa 1',
-            'email' => 'mhs@unisla.ac.id',
-            'password' => Hash::make('mhs#123'),
-            'role' => 'mahasiswa'
-        ]);
+        User::updateOrCreate(
+            ['email' => 'mhs@unisla.ac.id'], // key unik
+            [
+                'nama' => 'Mahasiswa 1',
+                'password' => Hash::make('password123'),
+                'role' => 'mahasiswa',
+            ]
+        );
     }
 }
