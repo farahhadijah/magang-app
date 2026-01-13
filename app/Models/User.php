@@ -2,16 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Mahasiswa;
-use App\Models\Verifikasi;
-use App\Models\Pkl;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class User extends Model
+class User extends Authenticatable
 {
-    public $timestamps = true;
+    use Notifiable;
+
     protected $table = 'users';
 
+    protected $fillable = [
+        'nama',
+        'email',
+        'password',
+        'role',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    // =====================
+    // RELATION
+    // =====================
     public function mahasiswa()
     {
         return $this->hasOne(Mahasiswa::class, 'id_user');
@@ -26,6 +40,27 @@ class User extends Model
     {
         return $this->hasMany(Pkl::class, 'id_dosen');
     }
-}
 
-?>
+    // =====================
+    // ROLE HELPER
+    // =====================
+    public function isMahasiswa()
+    {
+        return $this->role === 'mahasiswa';
+    }
+
+    public function isStaffTu()
+    {
+        return $this->role === 'staff_tu';
+    }
+
+    public function isKaprodi()
+    {
+        return $this->role === 'kaprodi';
+    }
+
+    public function isDosen()
+    {
+        return $this->role === 'dosen';
+    }
+}
