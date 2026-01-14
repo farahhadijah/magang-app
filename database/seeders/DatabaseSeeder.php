@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             DokumenPengajuanSeeder::class,
             VerifikasiSeeder::class,
             PklSeeder::class,
+            AdminUserSeeder::class,
         ]);
     }
 }

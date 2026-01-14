@@ -2,14 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $role = auth()->user()->role;
+        $user = Auth::user();
 
-        return redirect()->route($role . '.dashboard');
+        if (!$user) {
+            abort(401);
+        }
+
+        return match ($user->role) {
+            'admin'      => redirect()->route('admin.dashboard'),
+            'mahasiswa'  => view('dashboard'),
+            'dosen'      => redirect()->route('dosen.dashboard'),
+            'kaprodi'    => redirect()->route('kaprodi.dashboard'),
+            'staff_tu'   => redirect()->route('staff.dashboard'),
+            default      => abort(403, 'Role tidak dikenali'),
+        };
     }
 }
