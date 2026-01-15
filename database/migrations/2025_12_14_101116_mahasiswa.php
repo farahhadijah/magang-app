@@ -26,7 +26,7 @@ Schema::create('mahasiswa', function (Blueprint $table) {
     $table->timestamps();
 });
 
-    }
+}
 
     /**
      * Reverse the migrations.

@@ -2,28 +2,31 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\PklSeeder;
 use Illuminate\Database\Seeder;
-// use Database\Seeders\UserSeeder;
-// use Database\Seeders\MahasiswaSeeder;
+use Database\Seeders\UserSeeder;
+use Database\Seeders\DosenSeeder;
+use Database\Seeders\StaffSeeder;
+use Database\Seeders\MahasiswaSeeder;
 use Database\Seeders\TempatPklSeeder;
+use Database\Seeders\VerifikasiSeeder;
 use Database\Seeders\PengajuanPklSeeder;
 use Database\Seeders\DokumenPengajuanSeeder;
-use Database\Seeders\VerifikasiSeeder;
-use Database\Seeders\PklSeeder;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         $this->call([
-            // UserSeeder::class,
-            // MahasiswaSeeder::class,
+            UserSeeder::class,
+            MahasiswaSeeder::class,
             TempatPklSeeder::class,
             PengajuanPklSeeder::class,
             DokumenPengajuanSeeder::class,
             VerifikasiSeeder::class,
             PklSeeder::class,
-            AdminUserSeeder::class,
+            StaffSeeder::class,
+            DosenSeeder::class,
         ]);
     }
 }

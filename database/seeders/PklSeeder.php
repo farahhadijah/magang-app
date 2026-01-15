@@ -11,12 +11,20 @@ class PklSeeder extends Seeder
 {
     public function run(): void
     {
+        $pengajuan = PengajuanPkl::first();
+        $dosen     = User::where('role', 'dosen')->first();
+
+        // ❗ Jika data utama belum ada, hentikan seeder
+        if (!$pengajuan || !$dosen) {
+            return;
+        }
+
         Pkl::create([
-            'id_pengajuan_pkl' => PengajuanPkl::first()->id,
-            'id_dosen' => User::where('role', 'dosen')->first()->id,
+            'id_pengajuan_pkl' => $pengajuan->id,
+            'id_dosen' => $dosen->id,
             'tgl_mulai' => now(),
             'tgl_selesai' => now()->addMonths(3),
-            'status' => 'aktif'
+            'status' => 'aktif',
         ]);
     }
 }
