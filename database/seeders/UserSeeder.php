@@ -10,40 +10,59 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Staff TU
+        // =====================
+        // STAFF TU
+        // =====================
         User::updateOrCreate(
-            ['email' => 'staff_tu@unisla.ac.id'], // key unik
+            ['username' => '19800101'], // NIP
             [
                 'nama' => 'Staff TU',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('19800101'),
                 'role' => 'staff_tu',
+                'first_login' => true,
+                'is_active' => true,
             ]
         );
-        // Kaprodi
+
+        // =====================
+        // KAPRODI
+        // =====================
         User::updateOrCreate(
-            ['email' => 'kaprodi@unisla.ac.id'], // key unik
+            ['username' => '19750505'], // NIP
             [
-                'nama' => 'Kaprodi',
-                'password' => Hash::make('password123'),
+                'nama' => 'Kaprodi Teknik Informatika',
+                'password' => Hash::make('19750505'),
                 'role' => 'kaprodi',
+                'first_login' => true,
+                'is_active' => true,
             ]
         );
-        // Dosen
+
+        // =====================
+        // DOSEN
+        // =====================
         User::updateOrCreate(
-            ['email' => 'dosen@unisla.ac.id'], // key unik
+            ['username' => '12001234'], // NIDN
             [
                 'nama' => 'Dosen Pembimbing',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('12001234'),
                 'role' => 'dosen',
+                'first_login' => true,
+                'is_active' => true,
             ]
         );
-        // Mahasiswa
+
+        // =====================
+        // MAHASISWA
+        // =====================
         User::updateOrCreate(
-            ['email' => 'mhs@unisla.ac.id'], // key unik
+            ['username' => '210441100001'], // NIM
             [
                 'nama' => 'Mahasiswa 1',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('210441100001'),
                 'role' => 'mahasiswa',
+                'first_login' => true,
+                'is_active' => true,
             ]
         );
     }

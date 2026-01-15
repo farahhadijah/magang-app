@@ -13,11 +13,28 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('nama', 100);
-            $table->string('email', 100)->unique();
+
+            // Username = NIM / NIDN / NIP
+            $table->string('username', 30)->unique();
+
+            // Password login
             $table->string('password');
-            $table->enum('role', ['mahasiswa', 'staff_tu', 'kaprodi', 'dosen'])
-                ->default('mahasiswa');
+
+            // Role sistem (bukan dipilih user)
+            $table->enum('role', [
+                'admin',
+                'mahasiswa',
+                'dosen',
+                'staff'
+            ])->default('mahasiswa');
+
+            // Status akun
+            $table->boolean('is_active')->default(true);
+
+            // Login pertama → wajib ganti password
+            $table->boolean('first_login')->default(true);
+
+            $table->rememberToken();
             $table->timestamps();
         });
     }
@@ -27,6 +44,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('users');
     }
 };

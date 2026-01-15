@@ -11,9 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pkl', function (Blueprint $table) {
-            $table->timestamps();
-        });
+Schema::create('mahasiswa', function (Blueprint $table) {
+    $table->id();
+
+    $table->string('nim', 20)->unique();
+    $table->string('nama', 100);
+
+    $table->string('prodi', 100); // nanti bisa jadi FK
+    $table->year('angkatan');
+
+    $table->boolean('is_active')->default(true);
+
+    $table->timestamps();
+});
+
     }
 
     /**
