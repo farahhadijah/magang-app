@@ -17,12 +17,11 @@ class MahasiswaSeeder extends Seeder
         if (!$user) {
             return;
         }
-
         Mahasiswa::updateOrCreate(
             ['nim' => '112310090'],
             [
                 'nama' => 'Nur Faizah', // ✅ WAJIB
-                'prodi' => 'Teknik Informatika',
+                'prodi_id'  => 1,
                 'angkatan' => 2023,
                 'no_hp' => '08123456789',
                 'is_active' => true,

@@ -13,16 +13,8 @@ class DosenSeeder extends Seeder
             ['nidn' => '12001234'],
             [
                 'nama' => 'Dr. Budi Santoso',
+                'prodi_id'  => 1,
                 'no_hp' => '081234567890',
-                'is_active' => true,
-            ]
-        );
-
-        Dosen::updateOrCreate(
-            ['nidn' => '12005678'],
-            [
-                'nama' => 'Dra. Siti Nurhaliza',
-                'no_hp' => '081298761234',
                 'is_active' => true,
             ]
         );
