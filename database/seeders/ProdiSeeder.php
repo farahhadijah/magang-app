@@ -9,28 +9,22 @@ class ProdiSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('prodi')->insert([
-            [
-                'kode' => 'TI',
-                'nama' => 'Teknik Informatika',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'kode' => 'SI',
-                'nama' => 'Sistem Informasi',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'kode' => 'MI',
-                'nama' => 'Manajemen Informatika',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        $prodiList = [
+            ['kode' => 'TI', 'nama' => 'Teknik Informatika'],
+            ['kode' => 'SI', 'nama' => 'Sistem Informasi'],
+            ['kode' => 'MI', 'nama' => 'Manajemen Informatika']
+        ];
+
+        foreach ($prodiList as $p) {
+            DB::table('prodi')->updateOrInsert(
+                ['kode' => $p['kode']],
+                [
+                    'nama' => $p['nama'],
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            );
+        }
     }
 }

@@ -9,7 +9,7 @@ class Prodi extends Model
     use HasFactory;
 
     protected $table = 'prodi';
-    protected $fillable = ['nama_prodi'];
+    protected $fillable = ['kode', 'nama', 'is_active'];
 
     public function mahasiswa()
     {

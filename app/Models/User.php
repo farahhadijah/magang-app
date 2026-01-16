@@ -1,24 +1,25 @@
 <?php
 
 namespace App\Models;
-use App\Models\Pkl;
-use App\Models\Mahasiswa;
-use App\Models\Verifikasi;
+
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
-    use HasFactory,Notifiable;
-
+    use HasFactory, Notifiable;
     protected $table = 'users';
-
     protected $fillable = [
-        'nama',
-        'email',
+        'username',
         'password',
         'role',
+        'is_active',
+        'first_login',
+        'mahasiswa_id',
+        'dosen_id',
+        'staff_id'
     ];
 
     protected $hidden = [
@@ -26,44 +27,24 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // =====================
-    // RELATION
-    // =====================
-    public function mahasiswa()
-    {
-        return $this->hasOne(Mahasiswa::class, 'id_user');
-    }
+public function mahasiswa()
+{
+    return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id');
+}
 
-    public function verifikasi()
-    {
-        return $this->hasMany(Verifikasi::class, 'id_user');
-    }
+public function dosen()
+{
+    return $this->belongsTo(Dosen::class, 'dosen_id');
+}
 
-    public function pklDosen()
-    {
-        return $this->hasMany(Pkl::class, 'id_dosen');
-    }
+public function staff()
+{
+    return $this->belongsTo(Staff::class, 'staff_id');
+}
 
-    // =====================
-    // ROLE HELPER
-    // =====================
-    public function isMahasiswa()
-    {
-        return $this->role === 'mahasiswa';
-    }
 
-    public function isStaffTu()
-    {
-        return $this->role === 'staff_tu';
-    }
-
-    public function isKaprodi()
-    {
-        return $this->role === 'kaprodi';
-    }
-
-    public function isDosen()
-    {
-        return $this->role === 'dosen';
+    // Mutator otomatis hash password
+    public function setPasswordAttribute($value) {
+        $this->attributes['password'] = Hash::make($value);
     }
 }

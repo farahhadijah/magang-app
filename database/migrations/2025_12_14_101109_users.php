@@ -11,32 +11,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-
-            // Username = NIM / NIDN / NIP
-            $table->string('username', 30)->unique();
-
-            // Password login
-            $table->string('password');
-
-            // Role sistem (bukan dipilih user)
-            $table->enum('role', [
-                'admin',
-                'mahasiswa',
-                'dosen',
-                'staff'
-            ])->default('mahasiswa');
-
-            // Status akun
-            $table->boolean('is_active')->default(true);
-
-            // Login pertama → wajib ganti password
-            $table->boolean('first_login')->default(true);
-
-            $table->rememberToken();
-            $table->timestamps();
-        });
+Schema::create('users', function (Blueprint $table) {
+    $table->id();
+    $table->string('username', 30)->unique();
+    $table->string('password');
+    $table->enum('role', [
+        'admin',
+        'mahasiswa',
+        'staf',
+        'dosen',
+        'staff_tu',
+        'kaprodi'
+    ])->default('mahasiswa');
+    
+    // Hanya kolom, TANPA foreign key constraint
+    $table->unsignedBigInteger('mahasiswa_id')->nullable();
+    $table->unsignedBigInteger('dosen_id')->nullable();
+    $table->unsignedBigInteger('staff_id')->nullable();
+    
+    $table->boolean('is_active')->default(true);
+    $table->boolean('first_login')->default(true);
+    $table->rememberToken();
+    $table->timestamps();
+});
     }
 
     /**

@@ -3,63 +3,70 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Mahasiswa;
+use App\Models\Dosen;
+use App\Models\Staff;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // =====================
         // STAFF TU
-        // =====================
-        User::updateOrCreate(
-            ['username' => '19800101'], // NIP
-            [
-                'password' => Hash::make('19800101'),
-                'role' => 'staff_tu',
-                'first_login' => true,
-                'is_active' => true,
-            ]
-        );
-
-        // =====================
+        $staff = Staff::where('nip', '19800101')->first();
+        if ($staff) {
+            User::updateOrCreate(
+                ['username' => $staff->nip],
+                [
+                    'password' => $staff->nip,
+                    'role' => 'staff_tu',
+                    'first_login' => true,
+                    'is_active' => true,
+                    'staff_id' => $staff->id
+                ]
+            );
+        }
         // KAPRODI
-        // =====================
-        User::updateOrCreate(
-            ['username' => '19750505'], // NIP
-            [
-                'password' => Hash::make('19750505'),
-                'role' => 'kaprodi',
-                'first_login' => true,
-                'is_active' => true,
-            ]
-        );
-
-        // =====================
+        $kaprodi = Staff::where('nip', '19750505')->first();
+        if ($kaprodi) {
+            User::updateOrCreate(
+                ['username' => $kaprodi->nip],
+                [
+                    'password' => $kaprodi->nip,
+                    'role' => 'kaprodi',
+                    'first_login' => true,
+                    'is_active' => true,
+                    'staff_id' => $kaprodi->id
+                ]
+            );
+        }
         // DOSEN
-        // =====================
-        User::updateOrCreate(
-            ['username' => '12001234'], // NIDN
-            [
-                'password' => Hash::make('12001234'),
-                'role' => 'dosen',
-                'first_login' => true,
-                'is_active' => true,
-            ]
-        );
-
-        // =====================
+        $dosen = Dosen::where('nidn', '12001234')->first();
+        if ($dosen) {
+            User::updateOrCreate(
+                ['username' => $dosen->nidn],
+                [
+                    'password' => $dosen->nidn,
+                    'role' => 'dosen',
+                    'first_login' => true,
+                    'is_active' => true,
+                    'dosen_id' => $dosen->id
+                ]
+            );
+        }
         // MAHASISWA
-        // =====================
-        User::updateOrCreate(
-            ['username' => '210441100001'], // NIM
-            [
-                'password' => Hash::make('210441100001'),
-                'role' => 'mahasiswa',
-                'first_login' => true,
-                'is_active' => true,
-            ]
-        );
+        $mhs = Mahasiswa::where('nim', '210441100001')->first();
+        if ($mhs) {
+            User::updateOrCreate(
+                ['username' => $mhs->nim],
+                [
+                    'password' => $mhs->nim,
+                    'role' => 'mahasiswa',
+                    'first_login' => true,
+                    'is_active' => true,
+                    'mahasiswa_id' => $mhs->id
+                ]
+            );
+        }
     }
 }
