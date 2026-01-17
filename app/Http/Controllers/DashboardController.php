@@ -10,17 +10,13 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
-            abort(401);
-        }
-
         return match ($user->role) {
-            'admin'      => redirect()->route('admin.dashboard'),
-            'mahasiswa'  => view('dashboard'),
-            'dosen'      => redirect()->route('dosen.dashboard'),
-            'kaprodi'    => redirect()->route('kaprodi.dashboard'),
-            'staff_tu'   => redirect()->route('staff.dashboard'),
-            default      => abort(403, 'Role tidak dikenali'),
+            'admin'     => view('admin.dashboard'),
+            'mahasiswa' => view('mahasiswa.dashboard'),
+            'dosen'     => view('dosen.dashboard'),
+            'kaprodi'   => view('kaprodi.dashboard'),
+            'staff_tu'  => view('staff.dashboard'),
+            default     => abort(403, 'Role tidak dikenali'),
         };
     }
 }

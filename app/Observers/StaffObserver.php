@@ -10,15 +10,9 @@ class StaffObserver
     /**
      * Handle the Staff "created" event.
      */
-    public function created(Staff $staff): void
+public function created(Staff $staff): void
     {
-           $role = match ($staff->jabatan) {
-            'Staff TU' => 'staff_tu',
-            'Kaprodi'  => 'kaprodi',
-            default    => 'staff_tu',
-        };
-
-        UserAutoCreateService::fromStaff($staff, $role);
+        UserAutoCreateService::fromStaff($staff);
     }
 
     /**
