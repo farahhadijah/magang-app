@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\FirstLoginController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +22,10 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+        Route::get('/first-login', [FirstLoginController::class, 'show'])
+        ->name('password.first');
 
+    Route::post('/first-login', [FirstLoginController::class, 'update']);
     // SINGLE DASHBOARD ENTRY POINT
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');

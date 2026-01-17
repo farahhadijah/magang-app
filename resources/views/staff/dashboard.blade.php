@@ -4,4 +4,5 @@
             Dashboard
         </h2>
     </x-slot>
+    <h2>Staff</h2>
 </x-app-layout>

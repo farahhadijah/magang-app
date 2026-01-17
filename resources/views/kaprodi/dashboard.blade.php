@@ -4,4 +4,5 @@
             Dashboard
         </h2>
     </x-slot>
+    <h1>kaprodi</h1>
 </x-app-layout>

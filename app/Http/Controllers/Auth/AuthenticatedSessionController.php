@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\Auth\LoginRequest;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -22,14 +23,39 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+public function store(Request $request): RedirectResponse
+{
+    $request->validate([
+        'username' => ['required', 'string'],
+        'password' => ['required'],
+    ]);
 
-        $request->session()->regenerate();
+    $credentials = $request->only('username', 'password');
 
-        return redirect()->intended(route('dashboard', absolute: false));
+    if (!Auth::attempt($credentials)) {
+        throw ValidationException::withMessages([
+            'username' => __('Username atau password salah.'),
+        ]);
     }
+
+    $request->session()->regenerate();
+
+    $user = Auth::user();
+
+    // ⛔ akun nonaktif
+    if (!$user->is_active) {
+        Auth::logout();
+        abort(403, 'Akun tidak aktif');
+    }
+
+    // 🔐 first login
+    if ($user->first_login) {
+        return redirect()->route('password.first');
+    }
+
+    return redirect()->route('dashboard');
+}
+
 
     /**
      * Destroy an authenticated session.
