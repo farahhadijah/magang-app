@@ -22,15 +22,13 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-        Route::get('/first-login', [FirstLoginController::class, 'show'])
+
+    Route::get('/first-login', [FirstLoginController::class, 'show'])
         ->name('password.first');
 
     Route::post('/first-login', [FirstLoginController::class, 'update']);
-    // SINGLE DASHBOARD ENTRY POINT
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
 
-    // Breeze Profile
+    // Profile Breeze (boleh diakses)
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
@@ -41,12 +39,13 @@ Route::middleware(['auth'])->group(function () {
         ->name('profile.destroy');
 });
 
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:admin'])
+Route::middleware(['auth', 'first.login', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -58,12 +57,13 @@ Route::middleware(['auth', 'role:admin'])
             ->only(['create', 'store']);
     });
 
+
 /*
 |--------------------------------------------------------------------------
 | DOSEN AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:dosen'])
+Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->prefix('dosen')
     ->name('dosen.')
     ->group(function () {
@@ -72,12 +72,13 @@ Route::middleware(['auth', 'role:dosen'])
             ->name('dashboard');
     });
 
+
 /*
 |--------------------------------------------------------------------------
 | MAHASISWA AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:mahasiswa'])
+Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
     ->group(function () {
@@ -91,7 +92,7 @@ Route::middleware(['auth', 'role:mahasiswa'])
 | STAFF TU AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:staff_tu'])
+Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
     ->name('staff.')
     ->group(function () {
@@ -105,7 +106,7 @@ Route::middleware(['auth', 'role:staff_tu'])
 | KAPRODI AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:kaprodi'])
+Route::middleware(['auth', 'first.login', 'role:kaprodi'])
     ->prefix('kaprodi')
     ->name('kaprodi.')
     ->group(function () {

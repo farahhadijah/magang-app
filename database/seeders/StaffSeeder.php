@@ -18,15 +18,5 @@ class StaffSeeder extends Seeder
                 'is_active' => true,
             ]
         );
-
-        Staff::updateOrCreate(
-            ['nip' => '19830512'],
-            [
-                'nama' => 'Siti Aminah',
-                'jabatan' => 'Staff Fakultas',
-                'no_hp' => '08129876543',
-                'is_active' => true,
-            ]
-        );
     }
 }
