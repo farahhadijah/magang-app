@@ -13,6 +13,17 @@ use App\Http\Controllers\LaporanAkhirController;
 use App\Http\Controllers\NilaiPklController;
 
 // Auth::routes();
+Route::get('/', function () {
+    if (auth()->check()) {
+        return match (auth()->user()->role) {
+            'mahasiswa' => redirect('/mahasiswa/dashboard'),
+            'staff_tu'  => redirect('/tu/dashboard'),
+            default     => redirect()->route('login'),
+        };
+    }
+
+    return redirect()->route('login');
+});
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
