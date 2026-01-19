@@ -41,10 +41,4 @@ public function staff()
 {
     return $this->belongsTo(Staff::class, 'staff_id');
 }
-
-
-    // Mutator otomatis hash password
-    public function setPasswordAttribute($value) {
-        $this->attributes['password'] = Hash::make($value);
-    }
 }

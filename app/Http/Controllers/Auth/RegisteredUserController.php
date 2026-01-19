@@ -45,7 +45,8 @@ public function store(Request $request): RedirectResponse
         'nama' => $request->nama,
         'email' => $request->email,
         'role' => 'mahasiswa', // 🔒 DIPAKSA OLEH SISTEM
-        'password' => Hash::make($request->password),
+        // assign plain password; User model mutator will hash it
+        'password' => $request->password,
     ]);
 
     event(new Registered($user));

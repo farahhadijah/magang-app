@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+// Password will be hashed by the User model mutator
 
 class AdminSeeder extends Seeder
 {
@@ -13,7 +14,8 @@ class AdminSeeder extends Seeder
         User::updateOrCreate(
             ['username' => 'admin'],
             [
-                'password' => Hash::make('admin123'), // password sementara
+                // assign plain password; the model's setPasswordAttribute will hash it
+                'password' => Hash::make('admin123'),
                 'role' => 'admin',
                 'is_active' => true,
                 'first_login' => true,

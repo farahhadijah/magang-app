@@ -13,7 +13,7 @@ return new class extends Migration
 
             $table->string('nip', 30)->unique();
             $table->string('nama', 100);
-            $table->string('jabatan', 50); // TU, Admin, dll
+            $table->string('jabatan', 50); 
             $table->string('no_hp', 15)->nullable();
 
             $table->boolean('is_active')->default(true);

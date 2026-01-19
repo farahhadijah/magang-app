@@ -4,4 +4,7 @@
             Dashboard
         </h2>
     </x-slot>
+    <h1>
+        Mahasiswa
+    </h1>
 </x-app-layout>

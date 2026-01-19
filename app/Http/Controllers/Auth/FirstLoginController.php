@@ -35,7 +35,8 @@ class FirstLoginController extends Controller
         ]);
 
         $user->update([
-            'password'    => Hash::make($request->password),
+            // assign plain password; User model mutator will hash it
+            'password'    => $request->password,
             'first_login' => false,
         ]);
         

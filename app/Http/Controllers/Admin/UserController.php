@@ -28,7 +28,8 @@ class UserController extends Controller
             'nama' => $request->nama,
             'email' => $request->email,
             'role' => $request->role,
-            'password' => Hash::make($request->password),
+            // assign plain password; User model mutator will hash it
+            'password' => $request->password,
         ]);
 
         return redirect()

@@ -6,7 +6,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\FirstLoginController;
 
-
 /*
 |--------------------------------------------------------------------------
 | PUBLIC
@@ -18,17 +17,24 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| AUTHENTICATED
+| AUTHENTICATED (NO ROLE)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
 
+    // FIRST LOGIN (WAJIB SEBELUM DASHBOARD)
     Route::get('/first-login', [FirstLoginController::class, 'show'])
         ->name('password.first');
 
-    Route::post('/first-login', [FirstLoginController::class, 'update']);
+    Route::post('/first-login', [FirstLoginController::class, 'update'])
+        ->name('password.first.update');
 
-    // Profile Breeze (boleh diakses)
+    // SINGLE ENTRY POINT DASHBOARD
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('first.login')
+        ->name('dashboard');
+
+    // PROFILE (BOLEH DIAKSES SEMUA ROLE)
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
@@ -38,7 +44,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -57,7 +62,6 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
             ->only(['create', 'store']);
     });
 
-
 /*
 |--------------------------------------------------------------------------
 | DOSEN AREA
@@ -67,11 +71,9 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->prefix('dosen')
     ->name('dosen.')
     ->group(function () {
-
         Route::view('/dashboard', 'dosen.dashboard')
             ->name('dashboard');
     });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -82,7 +84,6 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
     ->group(function () {
-
         Route::view('/dashboard', 'mahasiswa.dashboard')
             ->name('dashboard');
     });
@@ -96,7 +97,6 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
     ->name('staff.')
     ->group(function () {
-
         Route::view('/dashboard', 'staff.dashboard')
             ->name('dashboard');
     });
@@ -110,7 +110,6 @@ Route::middleware(['auth', 'first.login', 'role:kaprodi'])
     ->prefix('kaprodi')
     ->name('kaprodi.')
     ->group(function () {
-
         Route::view('/dashboard', 'kaprodi.dashboard')
             ->name('dashboard');
     });

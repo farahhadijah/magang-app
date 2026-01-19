@@ -16,9 +16,10 @@ class UserAutoCreateService
             ['mahasiswa_id' => $mahasiswa->id],
             [
                 'username'     => $mahasiswa->nim,
+                // plain password: model mutator will hash it
                 'password'    => Hash::make($mahasiswa->nim),
                 'role'         => 'mahasiswa',
-                'is_active'   => $mahasiswa->is_active ?? true,
+                'is_active'    => $mahasiswa->is_active ?? true,
                 'first_login'  => true
             ]
         );
@@ -30,7 +31,8 @@ class UserAutoCreateService
             ['dosen_id' => $dosen->id],
             [
                 'username'     => $dosen->nidn,
-                'password'     => Hash::make($dosen->nidn),
+                // plain password: model mutator will hash it
+                'password'    => Hash::make( $dosen->nidn),
                 'role'         => 'dosen',
                 'is_active'    => $dosen->is_active ?? true,
                 'first_login'  => true
@@ -52,7 +54,8 @@ class UserAutoCreateService
             ['staff_id' => $staff->id],
             [
                 'username'     => $staff->nip,
-                'password'     => Hash::make($staff->nip),
+                // plain password: model mutator will hash it
+                'password'    => Hash::make($staff->nip),
                 'role'         => $role, // staff_tu / kaprodi
                 'is_active'    => $staff->is_active ?? true,
                 'first_login'  => true
