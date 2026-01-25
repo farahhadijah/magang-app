@@ -9,21 +9,21 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!Auth::check()) {
+        $user = Auth::user();
+
+        if (!$user) {
             abort(401, 'Unauthorized');
         }
 
-        if (!in_array(Auth::user()->role, $roles)) {
-            abort(403, 'Forbidden - Role tidak memiliki akses');
+        if (!$user->is_active) {
+            abort(403, 'Akun tidak aktif');
         }
 
+        if (!in_array($user->role, $roles)) {
+            abort(403, 'Forbidden - Role tidak memiliki akses');
+        }
 
         return $next($request);
     }

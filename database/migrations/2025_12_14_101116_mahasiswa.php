@@ -6,24 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('mahasiswa', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('id_user')->constrained('users')->cascadeOnDelete();
-            $table->string('nim', 20)->unique();
-            $table->string('prodi', 100);
-            $table->year('angkatan');
-            $table->string('no_hp', 15)->nullable();
-        });
-    }
+Schema::create('mahasiswa', function (Blueprint $table) {
+    $table->id();
 
-    /**
-     * Reverse the migrations.
-     */
+    $table->string('nim', 20)->unique();
+    $table->string('nama', 100);
+
+    $table->string('prodi', 100);
+    $table->year('angkatan');
+
+    $table->string('no_hp', 15)->nullable();
+    $table->boolean('is_active')->default(true);
+
+    $table->timestamps();
+});
+
+}
     public function down(): void
     {
         //

@@ -27,7 +27,8 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            // produce plain password; User model mutator will hash it when creating
+            'password' => static::$password ??= 'password',
             'remember_token' => Str::random(10),
         ];
     }

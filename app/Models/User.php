@@ -2,30 +2,43 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Mahasiswa;
-use App\Models\Verifikasi;
-use App\Models\Pkl;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Hash;
 
-class User extends Model
+class User extends Authenticatable
 {
-    public $timestamps = true;
+    use HasFactory, Notifiable;
     protected $table = 'users';
+    protected $fillable = [
+        'username',
+        'password',
+        'role',
+        'is_active',
+        'first_login',
+        'mahasiswa_id',
+        'dosen_id',
+        'staff_id'
+    ];
 
-    public function mahasiswa()
-    {
-        return $this->hasOne(Mahasiswa::class, 'id_user');
-    }
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-    public function verifikasi()
-    {
-        return $this->hasMany(Verifikasi::class, 'id_user');
-    }
-
-    public function pklDosen()
-    {
-        return $this->hasMany(Pkl::class, 'id_dosen');
-    }
+public function mahasiswa()
+{
+    return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id');
 }
 
-?>
+public function dosen()
+{
+    return $this->belongsTo(Dosen::class, 'dosen_id');
+}
+
+public function staff()
+{
+    return $this->belongsTo(Staff::class, 'staff_id');
+}
+}

@@ -11,14 +11,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama', 100);
-            $table->string('email', 100)->unique();
-            $table->string('password');
-            $table->enum('role', ['mahasiswa', 'staff_tu', 'kaprodi', 'dosen']);
-            $table->timestamps();
-        });
+Schema::create('users', function (Blueprint $table) {
+    $table->id();
+    $table->string('username', 30)->unique();
+    $table->string('password');
+    $table->enum('role', [
+        'admin',
+        'mahasiswa',
+        'staf',
+        'dosen',
+        'staff_tu',
+        'kaprodi'
+    ])->default('mahasiswa');
+    
+    // Hanya kolom, TANPA foreign key constraint
+    $table->unsignedBigInteger('mahasiswa_id')->nullable();
+    $table->unsignedBigInteger('dosen_id')->nullable();
+    $table->unsignedBigInteger('staff_id')->nullable();
+    
+    $table->boolean('is_active')->default(true);
+    $table->boolean('first_login')->default(true);
+    $table->rememberToken();
+    $table->timestamps();
+});
     }
 
     /**
@@ -26,6 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('users');
     }
 };

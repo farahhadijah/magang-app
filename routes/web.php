@@ -1,16 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PengajuanPklController;
-use App\Http\Controllers\DokumenPengajuanController;
-use App\Http\Controllers\LogbookController;
-use App\Http\Controllers\VerifikasiTuController;
-use App\Http\Controllers\VerifikasiKaprodiController;
-use App\Http\Controllers\PklController;
-use App\Http\Controllers\LaporanAkhirController;
-use App\Http\Controllers\NilaiPklController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\FirstLoginController;
 
 // Auth::routes();
 Route::get('/', function () {
@@ -31,82 +25,112 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
 
 Route::get('/db-test', function () {
     return DB::select('SELECT DATABASE() as db');
+/*
+|--------------------------------------------------------------------------
+| PUBLIC
+|--------------------------------------------------------------------------
+*/
+Route::get('/', function () {
+    return view('welcome');
 });
 
-Route::middleware(['auth','role:mahasiswa'])->prefix('mahasiswa')->group(function () {
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATED (NO ROLE)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('mahasiswa.dashboard');
+    // FIRST LOGIN (WAJIB SEBELUM DASHBOARD)
+    Route::get('/first-login', [FirstLoginController::class, 'show'])
+        ->name('password.first');
+
+    Route::post('/first-login', [FirstLoginController::class, 'update'])
+        ->name('password.first.update');
+
+    // SINGLE ENTRY POINT DASHBOARD
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('first.login')
+        ->name('dashboard');
+
+    // PROFILE (BOLEH DIAKSES SEMUA ROLE)
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::view('/dashboard', 'admin.dashboard')
+            ->name('dashboard');
+
+        Route::resource('users', UserController::class)
+            ->only(['create', 'store']);
     });
 
-    Route::resource('pengajuan-pkl', PengajuanPklController::class);
-
-    Route::post('pengajuan-pkl/{id}/upload-dokumen',
-        [DokumenPengajuanController::class, 'store']
-    );
-
-    Route::resource('logbook', LogbookController::class)
-        ->only(['index','create','store']);
-});
-
-Route::middleware(['auth','role:staff_tu'])->prefix('tu')->group(function () {
-
-    Route::get('/dashboard', function () {
-        return view('tu.dashboard');
+/*
+|--------------------------------------------------------------------------
+| DOSEN AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:dosen'])
+    ->prefix('dosen')
+    ->name('dosen.')
+    ->group(function () {
+        Route::view('/dashboard', 'dosen.dashboard')
+            ->name('dashboard');
     });
 
-    Route::get('/pengajuan',
-        [VerifikasiTuController::class, 'index']
-    );
-
-    Route::post('/pengajuan/{id}/approve',
-        [VerifikasiTuController::class, 'approve']
-    );
-
-    Route::post('/pengajuan/{id}/reject',
-        [VerifikasiTuController::class, 'reject']
-    );
-});
-
-Route::middleware(['auth','role:kaprodi'])->prefix('kaprodi')->group(function () {
-
-    Route::get('/dashboard', function () {
-        return view('kaprodi.dashboard');
+/*
+|--------------------------------------------------------------------------
+| MAHASISWA AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
+    ->prefix('mahasiswa')
+    ->name('mahasiswa.')
+    ->group(function () {
+        Route::view('/dashboard', 'mahasiswa.dashboard')
+            ->name('dashboard');
     });
 
-    Route::get('/pengajuan',
-        [VerifikasiKaprodiController::class, 'index']
-    );
-
-    Route::post('/pengajuan/{id}/approve',
-        [VerifikasiKaprodiController::class, 'approve']
-    );
-
-    Route::post('/pengajuan/{id}/reject',
-        [VerifikasiKaprodiController::class, 'reject']
-    );
-});
-
-Route::middleware(['auth','role:dosen'])->prefix('dosen')->group(function () {
-
-    Route::get('/dashboard', function () {
-        return view('dosen.dashboard');
+/*
+|--------------------------------------------------------------------------
+| STAFF TU AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:staff_tu'])
+    ->prefix('staff')
+    ->name('staff.')
+    ->group(function () {
+        Route::view('/dashboard', 'staff.dashboard')
+            ->name('dashboard');
     });
 
-    Route::get('/pkl',
-        [PklController::class, 'index']
-    );
+/*
+|--------------------------------------------------------------------------
+| KAPRODI AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:kaprodi'])
+    ->prefix('kaprodi')
+    ->name('kaprodi.')
+    ->group(function () {
+        Route::view('/dashboard', 'kaprodi.dashboard')
+            ->name('dashboard');
+    });
 
-    Route::post('/logbook/{id}/approve',
-        [LogbookController::class, 'approve']
-    );
-
-    Route::post('/laporan/{id}/approve',
-        [LaporanAkhirController::class, 'approve']
-    );
-
-    Route::resource('nilai-pkl', NilaiPklController::class)
-        ->only(['store']);
-});
-
-?>
+require __DIR__.'/auth.php';

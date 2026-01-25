@@ -2,20 +2,28 @@
 
 namespace Database\Seeders;
 
-use App\Models\Mahasiswa;
-use App\Models\PengajuanPkl;
-use App\Models\TempatPkl;
 use Illuminate\Database\Seeder;
+use App\Models\Mahasiswa;
+use App\Models\TempatPkl;
+use App\Models\PengajuanPkl;
 
 class PengajuanPklSeeder extends Seeder
 {
     public function run(): void
     {
+        $mahasiswa = Mahasiswa::first();
+        $tempat = TempatPkl::first();
+
+        // ❗ Jika data master belum ada, hentikan
+        if (!$mahasiswa || !$tempat) {
+            return;
+        }
+
         PengajuanPkl::create([
-            'id_mhs' => Mahasiswa::first()->id,
-            'id_tempat_pkl' => TempatPkl::first()->id,
+            'id_mhs' => $mahasiswa->id,
+            'id_tempat_pkl' => $tempat->id,
             'status' => 'pending',
-            'tgl_pengajuan' => now()
+            'tgl_pengajuan' => now(),
         ]);
     }
 }
