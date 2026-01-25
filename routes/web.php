@@ -5,6 +5,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\FirstLoginController;
+use App\Http\Controllers\Auth\AuthController;
+use Illuminate\Support\Facades\DB;
 
 // Auth::routes();
 Route::get('/', function () {
@@ -25,6 +27,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
 
 Route::get('/db-test', function () {
     return DB::select('SELECT DATABASE() as db');
+});
+
 /*
 |--------------------------------------------------------------------------
 | PUBLIC
