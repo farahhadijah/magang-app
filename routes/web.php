@@ -5,7 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\FirstLoginController;
-use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\DB;
 
 // Auth::routes();
