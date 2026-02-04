@@ -7,11 +7,11 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
-// Auth::routes();
 Route::get('/', function () {
-    if (auth()->check()) {
-        return match (auth()->user()->role) {
+    if (Auth::check()) {
+        return match (Auth::user()->role) {
             'mahasiswa' => redirect('/mahasiswa/dashboard'),
             'staff_tu'  => redirect('/tu/dashboard'),
             default     => redirect()->route('login'),
