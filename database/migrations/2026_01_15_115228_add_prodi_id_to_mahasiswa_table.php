@@ -12,7 +12,6 @@ return new class extends Migration
 
             // 1. Tambah kolom prodi_id
             $table->foreignId('prodi_id')
-                ->after('nama')
                 ->constrained('prodi')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
@@ -25,9 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('mahasiswa', function (Blueprint $table) {
-            $table->string('prodi', 100);
-            $table->dropForeign(['prodi_id']);
+                        $table->dropForeign(['prodi_id']);
             $table->dropColumn('prodi_id');
+            $table->string('prodi', 100);
         });
     }
 };

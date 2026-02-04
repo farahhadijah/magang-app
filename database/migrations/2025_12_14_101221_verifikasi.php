@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('verifikasi', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_pengajuan_pkl')->constrained('pengajuan_pkl')->cascadeOnDelete();
-            $table->foreignId('id_user')->constrained('users');
+$table->foreignId('id_user')
+      ->constrained('users')
+      ->cascadeOnDelete();
             $table->enum('level', ['tu', 'kaprodi']);
             $table->enum('status', ['approved', 'rejected']);
             $table->text('catatan')->nullable();
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('verifikasi');
     }
 };

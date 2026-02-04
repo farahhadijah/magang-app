@@ -7,6 +7,7 @@ use App\Models\Mahasiswa;
 use App\Models\Dosen;
 use App\Models\Staff;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -18,7 +19,7 @@ class UserSeeder extends Seeder
             User::updateOrCreate(
                 ['username' => $staff->nip],
                 [
-                    'password' => $staff->nip,
+                    'password' => Hash::make($staff->nip),
                     'role' => 'staff_tu',
                     'first_login' => true,
                     'is_active' => true,
@@ -32,7 +33,7 @@ class UserSeeder extends Seeder
             User::updateOrCreate(
                 ['username' => $kaprodi->nip],
                 [
-                    'password' => $kaprodi->nip,
+                    'password' => Hash::make($kaprodi->nip),
                     'role' => 'kaprodi',
                     'first_login' => true,
                     'is_active' => true,
@@ -46,7 +47,7 @@ class UserSeeder extends Seeder
             User::updateOrCreate(
                 ['username' => $dosen->nidn],
                 [
-                    'password' => $dosen->nidn,
+                    'password' => Hash::make($dosen->nidn),
                     'role' => 'dosen',
                     'first_login' => true,
                     'is_active' => true,
@@ -57,16 +58,18 @@ class UserSeeder extends Seeder
         // MAHASISWA
         $mhs = Mahasiswa::where('nim', '210441100001')->first();
         if ($mhs) {
-            User::updateOrCreate(
-                ['username' => $mhs->nim],
-                [
-                    'password' => $mhs->nim,
-                    'role' => 'mahasiswa',
-                    'first_login' => true,
-                    'is_active' => true,
-                    'mahasiswa_id' => $mhs->id
-                ]
-            );
+
+User::updateOrCreate(
+    ['username' => $mhs->nim],
+    [
+        'password' => Hash::make($mhs->nim),
+        'role' => 'mahasiswa',
+        'first_login' => true,
+        'is_active' => true,
+        'mahasiswa_id' => $mhs->id
+    ]
+);
+
         }
     }
 }
