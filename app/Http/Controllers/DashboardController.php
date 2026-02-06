@@ -7,16 +7,23 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
     public function index()
-    {
-        $user = Auth::user();
+{
+    $user = auth()->user();
 
-        return match ($user->role) {
-            'admin'     => view('admin.dashboard'),
-            'mahasiswa' => view('mahasiswa.dashboard'),
-            'dosen'     => view('dosen.dashboard'),
-            'kaprodi'   => view('kaprodi.dashboard'),
-            'staff_tu'  => view('staff.dashboard'),
-            default     => abort(403, 'Role tidak dikenali'),
-        };
+    switch ($user->role) {
+        case 'mahasiswa':
+            return redirect()->route('mahasiswa.dashboard');
+        case 'dosen':
+            return redirect()->route('dosen.dashboard');
+        case 'staff_tu':
+            return redirect()->route('staff.dashboard');
+        case 'admin':
+            return redirect()->route('admin.dashboard');
+        case 'kaprodi':
+            return redirect()->route('kaprodi.dashboard');
+        default:
+            abort(403);
     }
+}
+
 }

@@ -13,6 +13,12 @@ class PengajuanPkl extends Model
 {
     public $timestamps = true;
     protected $table = 'pengajuan_pkl';
+    protected $fillable = [
+    'id_mhs',
+    'id_tempat_pkl',
+    'status',
+    'tgl_pengajuan'
+];
 
     public function mahasiswa()
     {
