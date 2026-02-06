@@ -7,6 +7,7 @@
 
     <div class="max-w-5xl py-6 mx-auto space-y-6">
 
+        {{-- Notifikasi --}}
         @foreach (['success', 'error'] as $msg)
             @if (session($msg))
                 <div class="p-4 rounded {{ $msg === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -15,6 +16,7 @@
             @endif
         @endforeach
 
+        {{-- Error validasi --}}
         @if ($errors->any())
             <div class="p-4 text-red-800 bg-red-100 rounded">
                 <ul class="list-disc list-inside">
@@ -25,6 +27,14 @@
             </div>
         @endif
 
+        {{-- INFO --}}
+        <div class="p-4 text-blue-800 rounded bg-blue-50">
+            <p class="text-sm">
+                Form ini digunakan untuk <b>mengajukan permohonan PKL</b>.
+                Pengajuan akan diverifikasi oleh Staff TU sebelum disetujui secara akademik.
+            </p>
+        </div>
+
         <form method="POST"
               action="{{ route('mahasiswa.pengajuan.store') }}"
               enctype="multipart/form-data"
@@ -32,11 +42,12 @@
 
             @csrf
 
-            {{-- Tempat PKL --}}
+            {{-- DATA TEMPAT PKL --}}
             <h4 class="text-lg font-semibold">Data Tempat PKL</h4>
 
             <div class="grid gap-4 md:grid-cols-2">
-                <input type="text" name="nama_tempat" placeholder="Nama Instansi"
+                <input type="text" name="nama_tempat"
+                       placeholder="Nama Instansi / Perusahaan"
                        value="{{ old('nama_tempat') }}" required class="input">
 
                 <select name="jenis_tempat" required class="input">
@@ -48,27 +59,27 @@
                     @endforeach
                 </select>
 
-                <input type="text" name="no_hp" placeholder="No HP"
+                <input type="text" name="no_hp"
+                       placeholder="No HP / Telepon Instansi"
                        value="{{ old('no_hp') }}" required class="input">
 
                 <textarea name="lokasi_maps" rows="2" required class="input"
-                          placeholder="Link Google Maps">{{ old('lokasi_maps') }}</textarea>
+                          placeholder="Link lokasi Google Maps">{{ old('lokasi_maps') }}</textarea>
             </div>
 
-            {{-- Waktu --}}
-            <h4 class="text-lg font-semibold">Waktu PKL</h4>
-
-            <div class="grid gap-4 md:grid-cols-2">
-                <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" required class="input">
-                <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" required class="input">
-            </div>
-
-            {{-- Dokumen --}}
+            {{-- DOKUMEN --}}
             <div>
-                <label class="block font-medium">Dokumen Pendukung (PDF / DOC)</label>
-                <input type="file" name="dokumen" class="mt-1">
+                <label class="block font-medium">
+                    Surat Pengantar / Permohonan PKL <span class="text-red-500">*</span>
+                </label>
+                <input type="file" name="dokumen" required class="mt-1">
+
+                <p class="mt-1 text-xs text-gray-500">
+                    File ini akan diverifikasi oleh Staff TU (PDF/DOC).
+                </p>
             </div>
 
+            {{-- TOMBOL --}}
             <div class="flex justify-end gap-3">
                 <a href="{{ route('mahasiswa.dashboard') }}" class="btn-secondary">
                     Kembali
