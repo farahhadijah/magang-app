@@ -47,4 +47,28 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Staff::class, 'staff_id');
     }
+    public function getNama()
+    {
+        switch ($this->role) {
+
+            case 'mahasiswa':
+                return $this->mahasiswa?->nama;
+
+            case 'dosen':
+                return $this->dosen?->nama;
+
+            case 'admin':
+                return $this->admin?->nama;
+
+            case 'staff':
+                return $this->staff?->nama;
+
+            case 'kaprodi':
+                return $this->kaprodi?->nama;
+
+            default:
+                return $this->name; // fallback
+        }
+    }
+
 }
