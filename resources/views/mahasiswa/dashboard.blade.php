@@ -1,16 +1,7 @@
 <x-app-layout>
 
-    {{-- Header --}}
-    <x-slot name="header">
-        <div class="flex flex-col gap-1">
-            <h2 class="text-2xl font-bold text-green-800">
-                Dashboard Mahasiswa
-            </h2>
-
-            <p class="text-sm text-green-600">
-                Selamat datang, {{ auth()->user()->getNama() }} 👋
-            </p>
-        </div>
+    <x-slot name="title">
+        Dashboard Mahasiswa - MagangApp
     </x-slot>
 
 
