@@ -1,29 +1,55 @@
 @extends('layouts.dosen')
 
 @section('content')
-<h3>Form Penilaian PKL</h3>
+<div class="max-w-3xl py-6 mx-auto space-y-6">
 
-<form method="POST" action="{{ route('dosen.penilaian.store', $mahasiswaId) }}">
-    @csrf
+    {{-- Header --}}
+    <h2 class="flex items-center gap-2 text-2xl font-bold text-green-900">
+        <i class="fa-solid fa-pencil"></i> Form Penilaian PKL
+    </h2>
 
-    <div>
-        <label>Nilai (0 - 100)</label><br>
-        <input type="number" name="nilai" min="0" max="100" required>
-        @error('nilai')
-            <small style="color:red">{{ $message }}</small>
-        @enderror
-    </div>
+    {{-- Flash message --}}
+    @if (session('success'))
+        <div class="flex items-center gap-2 p-4 text-green-800 bg-green-100 border border-green-200 rounded-lg shadow">
+            <i class="fa-solid fa-circle-check"></i>
+            {{ session('success') }}
+        </div>
+    @endif
 
-    <br>
+    {{-- Form --}}
+    <form method="POST" action="{{ route('dosen.penilaian.store', $mahasiswaId) }}" class="p-6 space-y-6 transition border border-green-200 shadow-lg bg-green-50 rounded-xl hover:shadow-xl">
+        @csrf
 
-    <div>
-        <label>Catatan</label><br>
-        <textarea name="catatan" rows="4"></textarea>
-    </div>
+        {{-- Nilai --}}
+        <div class="flex flex-col gap-1">
+            <label class="font-medium text-green-800">Nilai (0 - 100)</label>
+            <input type="number" name="nilai" min="0" max="100" required
+                   class="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+            @error('nilai')
+                <span class="text-sm text-red-600">{{ $message }}</span>
+            @enderror
+        </div>
 
-    <br>
+        {{-- Catatan --}}
+        <div class="flex flex-col gap-1">
+            <label class="font-medium text-green-800">Catatan</label>
+            <textarea name="catatan" rows="4"
+                      class="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"></textarea>
+        </div>
 
-    <button type="submit">Simpan Nilai</button>
-    <a href="{{ route('dosen.penilaian.index') }}">Kembali</a>
-</form>
+        {{-- Tombol --}}
+        <div class="flex items-center gap-4">
+            <button type="submit"
+                    class="flex items-center gap-2 px-4 py-2 font-medium text-white transition bg-green-600 rounded-lg hover:bg-green-700">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Nilai
+            </button>
+
+            <a href="{{ route('dosen.penilaian.index') }}"
+               class="flex items-center gap-2 px-4 py-2 font-medium text-green-800 transition border border-green-300 rounded-lg hover:bg-green-100">
+                <i class="fa-solid fa-arrow-left"></i> Kembali
+            </a>
+        </div>
+    </form>
+
+</div>
 @endsection
