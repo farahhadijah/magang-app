@@ -62,7 +62,7 @@
             @elseif(auth()->user()->role === 'admin')
                 @include('layouts.navbar.admin')
 
-            @elseif(auth()->user()->role === 'staff')
+            @elseif(auth()->user()->role === 'staff_tu')
                 @include('layouts.navbar.staff')
 
             @elseif(auth()->user()->role === 'kaprodi')
