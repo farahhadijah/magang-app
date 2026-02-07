@@ -54,56 +54,35 @@
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
-
             </ul>
-
         </div>
-
         @endif
-
-
 
         {{-- ================= INFO ================= --}}
         <div class="p-5 border border-amber-200 rounded-xl bg-amber-50">
-
             <h4 class="flex items-center mb-1 font-semibold text-amber-800">
-
                 <i class="mr-2 fa-solid fa-circle-info"></i>
                 Informasi
-
             </h4>
-
             <p class="text-sm text-amber-700">
-
                 Form ini digunakan untuk
                 <b>mengajukan permohonan PKL</b>.
                 Pengajuan akan diverifikasi oleh Staff TU sebelum disetujui secara akademik.
-
             </p>
-
         </div>
-
-
-
+        
         {{-- ================= FORM ================= --}}
         <form method="POST"
               action="{{ route('mahasiswa.pengajuan.store') }}"
               enctype="multipart/form-data"
               class="p-6 space-y-6 bg-white border border-green-100 shadow rounded-xl">
-
             @csrf
-
-
-
             {{-- ================= DATA TEMPAT ================= --}}
             <div>
-
                 <h4 class="mb-4 text-lg font-semibold text-green-800">
                     Data Tempat PKL
                 </h4>
-
                 <div class="grid gap-4 md:grid-cols-2">
-
                     <input
                         type="text"
                         name="nama_tempat"
@@ -112,30 +91,19 @@
                         required
                         class="input focus:ring-green-500 focus:border-green-500"
                     >
-
-
                     <select
                         name="jenis_tempat"
                         required
                         class="input focus:ring-green-500 focus:border-green-500"
                     >
-
                         <option value="">-- Jenis Instansi --</option>
-
                         @foreach (['Pemerintah','Sekolah','PT','CV'] as $jenis)
-
                             <option value="{{ $jenis }}"
                                 @selected(old('jenis_tempat')==$jenis)>
-
                                 {{ $jenis }}
-
                             </option>
-
                         @endforeach
-
                     </select>
-
-
                     <input
                         type="text"
                         name="no_hp"
@@ -144,46 +112,53 @@
                         required
                         class="input focus:ring-green-500 focus:border-green-500"
                     >
+                    {{-- Lokasi Maps --}}
+                    <div>
+                        <label class="block mb-1 font-medium text-green-800">
+                            Lokasi Instansi (Google Maps)
+                            <span class="text-red-500">*</span>
+                        </label>
 
+                        <input
+                            type="text"
+                            name="lokasi_maps"
+                            value="{{ old('lokasi_maps') }}"
+                            placeholder="Contoh: https://maps.google.com/?q=Nama+Instansi"
+                            required
+                            class="block w-full border-gray-300 rounded-lg focus:border-green-500 focus:ring-green-500"
+                        >
 
-                    <textarea
-                        name="lokasi_maps"
-                        rows="2"
-                        required
-                        class="input focus:ring-green-500 focus:border-green-500"
-                        placeholder="Link lokasi Google Maps"
-                    >{{ old('lokasi_maps') }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Buka Google Maps → cari lokasi instansi → klik <b>Bagikan</b> → salin link.
+                        </p>
+                    </div>
 
                 </div>
-
             </div>
+            
+        {{-- ================= DOKUMEN ================= --}}
+        <div>
+            <label class="block mb-1 font-medium text-green-800">
+                Upload KHS (Wajib)
+                <span class="text-red-500">*</span>
+            </label>
+
+            <input
+                type="file"
+                name="dokumen"
+                accept=".pdf,.doc,.docx"
+                required
+                class="block w-full text-sm text-gray-600 file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700"
+            >
+
+            <p class="mt-1 text-xs text-gray-500">
+                Upload <strong>KHS terbaru</strong> (PDF / DOC).
+                <br>
+                Dokumen lain (pembayaran, studi tour, dll) <strong>tidak diterima</strong>.
+            </p>
+        </div>
 
 
-
-            {{-- ================= DOKUMEN ================= --}}
-            <div>
-
-                <label class="block mb-1 font-medium text-green-800">
-
-                    Surat Pengantar / Permohonan PKL
-                    <span class="text-red-500">*</span>
-
-                </label>
-
-
-                <input
-                    type="file"
-                    name="dokumen"
-                    required
-                    class="block w-full text-sm text-gray-600 transition file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700"
-                >
-
-
-                <p class="mt-1 text-xs text-gray-500">
-                    File ini akan diverifikasi oleh Staff TU (PDF/DOC).
-                </p>
-
-            </div>
 
 
 

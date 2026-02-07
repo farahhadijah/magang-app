@@ -15,7 +15,6 @@ class Verifikasi extends Model
     {
         return $this->belongsTo(PengajuanPkl::class, 'id_pengajuan_pkl');
     }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');

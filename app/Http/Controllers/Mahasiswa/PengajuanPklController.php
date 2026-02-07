@@ -37,21 +37,28 @@ class PengajuanPklController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_tempat'      => 'required|string|max:150',
-            'jenis_tempat'     => 'required|in:Pemerintah,Sekolah,PT,CV',
-            'no_hp'            => 'required|string|max:15',
-            'lokasi_maps'      => 'required|string',
-            'tanggal_mulai'    => 'required|date',
-            'tanggal_selesai'  => 'required|date|after_or_equal:tanggal_mulai',
-            'dokumen'          => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-        ]);
+        $request->validate(
+        [
+            'nama_tempat'     => 'required|string|max:150',
+            'jenis_tempat'    => 'required|in:Pemerintah,Sekolah,PT,CV',
+            'no_hp'           => 'required|string|max:15',
+            'lokasi_maps'     => 'required|string',
+
+            'dokumen'         => 'required|file|mimes:pdf,doc,docx|max:2048',
+        ],
+        [
+            'dokumen.required' => 'Dokumen pendukung wajib diunggah.',
+            'dokumen.mimes'    => 'Dokumen harus berupa PDF, DOC, atau DOCX.',
+            'dokumen.max'      => 'Ukuran dokumen maksimal 2 MB.',
+
+            'tanggal_selesai.after_or_equal' =>
+                'Tanggal selesai tidak boleh lebih awal dari tanggal mulai.',
+        ]
+    );
+
 
         $mahasiswa = Auth::user()->mahasiswa;
-
-        if (!$mahasiswa) {
-            abort(403);
-        }
+        abort_if(!$mahasiswa, 403);
 
         DB::transaction(function () use ($request, $mahasiswa) {
 
@@ -66,25 +73,24 @@ class PengajuanPklController extends Controller
                 'id_mhs'        => $mahasiswa->id,
                 'id_tempat_pkl' => $tempatPkl->id,
                 'status'        => 'pending',
-                'tgl_pengajuan' => Carbon::now(),
+                'tgl_pengajuan' => now(),
             ]);
 
-            if ($request->hasFile('dokumen')) {
-                $path = $request->file('dokumen')
-                    ->store("dokumen_pengajuan_pkl/{$mahasiswa->nim}", 'public');
+            $path = $request->file('dokumen')
+                ->store("dokumen_pengajuan_pkl/{$mahasiswa->nim}", 'public');
 
-                DokumenPengajuan::create([
-                    'id_pengajuan_pkl' => $pengajuan->id,
-                    'path_file'        => $path,
-                    'jenis_dokumen'    => 'KHS',
-                ]);
-            }
+            DokumenPengajuan::create([
+                'id_pengajuan_pkl' => $pengajuan->id,
+                'path_file'        => $path,
+                'jenis_dokumen'    => 'khs',
+            ]);
         });
 
         return redirect()
             ->route('mahasiswa.pengajuan.status')
-            ->with('success', 'Pengajuan PKL berhasil dikirim.');
+            ->with('success', 'Pengajuan PKL berhasil dikirim dan menunggu verifikasi.');
     }
+
 
     public function status()
     {
