@@ -164,7 +164,8 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->name('staff.')
     ->group(function () {
 
-        Route::view('/dashboard', 'staff.dashboard')->name('dashboard');
+        Route::get('/dashboard', [StaffPengajuanPKLController::class, 'dashboard'])
+            ->name('dashboard');
 
         // Histori pengajuan ditolak → harus DI ATAS {id}
         Route::get('/pengajuan/histori-ditolak', [StaffPengajuanPKLController::class, 'historiDitolak'])

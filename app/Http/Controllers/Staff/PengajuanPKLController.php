@@ -104,12 +104,29 @@ class PengajuanPKLController extends Controller
     }
     // histori ditolak
     public function historiDitolak()
-{
-    $pengajuansDitolak = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
-        ->where('status', 'ditolak_tu')
-        ->orderBy('updated_at', 'desc')
-        ->get();
+    {
+        $pengajuansDitolak = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
+            ->where('status', 'ditolak_tu')
+            ->orderBy('updated_at', 'desc')
+            ->get();
 
-    return view('staff.pengajuan.histori_ditolak', compact('pengajuansDitolak'));
-}
+        return view('staff.pengajuan.histori_ditolak', compact('pengajuansDitolak'));
+    }
+    public function dashboard()
+    {
+        // Menunggu verifikasi TU
+        $totalMenunggu = PengajuanPkl::where('status', 'pending_tu')->count();
+
+        // Disetujui TU
+        $totalDisetujuiTu = PengajuanPkl::whereHas('verifikasi', function($q){
+            $q->where('level', 'tu')->where('status', 'approved');
+        })->count();
+
+        // Ditolak TU
+        $totalDitolak = PengajuanPkl::where('status', 'ditolak_tu')->count();
+
+        return view('staff.dashboard', compact('totalMenunggu', 'totalDisetujuiTu', 'totalDitolak'));
+    }
+
+
 }
