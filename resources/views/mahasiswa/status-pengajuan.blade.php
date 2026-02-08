@@ -23,7 +23,6 @@
                     Ajukan PKL
                 </a>
             </div>
-
         @else
 
         {{-- ================= DITOLAK TU ================= --}}
@@ -41,11 +40,33 @@
                 </p>
 
                 <a href="{{ route('mahasiswa.pengajuan.create') }}"
-                   class="inline-flex items-center px-4 py-2 mt-4 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                class="inline-flex items-center px-4 py-2 mt-4 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
                     Ajukan Ulang PKL
                 </a>
             </div>
         @endif
+
+        {{-- ================= DITOLAK KAPRODI ================= --}}
+        @if ($pengajuan->status === 'ditolak_kaprodi')
+            <div class="p-4 border border-red-300 rounded-lg bg-red-50">
+                <p class="text-sm font-semibold text-red-800">
+                    ❌ Pengajuan PKL ditolak oleh Kaprodi
+                </p>
+
+                <p class="mt-1 text-sm text-red-700">
+                    Alasan:
+                    <span class="italic">
+                        {{ $pengajuan->catatan_kaprodi ?? 'Tidak ada catatan.' }}
+                    </span>
+                </p>
+
+                <a href="{{ route('mahasiswa.pengajuan.create') }}"
+                class="inline-flex items-center px-4 py-2 mt-4 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    Ajukan Ulang PKL
+                </a>
+            </div>
+        @endif
+
 
         {{-- ================= TIMELINE ================= --}}
         @php

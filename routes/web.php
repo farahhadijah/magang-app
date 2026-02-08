@@ -30,6 +30,10 @@ use App\Http\Controllers\Dosen\PenilaianPKLController;
 // STAFF TU
 use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanPKLController;
 
+// KAPRODI
+use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanPKLController;
+use App\Http\Controllers\Kaprodi\MahasiswaController;
+use App\Http\Controllers\Kaprodi\NilaiController;
 /*
 |--------------------------------------------------------------------------
 | ROOT & AUTH
@@ -211,13 +215,20 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
 | KAPRODI AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'first.login', 'role:kaprodi'])
+Route::middleware(['auth','role:kaprodi'])
     ->prefix('kaprodi')
     ->name('kaprodi.')
-    ->group(function () {
-
-        Route::view('/dashboard', 'kaprodi.dashboard')
-            ->name('dashboard');
+    ->group(function(){
+        Route::get('/dashboard',[KaprodiPengajuanPKLController::class,'dashboard'])->name('dashboard');
+        Route::get('/mahasiswa', [MahasiswaController::class, 'index'])
+            ->name('mahasiswa.index');
+        Route::get('/pengajuan',[KaprodiPengajuanPKLController::class,'index'])->name('pengajuan.index');
+        Route::get('/nilai', [NilaiController::class, 'index'])
+            ->name('nilai.index');
+        Route::get('/pengajuan/{id}',[KaprodiPengajuanPKLController::class,'show'])->name('pengajuan.show');
+        Route::post('/pengajuan/{id}/approve',[KaprodiPengajuanPKLController::class,'approve'])->name('pengajuan.approve');
+        Route::post('/pengajuan/{id}/reject',[KaprodiPengajuanPKLController::class,'reject'])->name('pengajuan.reject');
+        Route::get('/histori-ditolak',[KaprodiPengajuanPKLController::class,'historiDitolak'])->name('pengajuan.histori_ditolak');
     });
 
 /*

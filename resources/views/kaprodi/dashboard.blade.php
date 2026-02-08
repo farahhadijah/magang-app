@@ -12,22 +12,22 @@
 
             <div class="p-6 bg-blue-100 rounded shadow">
                 <h3 class="font-semibold">Total Mahasiswa PKL</h3>
-                <p class="mt-2 text-3xl font-bold">45</p>
+                <p class="mt-2 text-3xl font-bold">{{ $totalMahasiswa }}</p>
             </div>
 
             <div class="p-6 bg-yellow-100 rounded shadow">
                 <h3 class="font-semibold">Menunggu Verifikasi</h3>
-                <p class="mt-2 text-3xl font-bold">8</p>
+                <p class="mt-2 text-3xl font-bold">{{ $totalMenunggu }}</p>
             </div>
 
             <div class="p-6 bg-green-100 rounded shadow">
                 <h3 class="font-semibold">PKL Aktif</h3>
-                <p class="mt-2 text-3xl font-bold">30</p>
+                <p class="mt-2 text-3xl font-bold">{{ $totalAktif }}</p>
             </div>
 
             <div class="p-6 bg-purple-100 rounded shadow">
                 <h3 class="font-semibold">PKL Selesai</h3>
-                <p class="mt-2 text-3xl font-bold">7</p>
+                <p class="mt-2 text-3xl font-bold">{{ $totalSelesai }}</p>
             </div>
 
         </div>
@@ -37,24 +37,29 @@
             <h3 class="mb-4 text-lg font-semibold">Menu Kaprodi</h3>
 
             <div class="flex flex-wrap gap-4">
-                <a href="#"
-                   class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
-                    Rekap PKL
+                <a href="{{ route('kaprodi.pengajuan.index') }}"
+                   class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
+                    Verifikasi PKL
                 </a>
 
-                <a href="#"
-                   class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
+                <a href="{{ route('kaprodi.pengajuan.histori_ditolak') }}"
+                   class="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700">
+                    Histori Ditolak
+                </a>
+
+                <a href="{{ route('kaprodi.mahasiswa.index') }}"
+                   class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
                     Data Mahasiswa PKL
                 </a>
 
-                <a href="#"
+                <a href="{{ route('kaprodi.nilai.index') }}"
                    class="px-4 py-2 text-white bg-purple-600 rounded hover:bg-purple-700">
                     Nilai PKL
                 </a>
             </div>
 
             <p class="mt-4 text-sm text-gray-500">
-                * Data masih dummy, akan terhubung ke sistem setelah tahap berikutnya
+                * Data ditarik langsung dari database
             </p>
         </div>
 

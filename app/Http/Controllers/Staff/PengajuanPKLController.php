@@ -17,7 +17,7 @@ class PengajuanPKLController extends Controller
         $pengajuans = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
             ->whereIn('status', [
                 'pending_tu',
-                'pending_dosen',
+                'pending_kaprodi',
                 'disetujui'
             ])
             ->orderBy('created_at', 'desc')
@@ -60,7 +60,7 @@ class PengajuanPKLController extends Controller
 
             // lanjut ke Kaprodi
             $pengajuan->update([
-                'status' => 'pending_dosen',
+                'status' => 'pending_kaprodi',
             ]);
         });
 
