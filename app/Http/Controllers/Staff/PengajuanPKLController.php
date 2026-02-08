@@ -16,14 +16,20 @@ class PengajuanPKLController extends Controller
      * HANYA yang status = pending
      */
     public function index()
-    {
-        $pengajuans = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
-            ->whereIn('status', ['pending', 'disetujui'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        {
+            $pengajuans = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
+                ->whereIn('status', [
+                    'pending_tu',
+                    'ditolak_tu',
+                    'pending_dosen',
+                    'disetujui'
+                ])
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-        return view('staff.pengajuan.index', compact('pengajuans'));
-    }
+            return view('staff.pengajuan.index', compact('pengajuans'));
+        }
+
 
 
     /**

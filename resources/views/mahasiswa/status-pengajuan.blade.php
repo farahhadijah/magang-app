@@ -26,16 +26,36 @@
 
         @else
 
+        {{-- ================= DITOLAK TU ================= --}}
+        @if ($pengajuan->status === 'ditolak_tu')
+            <div class="p-4 border border-red-200 rounded-lg bg-red-50">
+                <p class="text-sm font-semibold text-red-700">
+                    ❌ Pengajuan PKL ditolak oleh TU
+                </p>
+
+                <p class="mt-1 text-sm text-red-600">
+                    Alasan:
+                    <span class="italic">
+                        {{ $pengajuan->catatan_tu ?? 'Tidak ada catatan.' }}
+                    </span>
+                </p>
+
+                <a href="{{ route('mahasiswa.pengajuan.create') }}"
+                   class="inline-flex items-center px-4 py-2 mt-4 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    Ajukan Ulang PKL
+                </a>
+            </div>
+        @endif
+
         {{-- ================= TIMELINE ================= --}}
         @php
             $status = $pengajuan->status;
 
-            // TIMELINE KHUSUS PENGAJUAN (BUKAN PKL)
             $steps = [
                 'pengajuan'  => true,
-                'verifikasi' => in_array($status, ['diverifikasi', 'disetujui']),
+                'verifikasi' => in_array($status, ['pending_kaprodi', 'disetujui']),
                 'berjalan'   => $status === 'disetujui',
-                'selesai'    => false, // nanti dari table PKL
+                'selesai'    => false,
             ];
         @endphp
 
@@ -45,7 +65,6 @@
             </h3>
 
             <div class="relative flex justify-between">
-                {{-- Line --}}
                 <div class="absolute left-0 right-0 h-1 bg-green-100 top-4"></div>
 
                 @foreach ([
@@ -74,15 +93,6 @@
                     </div>
                 @endforeach
             </div>
-
-            {{-- Jika Ditolak --}}
-            @if ($status === 'ditolak')
-                <div class="p-4 mt-6 border border-red-200 rounded-lg bg-red-50">
-                    <p class="text-sm text-red-700">
-                        ❌ Pengajuan PKL ditolak. Silakan ajukan kembali dengan data yang diperbaiki.
-                    </p>
-                </div>
-            @endif
         </div>
 
         {{-- ================= STATUS ================= --}}
@@ -94,16 +104,24 @@
 
                 @php
                     $badge = match($pengajuan->status) {
-                        'pending'       => 'bg-amber-100 text-amber-800',
-                        'diverifikasi'  => 'bg-blue-100 text-blue-800',
-                        'disetujui'     => 'bg-green-100 text-green-800',
-                        'ditolak'       => 'bg-red-100 text-red-800',
-                        default         => 'bg-gray-100 text-gray-800',
+                        'pending_tu'       => 'bg-amber-100 text-amber-800',
+                        'pending_kaprodi'  => 'bg-blue-100 text-blue-800',
+                        'disetujui'        => 'bg-green-100 text-green-800',
+                        'ditolak_tu'       => 'bg-red-100 text-red-800',
+                        default            => 'bg-gray-100 text-gray-800',
+                    };
+
+                    $labelStatus = match($pengajuan->status) {
+                        'pending_tu'      => 'Menunggu Verifikasi TU',
+                        'pending_kaprodi' => 'Menunggu Persetujuan Kaprodi',
+                        'disetujui'       => 'Disetujui',
+                        'ditolak_tu'      => 'Ditolak TU',
+                        default           => ucfirst($pengajuan->status),
                     };
                 @endphp
 
                 <span class="px-3 py-1 text-sm font-medium rounded-full {{ $badge }}">
-                    {{ ucfirst($pengajuan->status) }}
+                    {{ $labelStatus }}
                 </span>
             </div>
 
@@ -124,15 +142,15 @@
             <table class="w-full text-sm">
                 <tr class="border-b">
                     <td class="w-40 py-2 font-medium text-gray-600">Nama Tempat</td>
-                    <td class="py-2">: {{ $pengajuan->tempatPkl->nama_tempat ?? '-' }}</td>
+                    <td class="py-2">: {{ optional($pengajuan->tempatPkl)->nama_tempat ?? '-' }}</td>
                 </tr>
                 <tr class="border-b">
                     <td class="py-2 font-medium text-gray-600">Jenis</td>
-                    <td class="py-2">: {{ $pengajuan->tempatPkl->jenis_tempat ?? '-' }}</td>
+                    <td class="py-2">: {{ optional($pengajuan->tempatPkl)->jenis_tempat ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="py-2 font-medium text-gray-600">No HP</td>
-                    <td class="py-2">: {{ $pengajuan->tempatPkl->no_hp ?? '-' }}</td>
+                    <td class="py-2">: {{ optional($pengajuan->tempatPkl)->no_hp ?? '-' }}</td>
                 </tr>
             </table>
         </div>
@@ -143,7 +161,7 @@
                 Dokumen Pengajuan
             </h3>
 
-            @if ($pengajuan->dokumenPengajuan->count())
+            @if ($pengajuan->dokumenPengajuan && $pengajuan->dokumenPengajuan->count())
                 <ul class="space-y-2 text-sm">
                     @foreach ($pengajuan->dokumenPengajuan as $doc)
                         <li>
@@ -171,7 +189,7 @@
 
                 <p class="text-sm text-green-700">
                     Dosen Pembimbing:
-                    <strong>{{ $pengajuan->pkl->dosen->nama ?? '-' }}</strong>
+                    <strong>{{ optional($pengajuan->pkl->dosen)->nama ?? '-' }}</strong>
                 </p>
 
                 <p class="mt-1 text-sm text-green-700">
