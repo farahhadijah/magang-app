@@ -23,8 +23,9 @@ class PengajuanPklController extends Controller
 
         // Cegah pengajuan ganda
         $pengajuanAktif = PengajuanPkl::where('id_mhs', $mahasiswa->id)
-            ->whereIn('status', ['pending', 'disetujui'])
+            ->whereIn('status', ['draft', 'pending', 'disetujui'])
             ->first();
+
 
         if ($pengajuanAktif) {
             return redirect()
@@ -72,9 +73,10 @@ class PengajuanPklController extends Controller
             $pengajuan = PengajuanPkl::create([
                 'id_mhs'        => $mahasiswa->id,
                 'id_tempat_pkl' => $tempatPkl->id,
-                'status'        => 'pending',
+                'status'        => 'draft', // 🔥 FIX
                 'tgl_pengajuan' => now(),
             ]);
+
 
             $path = $request->file('dokumen')
                 ->store("dokumen_pengajuan_pkl/{$mahasiswa->nim}", 'public');
