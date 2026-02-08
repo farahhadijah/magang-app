@@ -164,22 +164,29 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->name('staff.')
     ->group(function () {
 
-        Route::view('/dashboard', 'staff.dashboard')
-            ->name('dashboard');
+        Route::view('/dashboard', 'staff.dashboard')->name('dashboard');
 
-        // VERIFIKASI PENGAJUAN PKL
+        // Histori pengajuan ditolak → harus DI ATAS {id}
+        Route::get('/pengajuan/histori-ditolak', [StaffPengajuanPKLController::class, 'historiDitolak'])
+            ->name('pengajuan.histori_ditolak');
+
+        // Daftar pengajuan TU
         Route::get('/pengajuan', [StaffPengajuanPKLController::class, 'index'])
             ->name('pengajuan.index');
 
+        // Detail pengajuan → parameter {id}
         Route::get('/pengajuan/{id}', [StaffPengajuanPKLController::class, 'show'])
             ->name('pengajuan.show');
 
+        // Approve / Reject
         Route::post('/pengajuan/{id}/approve', [StaffPengajuanPKLController::class, 'approve'])
             ->name('pengajuan.approve');
 
         Route::post('/pengajuan/{id}/reject', [StaffPengajuanPKLController::class, 'reject'])
             ->name('pengajuan.reject');
     });
+
+
 
 /*
 |--------------------------------------------------------------------------

@@ -14,12 +14,15 @@ class PengajuanPkl extends Model
     public $timestamps = true;
     protected $table = 'pengajuan_pkl';
     protected $fillable = [
-    'id_mhs',
-    'id_tempat_pkl',
-    'status',
-    'tgl_pengajuan'
-];
+        'id_mhs',
+        'id_tempat_pkl',
+        'status',
+        'tgl_pengajuan',
+        'catatan_tu',
+        'catatan_kaprodi'
+    ];
 
+    // RELATIONSHIPS
     public function mahasiswa()
     {
         return $this->belongsTo(Mahasiswa::class, 'id_mhs');
@@ -44,18 +47,20 @@ class PengajuanPkl extends Model
     {
         return $this->hasOne(Pkl::class, 'id_pengajuan_pkl');
     }
+
     public function verifikasiTu()
     {
         return $this->hasOne(Verifikasi::class, 'id_pengajuan_pkl')
             ->where('level', 'tu');
     }
+
     public function verifikasiKaprodi()
     {
         return $this->hasOne(Verifikasi::class, 'id_pengajuan_pkl')
             ->where('level', 'kaprodi');
     }
 
-
+    // CHECK STATUS
     public function sudahDisetujuiTu(): bool
     {
         return $this->verifikasi()
@@ -63,6 +68,7 @@ class PengajuanPkl extends Model
             ->where('status', 'approved')
             ->exists();
     }
+
     public function sudahDisetujuiKaprodi(): bool
     {
         return $this->verifikasi()
@@ -70,9 +76,10 @@ class PengajuanPkl extends Model
             ->where('status', 'approved')
             ->exists();
     }
+
     public function statusLabel(): array
     {
-        if ($this->status === 'pending') {
+        if ($this->status === 'pending_tu') {
             if ($this->sudahDisetujuiTu()) {
                 return [
                     'text'  => 'Pending Kaprodi',
@@ -93,6 +100,13 @@ class PengajuanPkl extends Model
             ];
         }
 
+        if ($this->status === 'pending_dosen') {
+            return [
+                'text'  => 'Pending Kaprodi',
+                'class' => 'text-blue-800 bg-blue-100',
+            ];
+        }
+
         if ($this->status === 'disetujui') {
             return [
                 'text'  => 'Disetujui',
@@ -105,17 +119,15 @@ class PengajuanPkl extends Model
             'class' => 'text-gray-800 bg-gray-100',
         ];
     }
+
+    // LOGIKA UNTUK MENAMPILKAN TOMBOL VERIFIKASI TU
     public function bisaDiverifikasiTu(): bool
     {
-        return $this->status === 'pending'
+        return $this->status === 'pending_tu'
             && !$this->sudahDisetujuiTu()
             && !$this->verifikasi()
                 ->where('level', 'tu')
                 ->where('status', 'rejected')
                 ->exists();
     }
-
-
-
-
 }

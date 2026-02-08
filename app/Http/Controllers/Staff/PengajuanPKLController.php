@@ -11,30 +11,22 @@ use Illuminate\Support\Facades\DB;
 
 class PengajuanPKLController extends Controller
 {
-    /**
-     * List pengajuan PKL (Staff TU)
-     * HANYA yang status = pending
-     */
+    // LIST PENGAJUAN
     public function index()
-        {
-            $pengajuans = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
-                ->whereIn('status', [
-                    'pending_tu',
-                    'ditolak_tu',
-                    'pending_dosen',
-                    'disetujui'
-                ])
-                ->orderBy('created_at', 'desc')
-                ->get();
+    {
+        $pengajuans = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
+            ->whereIn('status', [
+                'pending_tu',
+                'pending_dosen',
+                'disetujui'
+            ])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-            return view('staff.pengajuan.index', compact('pengajuans'));
-        }
+        return view('staff.pengajuan.index', compact('pengajuans'));
+    }
 
-
-
-    /**
-     * Detail pengajuan PKL
-     */
+    // DETAIL PENGAJUAN
     public function show($id)
     {
         $pengajuan = PengajuanPkl::with([
@@ -46,21 +38,17 @@ class PengajuanPKLController extends Controller
         return view('staff.pengajuan.show', compact('pengajuan'));
     }
 
-    /**
-     * APPROVE oleh Staff TU
-     * (verifikasi administratif)
-     */
+    // APPROVE PENGAJUAN TU
     public function approve($id)
     {
         $pengajuan = PengajuanPkl::findOrFail($id);
 
-        // hanya boleh proses DRAFT
-        if ($pengajuan->status !== 'pending') {
+        // hanya pengajuan pending_tu yang bisa diapprove
+        if ($pengajuan->status !== 'pending_tu') {
             return back()->with('success', 'Pengajuan sudah diproses.');
         }
 
         DB::transaction(function () use ($pengajuan) {
-
             Verifikasi::create([
                 'id_pengajuan_pkl' => $pengajuan->id,
                 'id_user'          => auth()->user()->id,
@@ -70,17 +58,18 @@ class PengajuanPKLController extends Controller
                 'tgl_verifikasi'   => now(),
             ]);
 
-            // 🔥 KUNCI: lanjut ke Kaprodi
+            // lanjut ke Kaprodi
             $pengajuan->update([
-                'status' => 'pending',
+                'status' => 'pending_dosen',
             ]);
         });
 
-    return redirect()
-        ->route('staff.pengajuan.index')
-        ->with('success', 'Pengajuan PKL berhasil diverifikasi TU dan diteruskan ke Kaprodi.');
-}
+        return redirect()
+            ->route('staff.pengajuan.index')
+            ->with('success', 'Pengajuan PKL berhasil diverifikasi TU dan diteruskan ke Kaprodi.');
+    }
 
+    // REJECT PENGAJUAN TU
     public function reject(Request $request, $id)
     {
         $request->validate([
@@ -89,14 +78,11 @@ class PengajuanPKLController extends Controller
 
         $pengajuan = PengajuanPkl::findOrFail($id);
 
-        if ($pengajuan->status !== 'pending') {
+        if ($pengajuan->status !== 'pending_tu') {
             return back()->with('success', 'Pengajuan sudah diproses.');
         }
 
-
-
         DB::transaction(function () use ($pengajuan, $request) {
-
             Verifikasi::create([
                 'id_pengajuan_pkl' => $pengajuan->id,
                 'id_user'          => auth()->user()->id,
@@ -107,15 +93,23 @@ class PengajuanPKLController extends Controller
             ]);
 
             $pengajuan->update([
-                'status'      => 'ditolak_tu',
-                'catatan_tu'  => $request->catatan, // 🔥 supaya mahasiswa bisa lihat
+                'status'     => 'ditolak_tu',
+                'catatan_tu' => $request->catatan,
             ]);
         });
 
         return redirect()
             ->route('staff.pengajuan.index')
             ->with('warning', 'Pengajuan PKL berhasil DITOLAK oleh Staff TU.');
-
     }
+    // histori ditolak
+    public function historiDitolak()
+{
+    $pengajuansDitolak = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
+        ->where('status', 'ditolak_tu')
+        ->orderBy('updated_at', 'desc')
+        ->get();
 
+    return view('staff.pengajuan.histori_ditolak', compact('pengajuansDitolak'));
+}
 }
