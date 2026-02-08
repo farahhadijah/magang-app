@@ -1,100 +1,108 @@
 <?php
 
 namespace App\Http\Controllers\Kaprodi;
-use App\Http\Controllers\Controller;
-use App\Models\PengajuanPkl;
-use App\Models\Verifikasi;
+
+use Carbon\Carbon;
 use App\Models\Pkl;
+use App\Models\User;
+use App\Models\Dosen;
+use App\Models\Verifikasi;
+use App\Models\PengajuanPkl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 
 class PengajuanPklController extends Controller
 {
-    /**
-     * Dashboard Kaprodi
-     */
     public function dashboard()
     {
         $totalMahasiswa = PengajuanPkl::distinct('id_mhs')->count();
 
-        $totalMenunggu = PengajuanPkl::where('status','pending')
+        $totalMenunggu = PengajuanPkl::where('status','pending_kaprodi')
             ->whereHas('verifikasi', function($q){
                 $q->where('level','tu')->where('status','approved');
             })->count();
 
-        $totalAktif = PengajuanPkl::whereHas('verifikasi', function($q){
-            $q->where('level','kaprodi')->where('status','approved');
-        })->count();
-
-        $totalSelesai = Pkl::whereNotNull('tgl_selesai')->count();
+        $totalAktif = Pkl::where('status','aktif')->count();
+        $totalSelesai = Pkl::where('status','selesai')->count();
 
         return view('kaprodi.dashboard', compact(
             'totalMahasiswa','totalMenunggu','totalAktif','totalSelesai'
         ));
     }
 
-
-    /**
-     * Index pengajuan yang menunggu Kaprodi
-     */
     public function index()
     {
         $pengajuans = PengajuanPkl::with(['mahasiswa','tempatPkl'])
-            ->whereIn('status', ['pending_kaprodi', 'disetujui'])
-            ->whereHas('verifikasi', function($q){
-                $q->where('level','tu')->where('status','approved');
-            })
+            ->munculUntukKaprodi()
             ->orderBy('created_at','desc')
             ->get();
 
         return view('kaprodi.pengajuan.index', compact('pengajuans'));
     }
 
-    /**
-     * Detail pengajuan
-     */
+
+
+// DETAIL pengajuan + daftar dosen
     public function show($id)
     {
         $pengajuan = PengajuanPkl::with(['mahasiswa','tempatPkl','dokumenPengajuan'])
             ->findOrFail($id);
 
-        return view('kaprodi.pengajuan.show', compact('pengajuan'));
+        // Ambil semua dosen dari tabel dosen
+        $dosenList = Dosen::select('id','nama')->get();
+
+        return view('kaprodi.pengajuan.show', compact('pengajuan','dosenList'));
     }
 
-    /**
-     * Approve pengajuan Kaprodi
-     */
-    public function approve($id)
-    {
-        $pengajuan = PengajuanPkl::findOrFail($id);
+    // Approve pengajuan Kaprodi dengan memilih dosen
+    public function approve(Request $request, $id)
+{
+    $request->validate([
+        'id_dosen' => 'required|exists:users,id',
+    ]);
 
-        if ($pengajuan->status !== 'pending_kaprodi') {
-            return back()->with('success','Pengajuan sudah diproses.');
-        }
+    $pengajuan = PengajuanPkl::findOrFail($id);
 
-
-        DB::transaction(function() use($pengajuan){
-            Verifikasi::create([
-                'id_pengajuan_pkl' => $pengajuan->id,
-                'id_user'          => auth()->user()->id,
-                'level'            => 'kaprodi',
-                'status'           => 'approved',
-                'catatan'          => null,
-                'tgl_verifikasi'   => now(),
-            ]);
-
-            $pengajuan->update([
-                'status' => 'disetujui',
-            ]);
-        });
-
-        return redirect()->route('kaprodi.pengajuan.index')
-            ->with('success','Pengajuan PKL berhasil disetujui Kaprodi.');
+    if (!$pengajuan->bisaDiverifikasiKaprodi()) {
+        return back()->with('success', 'Pengajuan sudah diproses.');
     }
 
-    /**
-     * Reject pengajuan Kaprodi
-     */
+    DB::transaction(function() use($pengajuan, $request) {
+        // Verifikasi Kaprodi
+        Verifikasi::create([
+            'id_pengajuan_pkl' => $pengajuan->id,
+            'id_user'          => auth()->user()->id,
+            'level'            => 'kaprodi',
+            'status'           => 'approved',
+            'catatan'          => null,
+            'tgl_verifikasi'   => now(),
+        ]);
+
+        // Update status pengajuan
+        $pengajuan->update([
+            'status' => 'disetujui',
+        ]);
+
+        // Buat record PKL dengan dosen yang dipilih Kaprodi
+        $tglMulai = now();
+        $tglSelesai = now()->addDays(30); // durasi PKL, bisa diubah
+
+        Pkl::create([
+            'id_pengajuan_pkl' => $pengajuan->id,
+            'id_dosen'         => $request->id_dosen,
+            'tgl_mulai'        => $tglMulai,
+            'tgl_selesai'      => $tglSelesai,
+            'status'           => 'aktif',
+        ]);
+    });
+
+    return redirect()->route('kaprodi.pengajuan.index')
+        ->with('success', 'Pengajuan PKL berhasil disetujui Kaprodi dan PKL aktif.');
+}
+
+
+
     public function reject(Request $request, $id)
     {
         $request->validate([
@@ -103,12 +111,12 @@ class PengajuanPklController extends Controller
 
         $pengajuan = PengajuanPkl::findOrFail($id);
 
-        if ($pengajuan->status !== 'pending_kaprodi') {
-            return back()->with('success','Pengajuan sudah diproses.');
+        if (!$pengajuan->bisaDiverifikasiKaprodi()) {
+            return back()->with('warning','Pengajuan sudah diproses dan tidak dapat diverifikasi kembali.');
         }
 
-
         DB::transaction(function() use($pengajuan, $request){
+            // catatan verifikasi Kaprodi
             Verifikasi::create([
                 'id_pengajuan_pkl' => $pengajuan->id,
                 'id_user'          => auth()->user()->id,
@@ -118,8 +126,9 @@ class PengajuanPklController extends Controller
                 'tgl_verifikasi'   => now(),
             ]);
 
+            // update status pengajuan
             $pengajuan->update([
-                'status' => 'ditolak_kaprodi',
+                'status'         => 'ditolak_kaprodi',
                 'catatan_kaprodi'=> $request->catatan,
             ]);
         });
@@ -128,9 +137,6 @@ class PengajuanPklController extends Controller
             ->with('warning','Pengajuan PKL berhasil ditolak Kaprodi.');
     }
 
-    /**
-     * Histori pengajuan ditolak Kaprodi
-     */
     public function historiDitolak()
     {
         $pengajuans = PengajuanPkl::with(['mahasiswa','tempatPkl'])

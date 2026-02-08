@@ -14,6 +14,13 @@ class Pkl extends Model
 {
     public $timestamps = true;
     protected $table = 'pkl';
+    protected $fillable = [
+        'id_pengajuan_pkl',
+        'id_dosen',
+        'tgl_mulai',
+        'tgl_selesai',
+        'status',
+    ];
 
     public function pengajuanPkl()
     {

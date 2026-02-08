@@ -32,41 +32,42 @@
             @endif
         </div>
 
-        {{-- Aksi Verifikasi --}}
+        {{-- Aksi Verifikasi Kaprodi --}}
         @if ($pengajuan->bisaDiverifikasiKaprodi())
-            <div class="flex flex-col gap-4 md:flex-row">
-                {{-- APPROVE --}}
-                <form method="POST" action="{{ route('kaprodi.pengajuan.approve', $pengajuan->id) }}"
-                    onsubmit="return confirm('Yakin ingin MENYETUJUI pengajuan PKL ini?')">
-                    @csrf
-                    <button class="w-full px-6 py-2 font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                        Setujui
-                    </button>
-                </form>
+            <form method="POST" action="{{ route('kaprodi.pengajuan.approve', $pengajuan->id) }}">
+                @csrf
+                <div class="space-y-4">
+                    {{-- Pilih Dosen Pembimbing --}}
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-gray-700">Pilih Dosen Pembimbing</label>
+                        <select name="id_dosen" required class="p-2 border rounded-md">
+                            <option value="">-- Pilih Dosen Pembimbing --</option>
+                            @foreach($dosenList as $d)
+                                <option value="{{ $d->id }}">{{ $d->nama }}</option>
+                            @endforeach
+                        </select>
 
-                {{-- REJECT --}}
-                <form method="POST" action="{{ route('kaprodi.pengajuan.reject', $pengajuan->id) }}"
-                    class="flex flex-col w-full gap-2 md:w-auto"
-                    onsubmit="return confirm('Yakin ingin MENOLAK pengajuan PKL ini?')">
-                    @csrf
-                    <textarea name="catatan" rows="3" placeholder="Catatan penolakan (wajib diisi)"
-                            class="p-2 border rounded-md border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                            required></textarea>
-                    <button class="px-6 py-2 font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700">
-                        Tolak
-                    </button>
-                </form>
-            </div>
+
+                    </div>
+
+                    {{-- Tombol Aksi --}}
+                    <div class="flex gap-4">
+                        <button type="submit"
+                                class="px-6 py-2 font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                            Setujui & Aktifkan PKL
+                        </button>
+
+                        <a href="{{ route('kaprodi.pengajuan.index') }}"
+                           class="inline-block px-6 py-2 font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700">
+                            Kembali
+                        </a>
+                    </div>
+                </div>
+            </form>
         @else
             <div class="p-4 text-sm text-gray-700 border border-gray-300 rounded-lg bg-gray-50">
                 Pengajuan ini sudah diproses dan tidak dapat diverifikasi kembali.
             </div>
         @endif
-
-
-
-        <a href="{{ route('kaprodi.pengajuan.index') }}" class="inline-block font-medium text-green-700 hover:text-green-900">
-            ← Kembali
-        </a>
     </div>
 </x-app-layout>

@@ -133,5 +133,14 @@ class PengajuanPkl extends Model
                 ->where('status', 'rejected')
                 ->exists();
     }
+    // Method untuk menampilkan pengajuan yang seharusnya muncul di Kaprodi index
+    public function scopeMunculUntukKaprodi($query)
+    {
+        return $query->whereIn('status', ['pending_kaprodi', 'disetujui'])
+                    ->whereHas('verifikasi', function($q){
+                        $q->where('level','tu')->where('status','approved');
+                    });
+    }
+
 
 }
