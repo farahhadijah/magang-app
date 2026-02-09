@@ -39,9 +39,10 @@ class User extends Authenticatable
     }
 
     public function dosen()
-    {
-        return $this->belongsTo(Dosen::class, 'dosen_id');
-    }
+{
+    return $this->belongsTo(Dosen::class, 'dosen_id');
+}
+
 
     public function staff()
     {

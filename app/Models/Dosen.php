@@ -12,6 +12,7 @@ class Dosen extends Model
     protected $table = 'dosen';
 
     protected $fillable = [
+        'user_id',
         'nidn',
         'nama',
         'prodi_id',
@@ -33,8 +34,12 @@ class Dosen extends Model
         return $this->belongsTo(Prodi::class);
     }
 
-    public function user()
+     public function user()
     {
-        return $this->hasOne(User::class, 'dosen_id');
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function pkl()
+    {
+        return $this->hasMany(Pkl::class, 'id_dosen');
     }
 }

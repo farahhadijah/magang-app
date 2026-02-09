@@ -78,6 +78,53 @@
     </div>
 
 </div>
+{{-- script --}}
+    <script>
+    function submitReview(event, id) {
+    event.preventDefault();
+
+    const status = document.getElementById('status-select-' + id).value;
+    const catatan = document.getElementById('catatan-' + id).value;
+    const token = document.querySelector('#modal-' + id + ' input[name=_token]').value;
+
+    fetch("/dosen/logbook/" + id + "/review-ajax", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token
+        },
+        body: JSON.stringify({status: status, catatan: catatan})
+    })
+    .then(res => {
+        if(!res.ok) throw new Error('Network response not ok');
+        return res.json();
+    })
+    .then(data => {
+        if(data.success) {
+            let statusCell = document.getElementById('status-' + id);
+            let html = '';
+            if(data.status === 'approved') {
+                html = '<span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Disetujui</span>';
+            } else if(data.status === 'pending') {
+                html = '<span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Perlu Revisi</span>';
+            }
+            statusCell.innerHTML = html;
+            closeModal(id);
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function openModal(id) {
+    document.getElementById('modal-' + id).classList.remove('hidden');
+}
+
+function closeModal(id) {
+    document.getElementById('modal-' + id).classList.add('hidden');
+}
+
+    </script>
+
 
 </body>
 

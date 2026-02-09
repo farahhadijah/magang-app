@@ -31,7 +31,6 @@ class Pkl extends Model
     {
         return $this->belongsTo(User::class, 'id_dosen');
     }
-
     public function logbook()
     {
         return $this->hasMany(Logbook::class, 'id_pkl');

@@ -1,11 +1,27 @@
-<div class="space-y-2">
+<div class="space-y-1">
 
-    <x-nav-link
-        :href="route('dashboard')"
-        :active="request()->routeIs('dashboard')">
+    {{-- ================= DAFTAR MAHASISWA BIMBINGAN ================= --}}
+    <a href="{{ route('dosen.mahasiswa.bimbingan') }}"
+       class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+       {{ request()->routeIs('dosen.mahasiswa.bimbingan') ? 'bg-green-700 text-white' : 'text-green-900' }}">
+        <i class="fa-solid fa-users"></i>
+        <span>Mahasiswa Bimbingan</span>
+    </a>
 
-        Dashboard
+    {{-- ================= REVIEW LOGBOOK ================= --}}
+    <a href="{{ route('dosen.logbook.index') }}"
+       class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-amber-800
+       {{ request()->routeIs('dosen.logbook.index') ? 'bg-amber-700 text-white' : 'text-amber-900' }}">
+        <i class="fa-solid fa-book"></i>
+        <span>Review Logbook</span>
+    </a>
 
-    </x-nav-link>
+    {{-- ================= PENILAIAN PKL ================= --}}
+    <a href="{{ route('dosen.penilaian.index') }}"
+       class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-amber-800
+       {{ request()->routeIs('dosen.pkl.penilaian') ? 'bg-amber-700 text-white' : 'text-amber-900' }}">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <span>Penilaian PKL</span>
+    </a>
 
 </div>

@@ -17,15 +17,9 @@ use App\Http\Controllers\Auth\FirstLoginController;
 // ADMIN
 use App\Http\Controllers\Admin\UserController;
 
-// MAHASISWA
-use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
-use App\Http\Controllers\Mahasiswa\PengajuanPklController;
-use App\Http\Controllers\Mahasiswa\LogbookController;
 
-// DOSEN
-use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
-use App\Http\Controllers\Dosen\ReviewLogbookController;
-use App\Http\Controllers\Dosen\PenilaianPKLController;
+
+
 
 // STAFF TU
 use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanPKLController;
@@ -94,6 +88,10 @@ Route::middleware(['auth'])->group(function () {
 | MAHASISWA AREA
 |--------------------------------------------------------------------------
 */
+// MAHASISWA
+use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
+use App\Http\Controllers\Mahasiswa\PengajuanPklController;
+use App\Http\Controllers\Mahasiswa\LogbookController;
 Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
@@ -128,6 +126,10 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
 | DOSEN AREA
 |--------------------------------------------------------------------------
 */
+// DOSEN
+use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
+use App\Http\Controllers\Dosen\ReviewLogbookController;
+use App\Http\Controllers\Dosen\PenilaianPKLController;
 Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->prefix('dosen')
     ->name('dosen.')
@@ -135,25 +137,23 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
 
         Route::view('/dashboard', 'dosen.dashboard')
             ->name('dashboard');
-
         // MAHASISWA BIMBINGAN
         Route::get('/mahasiswa-bimbingan', [MahasiswaBimbinganController::class, 'index'])
             ->name('mahasiswa.bimbingan');
-
         // REVIEW LOGBOOK
-        Route::get('/mahasiswa/{mahasiswa}/logbook', [ReviewLogbookController::class, 'index'])
+        Route::get('logbook', [ReviewLogbookController::class, 'index'])
             ->name('logbook.index');
-
-        Route::post('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review'])
+        Route::post('logbook/{id}/review', [ReviewLogbookController::class, 'review'])
             ->name('logbook.review');
+        Route::post('logbook/{logbook}/review-ajax', [ReviewLogbookController::class, 'reviewAjax'])
+            ->name('logbook.review-ajax');
+
 
         // PENILAIAN PKL
         Route::get('/penilaian', [PenilaianPKLController::class, 'index'])
             ->name('penilaian.index');
-
         Route::get('/penilaian/{mahasiswa}/create', [PenilaianPKLController::class, 'create'])
             ->name('penilaian.create');
-
         Route::post('/penilaian/{mahasiswa}', [PenilaianPKLController::class, 'store'])
             ->name('penilaian.store');
     });

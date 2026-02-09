@@ -27,39 +27,32 @@ class PengajuanPkl extends Model
     {
         return $this->belongsTo(Mahasiswa::class, 'id_mhs');
     }
-
     public function tempatPkl()
     {
         return $this->belongsTo(TempatPkl::class, 'id_tempat_pkl');
     }
-
     public function dokumenPengajuan()
     {
         return $this->hasMany(DokumenPengajuan::class, 'id_pengajuan_pkl');
     }
-
     public function verifikasi()
     {
         return $this->hasMany(Verifikasi::class, 'id_pengajuan_pkl');
     }
-
     public function pkl()
     {
         return $this->hasOne(Pkl::class, 'id_pengajuan_pkl');
     }
-
     public function verifikasiTu()
     {
         return $this->hasOne(Verifikasi::class, 'id_pengajuan_pkl')
             ->where('level', 'tu');
     }
-
     public function verifikasiKaprodi()
     {
         return $this->hasOne(Verifikasi::class, 'id_pengajuan_pkl')
             ->where('level', 'kaprodi');
     }
-
     // CHECK STATUS
     public function sudahDisetujuiTu(): bool
     {
