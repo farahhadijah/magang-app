@@ -127,25 +127,47 @@
 
             {{-- ================= DOKUMEN ================= --}}
             <div>
-                <label class="block mb-1 font-medium text-green-800">
-                    Upload KHS (Wajib)
-                    <span class="text-red-500">*</span>
-                </label>
+                <h4 class="mb-3 font-semibold text-green-800">
+                    Upload Dokumen Wajib
+                </h4>
 
-                <input
-                    type="file"
-                    name="dokumen"
-                    accept=".pdf,.doc,.docx"
-                    required
-                    class="block w-full text-sm text-gray-600 file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700"
-                >
+                {{-- KHS --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">
+                        KHS Terbaru <span class="text-red-500">*</span>
+                    </label>
+                    <input type="file"
+                        name="dokumen_khs"
+                        required
+                        accept=".pdf,.doc,.docx"
+                        class="file-input">
+                </div>
 
-                <p class="mt-1 text-xs text-gray-500">
-                    Upload <strong>KHS terbaru</strong> (PDF / DOC).
-                    <br>
-                    Dokumen lain <strong>tidak diterima</strong>.
-                </p>
+                {{-- Pembayaran --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">
+                        Bukti Pembayaran PKL <span class="text-red-500">*</span>
+                    </label>
+                    <input type="file"
+                        name="dokumen_pembayaran"
+                        required
+                        accept=".pdf,.jpg,.png"
+                        class="file-input">
+                </div>
+
+                {{-- Studi Tour --}}
+                <div>
+                    <label class="block mb-1 font-medium text-green-800">
+                        Surat Studi Tour <span class="text-red-500">*</span>
+                    </label>
+                    <input type="file"
+                        name="dokumen_studi_tour"
+                        required
+                        accept=".pdf,.doc,.docx"
+                        class="file-input">
+                </div>
             </div>
+
 
             {{-- ================= BUTTON ================= --}}
             <div class="flex justify-end gap-3 pt-4 border-t">
