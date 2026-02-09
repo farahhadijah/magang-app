@@ -1,23 +1,48 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+/*
+|--------------------------------------------------------------------------
+| CONTROLLERS
+|--------------------------------------------------------------------------
+*/
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\FirstLoginController;
-use App\Http\Controllers\AuthController;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 
+// ADMIN
+use App\Http\Controllers\Admin\UserController;
+
+// MAHASISWA
+use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
+use App\Http\Controllers\Mahasiswa\PengajuanPklController;
+use App\Http\Controllers\Mahasiswa\LogbookController;
+
+// DOSEN
+use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
+use App\Http\Controllers\Dosen\ReviewLogbookController;
+use App\Http\Controllers\Dosen\PenilaianPKLController;
+
+// STAFF TU
+use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanPKLController;
+
+// KAPRODI
+use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanPKLController;
+use App\Http\Controllers\Kaprodi\MahasiswaController;
+use App\Http\Controllers\Kaprodi\NilaiController;
+/*
+|--------------------------------------------------------------------------
+| ROOT & AUTH
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
     if (Auth::check()) {
-        return match (Auth::user()->role) {
-            'mahasiswa' => redirect('/mahasiswa/dashboard'),
-            'staff_tu'  => redirect('/tu/dashboard'),
-            default     => redirect()->route('login'),
-        };
+        return redirect()->route('dashboard');
     }
-
     return redirect()->route('login');
 });
 
@@ -25,39 +50,35 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
 
+/*
+|--------------------------------------------------------------------------
+| DB TEST (OPTIONAL)
+|--------------------------------------------------------------------------
+*/
 Route::get('/db-test', function () {
     return DB::select('SELECT DATABASE() as db');
 });
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC
-|--------------------------------------------------------------------------
-*/
-/* Route::get('/', function () {
-    return view('welcome');
-});*/
-
-/*
-|--------------------------------------------------------------------------
-| AUTHENTICATED (NO ROLE)
+| AUTHENTICATED (GLOBAL)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
 
-    // FIRST LOGIN (WAJIB SEBELUM DASHBOARD)
+    // FIRST LOGIN
     Route::get('/first-login', [FirstLoginController::class, 'show'])
         ->name('password.first');
 
     Route::post('/first-login', [FirstLoginController::class, 'update'])
         ->name('password.first.update');
 
-    // SINGLE ENTRY POINT DASHBOARD
+    // SINGLE ENTRY DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('first.login')
         ->name('dashboard');
 
-    // PROFILE (BOLEH DIAKSES SEMUA ROLE)
+    // PROFILE (ALL ROLES)
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
@@ -67,6 +88,110 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 });
+
+/*
+|--------------------------------------------------------------------------
+| MAHASISWA AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
+    ->prefix('mahasiswa')
+    ->name('mahasiswa.')
+    ->group(function () {
+
+        Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        // PENGAJUAN PKL
+        Route::get('/pengajuan-pkl', [PengajuanPklController::class, 'create'])
+            ->name('pengajuan.create');
+
+        Route::post('/pengajuan-pkl', [PengajuanPklController::class, 'store'])
+            ->name('pengajuan.store');
+
+        Route::get('/status-pengajuan', [PengajuanPklController::class, 'status'])
+            ->name('pengajuan.status');
+
+        // LOGBOOK
+        Route::get('/logbook', [LogbookController::class, 'index'])
+            ->name('logbook.index');
+
+        Route::get('/logbook/create', [LogbookController::class, 'create'])
+            ->name('logbook.create');
+
+        Route::post('/logbook', [LogbookController::class, 'store'])
+            ->name('logbook.store');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| DOSEN AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:dosen'])
+    ->prefix('dosen')
+    ->name('dosen.')
+    ->group(function () {
+
+        Route::view('/dashboard', 'dosen.dashboard')
+            ->name('dashboard');
+
+        // MAHASISWA BIMBINGAN
+        Route::get('/mahasiswa-bimbingan', [MahasiswaBimbinganController::class, 'index'])
+            ->name('mahasiswa.bimbingan');
+
+        // REVIEW LOGBOOK
+        Route::get('/mahasiswa/{mahasiswa}/logbook', [ReviewLogbookController::class, 'index'])
+            ->name('logbook.index');
+
+        Route::post('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review'])
+            ->name('logbook.review');
+
+        // PENILAIAN PKL
+        Route::get('/penilaian', [PenilaianPKLController::class, 'index'])
+            ->name('penilaian.index');
+
+        Route::get('/penilaian/{mahasiswa}/create', [PenilaianPKLController::class, 'create'])
+            ->name('penilaian.create');
+
+        Route::post('/penilaian/{mahasiswa}', [PenilaianPKLController::class, 'store'])
+            ->name('penilaian.store');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| STAFF TU AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:staff_tu'])
+    ->prefix('staff')
+    ->name('staff.')
+    ->group(function () {
+
+        Route::get('/dashboard', [StaffPengajuanPKLController::class, 'dashboard'])
+            ->name('dashboard');
+
+        // Histori pengajuan ditolak → harus DI ATAS {id}
+        Route::get('/pengajuan/histori-ditolak', [StaffPengajuanPKLController::class, 'historiDitolak'])
+            ->name('pengajuan.histori_ditolak');
+
+        // Daftar pengajuan TU
+        Route::get('/pengajuan', [StaffPengajuanPKLController::class, 'index'])
+            ->name('pengajuan.index');
+
+        // Detail pengajuan → parameter {id}
+        Route::get('/pengajuan/{id}', [StaffPengajuanPKLController::class, 'show'])
+            ->name('pengajuan.show');
+
+        // Approve / Reject
+        Route::post('/pengajuan/{id}/approve', [StaffPengajuanPKLController::class, 'approve'])
+            ->name('pengajuan.approve');
+
+        Route::post('/pengajuan/{id}/reject', [StaffPengajuanPKLController::class, 'reject'])
+            ->name('pengajuan.reject');
+    });
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -87,54 +212,28 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
 
 /*
 |--------------------------------------------------------------------------
-| DOSEN AREA
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'first.login', 'role:dosen'])
-    ->prefix('dosen')
-    ->name('dosen.')
-    ->group(function () {
-        Route::view('/dashboard', 'dosen.dashboard')
-            ->name('dashboard');
-    });
-
-/*
-|--------------------------------------------------------------------------
-| MAHASISWA AREA
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
-    ->prefix('mahasiswa')
-    ->name('mahasiswa.')
-    ->group(function () {
-        Route::view('/dashboard', 'mahasiswa.dashboard')
-            ->name('dashboard');
-    });
-
-/*
-|--------------------------------------------------------------------------
-| STAFF TU AREA
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'first.login', 'role:staff_tu'])
-    ->prefix('staff')
-    ->name('staff.')
-    ->group(function () {
-        Route::view('/dashboard', 'staff.dashboard')
-            ->name('dashboard');
-    });
-
-/*
-|--------------------------------------------------------------------------
 | KAPRODI AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'first.login', 'role:kaprodi'])
+Route::middleware(['auth','role:kaprodi'])
     ->prefix('kaprodi')
     ->name('kaprodi.')
-    ->group(function () {
-        Route::view('/dashboard', 'kaprodi.dashboard')
-            ->name('dashboard');
+    ->group(function(){
+        Route::get('/dashboard',[KaprodiPengajuanPKLController::class,'dashboard'])->name('dashboard');
+        Route::get('/mahasiswa', [MahasiswaController::class, 'index'])
+            ->name('mahasiswa.index');
+        Route::get('/pengajuan',[KaprodiPengajuanPKLController::class,'index'])->name('pengajuan.index');
+        Route::get('/nilai', [NilaiController::class, 'index'])
+            ->name('nilai.index');
+        Route::get('/pengajuan/{id}',[KaprodiPengajuanPKLController::class,'show'])->name('pengajuan.show');
+        Route::post('/pengajuan/{id}/approve',[KaprodiPengajuanPKLController::class,'approve'])->name('pengajuan.approve');
+        Route::post('/pengajuan/{id}/reject',[KaprodiPengajuanPKLController::class,'reject'])->name('pengajuan.reject');
+        Route::get('/histori-ditolak',[KaprodiPengajuanPKLController::class,'historiDitolak'])->name('pengajuan.histori_ditolak');
     });
 
-require __DIR__.'/auth.php';
+/*
+|--------------------------------------------------------------------------
+| DEFAULT AUTH ROUTES (BREEZE)
+|--------------------------------------------------------------------------
+*/
+require __DIR__ . '/auth.php';

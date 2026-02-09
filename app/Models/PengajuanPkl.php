@@ -13,7 +13,16 @@ class PengajuanPkl extends Model
 {
     public $timestamps = true;
     protected $table = 'pengajuan_pkl';
+    protected $fillable = [
+        'id_mhs',
+        'id_tempat_pkl',
+        'status',
+        'tgl_pengajuan',
+        'catatan_tu',
+        'catatan_kaprodi'
+    ];
 
+    // RELATIONSHIPS
     public function mahasiswa()
     {
         return $this->belongsTo(Mahasiswa::class, 'id_mhs');
@@ -38,4 +47,100 @@ class PengajuanPkl extends Model
     {
         return $this->hasOne(Pkl::class, 'id_pengajuan_pkl');
     }
+
+    public function verifikasiTu()
+    {
+        return $this->hasOne(Verifikasi::class, 'id_pengajuan_pkl')
+            ->where('level', 'tu');
+    }
+
+    public function verifikasiKaprodi()
+    {
+        return $this->hasOne(Verifikasi::class, 'id_pengajuan_pkl')
+            ->where('level', 'kaprodi');
+    }
+
+    // CHECK STATUS
+    public function sudahDisetujuiTu(): bool
+    {
+        return $this->verifikasi()
+            ->where('level', 'tu')
+            ->where('status', 'approved')
+            ->exists();
+    }
+
+    public function sudahDisetujuiKaprodi(): bool
+    {
+        return $this->verifikasi()
+            ->where('level', 'kaprodi')
+            ->where('status', 'approved')
+            ->exists();
+    }
+
+    public function statusLabel(): array
+{
+    if ($this->status === 'pending_tu') {
+        return [
+            'text'  => 'Pending Verifikasi TU',
+            'class' => 'text-amber-800 bg-amber-100',
+        ];
+    }
+
+    if ($this->status === 'pending_kaprodi') {
+        return [
+            'text'  => 'Pending Kaprodi',
+            'class' => 'text-blue-800 bg-blue-100',
+        ];
+    }
+
+    if ($this->status === 'ditolak_tu') {
+        return [
+            'text'  => 'Ditolak TU',
+            'class' => 'text-red-800 bg-red-100',
+        ];
+    }
+
+    if ($this->status === 'disetujui') {
+        return [
+            'text'  => 'Disetujui',
+            'class' => 'text-green-800 bg-green-100',
+        ];
+    }
+
+    return [
+        'text'  => ucfirst($this->status),
+        'class' => 'text-gray-800 bg-gray-100',
+    ];
+}
+
+
+    // LOGIKA UNTUK MENAMPILKAN TOMBOL VERIFIKASI TU
+    public function bisaDiverifikasiTu(): bool
+    {
+        return $this->status === 'pending_tu'
+            && !$this->sudahDisetujuiTu()
+            && !$this->verifikasi()
+                ->where('level', 'tu')
+                ->where('status', 'rejected')
+                ->exists();
+    }
+    public function bisaDiverifikasiKaprodi(): bool
+    {
+        return $this->status === 'pending_kaprodi'
+            && !$this->sudahDisetujuiKaprodi()
+            && !$this->verifikasi()
+                ->where('level', 'kaprodi')
+                ->where('status', 'rejected')
+                ->exists();
+    }
+    // Method untuk menampilkan pengajuan yang seharusnya muncul di Kaprodi index
+    public function scopeMunculUntukKaprodi($query)
+    {
+        return $query->whereIn('status', ['pending_kaprodi', 'disetujui'])
+                    ->whereHas('verifikasi', function($q){
+                        $q->where('level','tu')->where('status','approved');
+                    });
+    }
+
+
 }
