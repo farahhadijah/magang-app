@@ -23,7 +23,7 @@ use App\Http\Controllers\Admin\UserController;
 
 // STAFF TU
 use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanPKLController;
-
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 // KAPRODI
 use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanPKLController;
 use App\Http\Controllers\Kaprodi\MahasiswaController;
@@ -99,24 +99,23 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
 
         Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])
             ->name('dashboard');
-
         // PENGAJUAN PKL
         Route::get('/pengajuan-pkl', [PengajuanPklController::class, 'create'])
             ->name('pengajuan.create');
-
         Route::post('/pengajuan-pkl', [PengajuanPklController::class, 'store'])
             ->name('pengajuan.store');
-
         Route::get('/status-pengajuan', [PengajuanPklController::class, 'status'])
             ->name('pengajuan.status');
-
+        // UPLOAD ULANG DOKUMEN INVALID
+        Route::post(
+            '/pengajuan-pkl/dokumen/{id}/upload-ulang',
+            [PengajuanPklController::class, 'uploadUlangDokumen']
+            )->name('pengajuan.dokumen.upload-ulang');
         // LOGBOOK
         Route::get('/logbook', [LogbookController::class, 'index'])
             ->name('logbook.index');
-
         Route::get('/logbook/create', [LogbookController::class, 'create'])
             ->name('logbook.create');
-
         Route::post('/logbook', [LogbookController::class, 'store'])
             ->name('logbook.store');
     });
@@ -168,25 +167,20 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->name('staff.')
     ->group(function () {
 
-        Route::get('/dashboard', [StaffPengajuanPKLController::class, 'dashboard'])
+        Route::get('/dashboard', [StaffDashboardController::class, 'index'])
             ->name('dashboard');
-
         // Histori pengajuan ditolak → harus DI ATAS {id}
         Route::get('/pengajuan/histori-ditolak', [StaffPengajuanPKLController::class, 'historiDitolak'])
             ->name('pengajuan.histori_ditolak');
-
         // Daftar pengajuan TU
         Route::get('/pengajuan', [StaffPengajuanPKLController::class, 'index'])
             ->name('pengajuan.index');
-
         // Detail pengajuan → parameter {id}
         Route::get('/pengajuan/{id}', [StaffPengajuanPKLController::class, 'show'])
             ->name('pengajuan.show');
-
         // Approve / Reject
         Route::post('/pengajuan/{id}/approve', [StaffPengajuanPKLController::class, 'approve'])
             ->name('pengajuan.approve');
-
         Route::post('/pengajuan/{id}/reject', [StaffPengajuanPKLController::class, 'reject'])
             ->name('pengajuan.reject');
     });

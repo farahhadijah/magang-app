@@ -4,29 +4,35 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanPkl;
-use App\Models\Verifikasi;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class PengajuanPKLController extends Controller
+class PengajuanPklController extends Controller
 {
-    // LIST PENGAJUAN
+    /**
+     * ===============================
+     * LIST PENGAJUAN UNTUK TU
+     * ===============================
+     */
     public function index()
     {
-        $pengajuans = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
-            ->whereIn('status', [
-                'pending_tu',
-                'pending_kaprodi',
-                'disetujui'
+        $pengajuans = PengajuanPkl::with([
+                'mahasiswa',
+                'tempatPkl',
+                'dokumenPengajuan'
             ])
+            ->whereIn('status', ['pending', 'draft']) // hanya yang bisa diverifikasi TU
             ->orderBy('created_at', 'desc')
             ->get();
 
         return view('staff.pengajuan.index', compact('pengajuans'));
     }
 
-    // DETAIL PENGAJUAN
+    /**
+     * ===============================
+     * DETAIL PENGAJUAN
+     * ===============================
+     */
     public function show($id)
     {
         $pengajuan = PengajuanPkl::with([
@@ -38,60 +44,62 @@ class PengajuanPKLController extends Controller
         return view('staff.pengajuan.show', compact('pengajuan'));
     }
 
-    // APPROVE PENGAJUAN TU
+    /**
+     * ===============================
+     * APPROVE OLEH TU
+     * ===============================
+     * Syarat:
+     * - status = pending
+     * - semua dokumen VALID
+     */
     public function approve($id)
     {
-        $pengajuan = PengajuanPkl::findOrFail($id);
+        $pengajuan = PengajuanPkl::with('dokumenPengajuan')->findOrFail($id);
 
-        // hanya pengajuan pending_tu yang bisa diapprove
-        if ($pengajuan->status !== 'pending_tu') {
-            return back()->with('success', 'Pengajuan sudah diproses.');
+        if ($pengajuan->status !== 'pending') {
+            return back()->with('warning', 'Pengajuan tidak bisa disetujui karena status bukan pending.');
+        }
+
+        if (! $pengajuan->bisaDisetujuiTu()) {
+            return back()->with('warning', 'Pengajuan belum memenuhi syarat untuk disetujui.');
         }
 
         DB::transaction(function () use ($pengajuan) {
-            Verifikasi::create([
-                'id_pengajuan_pkl' => $pengajuan->id,
-                'id_user'          => auth()->user()->id,
-                'level'            => 'tu',
-                'status'           => 'approved',
-                'catatan'          => null,
-                'tgl_verifikasi'   => now(),
-            ]);
-
-            // lanjut ke Kaprodi
             $pengajuan->update([
-                'status' => 'pending_kaprodi',
+                'status' => 'disetujui', // sesuai alur Sibolang, TU setuju langsung disetujui
             ]);
         });
 
         return redirect()
             ->route('staff.pengajuan.index')
-            ->with('success', 'Pengajuan PKL berhasil diverifikasi TU dan diteruskan ke Kaprodi.');
+            ->with('success', 'Pengajuan PKL berhasil disetujui TU.');
     }
 
-    // REJECT PENGAJUAN TU
+    /**
+     * ===============================
+     * REJECT / KEMBALIKAN KE MAHASISWA
+     * ===============================
+     * Syarat:
+     * - status = pending
+     * - ada dokumen INVALID
+     */
     public function reject(Request $request, $id)
     {
         $request->validate([
             'catatan' => 'required|string|max:255',
         ]);
 
-        $pengajuan = PengajuanPkl::findOrFail($id);
+        $pengajuan = PengajuanPkl::with('dokumenPengajuan')->findOrFail($id);
 
-        if ($pengajuan->status !== 'pending_tu') {
-            return back()->with('success', 'Pengajuan sudah diproses.');
+        if ($pengajuan->status !== 'pending') {
+            return back()->with('warning', 'Pengajuan tidak dapat dikembalikan karena status bukan pending.');
+        }
+
+        if (! $pengajuan->bisaDikembalikanKeMahasiswa()) {
+            return back()->with('warning', 'Pengajuan tidak dapat dikembalikan karena semua dokumen valid.');
         }
 
         DB::transaction(function () use ($pengajuan, $request) {
-            Verifikasi::create([
-                'id_pengajuan_pkl' => $pengajuan->id,
-                'id_user'          => auth()->user()->id,
-                'level'            => 'tu',
-                'status'           => 'rejected',
-                'catatan'          => $request->catatan,
-                'tgl_verifikasi'   => now(),
-            ]);
-
             $pengajuan->update([
                 'status'     => 'ditolak_tu',
                 'catatan_tu' => $request->catatan,
@@ -100,33 +108,24 @@ class PengajuanPKLController extends Controller
 
         return redirect()
             ->route('staff.pengajuan.index')
-            ->with('warning', 'Pengajuan PKL berhasil DITOLAK oleh Staff TU.');
+            ->with('warning', 'Pengajuan PKL dikembalikan ke mahasiswa untuk perbaikan.');
     }
-    // histori ditolak
+
+    /**
+     * ===============================
+     * HISTORI DITOLAK TU
+     * ===============================
+     */
     public function historiDitolak()
     {
-        $pengajuansDitolak = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
-            ->where('status', 'ditolak_tu')
+        $pengajuans = PengajuanPkl::with([
+                'mahasiswa',
+                'tempatPkl'
+            ])
+            ->where('status', 'ditolak_tu') // sesuaikan dengan alur Sibolang
             ->orderBy('updated_at', 'desc')
             ->get();
 
-        return view('staff.pengajuan.histori_ditolak', compact('pengajuansDitolak'));
+        return view('staff.pengajuan.histori_ditolak', compact('pengajuans'));
     }
-    public function dashboard()
-    {
-        // Menunggu verifikasi TU
-        $totalMenunggu = PengajuanPkl::where('status', 'pending_tu')->count();
-
-        // Disetujui TU
-        $totalDisetujuiTu = PengajuanPkl::whereHas('verifikasi', function($q){
-            $q->where('level', 'tu')->where('status', 'approved');
-        })->count();
-
-        // Ditolak TU
-        $totalDitolak = PengajuanPkl::where('status', 'ditolak_tu')->count();
-
-        return view('staff.dashboard', compact('totalMenunggu', 'totalDisetujuiTu', 'totalDitolak'));
-    }
-
-
 }
