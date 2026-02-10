@@ -69,52 +69,64 @@
 
 
         {{-- ================= TIMELINE ================= --}}
-        @php
-            $status = $pengajuan->status;
+@php
+    $status = $pengajuan->status;
 
-            $steps = [
-                'pengajuan'  => true,
-                'verifikasi' => in_array($status, ['pending_kaprodi', 'disetujui']),
-                'berjalan'   => $status === 'disetujui',
-                'selesai'    => false,
-            ];
-        @endphp
+    $timeline = [
+        'pengajuan' => [
+            'label' => 'Pengajuan',
+            'active' => true,
+        ],
+        'verifikasi_tu' => [
+            'label' => 'Verifikasi TU',
+            'active' => in_array($status, [
+                'diverifikasi_tu',
+                'pending_kaprodi',
+                'disetujui'
+            ]),
+        ],
+        'kaprodi' => [
+            'label' => 'Persetujuan Kaprodi',
+            'active' => in_array($status, [
+                'pending_kaprodi',
+                'disetujui'
+            ]),
+        ],
+        'selesai' => [
+            'label' => 'Selesai',
+            'active' => $status === 'disetujui',
+        ],
+    ];
+@endphp
 
-        <div class="p-6 bg-white border border-green-100 shadow rounded-xl">
-            <h3 class="mb-6 text-lg font-semibold text-green-800">
-                Timeline Pengajuan PKL
-            </h3>
+<div class="p-6 bg-white border border-green-100 shadow rounded-xl">
+    <h3 class="mb-6 text-lg font-semibold text-green-800">
+        Timeline Pengajuan PKL
+    </h3>
 
-            <div class="relative flex justify-between">
-                <div class="absolute left-0 right-0 h-1 bg-green-100 top-4"></div>
+    <div class="relative flex justify-between">
+        <div class="absolute left-0 right-0 h-1 bg-green-100 top-4"></div>
 
-                @foreach ([
-                    'pengajuan'  => 'Pengajuan',
-                    'verifikasi' => 'Verifikasi TU',
-                    'berjalan'   => 'Disetujui Kaprodi',
-                    'selesai'    => 'Selesai'
-                ] as $key => $label)
+        @foreach ($timeline as $step)
+            <div class="relative z-10 flex flex-col items-center w-1/4">
+                <div class="
+                    w-9 h-9 flex items-center justify-center rounded-full font-semibold
+                    {{ $step['active']
+                        ? 'bg-green-600 text-white ring-4 ring-green-100'
+                        : 'bg-gray-300 text-gray-600'
+                    }}">
+                    {{ $step['active'] ? '✓' : $loop->iteration }}
+                </div>
 
-                    @php $active = $steps[$key]; @endphp
-
-                    <div class="relative z-10 flex flex-col items-center w-1/4">
-                        <div class="
-                            w-9 h-9 flex items-center justify-center rounded-full font-semibold
-                            {{ $active
-                                ? 'bg-green-600 text-white ring-4 ring-green-100'
-                                : 'bg-gray-300 text-gray-600'
-                            }}">
-                            {{ $active ? '✓' : $loop->iteration }}
-                        </div>
-
-                        <span class="mt-2 text-sm font-medium
-                            {{ $active ? 'text-green-700' : 'text-gray-500' }}">
-                            {{ $label }}
-                        </span>
-                    </div>
-                @endforeach
+                <span class="mt-2 text-sm font-medium
+                    {{ $step['active'] ? 'text-green-700' : 'text-gray-500' }}">
+                    {{ $step['label'] }}
+                </span>
             </div>
-        </div>
+        @endforeach
+    </div>
+</div>
+
 
         {{-- ================= STATUS ================= --}}
         <div class="p-6 bg-white border border-green-100 shadow rounded-xl">

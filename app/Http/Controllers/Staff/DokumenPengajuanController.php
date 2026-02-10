@@ -14,20 +14,27 @@ class DokumenPengajuanController extends Controller
      * ===============================
      */
     public function valid($id)
-    {
-        $dokumen = DokumenPengajuan::with('pengajuan')->findOrFail($id);
+{
+    $dokumen = DokumenPengajuan::with('pengajuan')->findOrFail($id);
 
-        if ($dokumen->pengajuan->status !== 'pending') {
-            return back()->with(
+    if ($dokumen->pengajuan->status !== 'pending_tu') {
+        return redirect()
+            ->back()
+            ->withFragment('dokumen-' . $dokumen->id)
+            ->with(
                 'warning',
                 'Dokumen tidak dapat diverifikasi karena verifikasi TU telah selesai.'
             );
-        }
-
-        $dokumen->tandaiValid();
-
-        return back()->with('success', 'Dokumen berhasil ditandai VALID.');
     }
+
+    $dokumen->tandaiValid();
+
+    return redirect()
+        ->back()
+        ->withFragment('dokumen-' . $dokumen->id)
+        ->with('success', 'Dokumen berhasil ditandai VALID.');
+}
+
 
     /**
      * ===============================
@@ -35,22 +42,29 @@ class DokumenPengajuanController extends Controller
      * ===============================
      */
     public function invalid(Request $request, $id)
-    {
-        $request->validate([
-            'catatan' => 'required|string|max:255',
-        ]);
+{
+    $request->validate([
+        'catatan' => 'required|string|max:255',
+    ]);
 
-        $dokumen = DokumenPengajuan::with('pengajuan')->findOrFail($id);
+    $dokumen = DokumenPengajuan::with('pengajuan')->findOrFail($id);
 
-        if ($dokumen->pengajuan->status !== 'pending') {
-            return back()->with(
+    if ($dokumen->pengajuan->status !== 'pending_tu') {
+        return redirect()
+            ->back()
+            ->withFragment('dokumen-' . $dokumen->id)
+            ->with(
                 'warning',
                 'Dokumen tidak dapat diverifikasi karena verifikasi TU telah selesai.'
             );
-        }
-
-        $dokumen->tandaiInvalid($request->catatan);
-
-        return back()->with('warning', 'Dokumen ditandai INVALID.');
     }
+
+    $dokumen->tandaiInvalid($request->catatan);
+
+    return redirect()
+        ->back()
+        ->withFragment('dokumen-' . $dokumen->id)
+        ->with('warning', 'Dokumen ditandai INVALID.');
+}
+
 }

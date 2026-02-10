@@ -21,7 +21,11 @@ class PengajuanPklController extends Controller
         abort_if(!$mahasiswa, 403);
 
         $pengajuanAktif = PengajuanPkl::where('id_mhs', $mahasiswa->id)
-            ->whereIn('status', ['draft', 'pending'])
+            ->whereIn('status', [
+                'pending_tu',
+                'diverifikasi_tu',
+                'pending_kaprodi'
+            ])
             ->exists();
 
         if ($pengajuanAktif) {
@@ -64,7 +68,7 @@ class PengajuanPklController extends Controller
             $pengajuan = PengajuanPkl::create([
                 'id_mhs'        => $mahasiswa->id,
                 'id_tempat_pkl'=> $tempatPkl->id,
-                'status'        => 'pending',
+                'status'        => 'pending_tu',
                 'tgl_pengajuan' => now(),
             ]);
 
@@ -149,7 +153,7 @@ class PengajuanPklController extends Controller
 
             // Kembalikan status pengajuan ke TU
             $pengajuan->update([
-                'status'      => 'pending',
+                'status'      => 'pending_tu',
                 'catatan_tu'  => null,
             ]);
         });

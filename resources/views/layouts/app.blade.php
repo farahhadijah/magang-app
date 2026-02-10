@@ -78,7 +78,7 @@
     </div>
 
 </div>
-{{-- script --}}
+{{-- script kedepannya akan dipindah sementara dibiarkan disini dulu--}}
     <script>
     function submitReview(event, id) {
     event.preventDefault();
@@ -122,6 +122,20 @@ function openModal(id) {
 function closeModal(id) {
     document.getElementById('modal-' + id).classList.add('hidden');
 }
+
+// ======================menangani refresh halaman============
+document.addEventListener("DOMContentLoaded", function () {
+        if (localStorage.getItem("scrollPosition")) {
+            window.scrollTo(0, localStorage.getItem("scrollPosition"));
+            localStorage.removeItem("scrollPosition");
+        }
+
+        document.querySelectorAll("form").forEach(form => {
+            form.addEventListener("submit", function () {
+                localStorage.setItem("scrollPosition", window.scrollY);
+            });
+        });
+    });
 
     </script>
 

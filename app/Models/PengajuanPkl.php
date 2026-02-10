@@ -48,10 +48,10 @@ public function verifikasi()
 
     /* ================= HELPER TU ================= */
 
-    public function bisaDiverifikasiTu(): bool
-    {
-        return $this->status === 'pending';
-    }
+   public function bisaDiverifikasiTu(): bool
+{
+    return $this->status === 'pending_tu';
+}
 
     public function adaDokumenInvalid(): bool
 {
@@ -69,7 +69,7 @@ public function verifikasi()
 
     public function bisaDisetujuiTu(): bool
 {
-    return $this->status === 'pending'
+    return $this->status === 'pending_tu'
         && $this->semuaDokumenValid();
 }
 
@@ -80,15 +80,14 @@ public function sudahDiverifikasiTu(): bool
 
     public function bisaDikembalikanKeMahasiswa(): bool
 {
-    return $this->status === 'pending'
+    return $this->status === 'pending_tu'
         && $this->adaDokumenInvalid();
 }
-
     /* ================= QUERY SCOPE ================= */
 
     public function scopeUntukTu($query)
 {
-    return $query->whereIn('status', ['pending']);
+    return $query->where('status', 'pending_tu');
 }
 public function statusLabel(): array
 {
@@ -97,9 +96,17 @@ public function statusLabel(): array
             'text' => 'Draft',
             'class' => 'text-gray-700 bg-gray-100',
         ],
-        'pending' => [
+        'pending_tu' => [
             'text' => 'Menunggu Verifikasi TU',
             'class' => 'text-amber-800 bg-amber-100',
+        ],
+        'pending_kaprodi' => [
+            'text' => 'Menunggu Verifikasi Kaprodi',
+            'class' => 'text-amber-800 bg-amber-100',
+        ],
+        'diverifikasi_tu' => [
+            'text' => 'Terverifikasi TU',
+            'class' => 'text-indigo-800 bg-indigo-100',
         ],
         'ditolak_tu' => [
             'text' => 'Ditolak TU',

@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\PengajuanPkl;
-use App\Models\User;
 
 class Verifikasi extends Model
 {
@@ -19,7 +17,7 @@ class Verifikasi extends Model
         'tgl_verifikasi',
     ];
 
-    public function pengajuanPkl()
+    public function pengajuan()
     {
         return $this->belongsTo(PengajuanPkl::class, 'id_pengajuan_pkl');
     }
@@ -29,5 +27,3 @@ class Verifikasi extends Model
         return $this->belongsTo(User::class, 'id_user');
     }
 }
-
-?>

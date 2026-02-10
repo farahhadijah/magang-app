@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanPkl;
+use App\Models\Verifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +22,7 @@ class PengajuanPklController extends Controller
                 'tempatPkl',
                 'dokumenPengajuan'
             ])
-            ->where('status', 'pending')
+            ->where('status', 'pending_tu')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -62,11 +63,20 @@ class PengajuanPklController extends Controller
         }
 
         DB::transaction(function () use ($pengajuan) {
-            $pengajuan->update([
-                'status'     => 'diverifikasi_tu',
-                'catatan_tu' => null,
-            ]);
+
+    $pengajuan->update([
+        'status' => 'diverifikasi_tu',
+        'catatan_tu' => null,
+    ]);
+
+    $pengajuan->verifikasi()->create([
+        'id_user' => auth()->user()->id, // PASTI users.id
+        'level' => 'tu',
+        'status' => 'approved',
+        'tgl_verifikasi' => now(),
+    ]);
         });
+
 
         return redirect()
             ->route('staff.pengajuan.index')
@@ -89,7 +99,7 @@ class PengajuanPklController extends Controller
 
         $pengajuan = PengajuanPkl::with('dokumenPengajuan')->findOrFail($id);
 
-        if ($pengajuan->status !== 'pending') {
+        if ($pengajuan->status !== 'pending_tu') {
             return back()->with(
                 'warning',
                 'Pengajuan tidak dapat dikembalikan karena sudah diproses.'

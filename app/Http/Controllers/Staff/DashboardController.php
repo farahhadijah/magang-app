@@ -7,18 +7,17 @@ use App\Models\PengajuanPkl;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        $totalMenunggu = PengajuanPkl::where('status', 'pending')->count();
+   public function index()
+{
+    $totalMenunggu = PengajuanPkl::where('status', 'pending_tu')->count();
+    $totalSelesaiTu = PengajuanPkl::where('status', 'diverifikasi_tu')->count();
+    $totalDitolak = PengajuanPkl::where('status', 'ditolak_tu')->count();
 
-        $totalSelesaiTu = PengajuanPkl::where('status', 'diverifikasi_tu')->count();
+    return view('staff.dashboard', compact(
+        'totalMenunggu',
+        'totalSelesaiTu',
+        'totalDitolak'
+    ));
+}
 
-        $totalDitolak = PengajuanPkl::where('status', 'ditolak_tu')->count();
-
-        return view('staff.dashboard', compact(
-            'totalMenunggu',
-            'totalSelesaiTu',
-            'totalDitolak'
-        ));
-    }
 }

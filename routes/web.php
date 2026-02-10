@@ -16,10 +16,6 @@ use App\Http\Controllers\Auth\FirstLoginController;
 
 // ADMIN
 use App\Http\Controllers\Admin\UserController;
-// STAFF TU
-use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanPKLController;
-use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
-use App\Http\Controllers\Staff\DokumenPengajuanController;
 // KAPRODI
 use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanPKLController;
 use App\Http\Controllers\Kaprodi\MahasiswaController;
@@ -158,6 +154,10 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
 | STAFF TU AREA
 |--------------------------------------------------------------------------
 */
+// STAFF TU
+use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanPKLController;
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Staff\DokumenPengajuanController;
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
     ->name('staff.')

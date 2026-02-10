@@ -23,7 +23,8 @@
             </h3>
 
             @forelse ($pengajuan->dokumenPengajuan as $dokumen)
-                <div class="p-4 mb-4 border rounded-lg
+                <div id="dokumen-{{ $dokumen->id }}"
+                class="p-4 mb-4 border rounded-lg
                     {{ $dokumen->isValid() ? 'border-green-300 bg-green-50'
                     : ($dokumen->isInvalid() ? 'border-red-300 bg-red-50'
                     : 'border-amber-300 bg-amber-50') }}">
@@ -59,7 +60,7 @@
                             <form method="POST"
                                   action="{{ route('staff.dokumen.valid', $dokumen->id) }}">
                                 @csrf
-                                <button class="px-4 py-1.5 text-sm text-white bg-green-600 rounded">
+                                <button id="tombol" class="px-4 py-1.5 text-sm text-white bg-green-600 rounded">
                                     Valid
                                 </button>
                             </form>

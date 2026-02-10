@@ -33,9 +33,8 @@ class DashboardController extends Controller
             'pengajuan'  => (bool) $pengajuan,
 
             'verifikasi' => in_array($status, [
-                'pending',
-                'ditolak_tu',
-                'ditolak_kaprodi',
+                'diverifikasi_tu',
+                'pending_kaprodi',
                 'disetujui',
             ]),
 
