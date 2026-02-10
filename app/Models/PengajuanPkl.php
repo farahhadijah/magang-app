@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\Pkl;
+use App\Models\Verifikasi;
 use Illuminate\Database\Eloquent\Model;
 
 class PengajuanPkl extends Model
@@ -33,6 +34,17 @@ class PengajuanPkl extends Model
     {
         return $this->hasMany(DokumenPengajuan::class, 'id_pengajuan_pkl');
     }
+    public function pkl()
+{
+    return $this->hasOne(Pkl::class, 'id_pengajuan_pkl');
+}
+public function verifikasi()
+{
+    return $this->hasMany(
+        Verifikasi::class,
+        'id_pengajuan_pkl'
+    );
+}
 
     /* ================= HELPER TU ================= */
 
@@ -61,6 +73,11 @@ class PengajuanPkl extends Model
         && $this->semuaDokumenValid();
 }
 
+public function sudahDiverifikasiTu(): bool
+{
+    return $this->status === 'diverifikasi_tu';
+}
+
     public function bisaDikembalikanKeMahasiswa(): bool
 {
     return $this->status === 'pending'
@@ -71,6 +88,32 @@ class PengajuanPkl extends Model
 
     public function scopeUntukTu($query)
 {
-    return $query->where('status', 'pending');
+    return $query->whereIn('status', ['pending']);
 }
+public function statusLabel(): array
+{
+    return match ($this->status) {
+        'draft' => [
+            'text' => 'Draft',
+            'class' => 'text-gray-700 bg-gray-100',
+        ],
+        'pending' => [
+            'text' => 'Menunggu Verifikasi TU',
+            'class' => 'text-amber-800 bg-amber-100',
+        ],
+        'ditolak_tu' => [
+            'text' => 'Ditolak TU',
+            'class' => 'text-red-800 bg-red-100',
+        ],
+        'disetujui' => [
+            'text' => 'Disetujui',
+            'class' => 'text-green-800 bg-green-100',
+        ],
+        default => [
+            'text' => ucfirst($this->status),
+            'class' => 'text-gray-800 bg-gray-100',
+        ],
+    };
+}
+
 }

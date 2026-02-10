@@ -21,7 +21,7 @@ class PengajuanPklController extends Controller
                 'tempatPkl',
                 'dokumenPengajuan'
             ])
-            ->whereIn('status', ['pending', 'draft']) // hanya yang bisa diverifikasi TU
+            ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -46,42 +46,40 @@ class PengajuanPklController extends Controller
 
     /**
      * ===============================
-     * APPROVE OLEH TU
+     * SELESAIKAN VERIFIKASI TU
      * ===============================
-     * Syarat:
-     * - status = pending
-     * - semua dokumen VALID
      */
     public function approve($id)
     {
         $pengajuan = PengajuanPkl::with('dokumenPengajuan')->findOrFail($id);
 
-        if ($pengajuan->status !== 'pending') {
-            return back()->with('warning', 'Pengajuan tidak bisa disetujui karena status bukan pending.');
-        }
-
+        // Proteksi ulang
         if (! $pengajuan->bisaDisetujuiTu()) {
-            return back()->with('warning', 'Pengajuan belum memenuhi syarat untuk disetujui.');
+            return back()->with(
+                'warning',
+                'Pengajuan tidak dapat diverifikasi atau sudah diproses.'
+            );
         }
 
         DB::transaction(function () use ($pengajuan) {
             $pengajuan->update([
-                'status' => 'disetujui', // sesuai alur Sibolang, TU setuju langsung disetujui
+                'status'     => 'diverifikasi_tu',
+                'catatan_tu' => null,
             ]);
         });
 
         return redirect()
             ->route('staff.pengajuan.index')
-            ->with('success', 'Pengajuan PKL berhasil disetujui TU.');
+            ->with(
+                'success',
+                'Verifikasi administrasi selesai. Pengajuan diteruskan ke Kaprodi.'
+            );
     }
 
     /**
      * ===============================
-     * REJECT / KEMBALIKAN KE MAHASISWA
+     * KEMBALIKAN KE MAHASISWA
      * ===============================
-     * Syarat:
-     * - status = pending
-     * - ada dokumen INVALID
      */
     public function reject(Request $request, $id)
     {
@@ -92,11 +90,17 @@ class PengajuanPklController extends Controller
         $pengajuan = PengajuanPkl::with('dokumenPengajuan')->findOrFail($id);
 
         if ($pengajuan->status !== 'pending') {
-            return back()->with('warning', 'Pengajuan tidak dapat dikembalikan karena status bukan pending.');
+            return back()->with(
+                'warning',
+                'Pengajuan tidak dapat dikembalikan karena sudah diproses.'
+            );
         }
 
         if (! $pengajuan->bisaDikembalikanKeMahasiswa()) {
-            return back()->with('warning', 'Pengajuan tidak dapat dikembalikan karena semua dokumen valid.');
+            return back()->with(
+                'warning',
+                'Pengajuan tidak dapat dikembalikan karena tidak ada dokumen invalid.'
+            );
         }
 
         DB::transaction(function () use ($pengajuan, $request) {
@@ -108,7 +112,10 @@ class PengajuanPklController extends Controller
 
         return redirect()
             ->route('staff.pengajuan.index')
-            ->with('warning', 'Pengajuan PKL dikembalikan ke mahasiswa untuk perbaikan.');
+            ->with(
+                'warning',
+                'Pengajuan PKL dikembalikan ke mahasiswa untuk perbaikan.'
+            );
     }
 
     /**
@@ -122,7 +129,7 @@ class PengajuanPklController extends Controller
                 'mahasiswa',
                 'tempatPkl'
             ])
-            ->where('status', 'ditolak_tu') // sesuaikan dengan alur Sibolang
+            ->where('status', 'ditolak_tu')
             ->orderBy('updated_at', 'desc')
             ->get();
 

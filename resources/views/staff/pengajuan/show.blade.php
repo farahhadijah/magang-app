@@ -94,16 +94,30 @@
                 <form method="POST"
                       action="{{ route('staff.pengajuan.approve', $pengajuan->id) }}">
                     @csrf
-                    <button class="px-6 py-2 text-white bg-green-600 rounded">
-                        Setujui Verifikasi TU
+                    @if ($pengajuan->bisaDisetujuiTu())
+                    <button class="px-3 py-2 text-white bg-green-800 rounded-sm">
+                        Selesaikan Verifikasi Administrasi
+                    </button>
+                @elseif ($pengajuan->sudahDiverifikasiTu())
+                    <span class="text-sm italic text-gray-500">
+                        ✔ Verifikasi administrasi telah selesai
+                    </span>
+                @endif
+                </form>
+            @elseif ($pengajuan->bisaDikembalikanKeMahasiswa())
+                <form method="POST"
+                    action="{{ route('staff.pengajuan.reject', $pengajuan->id) }}"
+                    class="space-y-3">
+                    @csrf
+                    <textarea name="catatan"
+                            required
+                            rows="3"
+                            placeholder="Catatan untuk mahasiswa (wajib)"
+                            class="w-full p-2 text-sm border rounded"></textarea>
+                    <button class="px-6 py-2 text-white bg-red-600 rounded">
+                        Kembalikan ke Mahasiswa
                     </button>
                 </form>
-
-            @elseif ($pengajuan->bisaDikembalikanKeMahasiswa())
-                <p class="text-sm text-red-700">
-                    Terdapat dokumen INVALID. Mahasiswa harus memperbaiki dokumen.
-                </p>
-
             @else
                 <p class="text-sm text-gray-600">
                     Verifikasi belum selesai.

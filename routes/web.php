@@ -16,14 +16,10 @@ use App\Http\Controllers\Auth\FirstLoginController;
 
 // ADMIN
 use App\Http\Controllers\Admin\UserController;
-
-
-
-
-
 // STAFF TU
 use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanPKLController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Staff\DokumenPengajuanController;
 // KAPRODI
 use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanPKLController;
 use App\Http\Controllers\Kaprodi\MahasiswaController;
@@ -172,6 +168,15 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         // Histori pengajuan ditolak → harus DI ATAS {id}
         Route::get('/pengajuan/histori-ditolak', [StaffPengajuanPKLController::class, 'historiDitolak'])
             ->name('pengajuan.histori_ditolak');
+        Route::post(
+            '/dokumen/{id}/valid',
+            [DokumenPengajuanController::class, 'valid']
+        )->name('dokumen.valid');
+
+        Route::post(
+            '/dokumen/{id}/invalid',
+            [DokumenPengajuanController::class, 'invalid']
+        )->name('dokumen.invalid');
         // Daftar pengajuan TU
         Route::get('/pengajuan', [StaffPengajuanPKLController::class, 'index'])
             ->name('pengajuan.index');

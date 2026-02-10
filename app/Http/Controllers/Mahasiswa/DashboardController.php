@@ -30,17 +30,17 @@ class DashboardController extends Controller
             $status = $pengajuan?->status;
 
             $timeline = [
-                'pengajuan'  => (bool) $pengajuan,
+            'pengajuan'  => (bool) $pengajuan,
 
-                // status sudah diproses staff
-                'verifikasi' => in_array($status, ['disetujui', 'ditolak']),
+            'verifikasi' => in_array($status, [
+                'pending',
+                'ditolak_tu',
+                'ditolak_kaprodi',
+                'disetujui',
+            ]),
 
-                // PKL sudah dibuat
-                'berjalan'   => in_array($status, ['berjalan', 'selesai']),
-
-                // PKL selesai
-                'selesai'    => $status === 'selesai',
-            ];
+    'selesai' => $status === 'disetujui',
+];
 
 
             return view('mahasiswa.dashboard', compact('pengajuan', 'timeline'));

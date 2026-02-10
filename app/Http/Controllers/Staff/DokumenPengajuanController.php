@@ -15,7 +15,14 @@ class DokumenPengajuanController extends Controller
      */
     public function valid($id)
     {
-        $dokumen = DokumenPengajuan::findOrFail($id);
+        $dokumen = DokumenPengajuan::with('pengajuan')->findOrFail($id);
+
+        if ($dokumen->pengajuan->status !== 'pending') {
+            return back()->with(
+                'warning',
+                'Dokumen tidak dapat diverifikasi karena verifikasi TU telah selesai.'
+            );
+        }
 
         $dokumen->tandaiValid();
 
@@ -33,7 +40,14 @@ class DokumenPengajuanController extends Controller
             'catatan' => 'required|string|max:255',
         ]);
 
-        $dokumen = DokumenPengajuan::findOrFail($id);
+        $dokumen = DokumenPengajuan::with('pengajuan')->findOrFail($id);
+
+        if ($dokumen->pengajuan->status !== 'pending') {
+            return back()->with(
+                'warning',
+                'Dokumen tidak dapat diverifikasi karena verifikasi TU telah selesai.'
+            );
+        }
 
         $dokumen->tandaiInvalid($request->catatan);
 

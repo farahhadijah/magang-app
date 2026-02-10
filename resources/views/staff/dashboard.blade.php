@@ -21,14 +21,15 @@
                 </p>
             </div>
 
-            <!-- Disetujui TU -->
+            <!-- Disetujui (Final) -->
+            <!-- Selesai Diverifikasi TU -->
             <div class="p-6 border border-green-300 shadow-sm bg-green-50 rounded-xl">
                 <h3 class="text-lg font-semibold text-green-800">
-                    Disetujui TU
+                    Selesai Diverifikasi TU
                 </h3>
 
                 <p class="mt-2 text-3xl font-bold text-green-900">
-                    {{ $totalDisetujuiTu }}
+                    {{ $totalSelesaiTu }}
                 </p>
             </div>
 
