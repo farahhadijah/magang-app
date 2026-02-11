@@ -7,8 +7,15 @@ use App\Models\Pkl;
 
 class SuratPengantar extends Model
 {
-    public $timestamps = true;
     protected $table = 'surat_pengantar';
+
+    protected $fillable = [
+        'id_pkl',
+        'no_surat',
+        'tgl_terbit',
+        'path_file',
+    ];
+    public $timestamps = true;
 
     public function pkl()
     {

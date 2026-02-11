@@ -1,3 +1,4 @@
+
 <x-app-layout>
 
     <x-slot name="title">
@@ -246,13 +247,28 @@
                             </button>
                         </form>
                     @endif
-
                 </div>
             @empty
                 <p class="text-sm text-gray-500">
                     Tidak ada dokumen terunggah.
                 </p>
             @endforelse
+
+            {{-- ================= SURAT PENGANTAR ================= --}}
+            @if($pengajuan->pkl && $pengajuan->pkl->suratPengantar)
+                <div class="p-4 mt-6 border border-green-200 bg-green-50 rounded-xl">
+                    <h4 class="mb-3 font-semibold text-green-800">
+                        📄 Surat Pengantar PKL
+                    </h4>
+
+                    <a href="{{ asset('storage/' . $pengajuan->pkl->suratPengantar->path_file) }}"
+                    target="_blank"
+                    class="inline-block px-5 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        Download Surat Pengantar
+                    </a>
+                </div>
+            @endif
+
         </div>
 
 

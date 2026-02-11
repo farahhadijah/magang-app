@@ -9,6 +9,9 @@ use App\Models\PengajuanPkl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\SuratPengantar;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class PengajuanPklController extends Controller
 {
@@ -76,58 +79,116 @@ class PengajuanPklController extends Controller
     /* ================= APPROVE ================= */
 
     public function approve(Request $request, $id)
-    {
-        $request->validate([
-            'id_dosen' => 'required|exists:dosen,id',
+{
+    $request->validate([
+        'id_dosen' => 'required|exists:dosen,id',
+    ]);
+
+    $pengajuan = PengajuanPkl::with([
+        'mahasiswa.prodi',
+        'tempatPkl',
+        'pkl'
+    ])->findOrFail($id);
+
+    if (!$pengajuan->bisaDiverifikasiKaprodi()) {
+        return back()->with('warning', 'Pengajuan sudah diproses.');
+    }
+
+    if ($pengajuan->pkl) {
+        return back()->with('warning', 'PKL sudah dibuat sebelumnya.');
+    }
+
+    $dosen = \App\Models\Dosen::where('id', $request->id_dosen)
+        ->where('is_active', 1)
+        ->first();
+
+    if (!$dosen) {
+        return back()->with('warning', 'Dosen tidak valid.');
+    }
+
+    DB::transaction(function () use ($pengajuan, $request, $dosen) {
+
+        /* ================= VERIFIKASI ================= */
+
+        Verifikasi::create([
+            'id_pengajuan_pkl' => $pengajuan->id,
+            'id_user' => auth()->user()->getKey(),
+            'level'            => 'kaprodi',
+            'status'           => 'approved',
+            'catatan'          => null,
+            'tgl_verifikasi'   => now(),
         ]);
 
-        $pengajuan = PengajuanPkl::with('pkl')->findOrFail($id);
+        $pengajuan->update([
+            'status' => 'disetujui',
+        ]);
 
-        if (!$pengajuan->bisaDiverifikasiKaprodi()) {
-            return back()->with('warning', 'Pengajuan sudah diproses.');
-        }
+        /* ================= BUAT PKL ================= */
 
-        // Proteksi jika PKL sudah ada
-        if ($pengajuan->pkl) {
-            return back()->with('warning', 'PKL sudah dibuat sebelumnya.');
-        }
-        $dosen = \App\Models\Dosen::where('id', $request->id_dosen)
+        $pkl = Pkl::create([
+            'id_pengajuan_pkl' => $pengajuan->id,
+            'id_dosen'         => $request->id_dosen,
+            'tgl_mulai'        => now(),
+            'tgl_selesai'      => now()->addDays(60),
+            'status'           => 'aktif',
+        ]);
+
+        /* ================= GENERATE NOMOR SURAT ================= */
+
+        $bulanRomawi = [
+            1 => 'I','II','III','IV','V','VI',
+            'VII','VIII','IX','X','XI','XII'
+        ];
+
+        $urutan = SuratPengantar::count() + 1;
+
+        $noSurat = sprintf(
+            "%03d/UNISLA/PKL/%s/%s",
+            $urutan,
+            $bulanRomawi[now()->month],
+            now()->year
+        );
+
+        /* ================= AMBIL DATA KAPRODI ================= */
+
+        $kaprodi = \App\Models\Staff::where('jabatan', 'kaprodi')
             ->where('is_active', 1)
             ->first();
 
-        if (!$dosen) {
-            return back()->with('warning', 'Dosen tidak valid.');
-        }
-        DB::transaction(function () use ($pengajuan, $request) {
+        /* ================= GENERATE PDF ================= */
 
-            // Simpan verifikasi kaprodi
-            Verifikasi::create([
-                'id_pengajuan_pkl' => $pengajuan->id,
-                'id_user' => auth()->user()->getKey(),
-                'level'            => 'kaprodi',
-                'status'           => 'approved',
-                'catatan'          => null,
-                'tgl_verifikasi'   => now(),
-            ]);
+        $pdf = Pdf::loadView('surat.pengantar', [
+            'pengajuan' => $pengajuan,
+            'pkl'       => $pkl,
+            'noSurat'   => $noSurat,
+            'kaprodi'   => $kaprodi,
+        ])->setPaper('A4', 'portrait');
 
-            // Update status pengajuan
-            $pengajuan->update([
-                'status' => 'disetujui',
-            ]);
+        $filename = 'surat_pkl_' . $pkl->id . '.pdf';
+        $path = 'surat/' . $filename;
 
-            // Buat PKL aktif
-            Pkl::create([
-                'id_pengajuan_pkl' => $pengajuan->id,
-                'id_dosen'         => $request->id_dosen,
-                'tgl_mulai'        => now(),
-                'tgl_selesai'      => now()->addDays( ),
-                'status'           => 'aktif',
-            ]);
-        });
+        // pastikan folder ada
+        // if (!Storage::exists('public/surat')) {
+        //     Storage::makeDirectory('public/surat');
+        // }
 
-        return redirect()->route('kaprodi.pengajuan.index')
-            ->with('success', 'Pengajuan disetujui dan PKL diaktifkan.');
-    }
+        Storage::disk('public')->put($path, $pdf->output());
+
+
+        /* ================= SIMPAN KE DATABASE ================= */
+
+        SuratPengantar::create([
+            'id_pkl'     => $pkl->id,
+            'no_surat'   => $noSurat,
+            'tgl_terbit' => now(),
+            'path_file'  => $path,
+        ]);
+    });
+
+    return redirect()->route('kaprodi.pengajuan.index')
+        ->with('success', 'Pengajuan disetujui, PKL aktif, dan Surat berhasil dibuat.');
+}
+
 
     /* ================= REJECT ================= */
 

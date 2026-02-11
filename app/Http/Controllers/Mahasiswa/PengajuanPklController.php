@@ -101,20 +101,22 @@ class PengajuanPklController extends Controller
      * Status pengajuan PKL mahasiswa
      */
     public function status()
-    {
-        $mahasiswa = Auth::user()->mahasiswa;
-        abort_if(!$mahasiswa, 403);
+{
+    $mahasiswa = Auth::user()->mahasiswa;
+    abort_if(!$mahasiswa, 403);
 
-        $pengajuan = PengajuanPkl::with([
-                'tempatPkl',
-                'dokumenPengajuan'
-            ])
-            ->where('id_mhs', $mahasiswa->id)
-            ->latest()
-            ->first();
+    $pengajuan = PengajuanPkl::with([
+            'tempatPkl',
+            'dokumenPengajuan',
+            'pkl.suratPengantar'   // 🔥 INI YANG KURANG
+        ])
+        ->where('id_mhs', $mahasiswa->id)
+        ->latest()
+        ->first();
 
-        return view('mahasiswa.status-pengajuan', compact('pengajuan'));
-    }
+    return view('mahasiswa.status-pengajuan', compact('pengajuan'));
+}
+
 
     /**
      * 🔁 Upload ulang dokumen INVALID
