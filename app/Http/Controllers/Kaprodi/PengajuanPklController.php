@@ -120,7 +120,7 @@ class PengajuanPklController extends Controller
                 'id_pengajuan_pkl' => $pengajuan->id,
                 'id_dosen'         => $request->id_dosen,
                 'tgl_mulai'        => now(),
-                'tgl_selesai'      => now()->addDays(30),
+                'tgl_selesai'      => now()->addDays( ),
                 'status'           => 'aktif',
             ]);
         });
