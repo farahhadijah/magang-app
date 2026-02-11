@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class PengajuanPklController extends Controller
 {
+    
+
     /**
      * ===============================
      * LIST PENGAJUAN UNTUK TU
@@ -64,18 +66,19 @@ class PengajuanPklController extends Controller
 
         DB::transaction(function () use ($pengajuan) {
 
-    $pengajuan->update([
-        'status' => 'diverifikasi_tu',
-        'catatan_tu' => null,
-    ]);
+        $pengajuan->update([
+            'status' => 'pending_kaprodi',
+            'catatan_tu' => null,
+        ]);
 
-    $pengajuan->verifikasi()->create([
-        'id_user' => auth()->user()->id, // PASTI users.id
-        'level' => 'tu',
-        'status' => 'approved',
-        'tgl_verifikasi' => now(),
-    ]);
-        });
+        $pengajuan->verifikasi()->create([
+            'id_user' => auth()->user()->getKey(),
+            'level'          => 'tu',
+            'status'         => 'approved',
+            'tgl_verifikasi' => now(),
+        ]);
+    });
+
 
 
         return redirect()
@@ -114,11 +117,21 @@ class PengajuanPklController extends Controller
         }
 
         DB::transaction(function () use ($pengajuan, $request) {
-            $pengajuan->update([
-                'status'     => 'ditolak_tu',
-                'catatan_tu' => $request->catatan,
-            ]);
-        });
+
+        $pengajuan->update([
+            'status'     => 'ditolak_tu',
+            'catatan_tu' => $request->catatan,
+        ]);
+
+        $pengajuan->verifikasi()->create([
+            'id_user' => auth()->user()->getKey(),
+            'level'          => 'tu',
+            'status'         => 'rejected',
+            'catatan'        => $request->catatan,
+            'tgl_verifikasi' => now(),
+        ]);
+    });
+
 
         return redirect()
             ->route('staff.pengajuan.index')

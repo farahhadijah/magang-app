@@ -49,27 +49,26 @@ class User extends Authenticatable
         return $this->belongsTo(Staff::class, 'staff_id');
     }
     public function getNama()
-    {
-        switch ($this->role) {
+{
+    switch ($this->role) {
 
-            case 'mahasiswa':
-                return $this->mahasiswa?->nama;
+        case 'mahasiswa':
+            return $this->mahasiswa?->nama;
 
-            case 'dosen':
-                return $this->dosen?->nama;
+        case 'dosen':
+            return $this->dosen?->nama;
 
-            case 'admin':
-                return $this->admin?->nama;
+        case 'staff':
+        case 'staff_tu': // 🔥 TAMBAHKAN INI
+            return $this->staff?->nama;
 
-            case 'staff':
-                return $this->staff?->nama;
+        case 'kaprodi':
+            return $this->dosen?->nama; // biasanya kaprodi itu dosen
 
-            case 'kaprodi':
-                return $this->kaprodi?->nama;
-
-            default:
-                return $this->name; // fallback
-        }
+        default:
+            return $this->username;
     }
+}
+
 
 }

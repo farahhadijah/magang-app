@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\PengajuanPkl;
 use App\Models\User;
 use App\Models\Logbook;
+use App\Models\Dosen;
 use App\Models\SuratPengantar;
 use App\Models\LaporanAkhir;
 use App\Models\NilaiPkl;
@@ -28,9 +29,9 @@ class Pkl extends Model
     }
 
     public function dosen()
-    {
-        return $this->belongsTo(User::class, 'id_dosen');
-    }
+{
+    return $this->belongsTo(Dosen::class, 'id_dosen');
+}
     public function logbook()
     {
         return $this->hasMany(Logbook::class, 'id_pkl');

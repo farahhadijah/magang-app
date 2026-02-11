@@ -31,6 +31,22 @@
                 <p class="text-sm text-gray-500">Tidak ada dokumen terunggah.</p>
             @endif
         </div>
+        {{-- Riwayat Verifikasi TU --}}
+        @php
+            $verifikasiTu = $pengajuan->verifikasi
+                ->where('level', 'tu')
+                ->where('status', 'approved')
+                ->first();
+        @endphp
+
+        @if($verifikasiTu)
+            <div class="p-4 border rounded bg-blue-50">
+                <p><strong>Verifikasi TU:</strong></p>
+                <p>Oleh: {{ $verifikasiTu->user?->getNama() ?? '-' }}</p>
+                <p>Tanggal: {{ $verifikasiTu->tgl_verifikasi }}</p>
+            </div>
+        @endif
+
 
         {{-- Aksi Verifikasi Kaprodi --}}
         @if ($pengajuan->bisaDiverifikasiKaprodi())
@@ -43,7 +59,9 @@
                         <select name="id_dosen" required class="p-2 border rounded-md">
                             <option value="">-- Pilih Dosen Pembimbing --</option>
                             @foreach($dosenList as $d)
-                                <option value="{{ $d->id }}">{{ $d->nama }}</option>
+                                <option value="{{ $d->dosen->id }}">
+                                    {{ $d->dosen?->nama ?? $d->username }}
+                                </option>
                             @endforeach
                         </select>
 

@@ -16,10 +16,6 @@ use App\Http\Controllers\Auth\FirstLoginController;
 
 // ADMIN
 use App\Http\Controllers\Admin\UserController;
-// KAPRODI
-use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanPKLController;
-use App\Http\Controllers\Kaprodi\MahasiswaController;
-use App\Http\Controllers\Kaprodi\NilaiController;
 /*
 |--------------------------------------------------------------------------
 | ROOT & AUTH
@@ -214,6 +210,10 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
 | KAPRODI AREA
 |--------------------------------------------------------------------------
 */
+// KAPRODI
+use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanPKLController;
+use App\Http\Controllers\Kaprodi\MahasiswaController;
+use App\Http\Controllers\Kaprodi\NilaiController;
 Route::middleware(['auth','role:kaprodi'])
     ->prefix('kaprodi')
     ->name('kaprodi.')
