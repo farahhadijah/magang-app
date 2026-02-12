@@ -93,7 +93,9 @@
                     <input
                         type="text"
                         name="no_hp"
-                        placeholder="No HP / Telepon Instansi"
+                        placeholder="No Hp Instansi"
+                        pattern="^08[0-9]{7,14}$"
+                        title="Masukkan nomor telepon yang diawali 08, mis. 08123456789"
                         value="{{ old('no_hp') }}"
                         required
                         autocomplete="off"
@@ -108,10 +110,12 @@
                         </label>
 
                         <input
-                            type="text"
+                            type="url"
                             name="lokasi_maps"
                             value="{{ old('lokasi_maps') }}"
                             placeholder="https://maps.google.com/?q=Nama+Instansi"
+                            pattern=".*google\..*"
+                            title="Gunakan link Google Maps (salin link dari fitur Bagikan)."
                             required
                             autocomplete="off"
                             class="block w-full border-gray-300 rounded-lg focus:border-green-500 focus:ring-green-500"
@@ -158,7 +162,7 @@
                 {{-- Studi Tour --}}
                 <div>
                     <label class="block mb-1 font-medium text-green-800">
-                        Surat Studi Tour <span class="text-red-500">*</span>
+                        Sertifikat Studi Tour <span class="text-red-500">*</span>
                     </label>
                     <input type="file"
                         name="dokumen_studi_tour"

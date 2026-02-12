@@ -40,7 +40,15 @@ class LogbookController extends Controller
             ? $pkl->logbook()->orderBy('tgl', 'desc')->get()
             : collect();
 
-        return view('mahasiswa.logbook.index', compact('logbooks'));
+        // Cek apakah sudah ada logbook untuk hari ini
+        $hasToday = false;
+        if ($pkl) {
+            $hasToday = $pkl->logbook()
+                ->whereDate('tgl', Carbon::today())
+                ->exists();
+        }
+
+        return view('mahasiswa.logbook.index', compact('logbooks', 'hasToday'));
     }
 
     /**
@@ -56,6 +64,17 @@ class LogbookController extends Controller
             ->with('warning', 'Belum ada PKL aktif. Tidak bisa menambah logbook.');
     }
 
+    // Cegah membuat logbook lebih dari satu untuk hari ini
+    $hasToday = $pkl->logbook()
+        ->whereDate('tgl', Carbon::today())
+        ->exists();
+
+    if ($hasToday) {
+        return redirect()
+            ->route('mahasiswa.logbook.index')
+            ->with('warning', 'Anda sudah membuat logbook untuk hari ini.');
+    }
+
     return view('mahasiswa.logbook.create', compact('pkl'));
 }
 
@@ -66,7 +85,7 @@ class LogbookController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tgl'      => 'required|date',
+            'tgl'      => 'required|date|before_or_equal:today',
             'kegiatan' => 'required|string|max:2000',
         ]);
 
@@ -92,7 +111,7 @@ class LogbookController extends Controller
 
         // ✅ Cek duplikat tanggal
         $exists = Logbook::where('id_pkl', $pkl->id)
-            ->where('tgl', $request->tgl)
+            ->whereDate('tgl', $request->tgl)
             ->exists();
 
         if ($exists) {
@@ -139,7 +158,7 @@ class LogbookController extends Controller
         }
 
         $request->validate([
-            'tgl'      => 'required|date',
+            'tgl'      => 'required|date|before_or_equal:today',
             'kegiatan' => 'required|string|max:2000',
         ]);
 

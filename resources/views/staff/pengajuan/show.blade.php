@@ -92,19 +92,18 @@
         {{-- ================= AKSI FINAL TU ================= --}}
         <div class="p-6 bg-white border border-gray-200 rounded-lg">
             @if ($pengajuan->bisaDisetujuiTu())
-                <form method="POST"
-                      action="{{ route('staff.pengajuan.approve', $pengajuan->id) }}">
+                <form method="POST" action="{{ route('staff.pengajuan.approve', $pengajuan->id) }}">
                     @csrf
-                    @if ($pengajuan->bisaDisetujuiTu())
                     <button class="px-3 py-2 text-white bg-green-800 rounded-sm">
                         Selesaikan Verifikasi Administrasi
                     </button>
-                @elseif ($pengajuan->sudahDiverifikasiTu())
-                    <span class="text-sm italic text-gray-500">
-                        ✔ Verifikasi administrasi telah selesai
-                    </span>
-                @endif
                 </form>
+
+            @elseif ($pengajuan->sudahDiverifikasiTu())
+                <span class="text-sm italic text-gray-500">
+                    ✔ Verifikasi administrasi telah selesai
+                </span>
+
             @elseif ($pengajuan->bisaDikembalikanKeMahasiswa())
                 <form method="POST"
                     action="{{ route('staff.pengajuan.reject', $pengajuan->id) }}"
@@ -119,6 +118,7 @@
                         Kembalikan ke Mahasiswa
                     </button>
                 </form>
+
             @else
                 <p class="text-sm text-gray-600">
                     Verifikasi belum selesai.

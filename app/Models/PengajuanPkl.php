@@ -48,9 +48,14 @@ class PengajuanPkl extends Model
 
     public function bisaDiverifikasiTu(): bool
     {
+        // TU dapat melakukan verifikasi ketika status pengajuan masih pending_tu
+        // dan belum ada verifikasi TU yang APPROVED. Jika sebelumnya TU
+        // menolak (rejected), mahasiswa bisa mengupload ulang dokumen dan TU
+        // boleh memverifikasi lagi.
         return $this->status === 'pending_tu'
             && ! $this->verifikasi()
                 ->where('level', 'tu')
+                ->where('status', 'approved')
                 ->exists();
     }
 
@@ -78,6 +83,17 @@ class PengajuanPkl extends Model
     {
         return $this->bisaDiverifikasiTu()
             && $this->adaDokumenInvalid();
+    }
+
+    /**
+     * Apakah pengajuan telah disetujui/di-verifikasi oleh TU sebelumnya?
+     */
+    public function sudahDiverifikasiTu(): bool
+    {
+        return $this->verifikasi()
+            ->where('level', 'tu')
+            ->where('status', 'approved')
+            ->exists();
     }
 
     /* ================= HELPER KAPRODI ================= */

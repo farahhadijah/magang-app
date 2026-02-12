@@ -39,10 +39,15 @@
             {{-- Tanggal --}}
             <div>
                 <label class="block mb-1 text-sm font-medium text-green-800">Tanggal</label>
+                @php
+                    $maxDate = \Carbon\Carbon::parse($pkl->tgl_selesai)->lt(\Carbon\Carbon::today())
+                        ? $pkl->tgl_selesai
+                        : \Carbon\Carbon::today()->toDateString();
+                @endphp
                 <input type="date"
                         name="tgl"
                         min="{{ $pkl->tgl_mulai }}"
-                        max="{{ $pkl->tgl_selesai }}"
+                        max="{{ $maxDate }}"
                         value="{{ old('tgl') }}"
                         required
                         class="w-full px-3 py-2 border border-green-200 rounded-lg outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400">

@@ -45,12 +45,18 @@ class PengajuanPklController extends Controller
         $request->validate([
             'nama_tempat'  => 'required|string|max:150',
             'jenis_tempat' => 'required|in:Pemerintah,Sekolah,PT,CV',
-            'no_hp'        => 'required|string|max:15',
-            'lokasi_maps'  => 'required|string',
+            // nomor instansi harus diawali 08 (format lokal Indonesia)
+            'no_hp'        => ['required', 'regex:/^08[0-9]{7,14}$/'],
+            // lokasi maps harus berupa URL Google Maps
+            'lokasi_maps'  => ['required', 'url', 'regex:/google\\./i'],
 
             'dokumen_khs'        => 'required|file|mimes:pdf,doc,docx|max:2048',
             'dokumen_pembayaran' => 'required|file|mimes:pdf,jpg,png|max:2048',
             'dokumen_studi_tour' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        ], [
+            'no_hp.regex' => 'Nomor telepon harus diawali dengan 08 dan hanya mengandung angka setelahnya (contoh: 08123456789).',
+            'lokasi_maps.url' => 'Alamat lokasi harus berupa URL yang valid.',
+            'lokasi_maps.regex' => 'Alamat lokasi harus mengandung link Google Maps (mis. maps.google.com atau goo.gl).',
         ]);
 
         $mahasiswa = Auth::user()->mahasiswa;
@@ -152,12 +158,21 @@ class PengajuanPklController extends Controller
                 'status_verifikasi'=> 'pending',
                 'catatan'          => null,
             ]);
+            // After updating this dokumen, check if there are any remaining
+            // dokumen with status 'invalid'. If none remain, the mahasiswa
+            // has finished fixing all invalid documents and we should forward
+            // the pengajuan back to Staff TU for verification.
+            $hasInvalid = $pengajuan->dokumenPengajuan()
+                ->where('status_verifikasi', 'invalid')
+                ->exists();
 
-            // Kembalikan status pengajuan ke TU
-            $pengajuan->update([
-                'status'      => 'pending_tu',
-                'catatan_tu'  => null,
-            ]);
+            if (! $hasInvalid) {
+                // set pengajuan kembali ke pending_tu sehingga TU melihatnya
+                $pengajuan->update([
+                    'status'     => 'pending_tu',
+                    'catatan_tu' => null,
+                ]);
+            }
         });
 
         return back()->with('success', 'Dokumen berhasil diupload ulang dan menunggu verifikasi TU.');
