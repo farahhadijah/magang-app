@@ -84,18 +84,63 @@
     event.preventDefault();
 
     const status = document.getElementById('status-select-' + id).value;
-    const catatan = document.getElementById('catatan-' + id).value;
+    const catatanEl = document.getElementById('catatan-' + id);
+    const catatan = catatanEl ? catatanEl.value : '';
     const token = document.querySelector('#modal-' + id + ' input[name=_token]').value;
 
+    // clear previous validation UI
+    if(catatanEl) {
+        const errElOld = document.getElementById('catatan-error-' + id);
+        if(errElOld) { errElOld.classList.add('hidden'); errElOld.textContent = ''; }
+        catatanEl.classList.remove('border-red-500');
+    }
+
+    // If the lecturer chose "revisi", require a catatan (quick client check)
+    if(status === 'revisi' && (!catatan || catatan.trim() === '')) {
+        // simple UI feedback
+        if(catatanEl) {
+            catatanEl.classList.add('border-red-500');
+            catatanEl.focus();
+        }
+        alert('Silakan isi catatan ketika memilih "Perlu Revisi".');
+        return;
+    }
+
+    // Build payload: include catatan only when needed
+    const payload = { status: status };
+    if(status === 'revisi') payload.catatan = catatan;
+
     fetch("/dosen/logbook/" + id + "/review-ajax", {
-        method: 'POST',
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': token
         },
-        body: JSON.stringify({status: status, catatan: catatan})
+        body: JSON.stringify(payload)
     })
     .then(res => {
+        // handle validation errors
+        if(res.status === 422) {
+            return res.json().then(json => {
+                if(json.errors) {
+                    // show catatan error if present
+                    if(json.errors.catatan) {
+                        const errEl = document.getElementById('catatan-error-' + id);
+                        if(errEl) {
+                            errEl.textContent = json.errors.catatan.join(' ');
+                            errEl.classList.remove('hidden');
+                        }
+                        if(catatanEl) {
+                            catatanEl.classList.add('border-red-500');
+                            catatanEl.focus();
+                        }
+                    }
+                }
+                // stop further processing
+                throw new Error('validation');
+            });
+        }
+
         if(!res.ok) throw new Error('Network response not ok');
         return res.json();
     })
@@ -112,11 +157,47 @@
             closeModal(id);
         }
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+        if(err && err.message === 'validation') {
+            // validation errors already shown
+            return;
+        }
+        console.error(err);
+        alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+    });
+}
+
+// Toggle visibility/required state of the catatan field based on status select
+function toggleCatatan(id) {
+    const select = document.getElementById('status-select-' + id);
+    const wrapper = document.getElementById('catatan-wrapper-' + id);
+    const textarea = document.getElementById('catatan-' + id);
+    const errEl = document.getElementById('catatan-error-' + id);
+    if(!select || !wrapper || !textarea) return;
+
+    if(select.value === 'revisi') {
+        wrapper.classList.remove('hidden');
+        textarea.removeAttribute('disabled');
+        // mark visually required (we'll still validate on submit)
+        textarea.classList.remove('opacity-50');
+        // clear previous error when showing
+        if(errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
+        textarea.classList.remove('border-red-500');
+    } else {
+        // hide/disable the catatan field for non-revision statuses
+        wrapper.classList.add('hidden');
+        textarea.setAttribute('disabled', 'disabled');
+        textarea.classList.add('opacity-50');
+        // clear/disable any previous validation error
+        if(errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
+        textarea.classList.remove('border-red-500');
+    }
 }
 
 function openModal(id) {
     document.getElementById('modal-' + id).classList.remove('hidden');
+    // ensure catatan visibility matches current select value
+    if (typeof toggleCatatan === 'function') toggleCatatan(id);
 }
 
 function closeModal(id) {

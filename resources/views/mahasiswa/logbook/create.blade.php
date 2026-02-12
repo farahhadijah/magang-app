@@ -40,10 +40,12 @@
             <div>
                 <label class="block mb-1 text-sm font-medium text-green-800">Tanggal</label>
                 <input type="date"
-                       name="tgl"
-                       value="{{ old('tgl') }}"
-                       required
-                       class="w-full px-3 py-2 border border-green-200 rounded-lg outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400">
+                        name="tgl"
+                        min="{{ $pkl->tgl_mulai }}"
+                        max="{{ $pkl->tgl_selesai }}"
+                        value="{{ old('tgl') }}"
+                        required
+                        class="w-full px-3 py-2 border border-green-200 rounded-lg outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400">
                 @error('tgl')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror

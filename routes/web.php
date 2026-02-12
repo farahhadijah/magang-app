@@ -106,6 +106,15 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
             ->name('logbook.create');
         Route::post('/logbook', [LogbookController::class, 'store'])
             ->name('logbook.store');
+        // edit
+        Route::get('/logbook/{logbook}/edit', [LogbookController::class, 'edit'])
+            ->name('logbook.edit');
+
+        Route::put('/logbook/{logbook}', [LogbookController::class, 'update'])
+            ->name('logbook.update');
+
+        Route::delete('/logbook/{logbook}', [LogbookController::class, 'destroy'])
+            ->name('logbook.destroy');
     });
 
 /*
@@ -127,14 +136,16 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         // MAHASISWA BIMBINGAN
         Route::get('/mahasiswa-bimbingan', [MahasiswaBimbinganController::class, 'index'])
             ->name('mahasiswa.bimbingan');
-        // REVIEW LOGBOOK
         Route::get('logbook', [ReviewLogbookController::class, 'index'])
             ->name('logbook.index');
-        Route::post('logbook/{id}/review', [ReviewLogbookController::class, 'review'])
-            ->name('logbook.review');
-        Route::post('logbook/{logbook}/review-ajax', [ReviewLogbookController::class, 'reviewAjax'])
-            ->name('logbook.review-ajax');
 
+        Route::put('logbook/{logbook}/review',
+            [ReviewLogbookController::class, 'review'])
+            ->name('logbook.review');
+
+        Route::put('logbook/{logbook}/review-ajax',
+            [ReviewLogbookController::class, 'reviewAjax'])
+            ->name('logbook.review-ajax');
 
         // PENILAIAN PKL
         Route::get('/penilaian', [PenilaianPKLController::class, 'index'])
@@ -144,6 +155,27 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         Route::post('/penilaian/{mahasiswa}', [PenilaianPKLController::class, 'store'])
             ->name('penilaian.store');
     });
+
+
+    // MITRA/PJ
+//     use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
+// use App\Http\Controllers\Mitra\LogbookController as MitraLogbookController;
+    
+// Route::middleware(['auth', 'first.login', 'role:mitra'])
+//     ->prefix('mitra')
+//     ->name('mitra.')
+//     ->group(function () {
+
+//         Route::get('/dashboard', [MitraDashboardController::class, 'index'])
+//             ->name('dashboard');
+
+//         Route::get('/logbook', [MitraLogbookController::class, 'index'])
+//             ->name('logbook.index');
+
+//         Route::post('/logbook/{logbook}/catatan', 
+//             [MitraLogbookController::class, 'beriCatatan'])
+//             ->name('logbook.catatan');
+// });
 
 /*
 |--------------------------------------------------------------------------

@@ -33,9 +33,10 @@ class Pkl extends Model
     return $this->belongsTo(Dosen::class, 'id_dosen');
 }
     public function logbook()
-    {
-        return $this->hasMany(Logbook::class, 'id_pkl');
-    }
+{
+    return $this->hasMany(Logbook::class, 'id_pkl');
+}
+
 
     public function suratPengantar()
     {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pkl;
 use App\Models\Logbook;
+use Carbon\Carbon;
 
 class LogbookController extends Controller
 {
@@ -14,10 +15,17 @@ class LogbookController extends Controller
      */
     private function getActivePkl()
     {
-        return Pkl::whereHas('pengajuanPkl', function ($q) {
-                $q->where('id_mhs', auth()->user()->mahasiswa->id);
+        $user = auth()->user();
+
+        if (!$user || !$user->mahasiswa) {
+            return null;
+        }
+
+        return Pkl::whereHas('pengajuanPkl', function ($q) use ($user) {
+                $q->where('id_mhs', $user->mahasiswa->id);
             })
             ->where('status', 'aktif')
+            ->latest()
             ->first();
     }
 
@@ -39,17 +47,18 @@ class LogbookController extends Controller
      * Form tambah logbook
      */
     public function create()
-    {
-        $pkl = $this->getActivePkl();
+{
+    $pkl = $this->getActivePkl();
 
-        if (!$pkl) {
-            return redirect()
-                ->route('mahasiswa.logbook.index')
-                ->with('warning', 'Belum ada PKL aktif. Tidak bisa menambah logbook.');
-        }
-
-        return view('mahasiswa.logbook.create');
+    if (!$pkl) {
+        return redirect()
+            ->route('mahasiswa.logbook.index')
+            ->with('warning', 'Belum ada PKL aktif. Tidak bisa menambah logbook.');
     }
+
+    return view('mahasiswa.logbook.create', compact('pkl'));
+}
+
 
     /**
      * Simpan logbook baru
@@ -57,8 +66,8 @@ class LogbookController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tgl'       => 'required|date',
-            'kegiatan'  => 'required|string',
+            'tgl'      => 'required|date',
+            'kegiatan' => 'required|string|max:2000',
         ]);
 
         $pkl = $this->getActivePkl();
@@ -69,11 +78,33 @@ class LogbookController extends Controller
                 ->with('warning', 'Belum ada PKL aktif.');
         }
 
+        // 🔒 Pastikan PKL masih aktif
+        if ($pkl->status !== 'aktif') {
+            abort(403, 'PKL sudah selesai.');
+        }
+
+        $tgl = Carbon::parse($request->tgl);
+
+        // ✅ Validasi periode PKL
+        if ($tgl->lt($pkl->tgl_mulai) || $tgl->gt($pkl->tgl_selesai)) {
+            return back()->with('error', 'Tanggal di luar periode PKL.');
+        }
+
+        // ✅ Cek duplikat tanggal
+        $exists = Logbook::where('id_pkl', $pkl->id)
+            ->where('tgl', $request->tgl)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Logbook untuk tanggal tersebut sudah ada.');
+        }
+
         Logbook::create([
             'id_pkl'         => $pkl->id,
             'tgl'            => $request->tgl,
             'kegiatan'       => $request->kegiatan,
             'status_approve' => 'pending',
+            'catatan_dosen'  => null,
         ]);
 
         return redirect()
@@ -82,34 +113,110 @@ class LogbookController extends Controller
     }
 
     /**
-     * Update logbook (jika ada fitur edit)
+     * Update logbook (untuk revisi)
      */
     public function update(Request $request, Logbook $logbook)
     {
-        // 🔐 pastikan logbook milik mahasiswa login
-        if ($logbook->pkl->pengajuanPkl->id_mhs !== auth()->user()->mahasiswa->id) {
-            abort(403, 'Akses ditolak');
+        $user = auth()->user();
+
+        if (!$user || !$user->mahasiswa) {
+            abort(403);
         }
 
-        // 🔒 TIDAK BOLEH EDIT JIKA SUDAH APPROVED
+        // 🔐 Pastikan logbook milik mahasiswa login
+        if ($logbook->pkl->pengajuanPkl->id_mhs !== $user->mahasiswa->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        // 🔒 PKL harus masih aktif
+        if ($logbook->pkl->status !== 'aktif') {
+            abort(403, 'PKL sudah selesai.');
+        }
+
+        // 🔒 Tidak boleh edit jika sudah approved
         if ($logbook->status_approve === 'approved') {
-            abort(403, 'Logbook sudah disetujui dan tidak bisa diubah');
+            abort(403, 'Logbook sudah disetujui dan tidak bisa diubah.');
         }
 
         $request->validate([
             'tgl'      => 'required|date',
-            'kegiatan' => 'required|string',
+            'kegiatan' => 'required|string|max:2000',
         ]);
+
+        $pkl = $logbook->pkl;
+        $tgl = Carbon::parse($request->tgl);
+
+        // ✅ Validasi periode PKL
+        if ($tgl->lt($pkl->tgl_mulai) || $tgl->gt($pkl->tgl_selesai)) {
+            return back()->with('error', 'Tanggal di luar periode PKL.');
+        }
+
+        // ✅ Cek duplikat tanggal (kecuali dirinya sendiri)
+        $exists = Logbook::where('id_pkl', $pkl->id)
+            ->where('tgl', $request->tgl)
+            ->where('id', '!=', $logbook->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Logbook untuk tanggal tersebut sudah ada.');
+        }
 
         $logbook->update([
             'tgl'            => $request->tgl,
             'kegiatan'       => $request->kegiatan,
-            // kalau diedit → kembali pending
-            'status_approve' => 'pending',
+            'status_approve' => 'pending',   // kembali pending setelah revisi
+            'catatan_dosen'  => null,        // reset catatan lama agar clean
         ]);
 
         return redirect()
             ->route('mahasiswa.logbook.index')
             ->with('success', 'Logbook berhasil diperbarui.');
     }
+
+    /**
+     * Hapus logbook (opsional tapi enterprise-ready)
+     */
+    public function destroy(Logbook $logbook)
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->mahasiswa) {
+            abort(403);
+        }
+
+        if ($logbook->pkl->pengajuanPkl->id_mhs !== $user->mahasiswa->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        if ($logbook->status_approve === 'approved') {
+            abort(403, 'Logbook yang sudah disetujui tidak dapat dihapus.');
+        }
+
+        $logbook->delete();
+
+        return back()->with('success', 'Logbook berhasil dihapus.');
+    }
+    public function edit(Logbook $logbook)
+{
+    $user = auth()->user();
+
+    if (!$user || !$user->mahasiswa) {
+        abort(403);
+    }
+
+    if ($logbook->pkl->pengajuanPkl->id_mhs !== $user->mahasiswa->id) {
+        abort(403, 'Akses ditolak.');
+    }
+
+    if ($logbook->pkl->status !== 'aktif') {
+        abort(403, 'PKL sudah selesai.');
+    }
+
+    if ($logbook->status_approve === 'approved') {
+        abort(403, 'Logbook sudah disetujui dan tidak bisa diubah.');
+    }
+
+    return view('mahasiswa.logbook.edit', compact('logbook'));
+}
+
 }
