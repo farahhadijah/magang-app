@@ -14,10 +14,12 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
 use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookController;
 use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
+use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
 
 use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
-use App\Http\Controllers\Dosen\PenilaianPKLController;
 use App\Http\Controllers\Dosen\ReviewLogbookController;
+use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirController;
+use App\Http\Controllers\Dosen\NilaiPklController as DosenNilaiPklController;
 
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
@@ -95,6 +97,11 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::get('/logbook/{logbook}/edit', [MahasiswaLogbookController::class, 'edit'])->name('logbook.edit');
         Route::put('/logbook/{logbook}', [MahasiswaLogbookController::class, 'update'])->name('logbook.update');
         Route::delete('/logbook/{logbook}', [MahasiswaLogbookController::class, 'destroy'])->name('logbook.destroy');
+        // Laporan Akhir
+        Route::get('/laporan', [MahasiswaLaporanAkhirController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/create', [MahasiswaLaporanAkhirController::class, 'create'])->name('laporan.create');
+        Route::post('/laporan', [MahasiswaLaporanAkhirController::class, 'store'])->name('laporan.store');
+
     });
 
 /*
@@ -113,10 +120,16 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         Route::put('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review'])->name('logbook.review');
         Route::put('/logbook/{logbook}/review-ajax', [ReviewLogbookController::class, 'reviewAjax'])->name('logbook.review-ajax');
 
-        // Penilaian PKL
-        Route::get('/penilaian', [PenilaianPKLController::class, 'index'])->name('penilaian.index');
-        Route::get('/penilaian/{mahasiswa}/create', [PenilaianPKLController::class, 'create'])->name('penilaian.create');
-        Route::post('/penilaian/{mahasiswa}', [PenilaianPKLController::class, 'store'])->name('penilaian.store');
+        // Nilai PKL
+        Route::get('/nilai', [DosenNilaiPklController::class, 'index'])->name('nilai.index');
+        Route::get('/nilai/{pkl}/create', [DosenNilaiPklController::class, 'create'])->name('nilai.create');
+        Route::post('/nilai/{pkl}', [DosenNilaiPklController::class, 'store'])->name('nilai.store');
+
+
+        // Laporan Akhir
+        Route::get('/laporan', [DosenLaporanAkhirController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/{pkl}', [DosenLaporanAkhirController::class, 'show'])->name('laporan.show');
+        Route::post('/laporan/{pkl}/approve', [DosenLaporanAkhirController::class, 'approve'])->name('laporan.approve');
     });
 
 /*

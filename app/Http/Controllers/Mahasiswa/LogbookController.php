@@ -40,44 +40,52 @@ class LogbookController extends Controller
             ? $pkl->logbook()->orderBy('tgl', 'desc')->get()
             : collect();
 
-        // Cek apakah sudah ada logbook untuk hari ini
         $hasToday = false;
+
         if ($pkl) {
+            $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
             $hasToday = $pkl->logbook()
-                ->whereDate('tgl', Carbon::today())
+                ->whereDate('tgl', $todayJakarta)
                 ->exists();
         }
 
-        return view('mahasiswa.logbook.index', compact('logbooks', 'hasToday'));
+        return view('mahasiswa.logbook.index', compact('logbooks', 'hasToday', 'pkl'));
     }
 
     /**
      * Form tambah logbook
      */
     public function create()
-{
-    $pkl = $this->getActivePkl();
+    {
+        $pkl = $this->getActivePkl();
 
-    if (!$pkl) {
-        return redirect()
-            ->route('mahasiswa.logbook.index')
-            ->with('warning', 'Belum ada PKL aktif. Tidak bisa menambah logbook.');
+        if (!$pkl) {
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'Belum ada PKL aktif.');
+        }
+
+        // 🔒 Pastikan masih dalam 30 hari pertama
+        if (!$pkl->isFaseLogbook()) {
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'Masa pengisian logbook (30 hari pertama) telah berakhir.');
+        }
+
+        // Cegah lebih dari satu logbook per hari (gunakan timezone lokal)
+        $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
+        $hasToday = $pkl->logbook()
+            ->whereDate('tgl', $todayJakarta)
+            ->exists();
+
+        if ($hasToday) {
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'Anda sudah membuat logbook untuk hari ini.');
+        }
+
+        return view('mahasiswa.logbook.create', compact('pkl'));
     }
-
-    // Cegah membuat logbook lebih dari satu untuk hari ini
-    $hasToday = $pkl->logbook()
-        ->whereDate('tgl', Carbon::today())
-        ->exists();
-
-    if ($hasToday) {
-        return redirect()
-            ->route('mahasiswa.logbook.index')
-            ->with('warning', 'Anda sudah membuat logbook untuk hari ini.');
-    }
-
-    return view('mahasiswa.logbook.create', compact('pkl'));
-}
-
 
     /**
      * Simpan logbook baru
@@ -85,9 +93,21 @@ class LogbookController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tgl'      => 'required|date|before_or_equal:today',
+            'tgl'      => 'required|date',
             'kegiatan' => 'required|string|max:2000',
         ]);
+
+        // Ensure 'tgl' is not after today in Asia/Jakarta timezone
+        $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
+        try {
+            $tglInput = Carbon::createFromFormat('Y-m-d', $request->tgl, 'Asia/Jakarta')->toDateString();
+        } catch (\Exception $e) {
+            return back()->withErrors(['tgl' => 'Format tanggal tidak valid.'])->withInput();
+        }
+
+        if ($tglInput > $todayJakarta) {
+            return back()->withErrors(['tgl' => 'Tanggal tidak boleh setelah hari ini.'])->withInput();
+        }
 
         $pkl = $this->getActivePkl();
 
@@ -97,19 +117,25 @@ class LogbookController extends Controller
                 ->with('warning', 'Belum ada PKL aktif.');
         }
 
-        // 🔒 Pastikan PKL masih aktif
         if ($pkl->status !== 'aktif') {
             abort(403, 'PKL sudah selesai.');
         }
 
-        $tgl = Carbon::parse($request->tgl);
-
-        // ✅ Validasi periode PKL
-        if ($tgl->lt($pkl->tgl_mulai) || $tgl->gt($pkl->tgl_selesai)) {
-            return back()->with('error', 'Tanggal di luar periode PKL.');
+        // 🔒 Pastikan masih dalam 30 hari pertama
+        if (!$pkl->isFaseLogbook()) {
+            return back()->with('error', 'Masa pengisian logbook telah berakhir.');
         }
 
-        // ✅ Cek duplikat tanggal
+        $tgl = Carbon::parse($request->tgl);
+        $mulai = Carbon::parse($pkl->tgl_mulai);
+        $akhirMagang = $pkl->batasMagang();
+
+        // Validasi hanya 30 hari pertama
+        if ($tgl->lt($mulai) || $tgl->gt($akhirMagang)) {
+            return back()->with('error', 'Logbook hanya dapat diisi dalam 30 hari pertama masa magang.');
+        }
+
+        // Cek duplikat tanggal
         $exists = Logbook::where('id_pkl', $pkl->id)
             ->whereDate('tgl', $request->tgl)
             ->exists();
@@ -132,7 +158,37 @@ class LogbookController extends Controller
     }
 
     /**
-     * Update logbook (untuk revisi)
+     * Edit form
+     */
+    public function edit(Logbook $logbook)
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->mahasiswa) {
+            abort(403);
+        }
+
+        if ($logbook->pkl->pengajuanPkl->id_mhs !== $user->mahasiswa->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        if ($logbook->pkl->status !== 'aktif') {
+            abort(403, 'PKL sudah selesai.');
+        }
+
+        if (!$logbook->pkl->isFaseLogbook()) {
+            abort(403, 'Masa pengisian logbook telah berakhir.');
+        }
+
+        if ($logbook->status_approve === 'approved') {
+            abort(403, 'Logbook sudah disetujui dan tidak bisa diubah.');
+        }
+
+        return view('mahasiswa.logbook.edit', compact('logbook'));
+    }
+
+    /**
+     * Update logbook
      */
     public function update(Request $request, Logbook $logbook)
     {
@@ -142,37 +198,51 @@ class LogbookController extends Controller
             abort(403);
         }
 
-        // 🔐 Pastikan logbook milik mahasiswa login
         if ($logbook->pkl->pengajuanPkl->id_mhs !== $user->mahasiswa->id) {
             abort(403, 'Akses ditolak.');
         }
 
-        // 🔒 PKL harus masih aktif
         if ($logbook->pkl->status !== 'aktif') {
             abort(403, 'PKL sudah selesai.');
         }
 
-        // 🔒 Tidak boleh edit jika sudah approved
+        if (!$logbook->pkl->isFaseLogbook()) {
+            abort(403, 'Masa pengisian logbook telah berakhir.');
+        }
+
         if ($logbook->status_approve === 'approved') {
             abort(403, 'Logbook sudah disetujui dan tidak bisa diubah.');
         }
 
         $request->validate([
-            'tgl'      => 'required|date|before_or_equal:today',
+            'tgl'      => 'required|date',
             'kegiatan' => 'required|string|max:2000',
         ]);
+
+        // Ensure 'tgl' is not after today in Asia/Jakarta timezone
+        $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
+        try {
+            $tglInput = Carbon::createFromFormat('Y-m-d', $request->tgl, 'Asia/Jakarta')->toDateString();
+        } catch (\Exception $e) {
+            return back()->withErrors(['tgl' => 'Format tanggal tidak valid.'])->withInput();
+        }
+
+        if ($tglInput > $todayJakarta) {
+            return back()->withErrors(['tgl' => 'Tanggal tidak boleh setelah hari ini.'])->withInput();
+        }
 
         $pkl = $logbook->pkl;
         $tgl = Carbon::parse($request->tgl);
 
-        // ✅ Validasi periode PKL
-        if ($tgl->lt($pkl->tgl_mulai) || $tgl->gt($pkl->tgl_selesai)) {
-            return back()->with('error', 'Tanggal di luar periode PKL.');
+        $mulai = Carbon::parse($pkl->tgl_mulai);
+        $akhirMagang = $pkl->batasMagang();
+
+        if ($tgl->lt($mulai) || $tgl->gt($akhirMagang)) {
+            return back()->with('error', 'Logbook hanya dapat diisi dalam 30 hari pertama masa magang.');
         }
 
-        // ✅ Cek duplikat tanggal (kecuali dirinya sendiri)
         $exists = Logbook::where('id_pkl', $pkl->id)
-            ->where('tgl', $request->tgl)
+            ->whereDate('tgl', $request->tgl)
             ->where('id', '!=', $logbook->id)
             ->exists();
 
@@ -183,8 +253,8 @@ class LogbookController extends Controller
         $logbook->update([
             'tgl'            => $request->tgl,
             'kegiatan'       => $request->kegiatan,
-            'status_approve' => 'pending',   // kembali pending setelah revisi
-            'catatan_dosen'  => null,        // reset catatan lama agar clean
+            'status_approve' => 'pending',
+            'catatan_dosen'  => null,
         ]);
 
         return redirect()
@@ -193,7 +263,7 @@ class LogbookController extends Controller
     }
 
     /**
-     * Hapus logbook (opsional tapi enterprise-ready)
+     * Hapus logbook
      */
     public function destroy(Logbook $logbook)
     {
@@ -211,31 +281,12 @@ class LogbookController extends Controller
             abort(403, 'Logbook yang sudah disetujui tidak dapat dihapus.');
         }
 
+        if (!$logbook->pkl->isFaseLogbook()) {
+            abort(403, 'Masa pengisian logbook telah berakhir.');
+        }
+
         $logbook->delete();
 
         return back()->with('success', 'Logbook berhasil dihapus.');
     }
-    public function edit(Logbook $logbook)
-{
-    $user = auth()->user();
-
-    if (!$user || !$user->mahasiswa) {
-        abort(403);
-    }
-
-    if ($logbook->pkl->pengajuanPkl->id_mhs !== $user->mahasiswa->id) {
-        abort(403, 'Akses ditolak.');
-    }
-
-    if ($logbook->pkl->status !== 'aktif') {
-        abort(403, 'PKL sudah selesai.');
-    }
-
-    if ($logbook->status_approve === 'approved') {
-        abort(403, 'Logbook sudah disetujui dan tidak bisa diubah.');
-    }
-
-    return view('mahasiswa.logbook.edit', compact('logbook'));
-}
-
 }
