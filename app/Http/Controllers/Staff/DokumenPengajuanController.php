@@ -34,8 +34,6 @@ class DokumenPengajuanController extends Controller
         ->withFragment('dokumen-' . $dokumen->id)
         ->with('success', 'Dokumen berhasil ditandai VALID.');
 }
-
-
     /**
      * ===============================
      * TANDAI DOKUMEN INVALID

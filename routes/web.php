@@ -151,6 +151,16 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::get('/pengajuan/{id}', [StaffPengajuanController::class, 'show'])->name('pengajuan.show');
         Route::post('/pengajuan/{id}/approve', [StaffPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [StaffPengajuanController::class, 'reject'])->name('pengajuan.reject');
+
+        Route::post('/mitra/{id}', 
+            [StaffPengajuanController::class, 'storeMitra']
+        )->name('mitra.store');
+
+        Route::get('/mitra', 
+    [StaffPengajuanController::class, 'manajemenMitra']
+        )->name('mitra.index');
+
+
     });
 
 /*
@@ -184,6 +194,28 @@ Route::middleware(['auth', 'role:kaprodi'])
         Route::post('/pengajuan/{id}/reject', [KaprodiPengajuanController::class, 'reject'])->name('pengajuan.reject');
         Route::get('/histori-ditolak', [KaprodiPengajuanController::class, 'historiDitolak'])->name('pengajuan.histori_ditolak');
     });
+
+/*
+|--------------------------------------------------------------------------
+| MITRA AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:mitra'])
+    ->prefix('mitra')
+    ->name('mitra.')
+    ->group(function () {
+
+        Route::get('/dashboard', 
+            [App\Http\Controllers\Mitra\MitraController::class, 'dashboard']
+        )->name('dashboard');
+
+        Route::get('/mahasiswa', [App\Http\Controllers\Mitra\MitraController::class, 'mahasiswa'])
+            ->name('mahasiswa');
+
+        Route::get('/logbook/{pkl}', [App\Http\Controllers\Mitra\MitraController::class, 'logbook'])
+            ->name('logbook');
+    });
+
 
 /*
 |--------------------------------------------------------------------------

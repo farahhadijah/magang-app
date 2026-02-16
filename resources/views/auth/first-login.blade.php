@@ -1,4 +1,7 @@
 <x-guest-layout>
+    <x-slot name="title">
+        Frist Login - MagangApp
+    </x-slot>
     <div class="flex flex-col items-center px-4 pt-5 bg-green-50">
 
         {{-- Card --}}

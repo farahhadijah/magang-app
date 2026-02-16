@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\Kaprodi;
-
 use App\Models\Pkl;
 use App\Models\User;
 use App\Models\Verifikasi;
@@ -12,24 +10,19 @@ use App\Http\Controllers\Controller;
 use App\Models\SuratPengantar;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
-
 class PengajuanPklController extends Controller
 {
     /* ================= DASHBOARD ================= */
-
     public function dashboard()
     {
         $totalMahasiswa = PengajuanPkl::distinct('id_mhs')->count();
-
         $totalMenunggu = PengajuanPkl::where('status', 'pending_kaprodi')
             ->whereHas('verifikasi', function ($q) {
                 $q->where('level', 'tu')
                   ->where('status', 'approved');
             })->count();
-
         $totalAktif = Pkl::where('status', 'aktif')->count();
         $totalSelesai = Pkl::where('status', 'selesai')->count();
-
         return view('kaprodi.dashboard', compact(
             'totalMahasiswa',
             'totalMenunggu',
@@ -37,21 +30,16 @@ class PengajuanPklController extends Controller
             'totalSelesai'
         ));
     }
-
     /* ================= LIST PENGAJUAN ================= */
-
     public function index()
     {
         $pengajuans = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
             ->munculUntukKaprodi()
             ->orderBy('created_at', 'desc')
             ->get();
-
         return view('kaprodi.pengajuan.index', compact('pengajuans'));
     }
-
     /* ================= DETAIL ================= */
-
     public function show($id)
     {
         $pengajuan = PengajuanPkl::with([

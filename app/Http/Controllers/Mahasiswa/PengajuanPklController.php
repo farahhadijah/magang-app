@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\Mahasiswa;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanPkl;
 use App\Models\TempatPkl;
 use App\Models\DokumenPengajuan;
-
 class PengajuanPklController extends Controller
 {
     /**
@@ -19,7 +16,6 @@ class PengajuanPklController extends Controller
     {
         $mahasiswa = Auth::user()->mahasiswa;
         abort_if(!$mahasiswa, 403);
-
         $pengajuanAktif = PengajuanPkl::where('id_mhs', $mahasiswa->id)
             ->whereIn('status', [
                 'pending_tu',
@@ -27,16 +23,13 @@ class PengajuanPklController extends Controller
                 'pending_kaprodi'
             ])
             ->exists();
-
         if ($pengajuanAktif) {
             return redirect()
                 ->route('mahasiswa.dashboard')
                 ->with('error', 'Kamu sudah memiliki pengajuan PKL yang sedang diproses.');
         }
-
         return view('mahasiswa.pengajuan-pkl');
     }
-
     /**
      * Simpan pengajuan PKL
      */
@@ -58,37 +51,29 @@ class PengajuanPklController extends Controller
             'lokasi_maps.url' => 'Alamat lokasi harus berupa URL yang valid.',
             'lokasi_maps.regex' => 'Alamat lokasi harus mengandung link Google Maps (mis. maps.google.com atau goo.gl).',
         ]);
-
         $mahasiswa = Auth::user()->mahasiswa;
         abort_if(!$mahasiswa, 403);
-
         DB::transaction(function () use ($request, $mahasiswa) {
-
             $tempatPkl = TempatPkl::create([
                 'nama_tempat'  => $request->nama_tempat,
                 'jenis_tempat' => $request->jenis_tempat,
                 'no_hp'        => $request->no_hp,
                 'lokasi_maps'  => $request->lokasi_maps,
             ]);
-
             $pengajuan = PengajuanPkl::create([
                 'id_mhs'        => $mahasiswa->id,
                 'id_tempat_pkl'=> $tempatPkl->id,
                 'status'        => 'pending_tu',
                 'tgl_pengajuan' => now(),
             ]);
-
             $basePath = "dokumen_pengajuan_pkl/{$mahasiswa->nim}";
-
             $dokumenMap = [
                 'dokumen_khs'        => 'KHS',
                 'dokumen_pembayaran' => 'Pembayaran',
                 'dokumen_studi_tour' => 'StudiTour',
             ];
-
             foreach ($dokumenMap as $input => $jenis) {
                 $path = $request->file($input)->store($basePath, 'public');
-
                 DokumenPengajuan::create([
                     'id_pengajuan_pkl' => $pengajuan->id,
                     'jenis_dokumen'    => $jenis,
@@ -97,12 +82,10 @@ class PengajuanPklController extends Controller
                 ]);
             }
         });
-
         return redirect()
             ->route('mahasiswa.pengajuan.status')
             ->with('success', 'Pengajuan PKL berhasil dikirim dan menunggu verifikasi Staff TU.');
     }
-
     /**
      * Status pengajuan PKL mahasiswa
      */
@@ -122,8 +105,6 @@ class PengajuanPklController extends Controller
 
     return view('mahasiswa.status-pengajuan', compact('pengajuan'));
 }
-
-
     /**
      * 🔁 Upload ulang dokumen INVALID
      */

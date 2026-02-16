@@ -1,13 +1,9 @@
 <?php
-
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Model;
-
 class Verifikasi extends Model
 {
     protected $table = 'verifikasi';
-
     protected $fillable = [
         'id_pengajuan_pkl',
         'id_user',
@@ -16,12 +12,10 @@ class Verifikasi extends Model
         'catatan',
         'tgl_verifikasi',
     ];
-
     public function pengajuan()
     {
         return $this->belongsTo(PengajuanPkl::class, 'id_pengajuan_pkl');
     }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');

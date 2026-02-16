@@ -8,9 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class DokumenPengajuan extends Model
 {
     public $timestamps = true;
-
     protected $table = 'dokumen_pengajuan';
-
     protected $fillable = [
         'id_pengajuan_pkl',
         'jenis_dokumen',
@@ -18,42 +16,22 @@ class DokumenPengajuan extends Model
         'status_verifikasi',
         'catatan',
     ];
-
-    /**
-     * ===============================
-     * RELATION
-     * ===============================
-     */
     public function pengajuan()
     {
         return $this->belongsTo(PengajuanPkl::class, 'id_pengajuan_pkl');
     }
-
-    /**
-     * ===============================
-     * HELPER STATUS
-     * ===============================
-     */
     public function isPending(): bool
     {
         return $this->status_verifikasi === 'pending';
     }
-
     public function isValid(): bool
     {
         return $this->status_verifikasi === 'valid';
     }
-
     public function isInvalid(): bool
     {
         return $this->status_verifikasi === 'invalid';
     }
-
-    /**
-     * ===============================
-     * ACTION
-     * ===============================
-     */
     public function tandaiValid()
     {
         $this->update([
@@ -61,7 +39,6 @@ class DokumenPengajuan extends Model
             'catatan' => null,
         ]);
     }
-
     public function tandaiInvalid(string $catatan)
     {
         $this->update([
@@ -69,12 +46,6 @@ class DokumenPengajuan extends Model
             'catatan' => $catatan,
         ]);
     }
-
-    /**
-     * ===============================
-     * UI HELPER
-     * ===============================
-     */
     public function statusBadge(): array
     {
         if ($this->isPending()) {
@@ -83,21 +54,18 @@ class DokumenPengajuan extends Model
                 'class' => 'text-amber-800 bg-amber-100',
             ];
         }
-
         if ($this->isValid()) {
             return [
                 'text'  => 'Valid',
                 'class' => 'text-green-800 bg-green-100',
             ];
         }
-
         if ($this->isInvalid()) {
             return [
                 'text'  => 'Invalid',
                 'class' => 'text-red-800 bg-red-100',
             ];
         }
-
         return [
             'text'  => ucfirst($this->status_verifikasi),
             'class' => 'text-gray-800 bg-gray-100',

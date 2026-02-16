@@ -1,10 +1,7 @@
 <?php
-
 namespace App\Http\Controllers\Kaprodi;
-
 use App\Http\Controllers\Controller;
 use App\Models\Mahasiswa;
-
 class MahasiswaController extends Controller
 {
     public function index()
