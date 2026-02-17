@@ -30,12 +30,12 @@ class LogbookController extends Controller
     {
         $pkl = $this->getActivePkl();
         $logbooks = $pkl
-            ? $pkl->logbook()->orderBy('tgl', 'desc')->get()
+            ? $pkl->logbooks()->orderBy('tgl', 'desc')->get()
             : collect();
         $hasToday = false;
         if ($pkl) {
             $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
-            $hasToday = $pkl->logbook()
+            $hasToday = $pkl->logbooks()
                 ->whereDate('tgl', $todayJakarta)
                 ->exists();
         }
@@ -60,7 +60,7 @@ class LogbookController extends Controller
         }
         // Cegah lebih dari satu logbook per hari (gunakan timezone lokal)
         $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
-        $hasToday = $pkl->logbook()
+        $hasToday = $pkl->logbooks()
             ->whereDate('tgl', $todayJakarta)
             ->exists();
         if ($hasToday) {

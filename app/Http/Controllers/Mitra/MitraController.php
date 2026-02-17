@@ -48,6 +48,30 @@ class MitraController extends Controller
         return view('mitra.logbook', compact('pkl'));
     }
 
+    /**
+     * List mahasiswa yang sudah mengisi logbook di tempat mitra ini.
+     */
+    public function logbookList()
+    {
+        $mitra = Auth::user()->mitra;
+
+        if (!$mitra) {
+            abort(403, 'Data mitra tidak ditemukan.');
+        }
+
+        // Ambil PKL yang terkait dengan tempat mitra dan memiliki minimal 1 logbook
+        $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
+                $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
+            })
+            ->whereHas('logbooks')
+            ->with(['mahasiswa', 'logbooks' => function ($q) {
+                $q->orderBy('tgl', 'desc');
+            }])
+            ->get();
+
+        return view('mitra.logbook_list', compact('pkls'));
+    }
+
     public function dashboard()
     {
         $mitra = Auth::user()->mitra;

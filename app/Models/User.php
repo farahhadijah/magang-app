@@ -44,7 +44,6 @@ class User extends Authenticatable
     {
         return $this->hasOne(Mitra::class);
     }
-
     public function getNama()
     {
         // Normalize role variants and return the most appropriate related name.

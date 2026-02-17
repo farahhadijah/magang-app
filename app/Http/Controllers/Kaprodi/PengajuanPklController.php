@@ -49,20 +49,27 @@ class PengajuanPklController extends Controller
             'verifikasi.user'
         ])->findOrFail($id);
 
+        if (!$pengajuan->bisaDiverifikasiKaprodi()) {
+            return redirect()
+                ->route('kaprodi.pengajuan.index')
+                ->with('warning', 'Pengajuan sudah diproses.');
+        }
+
         $prodiId = $pengajuan->mahasiswa->prodi_id;
 
-        // 🔥 Filter dosen sesuai prodi mahasiswa
         $dosenList = User::where('role', 'dosen')
             ->where('is_active', 1)
             ->whereHas('dosen', function ($q) use ($prodiId) {
                 $q->where('prodi_id', $prodiId)
-                  ->where('is_active', 1);
+                ->where('is_active', 1);
             })
             ->with('dosen')
             ->get();
 
         return view('kaprodi.pengajuan.show', compact('pengajuan', 'dosenList'));
     }
+
+
 
     /* ================= APPROVE ================= */
 

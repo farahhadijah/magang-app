@@ -142,36 +142,51 @@ class PengajuanPklController extends Controller
     }
 
     public function storeMitra(Request $request, $id)
-    {
-        $request->validate([
-            'nama_perwakilan' => 'required|string|max:255',
-            'username'        => 'required|string|unique:users,username',
-        ]);
+{
+    $tempat = TempatPkl::findOrFail($id);
 
-        $tempat = TempatPkl::findOrFail($id);
-
-        if ($tempat->mitra) {
-            return back()->with('error', 'Tempat PKL sudah memiliki mitra.');
-        }
-
-        $password = Str::random(8);
-
-        $user = User::create([
-            'username' => $request->username,
-            'password' => Hash::make($password),
-            'role'     => 'mitra',
-        ]);
-
-        Mitra::create([
-            'user_id'         => $user->id,
-            'tempat_pkl_id'   => $tempat->id,
-            'nama_perwakilan' => $request->nama_perwakilan,
-        ]);
-
-        return back()->with('success', 
-            "Akun mitra berhasil dibuat. Password: $password"
-        );
+    if ($tempat->mitra) {
+        return back()->with('error', 'Tempat PKL sudah memiliki mitra.');
     }
+
+    $baseUsername = 'mitra_' . Str::slug($tempat->nama_tempat, '_');
+    $username = $baseUsername;
+    $counter = 1;
+
+    while (User::where('username', $username)->exists()) {
+        $username = $baseUsername . '_' . $counter;
+        $counter++;
+    }
+
+    $password = Str::random(8);
+
+    $user = User::create([
+        'username' => $username,
+        'password' => Hash::make($password),
+        'role'     => 'mitra',
+        'first_login' => 1,
+    ]);
+
+    Mitra::create([
+        'user_id'       => $user->id,
+        'tempat_pkl_id' => $tempat->id,
+        'no_hp'         => $tempat->no_hp,
+    ]);
+
+    return redirect()->route('staff.mitra.akun', $tempat->id)
+        ->with([
+            'username' => $username,
+            'password' => $password
+        ]);
+}
+    public function showAkunMitra($id)
+{
+    $tempat = TempatPkl::with('mitra.user')->findOrFail($id);
+
+    return view('staff.mitra.akun', compact('tempat'));
+}
+
+
 
     
     public function manajemenMitra()

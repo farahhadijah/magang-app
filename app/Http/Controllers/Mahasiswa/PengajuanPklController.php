@@ -34,58 +34,123 @@ class PengajuanPklController extends Controller
      * Simpan pengajuan PKL
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'nama_tempat'  => 'required|string|max:150',
-            'jenis_tempat' => 'required|in:Pemerintah,Sekolah,PT,CV',
-            // nomor instansi harus diawali 08 (format lokal Indonesia)
-            'no_hp'        => ['required', 'regex:/^08[0-9]{7,14}$/'],
-            // lokasi maps harus berupa URL Google Maps
-            'lokasi_maps'  => ['required', 'url', 'regex:/google\\./i'],
+{
+    $request->validate([
+        'nama_tempat'  => 'required|string|max:150',
+        'jenis_tempat' => 'required|in:Pemerintah,Sekolah,PT,CV',
+        'no_hp'        => ['required', 'regex:/^08[0-9]{7,14}$/'],
+        'lokasi_maps'  => ['required', 'url', 'regex:/google\\./i'],
+        'dokumen_khs'        => 'required|file|mimes:pdf,doc,docx|max:2048',
+        'dokumen_pembayaran' => 'required|file|mimes:pdf,jpg,png|max:2048',
+        'dokumen_studi_tour' => 'required|file|mimes:pdf,doc,docx|max:2048',
+    ]);
 
-            'dokumen_khs'        => 'required|file|mimes:pdf,doc,docx|max:2048',
-            'dokumen_pembayaran' => 'required|file|mimes:pdf,jpg,png|max:2048',
-            'dokumen_studi_tour' => 'required|file|mimes:pdf,doc,docx|max:2048',
-        ], [
-            'no_hp.regex' => 'Nomor telepon harus diawali dengan 08 dan hanya mengandung angka setelahnya (contoh: 08123456789).',
-            'lokasi_maps.url' => 'Alamat lokasi harus berupa URL yang valid.',
-            'lokasi_maps.regex' => 'Alamat lokasi harus mengandung link Google Maps (mis. maps.google.com atau goo.gl).',
-        ]);
-        $mahasiswa = Auth::user()->mahasiswa;
-        abort_if(!$mahasiswa, 403);
-        DB::transaction(function () use ($request, $mahasiswa) {
-            $tempatPkl = TempatPkl::create([
-                'nama_tempat'  => $request->nama_tempat,
-                'jenis_tempat' => $request->jenis_tempat,
-                'no_hp'        => $request->no_hp,
-                'lokasi_maps'  => $request->lokasi_maps,
-            ]);
-            $pengajuan = PengajuanPkl::create([
-                'id_mhs'        => $mahasiswa->id,
-                'id_tempat_pkl'=> $tempatPkl->id,
-                'status'        => 'pending_tu',
-                'tgl_pengajuan' => now(),
-            ]);
-            $basePath = "dokumen_pengajuan_pkl/{$mahasiswa->nim}";
-            $dokumenMap = [
-                'dokumen_khs'        => 'KHS',
-                'dokumen_pembayaran' => 'Pembayaran',
-                'dokumen_studi_tour' => 'StudiTour',
-            ];
-            foreach ($dokumenMap as $input => $jenis) {
-                $path = $request->file($input)->store($basePath, 'public');
-                DokumenPengajuan::create([
-                    'id_pengajuan_pkl' => $pengajuan->id,
-                    'jenis_dokumen'    => $jenis,
-                    'path_file'        => $path,
-                    'status_verifikasi'=> 'pending',
-                ]);
-            }
-        });
-        return redirect()
-            ->route('mahasiswa.pengajuan.status')
-            ->with('success', 'Pengajuan PKL berhasil dikirim dan menunggu verifikasi Staff TU.');
+    $mahasiswa = Auth::user()->mahasiswa;
+    abort_if(!$mahasiswa, 403);
+
+    // 🔥 NORMALISASI DULU
+    $namaNormalized = $this->normalizeNamaTempat($request->nama_tempat);
+
+    // 1️⃣ CEK EXACT MATCH DULU
+    $tempatPkl = TempatPkl::where('nama_normalized', $namaNormalized)
+        ->where('no_hp', $request->no_hp)
+        ->first();
+
+    // 2️⃣ KALAU TIDAK ADA EXACT MATCH → BARU CEK KEMIRIPAN
+    if (!$tempatPkl) {
+
+        $mirip = $this->cekKemiripanTempat($request->nama_tempat);
+
+        if ($mirip) {
+            return back()
+                ->withInput()
+                ->with('warning', 'Nama tempat mirip dengan "' . $mirip->nama_tempat . '". Pastikan tidak salah ketik.');
+        }
     }
+
+    DB::transaction(function () use ($request, $mahasiswa, $tempatPkl, $namaNormalized) {
+
+        // 🆕 JIKA BELUM ADA → BUAT BARU
+        if (!$tempatPkl) {
+            $tempatPkl = TempatPkl::create([
+                'nama_tempat'     => $request->nama_tempat,
+                'nama_normalized' => $namaNormalized,
+                'jenis_tempat'    => $request->jenis_tempat,
+                'no_hp'           => $request->no_hp,
+                'lokasi_maps'     => $request->lokasi_maps,
+            ]);
+        }
+
+        $pengajuan = PengajuanPkl::create([
+            'id_mhs'         => $mahasiswa->id,
+            'id_tempat_pkl'  => $tempatPkl->id,
+            'status'         => 'pending_tu',
+            'tgl_pengajuan'  => now(),
+        ]);
+
+        $basePath = "dokumen_pengajuan_pkl/{$mahasiswa->nim}";
+
+        $dokumenMap = [
+            'dokumen_khs'        => 'KHS',
+            'dokumen_pembayaran' => 'Pembayaran',
+            'dokumen_studi_tour' => 'StudiTour',
+        ];
+
+        foreach ($dokumenMap as $input => $jenis) {
+            $path = $request->file($input)->store($basePath, 'public');
+
+            DokumenPengajuan::create([
+                'id_pengajuan_pkl' => $pengajuan->id,
+                'jenis_dokumen'    => $jenis,
+                'path_file'        => $path,
+                'status_verifikasi'=> 'pending',
+            ]);
+        }
+    });
+
+    return redirect()
+        ->route('mahasiswa.pengajuan.status')
+        ->with('success', 'Pengajuan PKL berhasil dikirim dan menunggu verifikasi Staff TU.');
+}
+
+
+    private function normalizeNamaTempat($nama)
+{
+    $nama = strtolower($nama);
+    $nama = preg_replace('/[^a-z0-9\s]/', '', $nama);
+    $nama = preg_replace('/\s+/', ' ', $nama);
+    return trim($nama);
+}
+    private function cekKemiripanTempat($namaInput)
+{
+    $namaInputNormalized = $this->normalizeNamaTempat($namaInput);
+
+    $semuaTempat = TempatPkl::select('id', 'nama_tempat', 'nama_normalized')
+        ->get();
+
+    foreach ($semuaTempat as $tempat) {
+
+        // 🔥 SKIP kalau exact match
+        if ($namaInputNormalized === $tempat->nama_normalized) {
+            continue;
+        }
+
+        similar_text(
+            $namaInputNormalized,
+            $tempat->nama_normalized,
+            $persen
+        );
+
+        if ($persen >= 85) {
+            return $tempat;
+        }
+    }
+
+    return null;
+}
+
+
+
     /**
      * Status pengajuan PKL mahasiswa
      */

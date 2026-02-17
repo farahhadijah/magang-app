@@ -9,16 +9,6 @@
 
         <!-- Info Mitra -->
         <div class="p-6 bg-white rounded-lg shadow">
-            <h3 class="mb-2 text-lg font-semibold">
-                Selamat Datang, {{ $mitra->nama_perwakilan }}
-            </h3>
-
-            <p class="text-gray-600">
-                Tempat PKL: 
-                <span class="font-semibold">
-                    {{ $mitra->tempatPkl->nama ?? '-' }}
-                </span>
-            </p>
 
             @if($mitra->jabatan)
                 <p class="text-gray-600">

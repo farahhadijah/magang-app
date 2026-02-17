@@ -37,6 +37,13 @@
                 </ul>
             </div>
         @endif
+        {{-- warning kemiripan --}}
+        @if(session('warning'))
+            <div class="px-4 py-3 mb-4 text-yellow-700 bg-yellow-100 border border-yellow-400 rounded">
+                {{ session('warning') }}
+            </div>
+        @endif
+
 
         {{-- ================= INFO ================= --}}
         <div class="p-5 border border-amber-200 rounded-xl bg-amber-50">

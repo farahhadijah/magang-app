@@ -62,36 +62,22 @@
                                 @endif
                             </td>
                         </tr>
-
                         @if(!$tempat->mitra)
                         <tr id="form-{{ $tempat->id }}" class="hidden bg-gray-50">
                             <td colspan="4" class="px-6 py-4">
                                 <form method="POST" action="{{ route('staff.mitra.store', $tempat->id) }}">
                                     @csrf
-
-                                    <div class="flex gap-4">
-                                        <input type="text" name="nama_perwakilan"
-                                            placeholder="Nama Perwakilan"
-                                            class="w-1/3 px-3 py-2 border rounded" required>
-
-                                        <input type="text" name="username"
-                                            placeholder="Username"
-                                            class="w-1/3 px-3 py-2 border rounded" required>
-
-                                        <button type="submit"
-                                            class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
-                                            Simpan
-                                        </button>
-                                    </div>
+                                    <button type="submit"
+                                        class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
+                                        Buat Akun Mitra Otomatis
+                                    </button>
                                 </form>
                             </td>
                         </tr>
                         @endif
-
                     @endforeach
                 </tbody>
             </table>
         </div>
-
     </div>
 </x-app-layout>

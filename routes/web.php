@@ -151,14 +151,18 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::get('/pengajuan/{id}', [StaffPengajuanController::class, 'show'])->name('pengajuan.show');
         Route::post('/pengajuan/{id}/approve', [StaffPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [StaffPengajuanController::class, 'reject'])->name('pengajuan.reject');
+        
+        Route::get('/mitra', 
+        [StaffPengajuanController::class, 'manajemenMitra']
+        )->name('mitra.index');
+        
+        Route::get('/mitra/{id}/akun',
+            [StaffPengajuanController::class, 'showAkunMitra']
+        )->name('mitra.akun');
 
-        Route::post('/mitra/{id}', 
+        Route::post('/mitra/{id}',
             [StaffPengajuanController::class, 'storeMitra']
         )->name('mitra.store');
-
-        Route::get('/mitra', 
-    [StaffPengajuanController::class, 'manajemenMitra']
-        )->name('mitra.index');
 
 
     });
@@ -211,6 +215,10 @@ Route::middleware(['auth', 'first.login', 'role:mitra'])
 
         Route::get('/mahasiswa', [App\Http\Controllers\Mitra\MitraController::class, 'mahasiswa'])
             ->name('mahasiswa');
+
+        // Daftar mahasiswa yang sudah mengisi logbook (index untuk mitra)
+        Route::get('/logbook', [App\Http\Controllers\Mitra\MitraController::class, 'logbookList'])
+            ->name('logbook.index');
 
         Route::get('/logbook/{pkl}', [App\Http\Controllers\Mitra\MitraController::class, 'logbook'])
             ->name('logbook');
