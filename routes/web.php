@@ -101,6 +101,9 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::get('/laporan', [MahasiswaLaporanAkhirController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/create', [MahasiswaLaporanAkhirController::class, 'create'])->name('laporan.create');
         Route::post('/laporan', [MahasiswaLaporanAkhirController::class, 'store'])->name('laporan.store');
+        Route::post('/cek-kemiripan-tempat', 
+    [MahasiswaPengajuanController::class, 'cekKemiripanAjax']
+            )->name('pengajuan.cek-kemiripan');
 
     });
 

@@ -8,7 +8,7 @@
             {{-- Header --}}
             <div class="mb-6 text-center">
                 <h1 class="flex items-center justify-center gap-2 text-2xl font-bold text-green-900">
-                    <i class="fa-solid fa-lock"></i> Masuk ke MagangApp
+                    <i class="fa-solid fa-lock"></i> Sibolang MagangApp
                 </h1>
                 <p class="mt-1 text-sm text-green-700">Silakan login menggunakan Username & Password Anda</p>
             </div>
