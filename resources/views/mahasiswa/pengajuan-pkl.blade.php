@@ -71,8 +71,9 @@
                     Data Tempat PKL
                 </h4>
 
-                <div class="grid gap-4 md:grid-cols-2">
-
+                <div class="grid gap-2 md:grid-cols-2">
+                    <div>
+                        <p class="font-medium text-green-800 bold">Nama instansi wajib ditulis lengkap, tidak boleh disingkat.</p>
                     <input
                         type="text"
                         name="nama_tempat"
@@ -80,13 +81,16 @@
                         value="{{ old('nama_tempat') }}"
                         required
                         autocomplete="off"
-                        class="input focus:ring-green-500 focus:border-green-500"
+                        class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500"
                     >
+                    </div>
 
-                    <select
+                    <div>
+                        <p class="font-medium text-green-800 bold">Jenis instansi</p>
+                        <select
                         name="jenis_tempat"
                         required
-                        class="input focus:ring-green-500 focus:border-green-500"
+                        class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500"
                     >
                         <option value="">-- Jenis Instansi --</option>
                         @foreach (['Pemerintah','Sekolah','PT','CV'] as $jenis)
@@ -96,7 +100,9 @@
                             </option>
                         @endforeach
                     </select>
-
+                    </div>
+                    <div>
+                        <p class="font-medium text-green-800 bold">No hp instansi</p>
                     <input
                         type="text"
                         name="no_hp"
@@ -106,8 +112,9 @@
                         value="{{ old('no_hp') }}"
                         required
                         autocomplete="off"
-                        class="input focus:ring-green-500 focus:border-green-500"
+                        class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500"
                     >
+                    </div>
 
                     {{-- Lokasi Maps --}}
                     <div>

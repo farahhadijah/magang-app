@@ -40,25 +40,21 @@
             <div>
                 <label class="block mb-1 text-sm font-medium text-green-800">Tanggal</label>
                 @php
-                    // Use Asia/Jakarta timezone explicitly so 'today' matches local date
                     $tz = 'Asia/Jakarta';
                     $today = \Carbon\Carbon::now($tz)->toDateString();
-
-                    // Determine max date: the earlier of PKL end and today
-                    $pklEnd = \Carbon\Carbon::parse($pkl->tgl_selesai)->toDateString();
-                    $maxDate = \Carbon\Carbon::createFromFormat('Y-m-d', $pklEnd, $tz)->lt(\Carbon\Carbon::createFromFormat('Y-m-d', $today, $tz))
-                        ? $pklEnd
-                        : $today;
-
-                    // Determine min date: the later of PKL start and today (prevent selecting past dates)
                     $pklStart = \Carbon\Carbon::parse($pkl->tgl_mulai)->toDateString();
-                    $minDate = \Carbon\Carbon::createFromFormat('Y-m-d', $pklStart, $tz)->gt(\Carbon\Carbon::createFromFormat('Y-m-d', $today, $tz))
-                        ? $pklStart
-                        : $today;
+                    $pklEnd = \Carbon\Carbon::parse($pkl->tgl_selesai)->toDateString();
+
+                    // max tetap hari ini atau akhir PKL (mana yang lebih kecil)
+                    $maxDate = \Carbon\Carbon::createFromFormat('Y-m-d', $pklEnd, $tz)->lt(
+                                    \Carbon\Carbon::createFromFormat('Y-m-d', $today, $tz)
+                                ) ? $pklEnd : $today;
                 @endphp
+
+
                 <input type="date"
                         name="tgl"
-                        min="{{ $minDate }}"
+                        min="{{ $pklStart }}"
                         max="{{ $maxDate }}"
                         value="{{ old('tgl', $today) }}"
                         required
