@@ -128,11 +128,12 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         Route::get('/nilai/{pkl}/create', [DosenNilaiPklController::class, 'create'])->name('nilai.create');
         Route::post('/nilai/{pkl}', [DosenNilaiPklController::class, 'store'])->name('nilai.store');
 
-
         // Laporan Akhir
         Route::get('/laporan', [DosenLaporanAkhirController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/{pkl}', [DosenLaporanAkhirController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{pkl}/approve', [DosenLaporanAkhirController::class, 'approve'])->name('laporan.approve');
+        Route::post('/laporan/{pkl}/reject', [DosenLaporanAkhirController::class, 'reject'])->name('laporan.reject');
+
     });
 
 /*
