@@ -6,6 +6,12 @@ use App\Models\Pkl;
 class NilaiPkl extends Model
 {
     public $timestamps = true;
+    protected $fillable = [
+    'id_pkl',
+    'nilai',
+    'keterangan',
+    'tgl_input',
+];
     protected $table = 'nilai_pkl';
     public function pkl()
     {

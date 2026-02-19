@@ -9,32 +9,33 @@
             @csrf
 
             <div>
-                <label>Nilai Angka</label>
+                <label class="block mb-1 font-medium">Nilai (0 - 100)</label>
                 <input type="number"
-                       name="nilai_angka"
+                       name="nilai"
+                       step="0.01"
                        min="0"
                        max="100"
                        required
                        class="w-full p-2 border rounded">
+                @error('nilai')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
-                <label>Nilai Huruf</label>
-                <input type="text"
-                       name="nilai_huruf"
-                       required
-                       class="w-full p-2 border rounded">
-            </div>
-
-            <div>
-                <label>Keterangan (opsional)</label>
+                <label class="block mb-1 font-medium">
+                    Keterangan (opsional)
+                </label>
                 <textarea name="keterangan"
                           class="w-full p-2 border rounded"></textarea>
+                @error('keterangan')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <button type="submit"
                     class="px-4 py-2 text-white bg-green-600 rounded">
-                Simpan Nilai
+                Simpan Nilai & Selesaikan PKL
             </button>
         </form>
 

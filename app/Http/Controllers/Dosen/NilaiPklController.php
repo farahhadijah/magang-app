@@ -57,16 +57,16 @@ class NilaiPklController extends Controller
             abort(403, 'Nilai sudah ada.');
         }
         $request->validate([
-            'nilai_angka' => 'required|numeric|min:0|max:100',
-            'nilai_huruf' => 'required|string|max:2',
-            'keterangan'  => 'nullable|string|max:2000',
+            'nilai'      => 'required|numeric|min:0|max:100',
+            'keterangan' => 'nullable|string|max:2000',
         ]);
         NilaiPkl::create([
-            'id_pkl'      => $pkl->id,
-            'nilai_angka' => $request->nilai_angka,
-            'nilai_huruf' => $request->nilai_huruf,
-            'keterangan'  => $request->keterangan,
+            'id_pkl'    => $pkl->id,
+            'nilai'     => $request->nilai,
+            'keterangan'=> $request->keterangan,
+            'tgl_input' => now(),
         ]);
+
         // 🔥 Set PKL selesai
         $pkl->update([
             'status' => 'selesai'

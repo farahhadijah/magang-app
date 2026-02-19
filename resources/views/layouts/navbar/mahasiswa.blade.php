@@ -68,7 +68,7 @@
         "
     >
         <i class="w-5 fa-solid fa-book"></i>
-        Logbook (Belum Aktif)
+        Logbook
     </div>
 @endif
 

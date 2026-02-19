@@ -41,37 +41,28 @@ class LaporanAkhir extends Model
     | BUSINESS LOGIC
     |--------------------------------------------------------------------------
     */
-
-    /**
-     * Approve laporan akhir
-     */
     public function approve($dosenId)
-    {
-        $this->update([
-            'status_approve' => 'approved',
-            'approved_by'    => $dosenId,
-            'approved_at'    => Carbon::now(),
-        ]);
+{
+    $this->update([
+        'status_approve' => 'approved',
+        'approved_by'    => $dosenId,
+        'approved_at'    => now(),
+        'catatan_dosen'  => null,
+    ]);
+}
 
-        // Auto selesaikan PKL
-        $this->pkl->selesaikanPkl();
-    }
 
     /**
      * Reject laporan akhir
      */
-    public function reject($dosenId, $catatan = null)
+    public function reject($dosenId, $catatan)
     {
         $this->update([
             'status_approve' => 'rejected',
             'approved_by'    => $dosenId,
-            'approved_at'    => Carbon::now(),
+            'approved_at'    => now(),
             'catatan_dosen'  => $catatan,
         ]);
-
-        // Kembalikan status PKL jadi aktif
-        $this->pkl->update([
-            'status' => 'aktif'
-        ]);
     }
+
 }

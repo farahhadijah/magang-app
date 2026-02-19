@@ -21,7 +21,7 @@ class LaporanAkhirController extends Controller
         return Pkl::whereHas('pengajuanPkl', function ($q) use ($user) {
                 $q->where('id_mhs', $user->mahasiswa->id);
             })
-            ->whereIn('status', ['aktif', 'menunggu_laporan'])
+            ->where('status', 'aktif')
             ->latest()
             ->first();
     }
@@ -98,9 +98,6 @@ class LaporanAkhirController extends Controller
                 'status_approve' => 'pending',
             ]);
         }
-
-        // 🔥 Set status PKL jadi menunggu laporan
-        $pkl->ajukanLaporan();
 
         return redirect()
             ->route('mahasiswa.laporan.index')
