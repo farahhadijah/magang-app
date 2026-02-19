@@ -95,9 +95,6 @@ class PengajuanPkl extends Model
     {
         return $query->where('status', 'pending_tu');
     }
-    /* ================= UI HELPER ================= */
-
-    /* ================= QUERY SCOPE ================= */
 public function scopeMunculUntukKaprodi($query)
 {
     return $query

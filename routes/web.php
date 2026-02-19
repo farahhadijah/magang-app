@@ -15,6 +15,8 @@ use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardCont
 use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookController;
 use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
 use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
+use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
+
 
 use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
 use App\Http\Controllers\Dosen\ReviewLogbookController;
@@ -101,10 +103,10 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::get('/laporan', [MahasiswaLaporanAkhirController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/create', [MahasiswaLaporanAkhirController::class, 'create'])->name('laporan.create');
         Route::post('/laporan', [MahasiswaLaporanAkhirController::class, 'store'])->name('laporan.store');
-        Route::post('/cek-kemiripan-tempat', 
-    [MahasiswaPengajuanController::class, 'cekKemiripanAjax']
-            )->name('pengajuan.cek-kemiripan');
-
+        Route::post('/cek-kemiripan-tempat', [MahasiswaPengajuanController::class, 'cekKemiripanAjax'] )->name('pengajuan.cek-kemiripan');
+        // nilai
+        Route::get('/nilai-pkl', [MahasiswaNilaiPklController::class, 'index'])->name('nilai.index');
+        Route::get('/sertifikat/{pkl}', function ($pklId) {return view('mahasiswa.nilai.sertifikat-dummy'); })->        name('sertifikat.dummy');
     });
 
 /*
@@ -133,7 +135,9 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         Route::get('/laporan/{pkl}', [DosenLaporanAkhirController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{pkl}/approve', [DosenLaporanAkhirController::class, 'approve'])->name('laporan.approve');
         Route::post('/laporan/{pkl}/reject', [DosenLaporanAkhirController::class, 'reject'])->name('laporan.reject');
-
+        // daftar nilai mahasiswa
+        Route::get('/nilai-pkl/daftar', [DosenNilaiPklController::class, 'daftar'])
+        ->name('nilai.daftar');
     });
 
 /*

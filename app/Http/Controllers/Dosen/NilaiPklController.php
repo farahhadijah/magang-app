@@ -74,4 +74,17 @@ class NilaiPklController extends Controller
         return redirect()->route('dosen.nilai.index')
             ->with('success', 'Nilai berhasil disimpan dan PKL selesai.');
     }
+    public function daftar()
+{
+    $dosenId = $this->getDosenId();
+
+    $pkls = Pkl::where('id_dosen', $dosenId)
+        ->where('status', 'selesai')
+        ->whereHas('nilaiPkl')
+        ->with(['pengajuanPkl.mahasiswa', 'nilaiPkl'])
+        ->orderByDesc('tgl_selesai')
+        ->get();
+
+    return view('dosen.nilai.daftar', compact('pkls'));
+}
 }
