@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pengajuan_pkl', function (Blueprint $table) {
-            $table->string('status', 30)->change();
+        Schema::table('logbook', function (Blueprint $table) {
+            $table->text('catatan')->nullable()->after('status_approve');
         });
     }
 
+
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::table('pengajuan_pkl', function (Blueprint $table) {
-            $table->enum('status', ['pending','approved','rejected'])->change();
+        Schema::table('logbook', function (Blueprint $table) {
+            //
         });
     }
-
 };

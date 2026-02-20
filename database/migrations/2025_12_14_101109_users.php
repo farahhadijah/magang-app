@@ -21,7 +21,8 @@ Schema::create('users', function (Blueprint $table) {
         'staf',
         'dosen',
         'staff_tu',
-        'kaprodi'
+        'kaprodi',
+        'mitra',
     ])->default('mahasiswa');
     
     // Hanya kolom, TANPA foreign key constraint

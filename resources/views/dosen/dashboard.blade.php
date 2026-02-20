@@ -10,14 +10,14 @@
         {{-- Welcome --}}
         <div class="p-6 transition border border-green-200 shadow-lg rounded-xl bg-green-50 hover:shadow-xl">
             <h1 class="flex items-center gap-2 text-2xl font-bold text-green-800">
-                <i class="fa-solid fa-hand-wave"></i> Selamat datang, Dosen
+                <i class="fa-solid fa-hand-wave"></i> Selamat datang, {{ auth()->user()->name }}
             </h1>
             <p class="mt-2 text-green-700">
                 Berikut ringkasan kegiatan bimbingan PKL.
             </p>
         </div>
 
-        {{-- Ringkasan --}}
+        {{-- Ringkasan Statistik --}}
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 
             {{-- Mahasiswa Bimbingan --}}
@@ -26,7 +26,7 @@
                     <i class="fa-solid fa-users"></i> Mahasiswa Bimbingan
                 </h3>
                 <p class="px-3 py-1 mt-2 text-3xl font-bold text-green-900 bg-green-100 rounded-full">
-                    0
+                    {{ $mahasiswaCount ?? 0 }}
                 </p>
             </div>
 
@@ -36,7 +36,7 @@
                     <i class="fa-solid fa-clock"></i> Logbook Menunggu Review
                 </h3>
                 <p class="px-3 py-1 mt-2 text-3xl font-bold rounded-full text-amber-900 bg-amber-100">
-                    0
+                    {{ $logbookPendingCount ?? 0 }}
                 </p>
             </div>
 
@@ -46,36 +46,10 @@
                     <i class="fa-solid fa-check-circle"></i> PKL Selesai
                 </h3>
                 <p class="px-3 py-1 mt-2 text-3xl font-bold text-green-900 bg-green-100 rounded-full">
-                    0
+                    {{ $pklSelesaiCount ?? 0 }}
                 </p>
             </div>
 
-        </div>
-
-        {{-- Aksi Cepat --}}
-        <div class="p-6 transition border border-green-200 shadow-lg rounded-xl bg-green-50 hover:shadow-xl">
-            <h3 class="flex items-center gap-2 mb-4 text-lg font-semibold text-green-800">
-                <i class="fa-solid fa-bolt"></i> Aksi Cepat
-            </h3>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-
-                <a href="{{ route('dosen.mahasiswa.bimbingan') }}"
-                    class="flex items-center justify-center block gap-2 p-5 font-medium text-center text-green-800 transition bg-white border border-green-300 shadow rounded-xl hover:bg-green-100">
-                    <i class="fa-solid fa-users"></i> Daftar Mahasiswa Bimbingan
-                </a>
-
-                <a href="#"
-                   class="flex items-center justify-center block gap-2 p-5 font-medium text-center transition bg-white border shadow text-amber-800 border-amber-300 rounded-xl hover:bg-amber-100">
-                    <i class="fa-solid fa-book"></i> Review Logbook
-                </a>
-
-                <a href="#"
-                   class="flex items-center justify-center block gap-2 p-5 font-medium text-center transition bg-white border shadow text-amber-800 border-amber-300 rounded-xl hover:bg-amber-100">
-                    <i class="fa-solid fa-clipboard-check"></i> Penilaian PKL
-                </a>
-
-            </div>
         </div>
 
         {{-- Informasi --}}

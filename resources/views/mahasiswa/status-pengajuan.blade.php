@@ -1,3 +1,4 @@
+
 <x-app-layout>
 
     <x-slot name="title">
@@ -69,52 +70,64 @@
 
 
         {{-- ================= TIMELINE ================= --}}
-        @php
-            $status = $pengajuan->status;
+@php
+    $status = $pengajuan->status;
 
-            $steps = [
-                'pengajuan'  => true,
-                'verifikasi' => in_array($status, ['pending_kaprodi', 'disetujui']),
-                'berjalan'   => $status === 'disetujui',
-                'selesai'    => false,
-            ];
-        @endphp
+    $timeline = [
+        'pengajuan' => [
+            'label' => 'Pengajuan',
+            'active' => true,
+        ],
+        'verifikasi_tu' => [
+            'label' => 'Verifikasi TU',
+            'active' => in_array($status, [
+                'diverifikasi_tu',
+                'pending_kaprodi',
+                'disetujui'
+            ]),
+        ],
+        'kaprodi' => [
+            'label' => 'Persetujuan Kaprodi',
+            'active' => in_array($status, [
+                'pending_kaprodi',
+                'disetujui'
+            ]),
+        ],
+        'selesai' => [
+            'label' => 'Selesai',
+            'active' => $status === 'disetujui',
+        ],
+    ];
+@endphp
 
-        <div class="p-6 bg-white border border-green-100 shadow rounded-xl">
-            <h3 class="mb-6 text-lg font-semibold text-green-800">
-                Timeline Pengajuan PKL
-            </h3>
+<div class="p-6 bg-white border border-green-100 shadow rounded-xl">
+    <h3 class="mb-6 text-lg font-semibold text-green-800">
+        Timeline Pengajuan PKL
+    </h3>
 
-            <div class="relative flex justify-between">
-                <div class="absolute left-0 right-0 h-1 bg-green-100 top-4"></div>
+    <div class="relative flex justify-between">
+        <div class="absolute left-0 right-0 h-1 bg-green-100 top-4"></div>
 
-                @foreach ([
-                    'pengajuan'  => 'Pengajuan',
-                    'verifikasi' => 'Verifikasi TU',
-                    'berjalan'   => 'Disetujui Kaprodi',
-                    'selesai'    => 'Selesai'
-                ] as $key => $label)
+        @foreach ($timeline as $step)
+            <div class="relative z-10 flex flex-col items-center w-1/4">
+                <div class="
+                    w-9 h-9 flex items-center justify-center rounded-full font-semibold
+                    {{ $step['active']
+                        ? 'bg-green-600 text-white ring-4 ring-green-100'
+                        : 'bg-gray-300 text-gray-600'
+                    }}">
+                    {{ $step['active'] ? '✓' : $loop->iteration }}
+                </div>
 
-                    @php $active = $steps[$key]; @endphp
-
-                    <div class="relative z-10 flex flex-col items-center w-1/4">
-                        <div class="
-                            w-9 h-9 flex items-center justify-center rounded-full font-semibold
-                            {{ $active
-                                ? 'bg-green-600 text-white ring-4 ring-green-100'
-                                : 'bg-gray-300 text-gray-600'
-                            }}">
-                            {{ $active ? '✓' : $loop->iteration }}
-                        </div>
-
-                        <span class="mt-2 text-sm font-medium
-                            {{ $active ? 'text-green-700' : 'text-gray-500' }}">
-                            {{ $label }}
-                        </span>
-                    </div>
-                @endforeach
+                <span class="mt-2 text-sm font-medium
+                    {{ $step['active'] ? 'text-green-700' : 'text-gray-500' }}">
+                    {{ $step['label'] }}
+                </span>
             </div>
-        </div>
+        @endforeach
+    </div>
+</div>
+
 
         {{-- ================= STATUS ================= --}}
         <div class="p-6 bg-white border border-green-100 shadow rounded-xl">
@@ -182,24 +195,83 @@
                 Dokumen Pengajuan
             </h3>
 
-            @if ($pengajuan->dokumenPengajuan && $pengajuan->dokumenPengajuan->count())
-                <ul class="space-y-2 text-sm">
-                    @foreach ($pengajuan->dokumenPengajuan as $doc)
-                        <li>
-                            <a href="{{ asset('storage/' . $doc->path_file) }}"
-                               target="_blank"
-                               class="text-green-700 hover:text-green-900">
-                                📄 {{ $doc->jenis_dokumen }}
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            @else
+            @forelse ($pengajuan->dokumenPengajuan as $doc)
+                <div class="p-4 mb-4 border rounded-lg">
+
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between">
+                        <a href="{{ asset('storage/' . $doc->path_file) }}"
+                        target="_blank"
+                        class="font-medium text-green-700 hover:underline">
+                            📄 {{ $doc->jenis_dokumen }}
+                        </a>
+
+                        @php
+                            $badge = match($doc->status_verifikasi) {
+                                'valid'   => 'bg-green-100 text-green-800',
+                                'invalid' => 'bg-red-100 text-red-800',
+                                default   => 'bg-amber-100 text-amber-800',
+                            };
+                        @endphp
+
+                        <span class="px-3 py-1 text-xs font-medium rounded-full {{ $badge }}">
+                            {{ ucfirst($doc->status_verifikasi) }}
+                        </span>
+                    </div>
+
+                    {{-- Catatan TU --}}
+                    @if ($doc->status_verifikasi === 'invalid' && $doc->catatan)
+                        <p class="mt-2 text-sm text-red-700">
+                            <strong>Catatan TU:</strong>
+                            {{ $doc->catatan }}
+                        </p>
+                    @endif
+
+                    {{-- Upload ulang --}}
+                    @if ($pengajuan->status === 'ditolak_tu' && $doc->status_verifikasi === 'invalid')
+                        <form method="POST"
+                            action="{{ route('mahasiswa.pengajuan.dokumen.upload-ulang', $doc->id) }}"
+                            enctype="multipart/form-data"
+                            class="mt-4 space-y-2">
+                            @csrf
+
+                            <input type="file"
+                                name="dokumen"
+                                accept=".pdf,.doc,.docx"
+                                required
+                                class="block w-full text-sm text-gray-600 file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700">
+
+                            <button type="submit"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                                Upload Ulang Dokumen
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            @empty
                 <p class="text-sm text-gray-500">
                     Tidak ada dokumen terunggah.
                 </p>
+            @endforelse
+
+            {{-- ================= SURAT PENGANTAR ================= --}}
+            @if($pengajuan->pkl && $pengajuan->pkl->suratPengantar)
+                <div class="p-4 mt-6 border border-green-200 bg-green-50 rounded-xl">
+                    <h4 class="mb-3 font-semibold text-green-800">
+                        📄 Surat Pengantar PKL
+                    </h4>
+
+                    <a href="{{ asset('storage/' . $pengajuan->pkl->suratPengantar->path_file) }}"
+                    target="_blank"
+                    class="inline-block px-5 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        Download Surat Pengantar
+                    </a>
+                </div>
             @endif
+
         </div>
+
+
 
         {{-- ================= INFO PKL (SETELAH DISETUJUI) ================= --}}
         @if ($pengajuan->pkl)

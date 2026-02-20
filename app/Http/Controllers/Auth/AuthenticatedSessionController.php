@@ -34,7 +34,7 @@ public function store(Request $request): RedirectResponse
 
     if (!Auth::attempt($credentials)) {
         throw ValidationException::withMessages([
-            'username' => __('Username atau password salah.'),
+            'username' => __('Username / password salah.'),
         ]);
     }
 

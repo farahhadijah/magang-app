@@ -34,20 +34,24 @@
                     @else
                         @php
                             $badge = match($pengajuan->status) {
-                                'pending_tu'       => 'bg-amber-100 text-amber-800',
-                                'pending_kaprodi'  => 'bg-blue-100 text-blue-800',
-                                'disetujui'        => 'bg-green-100 text-green-800',
-                                'ditolak_tu'       => 'bg-red-100 text-red-800',
-                                default            => 'bg-gray-100 text-gray-800',
-                            };
+                            'pending_tu'        => 'bg-amber-100 text-amber-800',
+                            'diverifikasi_tu'   => 'bg-indigo-100 text-indigo-800',
+                            'pending_kaprodi'   => 'bg-blue-100 text-blue-800',
+                            'disetujui'         => 'bg-green-100 text-green-800',
+                            'ditolak_tu', 
+                            'ditolak_kaprodi'   => 'bg-red-100 text-red-800',
+                            default             => 'bg-gray-100 text-gray-800',
+                        };
 
                             $label = match($pengajuan->status) {
-                                'pending_tu'      => 'Menunggu Verifikasi TU',
-                                'pending_kaprodi' => 'Menunggu Persetujuan Kaprodi',
-                                'disetujui'       => 'Disetujui',
-                                'ditolak_tu'      => 'Ditolak TU',
-                                default           => ucfirst($pengajuan->status),
-                            };
+                            'pending_tu'        => 'Menunggu Verifikasi TU',
+                            'diverifikasi_tu'   => 'Terverifikasi Administrasi',
+                            'pending_kaprodi'   => 'Menunggu Persetujuan Kaprodi',
+                            'disetujui'         => 'Disetujui Kaprodi',
+                            'ditolak_tu'        => 'Ditolak TU',
+                            'ditolak_kaprodi'   => 'Ditolak Kaprodi',
+                            default             => ucfirst($pengajuan->status),
+                        };
                         @endphp
 
                         <span class="inline-block px-3 py-1 text-sm font-medium rounded-full {{ $badge }}">
@@ -88,11 +92,19 @@
                 $status = $pengajuan->status;
 
                 $steps = [
-                    'Pengajuan'        => true,
-                    'Verifikasi TU'    => in_array($status, ['pending_kaprodi', 'disetujui']),
-                    'Persetujuan Kaprodi' => $status === 'disetujui',
-                    'PKL Berjalan'     => false,
-                ];
+                'Pengajuan' => true,
+                'Verifikasi TU' => in_array($status, [
+                    'diverifikasi_tu',
+                    'pending_kaprodi',
+                    'disetujui'
+                ]),
+                'Persetujuan Kaprodi' => in_array($status, [
+                    'pending_kaprodi',
+                    'disetujui'
+                ]),
+                'PKL Berjalan' => $pengajuan->pkl?->status === 'aktif',
+            ];
+
             @endphp
 
             <div class="p-6 bg-white border border-green-200 shadow-sm rounded-xl">

@@ -67,6 +67,9 @@
 
             @elseif(auth()->user()->role === 'kaprodi')
                 @include('layouts.navbar.kaprodi')
+                
+            @elseif(auth()->user()->role === 'mitra')
+                @include('layouts.navbar.mitra')
             @endif
 
 

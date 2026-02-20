@@ -1,11 +1,14 @@
 <x-guest-layout>
+    <x-slot name="title">
+        Login - MagangApp
+    </x-slot>
     <div class="flex items-center justify-center px-4 bg-green-50">
         <div class="w-full max-w-md p-8 transition bg-white border border-green-200 shadow-lg rounded-xl hover:shadow-2xl">
 
             {{-- Header --}}
             <div class="mb-6 text-center">
                 <h1 class="flex items-center justify-center gap-2 text-2xl font-bold text-green-900">
-                    <i class="fa-solid fa-lock"></i> Masuk ke MagangApp
+                    <i class="fa-solid fa-lock"></i> Sibolang MagangApp
                 </h1>
                 <p class="mt-1 text-sm text-green-700">Silakan login menggunakan Username & Password Anda</p>
             </div>

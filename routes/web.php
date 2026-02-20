@@ -1,49 +1,43 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| CONTROLLERS
-|--------------------------------------------------------------------------
-*/
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\FirstLoginController;
 
-// ADMIN
 use App\Http\Controllers\Admin\UserController;
 
-// MAHASISWA
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
-use App\Http\Controllers\Mahasiswa\PengajuanPklController;
-use App\Http\Controllers\Mahasiswa\LogbookController;
+use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookController;
+use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
+use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
+use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
 
-// DOSEN
+
 use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
 use App\Http\Controllers\Dosen\ReviewLogbookController;
-use App\Http\Controllers\Dosen\PenilaianPKLController;
+use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirController;
+use App\Http\Controllers\Dosen\NilaiPklController as DosenNilaiPklController;
 
-// STAFF TU
-use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanPKLController;
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
+use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanController;
 
-// KAPRODI
-use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanPKLController;
-use App\Http\Controllers\Kaprodi\MahasiswaController;
-use App\Http\Controllers\Kaprodi\NilaiController;
+use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanController;
+use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
+use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
+
 /*
 |--------------------------------------------------------------------------
 | ROOT & AUTH
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-    return redirect()->route('login');
+    return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -65,28 +59,19 @@ Route::get('/db-test', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+    // First login flow
+    Route::get('/first-login', [FirstLoginController::class, 'show'])->name('password.first');
+    Route::post('/first-login', [FirstLoginController::class, 'update'])->name('password.first.update');
 
-    // FIRST LOGIN
-    Route::get('/first-login', [FirstLoginController::class, 'show'])
-        ->name('password.first');
-
-    Route::post('/first-login', [FirstLoginController::class, 'update'])
-        ->name('password.first.update');
-
-    // SINGLE ENTRY DASHBOARD
+    // Dashboard (single entry)
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('first.login')
         ->name('dashboard');
 
-    // PROFILE (ALL ROLES)
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
-
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
-
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+    // Profile (all roles)
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 /*
@@ -98,29 +83,30 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
     ->group(function () {
+        Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
 
-        Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])
-            ->name('dashboard');
+        // Pengajuan PKL
+        Route::get('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
+        Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
+        Route::get('/status-pengajuan', [MahasiswaPengajuanController::class, 'status'])->name('pengajuan.status');
+        Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen'])
+            ->name('pengajuan.dokumen.upload-ulang');
 
-        // PENGAJUAN PKL
-        Route::get('/pengajuan-pkl', [PengajuanPklController::class, 'create'])
-            ->name('pengajuan.create');
-
-        Route::post('/pengajuan-pkl', [PengajuanPklController::class, 'store'])
-            ->name('pengajuan.store');
-
-        Route::get('/status-pengajuan', [PengajuanPklController::class, 'status'])
-            ->name('pengajuan.status');
-
-        // LOGBOOK
-        Route::get('/logbook', [LogbookController::class, 'index'])
-            ->name('logbook.index');
-
-        Route::get('/logbook/create', [LogbookController::class, 'create'])
-            ->name('logbook.create');
-
-        Route::post('/logbook', [LogbookController::class, 'store'])
-            ->name('logbook.store');
+        // Logbook
+        Route::get('/logbook', [MahasiswaLogbookController::class, 'index'])->name('logbook.index');
+        Route::get('/logbook/create', [MahasiswaLogbookController::class, 'create'])->name('logbook.create');
+        Route::post('/logbook', [MahasiswaLogbookController::class, 'store'])->name('logbook.store');
+        Route::get('/logbook/{logbook}/edit', [MahasiswaLogbookController::class, 'edit'])->name('logbook.edit');
+        Route::put('/logbook/{logbook}', [MahasiswaLogbookController::class, 'update'])->name('logbook.update');
+        Route::delete('/logbook/{logbook}', [MahasiswaLogbookController::class, 'destroy'])->name('logbook.destroy');
+        // Laporan Akhir
+        Route::get('/laporan', [MahasiswaLaporanAkhirController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/create', [MahasiswaLaporanAkhirController::class, 'create'])->name('laporan.create');
+        Route::post('/laporan', [MahasiswaLaporanAkhirController::class, 'store'])->name('laporan.store');
+        Route::post('/cek-kemiripan-tempat', [MahasiswaPengajuanController::class, 'cekKemiripanAjax'] )->name('pengajuan.cek-kemiripan');
+        // nilai
+        Route::get('/nilai-pkl', [MahasiswaNilaiPklController::class, 'index'])->name('nilai.index');
+        Route::get('/sertifikat/{pkl}', function ($pklId) {return view('mahasiswa.nilai.sertifikat-dummy'); })->        name('sertifikat.dummy');
     });
 
 /*
@@ -132,30 +118,26 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->prefix('dosen')
     ->name('dosen.')
     ->group(function () {
+        Route::view('/dashboard', 'dosen.dashboard')->name('dashboard');
+        Route::get('/mahasiswa-bimbingan', [MahasiswaBimbinganController::class, 'index'])->name('mahasiswa.bimbingan');
+        Route::get('/logbook', [ReviewLogbookController::class, 'index'])->name('logbook.index');
 
-        Route::view('/dashboard', 'dosen.dashboard')
-            ->name('dashboard');
+        Route::put('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review'])->name('logbook.review');
+        Route::put('/logbook/{logbook}/review-ajax', [ReviewLogbookController::class, 'reviewAjax'])->name('logbook.review-ajax');
 
-        // MAHASISWA BIMBINGAN
-        Route::get('/mahasiswa-bimbingan', [MahasiswaBimbinganController::class, 'index'])
-            ->name('mahasiswa.bimbingan');
+        // Nilai PKL
+        Route::get('/nilai', [DosenNilaiPklController::class, 'index'])->name('nilai.index');
+        Route::get('/nilai/{pkl}/create', [DosenNilaiPklController::class, 'create'])->name('nilai.create');
+        Route::post('/nilai/{pkl}', [DosenNilaiPklController::class, 'store'])->name('nilai.store');
 
-        // REVIEW LOGBOOK
-        Route::get('/mahasiswa/{mahasiswa}/logbook', [ReviewLogbookController::class, 'index'])
-            ->name('logbook.index');
-
-        Route::post('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review'])
-            ->name('logbook.review');
-
-        // PENILAIAN PKL
-        Route::get('/penilaian', [PenilaianPKLController::class, 'index'])
-            ->name('penilaian.index');
-
-        Route::get('/penilaian/{mahasiswa}/create', [PenilaianPKLController::class, 'create'])
-            ->name('penilaian.create');
-
-        Route::post('/penilaian/{mahasiswa}', [PenilaianPKLController::class, 'store'])
-            ->name('penilaian.store');
+        // Laporan Akhir
+        Route::get('/laporan', [DosenLaporanAkhirController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/{pkl}', [DosenLaporanAkhirController::class, 'show'])->name('laporan.show');
+        Route::post('/laporan/{pkl}/approve', [DosenLaporanAkhirController::class, 'approve'])->name('laporan.approve');
+        Route::post('/laporan/{pkl}/reject', [DosenLaporanAkhirController::class, 'reject'])->name('laporan.reject');
+        // daftar nilai mahasiswa
+        Route::get('/nilai-pkl/daftar', [DosenNilaiPklController::class, 'daftar'])
+        ->name('nilai.daftar');
     });
 
 /*
@@ -167,31 +149,31 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
     ->name('staff.')
     ->group(function () {
+        Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/pengajuan/histori-ditolak', [StaffPengajuanController::class, 'historiDitolak'])->name('pengajuan.histori_ditolak');
 
-        Route::get('/dashboard', [StaffPengajuanPKLController::class, 'dashboard'])
-            ->name('dashboard');
+        Route::post('/dokumen/{id}/valid', [StaffDokumenController::class, 'valid'])->name('dokumen.valid');
+        Route::post('/dokumen/{id}/invalid', [StaffDokumenController::class, 'invalid'])->name('dokumen.invalid');
 
-        // Histori pengajuan ditolak → harus DI ATAS {id}
-        Route::get('/pengajuan/histori-ditolak', [StaffPengajuanPKLController::class, 'historiDitolak'])
-            ->name('pengajuan.histori_ditolak');
+        Route::get('/pengajuan', [StaffPengajuanController::class, 'index'])->name('pengajuan.index');
+        Route::get('/pengajuan/{id}', [StaffPengajuanController::class, 'show'])->name('pengajuan.show');
+        Route::post('/pengajuan/{id}/approve', [StaffPengajuanController::class, 'approve'])->name('pengajuan.approve');
+        Route::post('/pengajuan/{id}/reject', [StaffPengajuanController::class, 'reject'])->name('pengajuan.reject');
+        
+        Route::get('/mitra', 
+        [StaffPengajuanController::class, 'manajemenMitra']
+        )->name('mitra.index');
+        
+        Route::get('/mitra/{id}/akun',
+            [StaffPengajuanController::class, 'showAkunMitra']
+        )->name('mitra.akun');
 
-        // Daftar pengajuan TU
-        Route::get('/pengajuan', [StaffPengajuanPKLController::class, 'index'])
-            ->name('pengajuan.index');
+        Route::post('/mitra/{id}',
+            [StaffPengajuanController::class, 'storeMitra']
+        )->name('mitra.store');
 
-        // Detail pengajuan → parameter {id}
-        Route::get('/pengajuan/{id}', [StaffPengajuanPKLController::class, 'show'])
-            ->name('pengajuan.show');
 
-        // Approve / Reject
-        Route::post('/pengajuan/{id}/approve', [StaffPengajuanPKLController::class, 'approve'])
-            ->name('pengajuan.approve');
-
-        Route::post('/pengajuan/{id}/reject', [StaffPengajuanPKLController::class, 'reject'])
-            ->name('pengajuan.reject');
     });
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -202,12 +184,8 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-
-        Route::view('/dashboard', 'admin.dashboard')
-            ->name('dashboard');
-
-        Route::resource('users', UserController::class)
-            ->only(['create', 'store']);
+        Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
+        Route::resource('users', UserController::class)->only(['create', 'store']);
     });
 
 /*
@@ -215,21 +193,45 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
 | KAPRODI AREA
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth','role:kaprodi'])
+Route::middleware(['auth', 'role:kaprodi'])
     ->prefix('kaprodi')
     ->name('kaprodi.')
-    ->group(function(){
-        Route::get('/dashboard',[KaprodiPengajuanPKLController::class,'dashboard'])->name('dashboard');
-        Route::get('/mahasiswa', [MahasiswaController::class, 'index'])
-            ->name('mahasiswa.index');
-        Route::get('/pengajuan',[KaprodiPengajuanPKLController::class,'index'])->name('pengajuan.index');
-        Route::get('/nilai', [NilaiController::class, 'index'])
-            ->name('nilai.index');
-        Route::get('/pengajuan/{id}',[KaprodiPengajuanPKLController::class,'show'])->name('pengajuan.show');
-        Route::post('/pengajuan/{id}/approve',[KaprodiPengajuanPKLController::class,'approve'])->name('pengajuan.approve');
-        Route::post('/pengajuan/{id}/reject',[KaprodiPengajuanPKLController::class,'reject'])->name('pengajuan.reject');
-        Route::get('/histori-ditolak',[KaprodiPengajuanPKLController::class,'historiDitolak'])->name('pengajuan.histori_ditolak');
+    ->group(function () {
+        Route::get('/dashboard', [KaprodiPengajuanController::class, 'dashboard'])->name('dashboard');
+        Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
+        Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
+        Route::get('/nilai', [KaprodiNilaiController::class, 'index'])->name('nilai.index');
+        Route::get('/pengajuan/{id}', [KaprodiPengajuanController::class, 'show'])->name('pengajuan.show');
+        Route::post('/pengajuan/{id}/approve', [KaprodiPengajuanController::class, 'approve'])->name('pengajuan.approve');
+        Route::post('/pengajuan/{id}/reject', [KaprodiPengajuanController::class, 'reject'])->name('pengajuan.reject');
+        Route::get('/histori-ditolak', [KaprodiPengajuanController::class, 'historiDitolak'])->name('pengajuan.histori_ditolak');
     });
+
+/*
+|--------------------------------------------------------------------------
+| MITRA AREA
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'first.login', 'role:mitra'])
+    ->prefix('mitra')
+    ->name('mitra.')
+    ->group(function () {
+
+        Route::get('/dashboard', 
+            [App\Http\Controllers\Mitra\MitraController::class, 'dashboard']
+        )->name('dashboard');
+
+        Route::get('/mahasiswa', [App\Http\Controllers\Mitra\MitraController::class, 'mahasiswa'])
+            ->name('mahasiswa');
+
+        // Daftar mahasiswa yang sudah mengisi logbook (index untuk mitra)
+        Route::get('/logbook', [App\Http\Controllers\Mitra\MitraController::class, 'logbookList'])
+            ->name('logbook.index');
+
+        Route::get('/logbook/{pkl}', [App\Http\Controllers\Mitra\MitraController::class, 'logbook'])
+            ->name('logbook');
+    });
+
 
 /*
 |--------------------------------------------------------------------------

@@ -13,14 +13,22 @@ class DashboardController extends Controller
     switch ($user->role) {
         case 'mahasiswa':
             return redirect()->route('mahasiswa.dashboard');
+
         case 'dosen':
             return redirect()->route('dosen.dashboard');
+
         case 'staff_tu':
             return redirect()->route('staff.dashboard');
+
         case 'admin':
             return redirect()->route('admin.dashboard');
+
         case 'kaprodi':
             return redirect()->route('kaprodi.dashboard');
+
+        case 'mitra': // 🔥 TAMBAHKAN INI
+            return redirect()->route('mitra.dashboard');
+
         default:
             abort(403);
     }

@@ -47,16 +47,19 @@
             <p class="text-sm text-amber-700">
                 Form ini digunakan untuk
                 <b>mengajukan permohonan PKL</b>.
-                Data akan diverifikasi oleh <b>Staff TU</b> sebelum diproses lebih lanjut.
+                Data akan diverifikasi oleh <b>Staff TU</b>.
             </p>
         </div>
 
         {{-- ================= FORM ================= --}}
-        <form method="POST"
+        <form id="formPengajuan"
+              method="POST"
               action="{{ route('mahasiswa.pengajuan.store') }}"
               enctype="multipart/form-data"
               class="p-6 space-y-6 bg-white border border-green-100 shadow rounded-xl">
             @csrf
+
+            <input type="hidden" name="force_create" id="force_create" value="0">
 
             {{-- ================= DATA TEMPAT ================= --}}
             <div>
@@ -66,59 +69,70 @@
 
                 <div class="grid gap-4 md:grid-cols-2">
 
-                    <input
-                        type="text"
-                        name="nama_tempat"
-                        placeholder="Nama Instansi / Perusahaan"
-                        value="{{ old('nama_tempat') }}"
-                        required
-                        autocomplete="off"
-                        class="input focus:ring-green-500 focus:border-green-500"
-                    >
+                    <div>
+                        <p class="font-medium text-green-800">
+                            Nama instansi wajib ditulis lengkap
+                        </p>
+                        <input
+                            type="text"
+                            name="nama_tempat"
+                            value="{{ old('nama_tempat') }}"
+                            required
+                            autocomplete="off"
+                            class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500"
+                        >
+                        <div id="warningTempat" class="hidden mt-2 text-sm text-amber-600"></div>
+                    </div>
 
-                    <select
-                        name="jenis_tempat"
-                        required
-                        class="input focus:ring-green-500 focus:border-green-500"
-                    >
-                        <option value="">-- Jenis Instansi --</option>
-                        @foreach (['Pemerintah','Sekolah','PT','CV'] as $jenis)
-                            <option value="{{ $jenis }}"
-                                @selected(old('jenis_tempat') === $jenis)>
-                                {{ $jenis }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div>
+                        <p class="font-medium text-green-800">
+                            Jenis instansi
+                        </p>
+                        <select
+                            name="jenis_tempat"
+                            required
+                            class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500"
+                        >
+                            <option value="">-- Jenis Instansi --</option>
+                            @foreach (['Pemerintah','Sekolah','PT','CV'] as $jenis)
+                                <option value="{{ $jenis }}"
+                                    @selected(old('jenis_tempat') === $jenis)>
+                                    {{ $jenis }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                    <input
-                        type="text"
-                        name="no_hp"
-                        placeholder="No HP / Telepon Instansi"
-                        value="{{ old('no_hp') }}"
-                        required
-                        autocomplete="off"
-                        class="input focus:ring-green-500 focus:border-green-500"
-                    >
+                    <div>
+                        <p class="font-medium text-green-800">
+                            No HP instansi
+                        </p>
+                        <input
+                            type="text"
+                            name="no_hp"
+                            pattern="^08[0-9]{7,14}$"
+                            value="{{ old('no_hp') }}"
+                            required
+                            autocomplete="off"
+                            class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500"
+                        >
+                    </div>
 
-                    {{-- Lokasi Maps --}}
                     <div>
                         <label class="block mb-1 font-medium text-green-800">
                             Lokasi Instansi (Google Maps)
-                            <span class="text-red-500">*</span>
                         </label>
-
                         <input
-                            type="text"
+                            type="url"
                             name="lokasi_maps"
                             value="{{ old('lokasi_maps') }}"
-                            placeholder="https://maps.google.com/?q=Nama+Instansi"
+                            pattern=".*google\..*"
                             required
                             autocomplete="off"
                             class="block w-full border-gray-300 rounded-lg focus:border-green-500 focus:ring-green-500"
                         >
-
                         <p class="mt-1 text-xs text-gray-500">
-                            Buka Google Maps → cari lokasi → klik <b>Bagikan</b> → salin link.
+                            Salin link dari fitur Bagikan di Google Maps.
                         </p>
                     </div>
 
@@ -127,24 +141,39 @@
 
             {{-- ================= DOKUMEN ================= --}}
             <div>
-                <label class="block mb-1 font-medium text-green-800">
-                    Upload KHS (Wajib)
-                    <span class="text-red-500">*</span>
-                </label>
+                <h4 class="mb-3 font-semibold text-green-800">
+                    Upload Dokumen Wajib
+                </h4>
 
-                <input
-                    type="file"
-                    name="dokumen"
-                    accept=".pdf,.doc,.docx"
-                    required
-                    class="block w-full text-sm text-gray-600 file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700"
-                >
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">
+                        KHS Terbaru *
+                    </label>
+                    <input type="file"
+                        name="dokumen_khs"
+                        required
+                        accept=".pdf,.doc,.docx">
+                </div>
 
-                <p class="mt-1 text-xs text-gray-500">
-                    Upload <strong>KHS terbaru</strong> (PDF / DOC).
-                    <br>
-                    Dokumen lain <strong>tidak diterima</strong>.
-                </p>
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">
+                        Bukti Pembayaran PKL *
+                    </label>
+                    <input type="file"
+                        name="dokumen_pembayaran"
+                        required
+                        accept=".pdf,.jpg,.png">
+                </div>
+
+                <div>
+                    <label class="block mb-1 font-medium text-green-800">
+                        Sertifikat Studi Tour *
+                    </label>
+                    <input type="file"
+                        name="dokumen_studi_tour"
+                        required
+                        accept=".pdf,.doc,.docx">
+                </div>
             </div>
 
             {{-- ================= BUTTON ================= --}}
@@ -155,11 +184,8 @@
                     Kembali
                 </a>
 
-                <button
-                    type="submit"
-                    class="px-5 py-2 text-sm font-medium text-white transition bg-green-600 rounded-lg hover:bg-green-700"
-                    onclick="this.disabled=true;this.innerText='Mengirim...';this.form.submit();"
-                >
+                <button type="submit"
+                    class="px-5 py-2 text-sm font-medium text-white transition bg-green-600 rounded-lg hover:bg-green-700">
                     <i class="mr-1 fa-solid fa-paper-plane"></i>
                     Ajukan PKL
                 </button>
@@ -168,5 +194,57 @@
         </form>
 
     </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const inputNama = document.querySelector('input[name="nama_tempat"]');
+    const warningBox = document.getElementById('warningTempat');
+
+    let timeout = null;
+
+    inputNama.addEventListener('input', function () {
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+
+            if (inputNama.value.length < 4) {
+                warningBox.classList.add('hidden');
+                return;
+            }
+
+            fetch("{{ route('mahasiswa.pengajuan.cek-kemiripan') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    nama_tempat: inputNama.value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.mirip) {
+                    warningBox.innerHTML =
+                        `⚠️ Nama ini mirip dengan <b>${data.nama_mirip}</b>. 
+                         Pastikan ini memang tempat yang berbeda, jika ya abaikan pesan ini`;
+                    warningBox.classList.remove('hidden');
+                } else {
+                    warningBox.classList.add('hidden');
+                }
+
+            });
+
+        }, 600); // delay supaya tidak spam request
+
+    });
+
+});
+</script>
+
+
 
 </x-app-layout>
