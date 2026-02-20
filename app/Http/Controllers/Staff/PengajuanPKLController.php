@@ -27,7 +27,7 @@ class PengajuanPklController extends Controller
             ])
             ->where('status', 'pending_tu')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(9);
         return view('staff.pengajuan.index', compact('pengajuans'));
     }
     /**
@@ -129,17 +129,19 @@ class PengajuanPklController extends Controller
      * HISTORI DITOLAK TU
      * ===============================
      */
-    public function historiDitolak()
-    {
-        $pengajuans = PengajuanPkl::with([
-                'mahasiswa',
-                'tempatPkl'
-            ])
-            ->where('status', 'ditolak_tu')
-            ->orderBy('updated_at', 'desc')
-            ->get();
-        return view('staff.pengajuan.histori_ditolak', compact('pengajuans'));
-    }
+    public function histori()
+{
+    $verifikasis = \App\Models\Verifikasi::with([
+            'pengajuan.mahasiswa',
+            'pengajuan.tempatPkl',
+            'user'
+        ])
+        ->where('level', 'tu')
+        ->orderBy('tgl_verifikasi', 'desc')
+        ->paginate(9); 
+
+    return view('staff.pengajuan.histori', compact('verifikasis'));
+}
 
     public function storeMitra(Request $request, $id)
 {
@@ -173,30 +175,41 @@ class PengajuanPklController extends Controller
         'no_hp'         => $tempat->no_hp,
     ]);
 
-    return redirect()->route('staff.mitra.akun', $tempat->id)
-        ->with([
-            'username' => $username,
-            'password' => $password
-        ]);
+    return redirect()
+    ->route('staff.mitra.akun', ['id' => $tempat->id])
+    ->with('generated_account', [
+        'username' => $username,
+        'password' => $password
+    ]);
 }
     public function showAkunMitra($id)
 {
+    if (!session()->has('generated_account')) {
+        return redirect()
+            ->route('staff.mitra.index')
+            ->with('warning', 'Akun hanya dapat dilihat setelah dibuat.');
+    }
+
     $tempat = TempatPkl::with('mitra.user')->findOrFail($id);
 
     return view('staff.mitra.akun', compact('tempat'));
-}
-
-
-
-    
+}  
     public function manajemenMitra()
-    {
-        $tempatPkls = TempatPkl::with(['mitra', 'pengajuans.pkl'])
-            ->whereHas('pengajuans.pkl') // hanya tempat yang sudah benar-benar punya PKL aktif
-            ->get();
+{
+    $tempatPkls = TempatPkl::with('mitra')
+        ->whereHas('pengajuans', function ($q) {
+            $q->whereHas('pkl');
+        })
+        ->withCount([
+            'pengajuans as jumlah_mahasiswa' => function ($q) {
+                $q->whereHas('pkl');
+            }
+        ])
+        ->orderBy('nama_tempat')
+        ->paginate(9);
 
-        return view('staff.mitra.index', compact('tempatPkls'));
-    }
+    return view('staff.mitra.index', compact('tempatPkls'));
+}
 
 
 

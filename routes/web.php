@@ -150,7 +150,8 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->name('staff.')
     ->group(function () {
         Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/pengajuan/histori-ditolak', [StaffPengajuanController::class, 'historiDitolak'])->name('pengajuan.histori_ditolak');
+        Route::get('/pengajuan/histori', [StaffPengajuanController::class, 'histori']
+        )->name('pengajuan.histori');
 
         Route::post('/dokumen/{id}/valid', [StaffDokumenController::class, 'valid'])->name('dokumen.valid');
         Route::post('/dokumen/{id}/invalid', [StaffDokumenController::class, 'invalid'])->name('dokumen.invalid');

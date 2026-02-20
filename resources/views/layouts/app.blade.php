@@ -19,7 +19,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased">
+<body class="relative font-sans antialiased">
 
 <div
     x-data="{ sidebarOpen: false }"

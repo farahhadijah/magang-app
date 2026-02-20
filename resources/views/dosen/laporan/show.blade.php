@@ -64,10 +64,6 @@
                   class="mt-6 space-y-4">
                 @csrf
 
-                <textarea name="catatan_dosen"
-                          placeholder="Catatan (opsional jika approve)"
-                          class="w-full p-2 border rounded"></textarea>
-
                 <div class="flex gap-3">
                     <button type="submit"
                             class="px-4 py-2 text-white bg-green-600 rounded">
