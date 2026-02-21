@@ -3,7 +3,7 @@
         Pengajuan Pkl - MagangApp
     </x-slot>
 
-    <div class="py-6 min-h-[70vh] flex flex-col">
+    <div class="py-2 min-h-[70vh] flex flex-col">
 
         {{-- Flash message --}}
         @if(session('success'))

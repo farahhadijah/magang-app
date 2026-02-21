@@ -32,36 +32,5 @@
 
         </div>
 
-        <!-- Menu Akses -->
-        <div class="p-6 bg-white rounded shadow">
-            <h3 class="mb-4 text-lg font-semibold">Menu Kaprodi</h3>
-
-            <div class="flex flex-wrap gap-4">
-                <a href="{{ route('kaprodi.pengajuan.index') }}"
-                   class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
-                    Verifikasi PKL
-                </a>
-
-                <a href="{{ route('kaprodi.pengajuan.histori_ditolak') }}"
-                   class="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700">
-                    Histori Ditolak
-                </a>
-
-                <a href="{{ route('kaprodi.mahasiswa.index') }}"
-                   class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
-                    Data Mahasiswa PKL
-                </a>
-
-                <a href="{{ route('kaprodi.nilai.index') }}"
-                   class="px-4 py-2 text-white bg-purple-600 rounded hover:bg-purple-700">
-                    Nilai PKL
-                </a>
-            </div>
-
-            <p class="mt-4 text-sm text-gray-500">
-                * Data ditarik langsung dari database
-            </p>
-        </div>
-
     </div>
 </x-app-layout>

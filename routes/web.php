@@ -201,11 +201,12 @@ Route::middleware(['auth', 'role:kaprodi'])
         Route::get('/dashboard', [KaprodiPengajuanController::class, 'dashboard'])->name('dashboard');
         Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
         Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
-        Route::get('/nilai', [KaprodiNilaiController::class, 'index'])->name('nilai.index');
+        Route::get('/nilai-pkl',[KaprodiNilaiController::class, 'index'])->name('nilai.index');
         Route::get('/pengajuan/{id}', [KaprodiPengajuanController::class, 'show'])->name('pengajuan.show');
         Route::post('/pengajuan/{id}/approve', [KaprodiPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [KaprodiPengajuanController::class, 'reject'])->name('pengajuan.reject');
-        Route::get('/histori-ditolak', [KaprodiPengajuanController::class, 'historiDitolak'])->name('pengajuan.histori_ditolak');
+        Route::get('/histori',[KaprodiPengajuanController::class, 'histori'])->name('pengajuan.histori');
+       Route::get('/mahasiswa/belum',[KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
     });
 
 /*

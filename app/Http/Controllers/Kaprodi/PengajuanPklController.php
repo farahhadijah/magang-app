@@ -36,7 +36,8 @@ class PengajuanPklController extends Controller
         $pengajuans = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
             ->munculUntukKaprodi()
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(9);
+
         return view('kaprodi.pengajuan.index', compact('pengajuans'));
     }
     /* ================= DETAIL ================= */
@@ -222,16 +223,20 @@ class PengajuanPklController extends Controller
 
     /* ================= HISTORI ================= */
 
-    public function historiDitolak()
+    public function histori()
     {
-        $pengajuans = PengajuanPkl::with(['mahasiswa', 'tempatPkl'])
+        $pengajuans = PengajuanPkl::with([
+                'mahasiswa',
+                'tempatPkl',
+                'verifikasi' => function ($q) {
+                    $q->where('level', 'kaprodi');
+                }
+            ])
             ->whereHas('verifikasi', function ($q) {
-                $q->where('level', 'kaprodi')
-                  ->where('status', 'rejected');
+                $q->where('level', 'kaprodi');
             })
-            ->orderBy('updated_at', 'desc')
-            ->get();
-
-        return view('kaprodi.pengajuan.histori_ditolak', compact('pengajuans'));
+            ->orderByDesc('updated_at')
+            ->paginate(15);
+        return view('kaprodi.pengajuan.histori', compact('pengajuans'));
     }
 }

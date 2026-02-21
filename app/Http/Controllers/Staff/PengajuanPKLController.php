@@ -27,7 +27,7 @@ class PengajuanPklController extends Controller
             ])
             ->where('status', 'pending_tu')
             ->orderBy('created_at', 'desc')
-            ->paginate(9);
+            ->paginate(15);
         return view('staff.pengajuan.index', compact('pengajuans'));
     }
     /**
