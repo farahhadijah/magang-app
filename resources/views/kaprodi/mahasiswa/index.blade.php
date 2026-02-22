@@ -1,8 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-900">
-            Daftar Mahasiswa PKL Aktif
-        </h2>
+    <x-slot name="title">
+        Mahasiswa Aktif - MagangApp
     </x-slot>
 
     <div class="px-4 py-6 mx-auto max-w-7xl min-h-[70vh] flex flex-col">

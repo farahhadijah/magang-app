@@ -1,6 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-900">Verifikasi Pengajuan PKL</h2>
+    <x-slot name="title">
+        Pengajuan Pkl - MagangApp
     </x-slot>
 
     <div class="px-4 py-2 mx-auto max-w-7xl min-h-[70vh] flex flex-col">

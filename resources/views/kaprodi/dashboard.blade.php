@@ -1,8 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Dashboard Kaprodi
-        </h2>
+    <x-slot name="title">
+        Dashboard - MagangApp
     </x-slot>
 
     <div class="py-6 space-y-6">

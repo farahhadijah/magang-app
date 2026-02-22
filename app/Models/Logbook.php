@@ -17,6 +17,7 @@ class Logbook extends Model
     protected $casts = [
         'tgl' => 'date',
     ];
+    
     /*
     |--------------------------------------------------------------------------
     | RELATION

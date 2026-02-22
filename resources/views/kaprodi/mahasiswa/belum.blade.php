@@ -1,4 +1,7 @@
 <x-app-layout>
+    <x-slot name="title">
+        Mahasiswa Belum Pkl- MagangApp
+    </x-slot>
 <div class="p-6">
     {{-- Card --}}
     <div class="overflow-hidden bg-white border border-green-100 shadow rounded-xl">

@@ -1,8 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-700">
-            Mahasiswa Selesai PKL & Sudah Dinilai
-        </h2>
+    <x-slot name="title">
+        Nilai Mahasiswa - MagangApp
     </x-slot>
 
     <div class="px-6 py-6">
