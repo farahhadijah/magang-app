@@ -86,7 +86,7 @@ class PengajuanPklController extends Controller
         ]);
 
         $pengajuan->verifikasi()->create([
-            'id_user' => auth()->id(),
+            'id_user' => auth()->user()->getKey(),
             'level' => 'tu',
             'status' => 'approved',
             'tgl_verifikasi' => now(),
@@ -140,7 +140,7 @@ class PengajuanPklController extends Controller
         ]);
 
         $pengajuan->verifikasi()->create([
-            'id_user' => auth()->id(),
+            'id_user' => auth()->user()->getKey(),
             'level' => 'tu',
             'status' => 'rejected',
             'catatan' => $request->catatan,
@@ -235,15 +235,20 @@ class PengajuanPklController extends Controller
     $prodiId = $this->getProdiId();
 
     $tempatPkls = TempatPkl::with('mitra')
-        ->whereHas('pengajuans.mahasiswa', function ($q) use ($prodiId) {
-            $q->where('prodi_id', $prodiId);
+        ->whereHas('pengajuans', function ($q) use ($prodiId) {
+            $q->where('status', 'disetujui')
+              ->whereHas('mahasiswa', function ($q2) use ($prodiId) {
+                  $q2->where('prodi_id', $prodiId);
+              })
+              ->whereHas('pkl'); // pastikan sudah jadi PKL
         })
         ->withCount([
             'pengajuans as jumlah_mahasiswa' => function ($q) use ($prodiId) {
-                $q->whereHas('mahasiswa', function ($q2) use ($prodiId) {
-                    $q2->where('prodi_id', $prodiId);
-                })
-                ->whereHas('pkl');
+                $q->where('status', 'disetujui')
+                  ->whereHas('mahasiswa', function ($q2) use ($prodiId) {
+                      $q2->where('prodi_id', $prodiId);
+                  })
+                  ->whereHas('pkl');
             }
         ])
         ->orderBy('nama_tempat')

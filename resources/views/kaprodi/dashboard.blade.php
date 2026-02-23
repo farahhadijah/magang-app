@@ -9,7 +9,7 @@
         <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
 
             <div class="p-6 bg-blue-100 rounded shadow">
-                <h3 class="font-semibold">Total Mahasiswa PKL</h3>
+                <h3 class="font-semibold">Mahasiswa Ajukan PKL</h3>
                 <p class="mt-2 text-3xl font-bold">{{ $totalMahasiswa }}</p>
             </div>
 

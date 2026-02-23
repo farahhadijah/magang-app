@@ -2,7 +2,7 @@
     <x-slot name="title">
         Detail Pengajuan - MagangApp
     </x-slot>
-
+    <div x-data="pdfViewer()">
     <div class="py-6 space-y-6">
         {{-- Informasi Mahasiswa --}}
         <div class="p-6 space-y-2 border border-green-200 rounded-lg shadow-sm bg-green-50">
@@ -94,10 +94,12 @@
                 <ul class="space-y-2 text-sm">
                     @foreach ($pengajuan->dokumenPengajuan as $dokumen)
                         <li>
-                            <a href="{{ asset('storage/' . $dokumen->path_file) }}" target="_blank"
-                               class="flex items-center gap-2 text-green-700 hover:text-green-900">
+                            <button
+                                type="button"
+                                @click="openModal('{{ asset('storage/' . $dokumen->path_file) }}')"
+                                class="flex items-center gap-2 text-green-700 hover:text-green-900">
                                 <i class="fa-solid fa-file-pdf"></i> {{ $dokumen->jenis_dokumen }}
-                            </a>
+                            </button>
                         </li>
                     @endforeach
                 </ul>
@@ -197,4 +199,48 @@
                 Pengajuan ini sudah diproses dan tidak dapat diverifikasi kembali.
             </div>
         @endif
+        {{-- ================= MODAL PDF ================= --}}
+        <div
+            x-show="isOpen"
+            x-transition
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+            style="display: none;">
+
+            <div class="relative w-11/12 bg-white rounded-lg shadow-lg h-[90vh]">
+
+                {{-- Tombol Close --}}
+                <button
+                    @click="closeModal()"
+                    class="absolute z-10 w-10 h-10 text-xl text-white bg-red-600 rounded-full -top-4 -right-4">
+                    ✕
+                </button>
+
+                {{-- Iframe --}}
+                <iframe
+                    :src="fileUrl"
+                    class="w-full h-full rounded-lg"
+                    frameborder="0">
+                </iframe>
+
+            </div>
+        </div>
+        <script>
+            function pdfViewer() {
+                return {
+                    isOpen: false,
+                    fileUrl: '',
+
+                    openModal(url) {
+                        this.fileUrl = url;
+                        this.isOpen = true;
+                    },
+
+                    closeModal() {
+                        this.fileUrl = '';
+                        this.isOpen = false;
+                    }
+                }
+            }
+        </script>
+    </div>
 </x-app-layout>

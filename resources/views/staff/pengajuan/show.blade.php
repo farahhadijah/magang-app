@@ -38,11 +38,11 @@
                             </span>
                         </div>
 
-                        <a href="{{ asset('storage/'.$dokumen->path_file) }}"
-                           target="_blank"
-                           class="text-sm font-medium text-green-700 hover:text-green-900">
+                        <button
+                            onclick="openModal('{{ asset('storage/'.$dokumen->path_file) }}')"
+                            class="text-sm font-medium text-green-700 hover:text-green-900">
                             Lihat Dokumen
-                        </a>
+                        </button>
                     </div>
 
                     @if ($dokumen->isInvalid())
@@ -128,4 +128,50 @@
            class="inline-block text-green-700">← Kembali</a>
 
     </div>
+    {{-- ================= MODAL PREVIEW PDF ================= --}}
+<div id="pdfModal"
+     class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-60">
+
+    <div class="relative w-11/12 h-[90vh] bg-white rounded-lg shadow-lg">
+
+        {{-- Tombol Close --}}
+        <button onclick="closeModal()"
+                class="absolute z-10 w-10 h-10 text-2xl text-white bg-red-600 rounded-full -top-4 -right-4">
+            ✕
+        </button>
+
+        {{-- Iframe PDF --}}
+        <iframe id="pdfFrame"
+                src=""
+                class="w-full h-full rounded-lg"
+                frameborder="0">
+        </iframe>
+
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    window.openModal = function(url) {
+        document.getElementById('pdfFrame').src = url;
+        document.getElementById('pdfModal').classList.remove('hidden');
+    }
+
+    window.closeModal = function() {
+        document.getElementById('pdfFrame').src = "";
+        document.getElementById('pdfModal').classList.add('hidden');
+    }
+
+    document.getElementById('pdfModal')
+        .addEventListener('click', function(e) {
+            if (e.target === this) {
+                window.closeModal();
+            }
+        });
+
+});
+</script>
+@endpush
 </x-app-layout>
