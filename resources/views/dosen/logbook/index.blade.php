@@ -1,8 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-900">
-            <i class="fa-solid fa-book-open"></i> Review Logbook Mahasiswa
-        </h2>
+    <x-slot name="title">
+        Logbook Mahasiswa Bimbingan - MagangApp
     </x-slot>
 
     <div class="max-w-6xl py-1 mx-auto space-y-6">
@@ -38,7 +36,7 @@
                 {{-- Table --}}
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
-                        <thead class="text-green-900 bg-green-100">
+                        <thead class="bg-green-100 text-slate-800">
                             <tr>
                                 <th class="px-4 py-3 text-center">
                                     <input type="checkbox" id="select-all">

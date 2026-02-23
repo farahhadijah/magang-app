@@ -1,8 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-900">
-            Mahasiswa Bimbingan
-        </h2>
+    <x-slot name="title">
+        Mahasiswa Bimbingan - MagangApp
     </x-slot>
 
     <div class="py-1 mx-auto space-y-6 max-w-7xl"></div>
@@ -57,12 +55,12 @@
                             {{-- LOGBOOK --}}
                             @if($pkl->status === 'aktif')
                                 <a href="{{ route('dosen.logbook.index') }}"
-                                class="px-3 py-1 text-xs text-green-900 bg-green-200 rounded hover:bg-green-300">
+                                class="px-4 py-1 text-xs text-green-900 bg-green-200 rounded hover:bg-green-300">
                                     Logbook
                                 </a>
                             @else
-                                <span class="px-3 py-1 text-xs text-gray-400 bg-gray-100 rounded">
-                                    Logbook Terkunci
+                                <span class="px-5 py-1 text-xs text-gray-400 bg-gray-100 rounded">
+                                    Terkunci
                                 </span>
                             @endif
                             {{-- NILAI --}}
@@ -82,8 +80,8 @@
                                 </span>
                             @endif
                             @else
-                                <span class="px-3 py-1 text-xs text-gray-400 bg-gray-100 rounded">
-                                    Belum Bisa Dinilai
+                                <span class="px-5 py-1 text-xs text-gray-400 bg-gray-100 rounded ">
+                                    Disable
                                 </span>
                             @endif
                     </td>

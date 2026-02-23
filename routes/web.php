@@ -17,7 +17,7 @@ use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanC
 use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
 use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
 
-
+use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
 use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
 use App\Http\Controllers\Dosen\ReviewLogbookController;
 use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirController;
@@ -119,7 +119,8 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->name('dosen.')
     ->group(function () {
 
-        Route::view('/dashboard', 'dosen.dashboard')->name('dashboard');
+        Route::get('/dashboard', [DosenDashboardController::class, 'index'])
+        ->name('dashboard');
 
         // Mahasiswa Bimbingan
         Route::get('/mahasiswa-bimbingan',[MahasiswaBimbinganController::class, 'index']
@@ -130,9 +131,8 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         )->name('logbook.index');
         Route::put('/logbook/{logbook}/review',[ReviewLogbookController::class, 'review']
         )->name('logbook.review');
-        Route::post('/logbook/{logbook}/review-ajax',
-    [ReviewLogbookController::class, 'reviewAjax']
-)->name('logbook.review-ajax');
+        Route::post('/logbook/{logbook}/review-ajax',[ReviewLogbookController::class, 'reviewAjax']
+        )->name('logbook.review-ajax');
         // bulk approve
         Route::post('/logbook/bulk-approve', [ReviewLogbookController::class, 'bulkApprove']
         )->name('logbook.bulk-approve');
@@ -156,7 +156,6 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         Route::post('/laporan/{pkl}/reject',[DosenLaporanAkhirController::class, 'reject']
         )->name('laporan.reject');
     });
-
 /*
 |--------------------------------------------------------------------------
 | STAFF TU AREA

@@ -1,8 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-900">
-            Dashboard Dosen
-        </h2>
+    <x-slot name="title">
+        Dashboard Dosen - MagangApp
     </x-slot>
 
     <div class="py-6 space-y-6">
@@ -20,37 +18,49 @@
         {{-- Ringkasan Statistik --}}
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 
-            {{-- Mahasiswa Bimbingan --}}
-            <div class="flex flex-col items-start gap-2 p-6 transition border border-green-200 shadow-lg rounded-xl bg-green-50 hover:shadow-xl">
-                <h3 class="flex items-center gap-2 text-sm font-semibold text-green-700">
-                    <i class="fa-solid fa-users"></i> Mahasiswa Bimbingan
-                </h3>
-                <p class="px-3 py-1 mt-2 text-3xl font-bold text-green-900 bg-green-100 rounded-full">
+            {{-- Mahasiswa Aktif --}}
+            <div class="p-6 transition bg-white border border-green-100 shadow rounded-2xl hover:shadow-xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-green-700">
+                        Mahasiswa Aktif
+                    </h3>
+                    <i class="text-green-600 fa-solid fa-users"></i>
+                </div>
+
+                <p class="mt-4 text-3xl font-bold text-green-900">
                     {{ $mahasiswaCount ?? 0 }}
                 </p>
             </div>
 
-            {{-- Logbook Menunggu Review --}}
-            <div class="flex flex-col items-start gap-2 p-6 transition border shadow-lg border-amber-200 rounded-xl bg-amber-50 hover:shadow-xl">
-                <h3 class="flex items-center gap-2 text-sm font-semibold text-amber-700">
-                    <i class="fa-solid fa-clock"></i> Logbook Menunggu Review
-                </h3>
-                <p class="px-3 py-1 mt-2 text-3xl font-bold rounded-full text-amber-900 bg-amber-100">
+            {{-- Logbook Pending --}}
+            <div class="p-6 transition bg-white border shadow border-amber-100 rounded-2xl hover:shadow-xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-amber-700">
+                        Logbook Pending
+                    </h3>
+                    <i class="text-amber-600 fa-solid fa-clock"></i>
+                </div>
+
+                <p class="mt-4 text-3xl font-bold text-amber-900">
                     {{ $logbookPendingCount ?? 0 }}
                 </p>
             </div>
 
             {{-- PKL Selesai --}}
-            <div class="flex flex-col items-start gap-2 p-6 transition border border-green-200 shadow-lg rounded-xl bg-green-50 hover:shadow-xl">
-                <h3 class="flex items-center gap-2 text-sm font-semibold text-green-700">
-                    <i class="fa-solid fa-check-circle"></i> PKL Selesai
-                </h3>
-                <p class="px-3 py-1 mt-2 text-3xl font-bold text-green-900 bg-green-100 rounded-full">
+            <div class="p-6 transition bg-white border border-green-100 shadow rounded-2xl hover:shadow-xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-green-700">
+                        PKL Selesai
+                    </h3>
+                    <i class="text-green-600 fa-solid fa-check-circle"></i>
+                </div>
+
+                <p class="mt-4 text-3xl font-bold text-green-900">
                     {{ $pklSelesaiCount ?? 0 }}
                 </p>
             </div>
 
-        </div>
+</div>
 
         {{-- Informasi --}}
         <div class="flex flex-col gap-2 p-6 transition border shadow-lg border-amber-200 rounded-xl bg-amber-50 hover:shadow-xl">

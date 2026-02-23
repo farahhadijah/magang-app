@@ -61,27 +61,18 @@
 
         {{-- JIKA BELUM ADA LAPORAN --}}
         @if(!$laporan)
-
             @if($pkl->isSiapUploadLaporan())
-
                 <div class="p-6 text-center bg-white border border-green-100 shadow-md rounded-2xl">
-                    <div class="flex justify-center mb-3">
-                        <i class="w-6 text-green-700 fa-solid fa-circle-info"></i>
-                    </div>
-
                     <p class="mb-4 text-green-800">
                         Anda sudah memenuhi syarat untuk upload laporan akhir.
                     </p>
-
                     <a href="{{ route('mahasiswa.laporan.create') }}"
                        class="inline-flex items-center gap-2 px-6 py-3 font-semibold text-white transition bg-green-600 shadow rounded-xl hover:bg-green-700 hover:shadow-lg">
                         <i class="w-5 fa-solid fa-circle-info"></i>
                         Upload Laporan
                     </a>
                 </div>
-
             @else
-
                 <div class="flex items-start gap-3 p-6 border-l-4 border-yellow-500 rounded-lg bg-yellow-50">
                     <i class="w-5 text-yellow-600 fa-solid fa-circle-info"></i>
                     <div>
@@ -93,21 +84,16 @@
                         </p>
                     </div>
                 </div>
-
             @endif
-
         @else
-
             <!-- Card Laporan -->
             <div class="p-8 space-y-6 bg-white border border-green-100 shadow-lg rounded-2xl">
-
                 <!-- Status -->
                 <div>
                     <p class="flex items-center gap-2 mb-2 text-sm font-semibold tracking-wide text-green-800 uppercase">
                         <i class="w-5 fa-solid fa-circle-info"></i>
                         Status Laporan
                     </p>
-
                     @if($laporan->status_approve === 'pending')
                         <span class="px-3 py-1 text-sm font-medium text-yellow-800 bg-yellow-200 rounded-full">
                             Menunggu Persetujuan

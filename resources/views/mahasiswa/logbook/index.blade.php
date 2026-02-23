@@ -71,6 +71,10 @@
                                     <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
                                         Disetujui
                                     </span>
+                                @elseif ($log->status_approve === 'revisi')
+                                    <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">
+                                        Perlu Revisi
+                                    </span>
                                 @else
                                     <span class="px-3 py-1 text-xs font-semibold rounded-full text-amber-800 bg-amber-100">
                                         Pending
@@ -91,9 +95,9 @@
 
                             {{-- Aksi --}}
                             <td class="px-4 py-3">
-                                @if ($log->status_approve === 'pending')
+                                @if (in_array($log->status_approve, ['pending', 'revisi']))
                                     <a href="{{ route('mahasiswa.logbook.edit', $log->id) }}"
-                                       class="text-sm font-medium text-green-600 hover:underline">
+                                    class="text-sm font-medium text-green-600 hover:underline">
                                         Edit
                                     </a>
                                 @else
