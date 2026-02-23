@@ -20,14 +20,20 @@ class PengajuanPklController extends Controller
      */
     public function index()
     {
+        $prodiId = $this->getProdiId();
+
         $pengajuans = PengajuanPkl::with([
                 'mahasiswa',
                 'tempatPkl',
                 'dokumenPengajuan'
             ])
             ->where('status', 'pending_tu')
+            ->whereHas('mahasiswa', function ($q) use ($prodiId) {
+                $q->where('prodi_id', $prodiId);
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(15);
+
         return view('staff.pengajuan.index', compact('pengajuans'));
     }
     /**
@@ -36,94 +42,119 @@ class PengajuanPklController extends Controller
      * ===============================
      */
     public function show($id)
-    {
-        $pengajuan = PengajuanPkl::with([
-            'mahasiswa',
-            'tempatPkl',
-            'dokumenPengajuan'
-        ])->findOrFail($id);
-        return view('staff.pengajuan.show', compact('pengajuan'));
-    }
+{
+    $prodiId = $this->getProdiId();
+
+    $pengajuan = PengajuanPkl::with([
+        'mahasiswa',
+        'tempatPkl',
+        'dokumenPengajuan'
+    ])
+    ->whereHas('mahasiswa', function ($q) use ($prodiId) {
+        $q->where('prodi_id', $prodiId);
+    })
+    ->findOrFail($id);
+
+    return view('staff.pengajuan.show', compact('pengajuan'));
+}
     /**
      * ===============================
      * SELESAIKAN VERIFIKASI TU
      * ===============================
      */
     public function approve($id)
-    {
-        $pengajuan = PengajuanPkl::with('dokumenPengajuan')->findOrFail($id);
-        // Proteksi ulang
-        if (! $pengajuan->bisaDisetujuiTu()) {
-            return back()->with(
-                'warning',
-                'Pengajuan tidak dapat diverifikasi atau sudah diproses.'
-            );
-        }
-        DB::transaction(function () use ($pengajuan) {
+{
+    $prodiId = $this->getProdiId();
+
+    $pengajuan = PengajuanPkl::with('dokumenPengajuan')
+        ->whereHas('mahasiswa', function ($q) use ($prodiId) {
+            $q->where('prodi_id', $prodiId);
+        })
+        ->findOrFail($id);
+
+    if (! $pengajuan->bisaDisetujuiTu()) {
+        return back()->with(
+            'warning',
+            'Pengajuan tidak dapat diverifikasi atau sudah diproses.'
+        );
+    }
+
+    DB::transaction(function () use ($pengajuan) {
         $pengajuan->update([
             'status' => 'pending_kaprodi',
             'catatan_tu' => null,
         ]);
+
         $pengajuan->verifikasi()->create([
-            'id_user' => auth()->user()->getKey(),
-            'level'          => 'tu',
-            'status'         => 'approved',
+            'id_user' => auth()->id(),
+            'level' => 'tu',
+            'status' => 'approved',
             'tgl_verifikasi' => now(),
         ]);
     });
-        return redirect()
-            ->route('staff.pengajuan.index')
-            ->with(
-                'success',
-                'Verifikasi administrasi selesai. Pengajuan diteruskan ke Kaprodi.'
-            );
-    }
+
+    return redirect()
+        ->route('staff.pengajuan.index')
+        ->with(
+            'success',
+            'Verifikasi administrasi selesai. Pengajuan diteruskan ke Kaprodi.'
+        );
+}
     /**
      * ===============================
      * KEMBALIKAN KE MAHASISWA
      * ===============================
      */
     public function reject(Request $request, $id)
-    {
-        $request->validate([
-            'catatan' => 'required|string|max:255',
-        ]);
-        $pengajuan = PengajuanPkl::with('dokumenPengajuan')->findOrFail($id);
-        if ($pengajuan->status !== 'pending_tu') {
-            return back()->with(
-                'warning',
-                'Pengajuan tidak dapat dikembalikan karena sudah diproses.'
-            );
-        }
-        if (! $pengajuan->bisaDikembalikanKeMahasiswa()) {
-            return back()->with(
-                'warning',
-                'Pengajuan tidak dapat dikembalikan karena tidak ada dokumen invalid.'
-            );
-        }
+{
+    $request->validate([
+        'catatan' => 'required|string|max:255',
+    ]);
 
-        DB::transaction(function () use ($pengajuan, $request) {
+    $prodiId = $this->getProdiId();
 
+    $pengajuan = PengajuanPkl::with('dokumenPengajuan')
+        ->whereHas('mahasiswa', function ($q) use ($prodiId) {
+            $q->where('prodi_id', $prodiId);
+        })
+        ->findOrFail($id);
+
+    if ($pengajuan->status !== 'pending_tu') {
+        return back()->with(
+            'warning',
+            'Pengajuan tidak dapat dikembalikan karena sudah diproses.'
+        );
+    }
+
+    if (! $pengajuan->bisaDikembalikanKeMahasiswa()) {
+        return back()->with(
+            'warning',
+            'Pengajuan tidak dapat dikembalikan karena tidak ada dokumen invalid.'
+        );
+    }
+
+    DB::transaction(function () use ($pengajuan, $request) {
         $pengajuan->update([
-            'status'     => 'ditolak_tu',
+            'status' => 'ditolak_tu',
             'catatan_tu' => $request->catatan,
         ]);
 
         $pengajuan->verifikasi()->create([
-            'id_user' => auth()->user()->getKey(),
-            'level'          => 'tu',
-            'status'         => 'rejected',
-            'catatan'        => $request->catatan,
+            'id_user' => auth()->id(),
+            'level' => 'tu',
+            'status' => 'rejected',
+            'catatan' => $request->catatan,
             'tgl_verifikasi' => now(),
         ]);
     });
-        return redirect()
-            ->route('staff.pengajuan.index')
-            ->with(
-                'warning',
-                'Pengajuan PKL dikembalikan ke mahasiswa untuk perbaikan.'
-            );
-    }
+
+    return redirect()
+        ->route('staff.pengajuan.index')
+        ->with(
+            'warning',
+            'Pengajuan PKL dikembalikan ke mahasiswa untuk perbaikan.'
+        );
+}
     /**
      * ===============================
      * HISTORI DITOLAK TU
@@ -131,14 +162,19 @@ class PengajuanPklController extends Controller
      */
     public function histori()
 {
+    $prodiId = $this->getProdiId();
+
     $verifikasis = \App\Models\Verifikasi::with([
             'pengajuan.mahasiswa',
             'pengajuan.tempatPkl',
             'user'
         ])
         ->where('level', 'tu')
+        ->whereHas('pengajuan.mahasiswa', function ($q) use ($prodiId) {
+            $q->where('prodi_id', $prodiId);
+        })
         ->orderBy('tgl_verifikasi', 'desc')
-        ->paginate(9); 
+        ->paginate(9);
 
     return view('staff.pengajuan.histori', compact('verifikasis'));
 }
@@ -196,13 +232,18 @@ class PengajuanPklController extends Controller
 }  
     public function manajemenMitra()
 {
+    $prodiId = $this->getProdiId();
+
     $tempatPkls = TempatPkl::with('mitra')
-        ->whereHas('pengajuans', function ($q) {
-            $q->whereHas('pkl');
+        ->whereHas('pengajuans.mahasiswa', function ($q) use ($prodiId) {
+            $q->where('prodi_id', $prodiId);
         })
         ->withCount([
-            'pengajuans as jumlah_mahasiswa' => function ($q) {
-                $q->whereHas('pkl');
+            'pengajuans as jumlah_mahasiswa' => function ($q) use ($prodiId) {
+                $q->whereHas('mahasiswa', function ($q2) use ($prodiId) {
+                    $q2->where('prodi_id', $prodiId);
+                })
+                ->whereHas('pkl');
             }
         ])
         ->orderBy('nama_tempat')
@@ -210,7 +251,16 @@ class PengajuanPklController extends Controller
 
     return view('staff.mitra.index', compact('tempatPkls'));
 }
+private function getProdiId()
+{
+    $staff = auth()->user()->staff;
 
+    if (!$staff || !$staff->prodi_id) {
+        abort(403, 'Staff tidak memiliki prodi.');
+    }
+
+    return $staff->prodi_id;
+}
 
 
 }
