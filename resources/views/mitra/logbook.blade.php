@@ -1,72 +1,87 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-bold text-gray-800">
+        <h2 class="text-2xl font-bold text-green-900">
             Logbook Mahasiswa
         </h2>
     </x-slot>
 
-    <div class="px-4 py-6 mx-auto space-y-6 max-w-7xl">
+    <div class="max-w-6xl py-5 mx-auto space-y-4">
 
-        <!-- Info Mahasiswa -->
-        <div class="p-6 bg-white rounded-lg shadow">
-            <h3 class="text-lg font-semibold">
-                {{ $pkl->mahasiswa->nama ?? $pkl->mahasiswa->user->getNama() ?? '-' }}
-            </h3>
+        {{-- Info Mahasiswa --}}
+        <div class="p-4 transition border border-green-200 shadow bg-green-50 rounded-xl hover:shadow-md">
+            <div class="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
 
-            <p class="text-gray-600">
-                NIM: {{ $pkl->mahasiswa->nim ?? '-' }}
-            </p>
+                <div>
+                    <h3 class="text-lg font-semibold text-green-900">
+                        {{ $pkl->mahasiswa->nama ?? $pkl->mahasiswa->user->getNama() ?? '-' }}
+                    </h3>
+                    <p class="text-sm text-green-700">
+                        NIM: {{ $pkl->mahasiswa->nim ?? '-' }}
+                    </p>
+                </div>
 
-            <p class="text-gray-600">
-                Periode:
-                {{ $pkl->tgl_mulai ? \Carbon\Carbon::parse($pkl->tgl_mulai, 'Asia/Jakarta')->format('d M Y') : '-' }} - {{ $pkl->tgl_selesai ? \Carbon\Carbon::parse($pkl->tgl_selesai, 'Asia/Jakarta')->format('d M Y') : '-' }}
-            </p>
+                <div class="mt-2 text-sm text-green-800 md:mt-0">
+                    Periode:
+                    <span class="font-medium">
+                        {{ $pkl->tgl_mulai ? \Carbon\Carbon::parse($pkl->tgl_mulai, 'Asia/Jakarta')->format('d M Y') : '-' }}
+                        -
+                        {{ $pkl->tgl_selesai ? \Carbon\Carbon::parse($pkl->tgl_selesai, 'Asia/Jakarta')->format('d M Y') : '-' }}
+                    </span>
+                </div>
+
+            </div>
         </div>
 
-        <!-- Daftar Logbook -->
-        <div class="p-6 bg-white rounded-lg shadow">
-            <h3 class="mb-4 text-lg font-semibold">
+        {{-- Daftar Logbook --}}
+        <div class="p-4 bg-white border border-green-200 shadow rounded-xl">
+
+            <h3 class="mb-3 text-lg font-semibold text-green-900">
                 Daftar Kegiatan
             </h3>
 
             @if($pkl->logbooks->isEmpty())
-                <div class="text-center text-gray-500">
+                <div class="py-6 text-sm text-center text-gray-500">
                     Belum ada logbook yang diisi.
                 </div>
             @else
 
-                <div class="space-y-4">
+                <div class="space-y-3">
+
                     @foreach($pkl->logbooks as $logbook)
-                        <div class="p-4 border rounded-lg bg-gray-50">
-                            
+                        <div class="p-4 transition border border-green-100 rounded-lg bg-green-50 hover:bg-green-100">
+
+                            {{-- Header --}}
                             <div class="flex items-center justify-between mb-2">
-                                    <div class="font-semibold text-gray-800">
+
+                                <div class="text-sm font-semibold text-green-800">
                                     {{ $logbook->tgl ? \Carbon\Carbon::parse($logbook->tgl, 'Asia/Jakarta')->format('d M Y') : '-' }}
                                 </div>
 
                                 <div>
                                     @if($logbook->status_approve == 'approved')
-                                        <span class="px-2 py-1 text-xs text-green-700 bg-green-100 rounded">
-                                            Disetujui Dosen
+                                        <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded-full">
+                                            ✔ Disetujui
                                         </span>
                                     @elseif(in_array($logbook->status_approve, ['rejected','revisi']))
-                                        <span class="px-2 py-1 text-xs text-red-700 bg-red-100 rounded">
-                                            Ditolak Dosen
+                                        <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-200 rounded-full">
+                                            ✖ Ditolak
                                         </span>
                                     @else
-                                        <span class="px-2 py-1 text-xs text-yellow-700 bg-yellow-100 rounded">
-                                            Menunggu Review
+                                        <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full">
+                                            ⏳ Menunggu
                                         </span>
                                     @endif
                                 </div>
                             </div>
 
-                            <div class="text-gray-700 whitespace-pre-line">
+                            {{-- Isi kegiatan --}}
+                            <div class="text-sm leading-relaxed text-gray-700 whitespace-pre-line">
                                 {{ $logbook->kegiatan }}
                             </div>
 
+                            {{-- Catatan --}}
                             @if($logbook->catatan)
-                                <div class="p-3 mt-3 text-sm text-blue-800 border-l-4 border-blue-400 bg-blue-50">
+                                <div class="p-3 mt-3 text-sm text-green-900 bg-green-100 border-l-4 border-green-500 rounded">
                                     <strong>Catatan Dosen:</strong><br>
                                     {{ $logbook->catatan }}
                                 </div>
@@ -74,9 +89,11 @@
 
                         </div>
                     @endforeach
+
                 </div>
 
             @endif
+
         </div>
 
     </div>
