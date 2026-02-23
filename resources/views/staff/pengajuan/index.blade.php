@@ -1,11 +1,9 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-900">
-            Verifikasi Pengajuan PKL
-        </h2>
+    <x-slot name="title">
+        Pengajuan Pkl - MagangApp
     </x-slot>
 
-    <div class="py-6">
+    <div class="py-2 min-h-[70vh] flex flex-col">
 
         {{-- Flash message --}}
         @if(session('success'))
@@ -48,7 +46,7 @@
                     @foreach ($pengajuans as $item)
                         <tr class="transition hover:bg-green-50">
                             <td class="p-3 border">
-                                {{ $loop->iteration }}
+                                {{ $pengajuans->firstItem() + $loop->index }}
                             </td>
 
                             <td class="p-3 border">
@@ -79,6 +77,9 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+        <div class="flex justify-center pt-6 mt-auto">
+            {{ $pengajuans->links() }}
         </div>
 
         @endif

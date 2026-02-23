@@ -19,7 +19,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased">
+<body class="relative font-sans antialiased">
 
 <div
     x-data="{ sidebarOpen: false }"
@@ -79,131 +79,135 @@
 
 </div>
 {{-- script kedepannya akan dipindah sementara dibiarkan disini dulu--}}
-    <script>
-    function submitReview(event, id) {
-    event.preventDefault();
+<script>
+function openModal(id) {
+    const modal = document.getElementById('modal-' + id);
+    if (!modal) return;
 
-    const status = document.getElementById('status-select-' + id).value;
-    const catatanEl = document.getElementById('catatan-' + id);
-    const catatan = catatanEl ? catatanEl.value : '';
-    const token = document.querySelector('#modal-' + id + ' input[name=_token]').value;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 
-    // clear previous validation UI
-    if(catatanEl) {
-        const errElOld = document.getElementById('catatan-error-' + id);
-        if(errElOld) { errElOld.classList.add('hidden'); errElOld.textContent = ''; }
-        catatanEl.classList.remove('border-red-500');
-    }
-
-    // If the lecturer chose "revisi", require a catatan (quick client check)
-    if(status === 'revisi' && (!catatan || catatan.trim() === '')) {
-        // simple UI feedback
-        if(catatanEl) {
-            catatanEl.classList.add('border-red-500');
-            catatanEl.focus();
-        }
-        alert('Silakan isi catatan ketika memilih "Perlu Revisi".');
-        return;
-    }
-
-    // Build payload: include catatan only when needed
-    const payload = { status: status };
-    if(status === 'revisi') payload.catatan = catatan;
-
-    fetch("/dosen/logbook/" + id + "/review-ajax", {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': token
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(res => {
-        // handle validation errors
-        if(res.status === 422) {
-            return res.json().then(json => {
-                if(json.errors) {
-                    // show catatan error if present
-                    if(json.errors.catatan) {
-                        const errEl = document.getElementById('catatan-error-' + id);
-                        if(errEl) {
-                            errEl.textContent = json.errors.catatan.join(' ');
-                            errEl.classList.remove('hidden');
-                        }
-                        if(catatanEl) {
-                            catatanEl.classList.add('border-red-500');
-                            catatanEl.focus();
-                        }
-                    }
-                }
-                // stop further processing
-                throw new Error('validation');
-            });
-        }
-
-        if(!res.ok) throw new Error('Network response not ok');
-        return res.json();
-    })
-    .then(data => {
-        if(data.success) {
-            let statusCell = document.getElementById('status-' + id);
-            let html = '';
-            if(data.status === 'approved') {
-                html = '<span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Disetujui</span>';
-            } else if(data.status === 'pending') {
-                html = '<span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Perlu Revisi</span>';
-            }
-            statusCell.innerHTML = html;
-            closeModal(id);
-        }
-    })
-    .catch(err => {
-        if(err && err.message === 'validation') {
-            // validation errors already shown
-            return;
-        }
-        console.error(err);
-        alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
-    });
+    // Sinkronkan tampilan catatan saat pertama buka
+    toggleCatatan(id);
 }
 
-// Toggle visibility/required state of the catatan field based on status select
+function closeModal(id) {
+    const modal = document.getElementById('modal-' + id);
+    if (!modal) return;
+
+    modal.classList.remove('flex');
+    modal.classList.add('hidden');
+}
+
 function toggleCatatan(id) {
     const select = document.getElementById('status-select-' + id);
     const wrapper = document.getElementById('catatan-wrapper-' + id);
     const textarea = document.getElementById('catatan-' + id);
-    const errEl = document.getElementById('catatan-error-' + id);
-    if(!select || !wrapper || !textarea) return;
 
-    if(select.value === 'revisi') {
+    if (!select || !wrapper || !textarea) return;
+
+    if (select.value === 'revisi') {
         wrapper.classList.remove('hidden');
         textarea.removeAttribute('disabled');
-        // mark visually required (we'll still validate on submit)
         textarea.classList.remove('opacity-50');
-        // clear previous error when showing
-        if(errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
-        textarea.classList.remove('border-red-500');
     } else {
-        // hide/disable the catatan field for non-revision statuses
         wrapper.classList.add('hidden');
         textarea.setAttribute('disabled', 'disabled');
         textarea.classList.add('opacity-50');
-        // clear/disable any previous validation error
-        if(errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
         textarea.classList.remove('border-red-500');
     }
 }
 
-function openModal(id) {
-    document.getElementById('modal-' + id).classList.remove('hidden');
-    // ensure catatan visibility matches current select value
-    if (typeof toggleCatatan === 'function') toggleCatatan(id);
-}
+function submitReview(event, id) {
+    event.preventDefault();
 
-function closeModal(id) {
-    document.getElementById('modal-' + id).classList.add('hidden');
-}
+    const select = document.getElementById('status-select-' + id);
+    const textarea = document.getElementById('catatan-' + id);
+    const tokenMeta = document.querySelector('meta[name="csrf-token"]');
 
+    if (!select || !tokenMeta) {
+        console.error("Element tidak ditemukan");
+        return;
+    }
+
+    const status = select.value;
+    let catatan = textarea ? textarea.value.trim() : "";
+
+    const token = tokenMeta.getAttribute('content');
+
+    // Reset error style
+    if (textarea) {
+        textarea.classList.remove('border-red-500');
+    }
+
+    // Validasi client-side
+    if (status === "revisi" && catatan === "") {
+        alert('Silakan isi catatan ketika memilih "Perlu Revisi".');
+        if (textarea) {
+            textarea.classList.add('border-red-500');
+            textarea.focus();
+        }
+        return;
+    }
+
+    // 🔥 Penting: jika approved, jangan kirim catatan
+    if (status === "approved") {
+        catatan = null;
+    }
+
+    fetch("/dosen/logbook/" + id + "/review-ajax", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": token,
+            "Accept": "application/json"
+        },
+        body: JSON.stringify({
+            status: status,
+            catatan: catatan
+        })
+    })
+    .then(res => {
+        if (res.status === 422) {
+            return res.json().then(data => {
+                if (data.errors?.catatan) {
+                    alert(data.errors.catatan.join(" "));
+                }
+                throw new Error("validation");
+            });
+        }
+
+        if (!res.ok) {
+            return res.json().then(data => {
+                alert(data.message || "Terjadi kesalahan.");
+                throw new Error("server");
+            });
+        }
+
+        return res.json();
+    })
+    .then(data => {
+        if (!data.success) return;
+
+        const statusCell = document.getElementById('status-' + id);
+        if (statusCell) {
+            if (data.status === "approved") {
+                statusCell.innerHTML =
+                    '<span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Disetujui</span>';
+            } else if (data.status === "revisi") {
+                statusCell.innerHTML =
+                    '<span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Perlu Revisi</span>';
+            }
+        }
+
+        closeModal(id);
+    })
+    .catch(err => {
+        if (err.message === "validation") return;
+        console.error(err);
+        alert("Terjadi kesalahan saat mengirim data. Silakan coba lagi.");
+    });
+}
 // ======================menangani refresh halaman============
 document.addEventListener("DOMContentLoaded", function () {
         if (localStorage.getItem("scrollPosition")) {
@@ -219,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     </script>
-
+@stack('scripts')
 
 </body>
 

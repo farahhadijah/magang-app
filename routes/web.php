@@ -17,7 +17,7 @@ use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanC
 use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
 use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
 
-
+use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
 use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
 use App\Http\Controllers\Dosen\ReviewLogbookController;
 use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirController;
@@ -118,28 +118,44 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->prefix('dosen')
     ->name('dosen.')
     ->group(function () {
-        Route::view('/dashboard', 'dosen.dashboard')->name('dashboard');
-        Route::get('/mahasiswa-bimbingan', [MahasiswaBimbinganController::class, 'index'])->name('mahasiswa.bimbingan');
-        Route::get('/logbook', [ReviewLogbookController::class, 'index'])->name('logbook.index');
 
-        Route::put('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review'])->name('logbook.review');
-        Route::put('/logbook/{logbook}/review-ajax', [ReviewLogbookController::class, 'reviewAjax'])->name('logbook.review-ajax');
+        Route::get('/dashboard', [DosenDashboardController::class, 'index'])
+        ->name('dashboard');
 
-        // Nilai PKL
-        Route::get('/nilai', [DosenNilaiPklController::class, 'index'])->name('nilai.index');
-        Route::get('/nilai/{pkl}/create', [DosenNilaiPklController::class, 'create'])->name('nilai.create');
-        Route::post('/nilai/{pkl}', [DosenNilaiPklController::class, 'store'])->name('nilai.store');
+        // Mahasiswa Bimbingan
+        Route::get('/mahasiswa-bimbingan',[MahasiswaBimbinganController::class, 'index']
+        )->name('mahasiswa.bimbingan');
+
+        // Logbook
+        Route::get('/logbook',[ReviewLogbookController::class, 'index']
+        )->name('logbook.index');
+        Route::put('/logbook/{logbook}/review',[ReviewLogbookController::class, 'review']
+        )->name('logbook.review');
+        Route::post('/logbook/{logbook}/review-ajax',[ReviewLogbookController::class, 'reviewAjax']
+        )->name('logbook.review-ajax');
+        // bulk approve
+        Route::post('/logbook/bulk-approve', [ReviewLogbookController::class, 'bulkApprove']
+        )->name('logbook.bulk-approve');
+        // Nilai
+        Route::get('/nilai',[DosenNilaiPklController::class, 'index']
+        )->name('nilai.index');
+        Route::get('/nilai/{pkl}/create',[DosenNilaiPklController::class, 'create']
+        )->name('nilai.create');
+        Route::post('/nilai/{pkl}',[DosenNilaiPklController::class, 'store']
+        )->name('nilai.store');
+        Route::get('/nilai/daftar',[DosenNilaiPklController::class, 'daftar']
+        )->name('nilai.daftar');
 
         // Laporan Akhir
-        Route::get('/laporan', [DosenLaporanAkhirController::class, 'index'])->name('laporan.index');
-        Route::get('/laporan/{pkl}', [DosenLaporanAkhirController::class, 'show'])->name('laporan.show');
-        Route::post('/laporan/{pkl}/approve', [DosenLaporanAkhirController::class, 'approve'])->name('laporan.approve');
-        Route::post('/laporan/{pkl}/reject', [DosenLaporanAkhirController::class, 'reject'])->name('laporan.reject');
-        // daftar nilai mahasiswa
-        Route::get('/nilai-pkl/daftar', [DosenNilaiPklController::class, 'daftar'])
-        ->name('nilai.daftar');
+        Route::get('/laporan',[DosenLaporanAkhirController::class, 'index']
+        )->name('laporan.index');
+        Route::get('/laporan/{pkl}',[DosenLaporanAkhirController::class, 'show']
+        )->name('laporan.show');
+        Route::post('/laporan/{pkl}/approve',[DosenLaporanAkhirController::class, 'approve']
+        )->name('laporan.approve');
+        Route::post('/laporan/{pkl}/reject',[DosenLaporanAkhirController::class, 'reject']
+        )->name('laporan.reject');
     });
-
 /*
 |--------------------------------------------------------------------------
 | STAFF TU AREA
@@ -150,7 +166,8 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->name('staff.')
     ->group(function () {
         Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/pengajuan/histori-ditolak', [StaffPengajuanController::class, 'historiDitolak'])->name('pengajuan.histori_ditolak');
+        Route::get('/pengajuan/histori', [StaffPengajuanController::class, 'histori']
+        )->name('pengajuan.histori');
 
         Route::post('/dokumen/{id}/valid', [StaffDokumenController::class, 'valid'])->name('dokumen.valid');
         Route::post('/dokumen/{id}/invalid', [StaffDokumenController::class, 'invalid'])->name('dokumen.invalid');
@@ -200,11 +217,12 @@ Route::middleware(['auth', 'role:kaprodi'])
         Route::get('/dashboard', [KaprodiPengajuanController::class, 'dashboard'])->name('dashboard');
         Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
         Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
-        Route::get('/nilai', [KaprodiNilaiController::class, 'index'])->name('nilai.index');
+        Route::get('/nilai-pkl',[KaprodiNilaiController::class, 'index'])->name('nilai.index');
         Route::get('/pengajuan/{id}', [KaprodiPengajuanController::class, 'show'])->name('pengajuan.show');
         Route::post('/pengajuan/{id}/approve', [KaprodiPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [KaprodiPengajuanController::class, 'reject'])->name('pengajuan.reject');
-        Route::get('/histori-ditolak', [KaprodiPengajuanController::class, 'historiDitolak'])->name('pengajuan.histori_ditolak');
+        Route::get('/histori',[KaprodiPengajuanController::class, 'histori'])->name('pengajuan.histori');
+       Route::get('/mahasiswa/belum',[KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
     });
 
 /*

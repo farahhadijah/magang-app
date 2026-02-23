@@ -58,6 +58,10 @@ class Pkl extends Model
     {
         return $this->hasOne(NilaiPkl::class, 'id_pkl');
     }
+    public function pengajuan()
+    {
+        return $this->belongsTo(\App\Models\PengajuanPkl::class, 'id_pengajuan_pkl');
+    }
     public function totalLogbook()
     {
         return $this->logbooks()->count();

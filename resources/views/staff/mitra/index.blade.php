@@ -1,11 +1,9 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-800">
-            Manajemen Mitra
-        </h2>
+    <x-slot name="title">
+        Manajemen Mitra - MagangApp
     </x-slot>
 
-    <div class="px-4 py-6 mx-auto max-w-7xl">
+    <div class="px-4 py-6 mx-auto max-w-7xl min-h-[70vh] flex flex-col">
         @if(session('success'))
             <div class="p-4 mb-4 border-l-4 border-green-600 bg-green-50">
                 <strong>Akun Berhasil Dibuat</strong><br>
@@ -17,9 +15,9 @@
         @endif
 
 
-        <div class="overflow-hidden bg-white rounded-lg shadow">
+        <div class="overflow-hidden bg-white border border-green-200 rounded-lg shadow">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-100">
+                <thead class="bg-green-100">
                     <tr>
                         <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Tempat PKL</th>
                         <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Jumlah Mahasiswa</th>
@@ -36,7 +34,7 @@
                             </td>
 
                             <td class="px-6 py-4 text-sm text-gray-700">
-                                {{ $tempat->pengajuans->whereNotNull('pkl')->count() }}
+                                {{ $tempat->jumlah_mahasiswa }}
                             </td>
 
                             <td class="px-6 py-4 text-sm">
@@ -78,6 +76,9 @@
                     @endforeach
                 </tbody>
             </table>
+            <div class="flex justify-center pt-6 mt-auto">
+                {{ $tempatPkls->links() }}
+            </div>
         </div>
     </div>
 </x-app-layout>

@@ -11,7 +11,7 @@
         @else
             <div class="overflow-hidden bg-white rounded-lg shadow">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-100">
+                    <thead class="bg-green-100">
                         <tr>
                             <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">No</th>
                             <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">Nama</th>
@@ -34,7 +34,7 @@
                                     {{ $last?->tgl ? \Carbon\Carbon::parse($last->tgl, 'Asia/Jakarta')->format('d M Y') : '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <a href="{{ route('mitra.logbook', $pkl->id) }}" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">Lihat Logbook</a>
+                                    <a href="{{ route('mitra.logbook', $pkl->id) }}" class="px-3 py-1 text-sm text-white bg-green-500 rounded hover:bg-green-600">Lihat Logbook</a>
                                 </td>
                             </tr>
                         @endforeach

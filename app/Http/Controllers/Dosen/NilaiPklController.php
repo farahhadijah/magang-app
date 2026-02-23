@@ -16,13 +16,15 @@ class NilaiPklController extends Controller
     public function index()
     {
         $dosenId = $this->getDosenId();
+
         $pkls = Pkl::where('id_dosen', $dosenId)
             ->where('status', 'aktif')
             ->whereHas('laporanAkhir', function ($q) {
                 $q->where('status_approve', 'approved');
             })
             ->with(['pengajuanPkl.mahasiswa', 'laporanAkhir', 'nilaiPkl'])
-            ->get();
+            ->paginate(15); // 🔥 pagination
+
         return view('dosen.nilai.index', compact('pkls'));
     }
     /**
@@ -75,16 +77,16 @@ class NilaiPklController extends Controller
             ->with('success', 'Nilai berhasil disimpan dan PKL selesai.');
     }
     public function daftar()
-{
-    $dosenId = $this->getDosenId();
+    {
+        $dosenId = $this->getDosenId();
 
-    $pkls = Pkl::where('id_dosen', $dosenId)
-        ->where('status', 'selesai')
-        ->whereHas('nilaiPkl')
-        ->with(['pengajuanPkl.mahasiswa', 'nilaiPkl'])
-        ->orderByDesc('tgl_selesai')
-        ->get();
+        $pkls = Pkl::where('id_dosen', $dosenId)
+            ->where('status', 'selesai')
+            ->whereHas('nilaiPkl')
+            ->with(['pengajuanPkl.mahasiswa', 'nilaiPkl'])
+            ->orderByDesc('tgl_selesai')
+            ->paginate(10); // 🔥 pagination
 
-    return view('dosen.nilai.daftar', compact('pkls'));
-}
+        return view('dosen.nilai.daftar', compact('pkls'));
+    }
 }

@@ -1,9 +1,9 @@
 <div class="space-y-1">
     {{-- ================= DAFTAR MAHASISWA BIMBINGAN ================= --}}
     <a href="{{ route('dosen.mahasiswa.bimbingan') }}"
-       class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
-       {{ request()->routeIs('dosen.mahasiswa.bimbingan') ? 'bg-green-800 text-amber-300' : '' }}">
-        <i class="fa-solid fa-users"></i>
+    class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+    {{ request()->routeIs('dosen.mahasiswa.bimbingan*') ? 'bg-green-800 text-amber-300' : '' }}">
+        <i class="w-5 fa-solid fa-users"></i>
         <span>Mahasiswa Bimbingan</span>
     </a>
     {{-- ================= REVIEW LOGBOOK ================= --}}
