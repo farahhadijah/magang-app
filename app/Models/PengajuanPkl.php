@@ -80,16 +80,29 @@ class PengajuanPkl extends Model
     }
     /* ================= HELPER KAPRODI ================= */
     public function bisaDiverifikasiKaprodi(): bool
-    {
-        return $this->status === 'pending_kaprodi'
-            && $this->verifikasi()
-                ->where('level', 'tu')
-                ->where('status', 'approved')
-                ->exists()
-            && ! $this->verifikasi()
-                ->where('level', 'kaprodi')
-                ->exists();
+{
+    if ($this->status !== 'pending_kaprodi') {
+        return false;
     }
+
+    // Pastikan relasi sudah diload untuk mencegah query tambahan
+    if (! $this->relationLoaded('verifikasi')) {
+        $this->load('verifikasi');
+    }
+
+    $verifikasi = $this->verifikasi;
+
+    $sudahDisetujuiTU = $verifikasi
+        ->where('level', 'tu')
+        ->where('status', 'approved')
+        ->isNotEmpty();
+
+    $sudahDiverifikasiKaprodi = $verifikasi
+        ->where('level', 'kaprodi')
+        ->isNotEmpty();
+
+    return $sudahDisetujuiTU && ! $sudahDiverifikasiKaprodi;
+}
     /* ================= QUERY SCOPE ================= */
     public function scopeUntukTu($query)
     {

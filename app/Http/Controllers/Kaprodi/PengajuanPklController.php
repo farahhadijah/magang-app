@@ -1,15 +1,17 @@
 <?php
 namespace App\Http\Controllers\Kaprodi;
+use App\Http\Controllers\Controller;
+use App\Models\Dosen;
+use App\Models\PengajuanPkl;
 use App\Models\Pkl;
+use App\Models\SuratPengantar;
 use App\Models\User;
 use App\Models\Verifikasi;
-use App\Models\PengajuanPkl;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use App\Models\SuratPengantar;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+
 class PengajuanPklController extends Controller
 {
     /* ================= DASHBOARD ================= */
@@ -17,11 +19,15 @@ class PengajuanPklController extends Controller
 {
     $prodiId = $this->getProdiId();
 
-    $totalMahasiswa = PengajuanPkl::whereHas('mahasiswa', function ($q) use ($prodiId) {
-            $q->where('prodi_id', $prodiId);
-        })
-        ->distinct('id_mhs')
-        ->count('id_mhs');
+    $totalMahasiswa = PengajuanPkl::whereIn('status', [
+        'pending_tu',
+        'pending_kaprodi'
+    ])
+    ->whereHas('mahasiswa', function ($q) use ($prodiId) {
+        $q->where('prodi_id', $prodiId);
+    })
+    ->distinct('id_mhs')
+    ->count('id_mhs');
 
     $totalMenunggu = PengajuanPkl::where('status', 'pending_kaprodi')
         ->whereHas('mahasiswa', function ($q) use ($prodiId) {
@@ -69,39 +75,47 @@ class PengajuanPklController extends Controller
 }
     /* ================= DETAIL ================= */
     public function show($id)
-    {
-        $prodiId = $this->getProdiId();
+{
+    $prodiId = $this->getProdiId();
 
-        $pengajuan = PengajuanPkl::with([
-            'mahasiswa.prodi',
-            'tempatPkl',
-            'dokumenPengajuan',
-            'verifikasi.user'
+    $pengajuan = PengajuanPkl::query()
+        ->whereKey($id)
+        ->whereHas('mahasiswa', fn($q) => 
+            $q->where('prodi_id', $prodiId)
+        )
+        ->with([
+            'mahasiswa:id,nama,nim,prodi_id',
+            'mahasiswa.prodi:id,nama',
+            'tempatPkl:id,nama_tempat,jenis_tempat,lokasi_maps',
+            'dokumenPengajuan:id,id_pengajuan_pkl,jenis_dokumen,path_file',
+            'verifikasi:id,id_pengajuan_pkl,id_user,level,status,tgl_verifikasi',
+            'verifikasi.user:id,username'
         ])
-        ->whereHas('mahasiswa', function ($q) use ($prodiId) {
-            $q->where('prodi_id', $prodiId);
-        })
-        ->findOrFail($id);
+        ->firstOrFail();
 
-        if (!$pengajuan->bisaDiverifikasiKaprodi()) {
-            return redirect()
-                ->route('kaprodi.pengajuan.index')
-                ->with('warning', 'Pengajuan sudah diproses.');
-        }
-
-        $prodiId = $pengajuan->mahasiswa->prodi_id;
-
-        $dosenList = User::where('role', 'dosen')
-            ->where('is_active', 1)
-            ->whereHas('dosen', function ($q) use ($prodiId) {
-                $q->where('prodi_id', $prodiId)
-                ->where('is_active', 1);
-            })
-            ->with('dosen')
-            ->get();
-
-        return view('kaprodi.pengajuan.show', compact('pengajuan', 'dosenList'));
+    if (!$pengajuan->bisaDiverifikasiKaprodi()) {
+        return redirect()
+            ->route('kaprodi.pengajuan.index')
+            ->with('warning', 'Pengajuan sudah diproses.');
     }
+
+    // $dosenList = User::query()
+    // ->select('id', 'username')
+    // ->where('role', 'dosen')
+    // ->where('is_active', 1)
+    // ->whereHas('dosen', function ($q) use ($prodiId) {
+    //     $q->where('prodi_id', $prodiId)
+    //       ->where('is_active', 1);
+    // })
+    // ->with(['dosen:id,nama,prodi_id'])
+    // ->get();
+    $dosenList = Dosen::where('prodi_id', $prodiId)
+    ->where('is_active', 1)
+    ->orderBy('nama')
+    ->get(['id', 'nama']);
+
+    return view('kaprodi.pengajuan.show', compact('pengajuan', 'dosenList'));
+}
 
 
 

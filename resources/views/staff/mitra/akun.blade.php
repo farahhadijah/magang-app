@@ -6,7 +6,14 @@
     <div class="max-w-4xl px-4 py-8 mx-auto">
 
         <div class="overflow-hidden bg-white border border-green-200 shadow-lg rounded-2xl">
-
+            @if($account_notice ?? false)
+                <div class="p-4 text-sm text-yellow-800 border border-yellow-200 rounded-lg bg-yellow-50">
+                    ⚠️ Data akun ini hanya ditampilkan satu kali.
+                    Jika Anda merefresh, logout, atau meninggalkan halaman ini,
+                    informasi akun tidak akan ditampilkan kembali.
+                    Pastikan Anda menyimpan atau mengirimkan data ini sebelum keluar.
+                </div>
+            @endif
             {{-- Header --}}
             <div class="px-6 py-4 bg-green-700">
                 <h3 class="text-lg font-semibold text-white">
@@ -18,10 +25,6 @@
             </div>
 
             <div class="p-6 space-y-6">
-
-                @php
-                    $akun = session('generated_account');
-                @endphp
 
                 @if($akun)
 
