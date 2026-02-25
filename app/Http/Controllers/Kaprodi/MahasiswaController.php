@@ -9,7 +9,10 @@ class MahasiswaController extends Controller
 {
     public function index()
     {
-        $mahasiswas = Mahasiswa::whereHas('pengajuanPkl.pkl', function ($q) {
+        $prodiId = auth()->user()->staff->prodi_id;
+
+        $mahasiswas = Mahasiswa::where('prodi_id', $prodiId)
+            ->whereHas('pengajuanPkl.pkl', function ($q) {
                 $q->where('status', 'aktif');
             })
             ->with('prodi')
@@ -20,7 +23,10 @@ class MahasiswaController extends Controller
     }
     public function belumMengajukan()
     {
-        $mahasiswas = Mahasiswa::whereDoesntHave('pengajuanPkl', function ($q) {
+        $prodiId = auth()->user()->staff->prodi_id;
+
+        $mahasiswas = Mahasiswa::where('prodi_id', $prodiId)
+            ->whereDoesntHave('pengajuanPkl', function ($q) {
                 $q->whereNotIn('status', ['ditolak_tu', 'ditolak_kaprodi']);
             })
             ->with(['prodi', 'pengajuanPkl'])

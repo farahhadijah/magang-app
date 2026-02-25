@@ -23,7 +23,7 @@
             <!-- Selesai Diverifikasi TU -->
             <div class="p-6 border border-green-300 shadow-sm bg-green-50 rounded-xl">
                 <h3 class="text-lg font-semibold text-green-800">
-                    Selesai Diverifikasi TU
+                    Menunggu Verifikasi Kaprodi
                 </h3>
 
                 <p class="mt-2 text-3xl font-bold text-green-900">
