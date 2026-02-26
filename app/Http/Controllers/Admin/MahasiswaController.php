@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Imports\MahasiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\HeadingRowImport;
 
 class MahasiswaController extends Controller
 {
@@ -176,17 +177,35 @@ public function resetPassword(Mahasiswa $mahasiswa)
 
     return back()->with('success', 'Password berhasil direset ke NIM.');
 }
+
+
 public function import(Request $request)
 {
     $request->validate([
         'file' => 'required|mimes:xlsx,xls,csv'
     ]);
 
+    $headings = (new HeadingRowImport)->toArray($request->file('file'));
+    $header = $headings[0][0] ?? [];
+
+    $required = ['nim','nama','angkatan','no_hp','kode_prodi'];
+
+    $header = array_map(fn($h) => strtolower(trim($h)), $header);
+
+    foreach ($required as $col) {
+        if (!in_array($col, $header)) {
+            return back()->with(
+                'error',
+                'Format file salah. Kolom wajib: nim, nama, angkatan, no_hp, kode_prodi'
+            );
+        }
+    }
+
     try {
 
         Excel::import(new MahasiswaImport, $request->file('file'));
 
-        return back()->with('success', 'Import berhasil.');
+        return back()->with('success', 'Import mahasiswa berhasil.');
 
     } catch (\Exception $e) {
 

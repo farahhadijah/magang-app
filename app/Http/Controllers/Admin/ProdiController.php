@@ -7,6 +7,7 @@ use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ProdiImport;
+use Maatwebsite\Excel\HeadingRowImport;
 
 class ProdiController extends Controller
 {
@@ -67,13 +68,32 @@ class ProdiController extends Controller
     }
 
     public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,csv'
-        ]);
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,csv'
+    ]);
 
-        Excel::import(new ProdiImport, $request->file('file'));
+    // Ambil header baris pertama
+    $headings = (new HeadingRowImport)->toArray($request->file('file'));
 
-        return back()->with('success', 'Data Prodi berhasil diimport.');
+    $header = $headings[0][0] ?? [];
+
+    $required = ['kode', 'nama'];
+
+    // Normalisasi header jadi lowercase
+    $header = array_map(fn($h) => strtolower(trim($h)), $header);
+
+    foreach ($required as $col) {
+        if (!in_array($col, $header)) {
+            return back()->with('error',
+                'Format file salah. Kolom wajib: kode, nama'
+            );
+        }
     }
+
+    // Kalau header valid → lanjut import
+    Excel::import(new ProdiImport, $request->file('file'));
+
+    return back()->with('success', 'Data Prodi berhasil diimport.');
+}
 }

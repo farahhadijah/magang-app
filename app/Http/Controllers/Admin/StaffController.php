@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StaffImport;
+use Maatwebsite\Excel\HeadingRowImport;
 
 class StaffController extends Controller
 {
@@ -105,14 +106,32 @@ class StaffController extends Controller
         return back()->with('success','Password berhasil direset.');
     }
 
-    public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
-        ]);
+    
 
-        Excel::import(new StaffImport, $request->file('file'));
+public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls,csv'
+    ]);
 
-        return back()->with('success','Import staff berhasil.');
+    $headings = (new HeadingRowImport)->toArray($request->file('file'));
+    $header = $headings[0][0] ?? [];
+
+    $required = ['nip','nama','jabatan','no_hp','kode_prodi'];
+
+    $header = array_map(fn($h) => strtolower(trim($h)), $header);
+
+    foreach ($required as $col) {
+        if (!in_array($col, $header)) {
+            return back()->with(
+                'error',
+                'Format file salah. Kolom wajib: nip, nama, jabatan, no_hp, kode_prodi'
+            );
+        }
     }
+
+    Excel::import(new StaffImport, $request->file('file'));
+
+    return back()->with('success','Import staff berhasil.');
+}
 }

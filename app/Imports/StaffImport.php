@@ -4,41 +4,54 @@ namespace App\Imports;
 
 use App\Models\Staff;
 use App\Models\User;
+use App\Models\Prodi;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Illuminate\Support\Collection;
+// use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class StaffImport implements ToCollection
+class StaffImport implements ToModel, WithHeadingRow
 {
-    public function collection(Collection $rows)
+    public function model(array $row)
     {
-        DB::transaction(function () use ($rows) {
+        if (
+            empty($row['nip']) ||
+            empty($row['nama']) ||
+            empty($row['jabatan']) ||
+            empty($row['kode_prodi'])
+        ) {
+            return null;
+        }
 
-            foreach ($rows->skip(1) as $row) {
+        // Cari prodi berdasarkan kode
+        $prodi = Prodi::where('kode', strtoupper(trim($row['kode_prodi'])))->first();
 
-                $staff = Staff::updateOrCreate(
-                    ['nip' => $row[0]],
-                    [
-                        'nama' => $row[1],
-                        'jabatan' => $row[2],
-                        'no_hp' => $row[3],
-                        'prodi_id' => $row[4],
-                        'is_active' => 1,
-                    ]
-                );
+        if (!$prodi) {
+            return null; // skip jika prodi tidak ditemukan
+        }
 
-                if (!$staff->user) {
-                    User::create([
-                        'username' => $staff->nip,
-                        'password' => Hash::make($staff->nip),
-                        'role' => 'staf',
-                        'staff_id' => $staff->id,
-                        'is_active' => 1,
-                        'first_login' => 1,
-                    ]);
-                }
-            }
-        });
+        $staff = Staff::updateOrCreate(
+            ['nip' => trim($row['nip'])],
+            [
+                'nama'      => trim($row['nama']),
+                'jabatan'   => trim($row['jabatan']),
+                'no_hp'     => trim($row['no_hp'] ?? null),
+                'prodi_id'  => $prodi->id,
+                'is_active' => 1,
+            ]
+        );
+
+        if (!$staff->user) {
+            User::create([
+                'username'    => $staff->nip,
+                'password'    => Hash::make($staff->nip),
+                'role'        => 'staf',
+                'staff_id'    => $staff->id,
+                'is_active'   => 1,
+                'first_login' => 1,
+            ]);
+        }
+
+        return $staff;
     }
 }

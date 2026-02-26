@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\DosenImport;
+use Maatwebsite\Excel\HeadingRowImport;
 class DosenController extends Controller
 {
     public function index(Request $request)
@@ -157,11 +158,29 @@ public function resetPassword(Dosen $dosen)
 
     return back()->with('success','Password berhasil direset.');
 }
+
+
 public function import(Request $request)
 {
     $request->validate([
         'file' => 'required|mimes:xlsx,xls,csv'
     ]);
+
+    $headings = (new HeadingRowImport)->toArray($request->file('file'));
+    $header = $headings[0][0] ?? [];
+
+    $required = ['nidn','nama','keahlian','no_hp','kode_prodi'];
+
+    $header = array_map(fn($h) => strtolower(trim($h)), $header);
+
+    foreach ($required as $col) {
+        if (!in_array($col, $header)) {
+            return back()->with(
+                'error',
+                'Format file salah. Kolom wajib: nidn, nama, keahlian, no_hp, kode_prodi'
+            );
+        }
+    }
 
     try {
 

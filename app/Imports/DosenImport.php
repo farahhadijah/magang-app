@@ -4,55 +4,38 @@ namespace App\Imports;
 
 use App\Models\Dosen;
 use App\Models\Prodi;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class DosenImport implements ToCollection
+class DosenImport implements ToModel, WithHeadingRow
 {
-    public function collection(Collection $rows)
+    public function model(array $row)
     {
-        DB::transaction(function () use ($rows) {
+        if (
+            empty($row['nidn']) ||
+            empty($row['nama']) ||
+            empty($row['kode_prodi'])
+        ) {
+            return null;
+        }
 
-            foreach ($rows->skip(1) as $row) {
+        $prodi = Prodi::where('kode', strtoupper(trim($row['kode_prodi'])))->first();
 
-                // Format:
-                // 0 = nidn
-                // 1 = nama
-                // 2 = keahlian
-                // 3 = no_hp
-                // 4 = kode_prodi
+        if (!$prodi) {
+            return null;
+        }
 
-                $prodi = Prodi::where('kode', $row[4])->first();
+        $dosen = Dosen::updateOrCreate(
+            ['nidn' => trim($row['nidn'])],
+            [
+                'nama'      => trim($row['nama']),
+                'keahlian'  => trim($row['keahlian'] ?? null),
+                'no_hp'     => trim($row['no_hp'] ?? null),
+                'prodi_id'  => $prodi->id,
+                'is_active' => 1,
+            ]
+        );
 
-                if (!$prodi) {
-                    continue; // skip kalau prodi tidak ditemukan
-                }
-
-                $dosen = Dosen::updateOrCreate(
-                    ['nidn' => $row[0]],
-                    [
-                        'nama' => $row[1],
-                        'keahlian' => $row[2],
-                        'no_hp' => $row[3],
-                        'prodi_id' => $prodi->id,
-                        'is_active' => 1,
-                    ]
-                );
-
-                if (!$dosen->user) {
-                    User::create([
-                        'username' => $dosen->nidn,
-                        'password' => Hash::make($dosen->nidn),
-                        'role' => 'dosen',
-                        'dosen_id' => $dosen->id,
-                        'is_active' => 1,
-                        'first_login' => 1,
-                    ]);
-                }
-            }
-        });
+        return $dosen;
     }
 }
