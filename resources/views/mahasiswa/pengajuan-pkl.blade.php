@@ -145,16 +145,28 @@
                     Upload Dokumen Wajib
                 </h4>
 
-                <div class="mb-4">
-                    <label class="block mb-1 font-medium text-green-800">
-                        KHS Terbaru *
-                    </label>
-                    <input type="file"
-                        name="dokumen_khs"
-                        required
-                        accept=".pdf,.doc,.docx">
+                <div class="p-4 mb-4 text-sm border rounded-lg bg-gray-50 border-gray-200 text-gray-600">
+                    • Upload KHS dari semester 1 sampai semester terakhir. <br>
+                    • Semua dokumen wajib dalam format PDF (kecuali pembayaran boleh gambar).
                 </div>
 
+                {{-- ================= KHS MULTIPLE ================= --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">
+                        KHS Semester 1 - Terakhir *
+                    </label>
+                    <input type="file"
+                        name="dokumen_khs[]"
+                        multiple
+                        required
+                        accept=".pdf,.doc,.docx"
+                        class="block w-full text-sm">
+                    <p class="mt-1 text-xs text-gray-500">
+                        Bisa pilih lebih dari satu file.
+                    </p>
+                </div>
+
+                {{-- ================= PEMBAYARAN ================= --}}
                 <div class="mb-4">
                     <label class="block mb-1 font-medium text-green-800">
                         Bukti Pembayaran PKL *
@@ -162,17 +174,44 @@
                     <input type="file"
                         name="dokumen_pembayaran"
                         required
-                        accept=".pdf,.jpg,.png">
+                        accept=".pdf,.jpg,.png"
+                        class="block w-full text-sm">
                 </div>
 
-                <div>
+                {{-- ================= STUDI TOUR ================= --}}
+                <div class="mb-4">
                     <label class="block mb-1 font-medium text-green-800">
                         Sertifikat Studi Tour *
                     </label>
                     <input type="file"
                         name="dokumen_studi_tour"
                         required
-                        accept=".pdf,.doc,.docx">
+                        accept=".pdf,.doc,.docx"
+                        class="block w-full text-sm">
+                </div>
+
+                {{-- ================= FORM PKN (BARU) ================= --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">
+                        Form Pengajuan PKN *
+                    </label>
+                    <input type="file"
+                        name="dokumen_form_pkn"
+                        required
+                        accept=".pdf"
+                        class="block w-full text-sm">
+                </div>
+
+                {{-- ================= KRS REMEDIAL (BARU) ================= --}}
+                <div>
+                    <label class="block mb-1 font-medium text-green-800">
+                        KRS Remedial *
+                    </label>
+                    <input type="file"
+                        name="dokumen_krs_remedial"
+                        required
+                        accept=".pdf"
+                        class="block w-full text-sm">
                 </div>
             </div>
 

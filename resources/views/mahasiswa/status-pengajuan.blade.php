@@ -191,68 +191,136 @@
 
         {{-- ================= DOKUMEN ================= --}}
         <div class="p-6 bg-white border border-green-100 shadow rounded-xl">
-            <h3 class="mb-4 text-lg font-semibold text-green-800">
+            <h3 class="mb-6 text-lg font-semibold text-green-800">
                 Dokumen Pengajuan
             </h3>
 
-            @forelse ($pengajuan->dokumenPengajuan as $doc)
-                <div class="p-4 mb-4 border rounded-lg">
+            @php
+                $khsList = $pengajuan->dokumenPengajuan->where('jenis_dokumen', 'KHS');
+                $lainnya = $pengajuan->dokumenPengajuan->where('jenis_dokumen', '!=', 'KHS');
+            @endphp
 
-                    {{-- Header --}}
-                    <div class="flex items-center justify-between">
-                        <a href="{{ asset('storage/' . $doc->path_file) }}"
-                        target="_blank"
-                        class="font-medium text-green-700 hover:underline">
-                            📄 {{ $doc->jenis_dokumen }}
-                        </a>
+            {{-- ================= KHS MULTIPLE ================= --}}
+            <div class="mb-6">
+                <h4 class="mb-3 font-semibold text-gray-700">
+                    📚 KHS Semester 1 - Terakhir
+                </h4>
 
-                        @php
-                            $badge = match($doc->status_verifikasi) {
-                                'valid'   => 'bg-green-100 text-green-800',
-                                'invalid' => 'bg-red-100 text-red-800',
-                                default   => 'bg-amber-100 text-amber-800',
-                            };
-                        @endphp
+                @forelse ($khsList as $index => $doc)
+                    <div class="p-4 mb-3 border rounded-lg bg-gray-50">
 
-                        <span class="px-3 py-1 text-xs font-medium rounded-full {{ $badge }}">
-                            {{ ucfirst($doc->status_verifikasi) }}
-                        </span>
+                        <div class="flex items-center justify-between">
+                            <a href="{{ asset('storage/' . $doc->path_file) }}"
+                            target="_blank"
+                            class="font-medium text-green-700 hover:underline">
+                                📄 KHS File {{ $index + 1 }}
+                            </a>
+
+                            @php
+                                $badge = match($doc->status_verifikasi) {
+                                    'valid'   => 'bg-green-100 text-green-800',
+                                    'invalid' => 'bg-red-100 text-red-800',
+                                    default   => 'bg-amber-100 text-amber-800',
+                                };
+                            @endphp
+
+                            <span class="px-3 py-1 text-xs font-medium rounded-full {{ $badge }}">
+                                {{ ucfirst($doc->status_verifikasi) }}
+                            </span>
+                        </div>
+
+                        @if ($doc->status_verifikasi === 'invalid' && $doc->catatan)
+                            <p class="mt-2 text-sm text-red-700">
+                                <strong>Catatan TU:</strong> {{ $doc->catatan }}
+                            </p>
+                        @endif
+
+                        @if ($pengajuan->status === 'ditolak_tu' && $doc->status_verifikasi === 'invalid')
+                            <form method="POST"
+                                action="{{ route('mahasiswa.pengajuan.dokumen.upload-ulang', $doc->id) }}"
+                                enctype="multipart/form-data"
+                                class="mt-3">
+                                @csrf
+
+                                <input type="file"
+                                    name="dokumen"
+                                    required
+                                    accept=".pdf,.doc,.docx"
+                                    class="block w-full text-sm">
+
+                                <button type="submit"
+                                        class="px-4 py-2 mt-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700">
+                                    Upload Ulang
+                                </button>
+                            </form>
+                        @endif
+
                     </div>
+                @empty
+                    <p class="text-sm text-gray-500">Tidak ada KHS diunggah.</p>
+                @endforelse
+            </div>
 
-                    {{-- Catatan TU --}}
-                    @if ($doc->status_verifikasi === 'invalid' && $doc->catatan)
-                        <p class="mt-2 text-sm text-red-700">
-                            <strong>Catatan TU:</strong>
-                            {{ $doc->catatan }}
-                        </p>
-                    @endif
+            {{-- ================= DOKUMEN LAINNYA ================= --}}
+            <div>
+                <h4 class="mb-3 font-semibold text-gray-700">
+                    📄 Dokumen Lainnya
+                </h4>
 
-                    {{-- Upload ulang --}}
-                    @if ($pengajuan->status === 'ditolak_tu' && $doc->status_verifikasi === 'invalid')
-                        <form method="POST"
-                            action="{{ route('mahasiswa.pengajuan.dokumen.upload-ulang', $doc->id) }}"
-                            enctype="multipart/form-data"
-                            class="mt-4 space-y-2">
-                            @csrf
+                @foreach ($lainnya as $doc)
+                    <div class="p-4 mb-3 border rounded-lg">
 
-                            <input type="file"
-                                name="dokumen"
-                                accept=".pdf,.doc,.docx"
-                                required
-                                class="block w-full text-sm text-gray-600 file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700">
+                        <div class="flex items-center justify-between">
+                            <a href="{{ asset('storage/' . $doc->path_file) }}"
+                            target="_blank"
+                            class="font-medium text-green-700 hover:underline">
+                                📄 {{ $doc->jenis_dokumen }}
+                            </a>
 
-                            <button type="submit"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                                Upload Ulang Dokumen
-                            </button>
-                        </form>
-                    @endif
-                </div>
-            @empty
-                <p class="text-sm text-gray-500">
-                    Tidak ada dokumen terunggah.
-                </p>
-            @endforelse
+                            @php
+                                $badge = match($doc->status_verifikasi) {
+                                    'valid'   => 'bg-green-100 text-green-800',
+                                    'invalid' => 'bg-red-100 text-red-800',
+                                    default   => 'bg-amber-100 text-amber-800',
+                                };
+                            @endphp
+
+                            <span class="px-3 py-1 text-xs font-medium rounded-full {{ $badge }}">
+                                {{ ucfirst($doc->status_verifikasi) }}
+                            </span>
+                        </div>
+
+                        @if ($doc->status_verifikasi === 'invalid' && $doc->catatan)
+                            <p class="mt-2 text-sm text-red-700">
+                                <strong>Catatan TU:</strong> {{ $doc->catatan }}
+                            </p>
+                        @endif
+
+                        @if ($pengajuan->status === 'ditolak_tu' && $doc->status_verifikasi === 'invalid')
+                            <form method="POST"
+                                action="{{ route('mahasiswa.pengajuan.dokumen.upload-ulang', $doc->id) }}"
+                                enctype="multipart/form-data"
+                                class="mt-3">
+                                @csrf
+
+                                <input type="file"
+                                    name="dokumen"
+                                    required
+                                    accept=".pdf,.doc,.docx,.jpg,.png"
+                                    class="block w-full text-sm">
+
+                                <button type="submit"
+                                        class="px-4 py-2 mt-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700">
+                                    Upload Ulang
+                                </button>
+                            </form>
+                        @endif
+
+                    </div>
+                @endforeach
+            </div>
+
+        </div>
 
             {{-- ================= SURAT PENGANTAR ================= --}}
             @if($pengajuan->pkl && $pengajuan->pkl->suratPengantar)
@@ -270,8 +338,6 @@
             @endif
 
         </div>
-
-
 
         {{-- ================= INFO PKL (SETELAH DISETUJUI) ================= --}}
         @if ($pengajuan->pkl)

@@ -84,7 +84,14 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->name('mahasiswa.')
     ->group(function () {
         Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
+        // formulir
+        Route::get('/formulir', 
+            [\App\Http\Controllers\Mahasiswa\FormulirController::class,'index']
+        )->name('formulir.index');
 
+        Route::get('/formulir/download/{id}', 
+            [\App\Http\Controllers\Mahasiswa\FormulirController::class,'download']
+        )->name('formulir.download');
         // Pengajuan PKL
         Route::get('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
         Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
@@ -203,6 +210,7 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
     ->group(function () {
         Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
         Route::resource('users', UserController::class)->only(['create', 'store']);
+        Route::resource('formulir', \App\Http\Controllers\Admin\FormulirController::class);
     });
 
 /*
