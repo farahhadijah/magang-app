@@ -1,5 +1,8 @@
 <x-app-layout>
-    <h2 class="text-2xl font-bold mb-6">Edit Formulir</h2>
+    <x-slot name="title">
+        Update - MagangApp
+    </x-slot>
+    <h2 class="mb-6 text-2xl font-bold">Edit Formulir</h2>
 
     <form action="{{ route('admin.formulir.update',$formulir->id) }}"
           method="POST"
@@ -11,21 +14,12 @@
             <label>Nama Formulir</label>
             <input type="text" name="nama"
                    value="{{ $formulir->nama }}"
-                   class="border p-2 w-full">
-        </div>
-
-        <div class="mb-4">
-            <label>Kategori</label>
-            <select name="kategori" class="border p-2 w-full">
-                <option value="pkl" {{ $formulir->kategori=='pkl'?'selected':'' }}>PKL</option>
-                <option value="skripsi" {{ $formulir->kategori=='skripsi'?'selected':'' }}>Skripsi</option>
-                <option value="umum" {{ $formulir->kategori=='umum'?'selected':'' }}>Umum</option>
-            </select>
+                   class="w-full p-2 border">
         </div>
 
         <div class="mb-4">
             <label>Prodi</label>
-            <select name="prodi_id" class="border p-2 w-full">
+            <select name="prodi_id" class="w-full p-2 border">
                 <option value="">Umum</option>
                 @foreach($prodi as $p)
                     <option value="{{ $p->id }}"
@@ -38,7 +32,7 @@
 
         <div class="mb-4">
             <label>Ganti File (opsional)</label>
-            <input type="file" name="file" class="border p-2 w-full">
+            <input type="file" name="file" class="w-full p-2 border">
         </div>
 
         <div class="mb-4">
@@ -49,7 +43,7 @@
             </label>
         </div>
 
-        <button class="bg-blue-500 text-white px-4 py-2 rounded">
+        <button class="px-4 py-2 text-white bg-blue-500 rounded">
             Update
         </button>
     </form>

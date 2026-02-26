@@ -11,8 +11,8 @@ class ProdiSeeder extends Seeder
     {
         $prodiList = [
             ['kode' => 'TI', 'nama' => 'Teknik Informatika'],
-            ['kode' => 'SI', 'nama' => 'Sistem Informasi'],
-            ['kode' => 'MI', 'nama' => 'Manajemen Informatika']
+            ['kode' => 'TE', 'nama' => 'Teknik Elektro'],
+            ['kode' => 'TS', 'nama' => 'Teknik Sipil']
         ];
 
         foreach ($prodiList as $p) {

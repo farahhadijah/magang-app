@@ -9,7 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\FirstLoginController;
 
-use App\Http\Controllers\Admin\UserController;
+
 
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
 use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookController;
@@ -30,6 +30,14 @@ use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanControlle
 use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanController;
 use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
 use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
+
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ProdiController;
+use App\Http\Controllers\Admin\MahasiswaController;
+use App\Http\Controllers\Admin\FormulirController;
+use App\Http\Controllers\Admin\DosenController;
+use App\Http\Controllers\Admin\StaffController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -204,13 +212,33 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
 | ADMIN AREA
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth', 'first.login', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
         Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
+
         Route::resource('users', UserController::class)->only(['create', 'store']);
-        Route::resource('formulir', \App\Http\Controllers\Admin\FormulirController::class);
+
+        Route::resource('formulir', FormulirController::class);
+
+        Route::resource('prodi', ProdiController::class);
+        Route::post('prodi/import', [ProdiController::class, 'import'])->name('prodi.import');
+
+        Route::resource('mahasiswa', MahasiswaController::class);
+        Route::post('mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
+        Route::post('mahasiswa/{mahasiswa}/reset-password',[MahasiswaController::class, 'resetPassword'])->name('mahasiswa.reset-password');
+
+        Route::resource('dosen', DosenController::class);
+        Route::post('dosen/{dosen}/reset-password',[DosenController::class,'resetPassword'])->name('dosen.reset-password');
+        Route::post('dosen/import',[DosenController::class,'import'])->name('dosen.import');
+
+        Route::resource('staff', StaffController::class);
+        Route::post('staff/{id}/reset', [StaffController::class,'reset'])->name('staff.reset');
+        Route::post('staff/import',[StaffController::class, 'import'])->name('staff.import');
+
     });
 
 /*

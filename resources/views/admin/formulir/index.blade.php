@@ -1,29 +1,32 @@
 <x-app-layout>
-    <div class="flex justify-between items-center mb-8">
+    <x-slot name="title">
+        Formulir - MagangApp
+    </x-slot>
+    <div class="flex items-center justify-between mb-8">
         <div>
             <h2 class="text-3xl font-bold text-green-800">
                 Manajemen Formulir Magang
             </h2>
-            <p class="text-gray-500 mt-1 text-sm">
+            <p class="mt-1 text-sm text-gray-500">
                 Kelola formulir yang dapat diunduh oleh mahasiswa.
             </p>
         </div>
 
         <a href="{{ route('admin.formulir.create') }}"
-           class="bg-green-600 hover:bg-green-700 transition text-white px-5 py-2 rounded-lg shadow">
+           class="px-5 py-2 text-white transition bg-green-600 rounded-lg shadow hover:bg-green-700">
             + Tambah Formulir
         </a>
     </div>
 
     @if(session('success'))
-        <div class="bg-green-100 border border-green-300 text-green-800 p-4 rounded-lg mb-6">
+        <div class="p-4 mb-6 text-green-800 bg-green-100 border border-green-300 rounded-lg">
             {{ session('success') }}
         </div>
     @endif
 
-    <div class="bg-white shadow-md rounded-xl overflow-hidden border border-green-100">
+    <div class="overflow-hidden bg-white border border-green-100 shadow-md rounded-xl">
         <table class="min-w-full">
-            <thead class="bg-green-700 text-white">
+            <thead class="text-white bg-green-700">
                 <tr>
                     <th class="p-4 text-center">No</th>
                     <th class="p-4 text-left">Nama Formulir</th>
@@ -34,7 +37,7 @@
             </thead>
             <tbody>
                 @forelse($formulir as $index => $f)
-                    <tr class="border-b hover:bg-green-50 transition">
+                    <tr class="transition border-b hover:bg-green-50">
                         <td class="p-4 text-center">
                             {{ $index + 1 }}
                         </td>
@@ -46,18 +49,18 @@
                         </td>
                         <td class="p-4 text-center">
                             @if($f->is_active)
-                                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-700">
+                                <span class="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
                                     Aktif
                                 </span>
                             @else
-                                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-600">
+                                <span class="px-3 py-1 text-sm font-semibold text-red-600 bg-red-100 rounded-full">
                                     Nonaktif
                                 </span>
                             @endif
                         </td>
-                        <td class="p-4 text-center space-x-2">
+                        <td class="p-4 space-x-2 text-center">
                             <a href="{{ route('admin.formulir.edit',$f->id) }}"
-                               class="bg-yellow-500 hover:bg-yellow-600 transition text-white px-3 py-1 rounded-lg text-sm shadow">
+                               class="px-3 py-1 text-sm text-white transition bg-yellow-500 rounded-lg shadow hover:bg-yellow-600">
                                 Edit
                             </a>
 
@@ -67,7 +70,7 @@
                                   onsubmit="return confirm('Yakin hapus formulir ini?')">
                                 @csrf
                                 @method('DELETE')
-                                <button class="bg-red-500 hover:bg-red-600 transition text-white px-3 py-1 rounded-lg text-sm shadow">
+                                <button class="px-3 py-1 text-sm text-white transition bg-red-500 rounded-lg shadow hover:bg-red-600">
                                     Hapus
                                 </button>
                             </form>
