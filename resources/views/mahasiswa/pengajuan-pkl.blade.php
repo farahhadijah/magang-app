@@ -38,19 +38,6 @@
             </div>
         @endif
 
-        {{-- ================= INFO ================= --}}
-        <div class="p-5 border border-amber-200 rounded-xl bg-amber-50">
-            <h4 class="flex items-center mb-1 font-semibold text-amber-800">
-                <i class="mr-2 fa-solid fa-circle-info"></i>
-                Informasi
-            </h4>
-            <p class="text-sm text-amber-700">
-                Form ini digunakan untuk
-                <b>mengajukan permohonan PKL</b>.
-                Data akan diverifikasi oleh <b>Staff TU</b>.
-            </p>
-        </div>
-
         {{-- ================= FORM ================= --}}
         <form id="formPengajuan"
               method="POST"
@@ -71,7 +58,7 @@
 
                     <div>
                         <p class="font-medium text-green-800">
-                            Nama instansi wajib ditulis lengkap
+                            Nama instansi wajib ditulis lengkap, tidak menyertakan alamat.
                         </p>
                         <input
                             type="text"
@@ -139,13 +126,54 @@
                 </div>
             </div>
 
+            {{-- ================= DATA AKADEMIK ================= --}}
+            <div>
+                <div class="grid gap-4 md:grid-cols-2">
+
+                    {{-- SEMESTER --}}
+                    <div>
+                        <label class="block mb-1 font-medium text-green-800">
+                            Semester (Angka Romawi) *
+                        </label>
+                        <input
+                            type="text"
+                            name="semester"
+                            value="{{ old('semester') }}"
+                            required
+                            pattern="^(I|II|III|IV|V|VI|VII|VIII|IX|X)$"
+                            title="Gunakan angka romawi, contoh: V"
+                            class="block w-full uppercase rounded-lg input focus:ring-green-500 focus:border-green-500"
+                            style="text-transform: uppercase;"
+                        >
+                        <p class="mt-1 text-xs text-gray-500">
+                            Gunakan angka romawi (I, II, III, IV, V, dst).
+                        </p>
+                    </div>
+
+                    {{-- ALAMAT ASAL --}}
+                    <div>
+                        <label class="block mb-1 font-medium text-green-800">
+                            Alamat Asal Mahasiswa *
+                        </label>
+                        <textarea
+                            name="alamat_asal"
+                            required
+                            rows="3"
+                            class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500"
+                            placeholder="Contoh: Ds. Sidomulyo RT 01/RW 02, Kec. Deket, Kab. Lamongan"
+                        >{{ old('alamat_asal') }}</textarea>
+                    </div>
+
+                </div>
+            </div>
+
             {{-- ================= DOKUMEN ================= --}}
             <div>
                 <h4 class="mb-3 font-semibold text-green-800">
                     Upload Dokumen Wajib
                 </h4>
 
-                <div class="p-4 mb-4 text-sm border rounded-lg bg-gray-50 border-gray-200 text-gray-600">
+                <div class="p-4 mb-4 text-sm text-gray-600 border border-gray-200 rounded-lg bg-gray-50">
                     • Upload KHS dari semester 1 sampai semester terakhir. <br>
                     • Semua dokumen wajib dalam format PDF (kecuali pembayaran boleh gambar).
                 </div>
@@ -161,9 +189,6 @@
                         required
                         accept=".pdf,.doc,.docx"
                         class="block w-full text-sm">
-                    <p class="mt-1 text-xs text-gray-500">
-                        Bisa pilih lebih dari satu file.
-                    </p>
                 </div>
 
                 {{-- ================= PEMBAYARAN ================= --}}
@@ -282,6 +307,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
+
+// Auto Uppercase Semester
+const semesterInput = document.querySelector('input[name="semester"]');
+
+if (semesterInput) {
+    semesterInput.addEventListener('input', function () {
+        this.value = this.value.toUpperCase();
+    });
+}
 </script>
 
 

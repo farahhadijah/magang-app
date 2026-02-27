@@ -27,20 +27,6 @@ class UserSeeder extends Seeder
                 ]
             );
         }
-        // KAPRODI
-        $kaprodi = Staff::where('nip', '19750505')->first();
-        if ($kaprodi) {
-            User::updateOrCreate(
-                ['username' => $kaprodi->nip],
-                [
-                    'password' => Hash::make($kaprodi->nip),
-                    'role' => 'kaprodi',
-                    'first_login' => true,
-                    'is_active' => true,
-                    'staff_id' => $kaprodi->id
-                ]
-            );
-        }
         // DOSEN
         $dosen = Dosen::where('nidn', '12001234')->first();
         if ($dosen) {

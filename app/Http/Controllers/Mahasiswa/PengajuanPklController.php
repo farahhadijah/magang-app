@@ -47,6 +47,11 @@ class PengajuanPklController extends Controller
         'jenis_tempat' => 'required|in:Pemerintah,Sekolah,PT,CV',
         'no_hp'        => ['required', 'regex:/^08[0-9]{7,14}$/'],
         'lokasi_maps'  => ['required', 'url', 'regex:/google\\./i'],
+        'semester' => [
+            'required',
+            'regex:/^(I|II|III|IV|V|VI|VII|VIII|IX|X)$/'
+        ],
+        'alamat_asal' => 'required|string|max:500',
 
         // 🔥 KHS sekarang multiple
         'dokumen_khs'     => 'required|array|min:1',
@@ -85,6 +90,8 @@ class PengajuanPklController extends Controller
         $pengajuan = PengajuanPkl::create([
             'id_mhs'        => $mahasiswa->id,
             'id_tempat_pkl' => $tempatPkl->id,
+            'semester'      => $request->semester,
+            'alamat_asal'   => $request->alamat_asal,
             'status'        => 'pending_tu',
             'tgl_pengajuan' => now(),
         ]);

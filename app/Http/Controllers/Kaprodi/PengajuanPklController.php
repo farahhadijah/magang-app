@@ -88,8 +88,12 @@ class PengajuanPklController extends Controller
             'mahasiswa.prodi:id,nama',
             'tempatPkl:id,nama_tempat,jenis_tempat,lokasi_maps',
             'dokumenPengajuan:id,id_pengajuan_pkl,jenis_dokumen,path_file',
+
             'verifikasi:id,id_pengajuan_pkl,id_user,level,status,tgl_verifikasi',
-            'verifikasi.user:id,username'
+            'verifikasi.user:id,username,role,staff_id,mahasiswa_id,dosen_id',
+            'verifikasi.user.staff:id,nama',
+            'verifikasi.user.mahasiswa:id,nama',
+            'verifikasi.user.dosen:id,nama'
         ])
         ->firstOrFail();
 

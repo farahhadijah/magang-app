@@ -45,28 +45,34 @@ class User extends Authenticatable
         return $this->hasOne(Mitra::class);
     }
     public function getNama()
-    {
-        // Normalize role variants and return the most appropriate related name.
-        // Some roles in the codebase use different strings (e.g. 'staff_tu'),
-        // and there is no separate 'kaprodi' user relation - kaprodi is stored
-        // as a Staff entry with jabatan = 'kaprodi'. Use the Staff relation
-        // for staff-like roles, and sensible fallbacks.
-        $role = $this->role;
-        if (in_array($role, ['staff', 'staff_tu', 'kaprodi'], true)) {
-            return $this->staff?->nama ?? $this->username ?? null;
-        }
-        if ($role === 'mahasiswa') {
-            return $this->mahasiswa?->nama ?? $this->username ?? null;
-        }
-        if ($role === 'dosen') {
-            return $this->dosen?->nama ?? $this->username ?? null;
-        }
-        if ($role === 'admin') {
-            // There isn't a dedicated admin relation on the User model; prefer
-            // an admin.name if available, otherwise fall back to username.
-            return $this->admin?->nama ?? $this->username ?? null;
-        }
-        // Default fallback
-        return $this->username ?? $this->name ?? null;
+{
+    $role = $this->role;
+
+    // STAFF / TU / KAPRODI
+    if (in_array($role, ['staf', 'staff_tu', 'kaprodi'], true)) {
+        return $this->staff?->nama ?? $this->username ?? null;
     }
+
+    // MAHASISWA
+    if ($role === 'mahasiswa') {
+        return $this->mahasiswa?->nama ?? $this->username ?? null;
+    }
+
+    // DOSEN
+    if ($role === 'dosen') {
+        return $this->dosen?->nama ?? $this->username ?? null;
+    }
+
+    // ADMIN
+    if ($role === 'admin') {
+        return $this->username ?? null;
+    }
+
+    // MITRA
+    if ($role === 'mitra') {
+        return $this->mitra?->nama ?? $this->username ?? null;
+    }
+
+    return $this->username ?? null;
+}
 }

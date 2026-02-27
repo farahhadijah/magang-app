@@ -9,6 +9,8 @@ class PengajuanPkl extends Model
         'id_tempat_pkl',
         'status',
         'tgl_pengajuan',
+        'semester',
+        'alamat_asal',
         'catatan_tu',
         'catatan_kaprodi',
     ];

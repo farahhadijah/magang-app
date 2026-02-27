@@ -124,7 +124,6 @@
             <p class="mt-1 text-sm text-amber-600">
                 Pastikan seluruh dokumen PKL sudah diunggah dan menunggu verifikasi TU sebelum diteruskan ke Kaprodi.
             </p>
-            <a href="https://drive.google.com/drive/folders/122hdU2vh7OXth9jagGTqHrqh2b6JA1jy">download dokumen</a>
         </div>
     </div>
 </x-app-layout>
