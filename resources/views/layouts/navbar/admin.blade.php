@@ -8,6 +8,14 @@
         <span>Manajemen Formulir</span>
     </a>
 
+    {{-- ================= MANAJEMEN FAKULTAS ================= --}}
+    <a href="{{ route('admin.fakultas.index') }}"
+    class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+    {{ request()->routeIs('admin.fakultas.*') ? 'bg-green-800 text-amber-300' : '' }}">
+        <i class="w-5 fa-solid fa-building-columns"></i>
+        <span>Manajemen Fakultas</span>
+    </a>
+
     {{-- ================= MANAJEMEN PRODI ================= --}}
     <a href="{{ route('admin.prodi.index') }}"
        class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800

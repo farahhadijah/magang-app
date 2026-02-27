@@ -1,42 +1,35 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Admin\DosenController;
+use App\Http\Controllers\Admin\FakultasController;
+use App\Http\Controllers\Admin\FormulirController;
+use App\Http\Controllers\Admin\MahasiswaController;
+use App\Http\Controllers\Admin\ProdiController;
+use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Auth\FirstLoginController;
-
-
-
-use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
-use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookController;
-use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
-use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
-use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
-
 use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
-use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
-use App\Http\Controllers\Dosen\ReviewLogbookController;
 use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirController;
+use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
 use App\Http\Controllers\Dosen\NilaiPklController as DosenNilaiPklController;
-
+use App\Http\Controllers\Dosen\ReviewLogbookController;
+use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
+use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
+use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanController;
+use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
+use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
+use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookController;
+use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
+use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
 use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanController;
-
-use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanController;
-use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
-use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
-
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\ProdiController;
-use App\Http\Controllers\Admin\MahasiswaController;
-use App\Http\Controllers\Admin\FormulirController;
-use App\Http\Controllers\Admin\DosenController;
-use App\Http\Controllers\Admin\StaffController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 
 /*
@@ -239,6 +232,11 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
         Route::post('staff/{id}/reset', [StaffController::class,'reset'])->name('staff.reset');
         Route::post('staff/import',[StaffController::class, 'import'])->name('staff.import');
 
+        Route::resource('fakultas', FakultasController::class)->parameters([
+        'fakultas' => 'fakultas']);
+
+        Route::post('fakultas/import',[FakultasController::class, 'import']
+        )->name('fakultas.import');
     });
 
 /*
