@@ -11,6 +11,14 @@
     $bolehUploadLaporan = $pkl?->isSiapUploadLaporan();
 @endphp
 <div class="space-y-1">
+    {{-- ================= DOWNLOAD FORMULIR ================= --}}
+        <a href="{{ route('mahasiswa.formulir.index') }}"
+        class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+        {{ request()->routeIs('mahasiswa.formulir.*') ? 'bg-green-800 text-amber-300' : '' }}">
+            
+            <i class="w-5 fa-solid fa-download"></i>
+            <span>Download Formulir</span>
+        </a>
     {{-- ================= AJUKAN PKL ================= --}}
     @if(!$pengajuan)
         <a

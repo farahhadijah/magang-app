@@ -187,40 +187,45 @@ class PengajuanPklController extends Controller
         return back()->with('error', 'Tempat PKL sudah memiliki mitra.');
     }
 
-    $baseUsername = 'mitra_' . Str::slug($tempat->nama_tempat, '_');
-    $username = $baseUsername;
-    $counter = 1;
+    return DB::transaction(function () use ($tempat) {
 
-    while (User::where('username', $username)->exists()) {
-        $username = $baseUsername . '_' . $counter;
-        $counter++;
-    }
+        $baseUsername = 'mitra_' . Str::slug($tempat->nama_tempat, '_');
+        $username = $baseUsername;
+        $counter = 1;
 
-    $password = Str::random(8);
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . '_' . $counter;
+            $counter++;
+        }
 
-    $user = User::create([
-        'username' => $username,
-        'password' => Hash::make($password),
-        'role'     => 'mitra',
-        'first_login' => 1,
-    ]);
+        $password = Str::random(8);
 
-    Mitra::create([
-        'user_id'       => $user->id,
-        'tempat_pkl_id' => $tempat->id,
-        'no_hp'         => $tempat->no_hp,
-    ]);
+        $user = User::create([
+            'username' => $username,
+            'password' => Hash::make($password),
+            'role' => 'mitra',
+            'first_login' => 1,
+        ]);
 
-    return redirect()
-    ->route('staff.mitra.akun', ['id' => $tempat->id])
-    ->with('generated_account', [
-        'username' => $username,
-        'password' => $password
-    ]);
+        Mitra::create([
+            'user_id' => $user->id,
+            'tempat_pkl_id' => $tempat->id,
+            'no_hp' => $tempat->no_hp,
+        ]);
+
+        return redirect()
+            ->route('staff.mitra.akun', ['id' => $tempat->id])
+            ->with('generated_account', [
+                'username' => $username,
+                'password' => $password
+            ]);
+    });
 }
     public function showAkunMitra($id)
 {
-    if (!session()->has('generated_account')) {
+    $akun = session('generated_account');
+
+    if (!$akun) {
         return redirect()
             ->route('staff.mitra.index')
             ->with('warning', 'Akun hanya dapat dilihat setelah dibuat.');
@@ -228,8 +233,12 @@ class PengajuanPklController extends Controller
 
     $tempat = TempatPkl::with('mitra.user')->findOrFail($id);
 
-    return view('staff.mitra.akun', compact('tempat'));
-}  
+    return view('staff.mitra.akun', [
+        'tempat' => $tempat,
+        'akun' => $akun,
+        'account_notice' => true,
+    ]);
+} 
     public function manajemenMitra()
 {
     $prodiId = $this->getProdiId();

@@ -38,19 +38,6 @@
             </div>
         @endif
 
-        {{-- ================= INFO ================= --}}
-        <div class="p-5 border border-amber-200 rounded-xl bg-amber-50">
-            <h4 class="flex items-center mb-1 font-semibold text-amber-800">
-                <i class="mr-2 fa-solid fa-circle-info"></i>
-                Informasi
-            </h4>
-            <p class="text-sm text-amber-700">
-                Form ini digunakan untuk
-                <b>mengajukan permohonan PKL</b>.
-                Data akan diverifikasi oleh <b>Staff TU</b>.
-            </p>
-        </div>
-
         {{-- ================= FORM ================= --}}
         <form id="formPengajuan"
               method="POST"
@@ -71,7 +58,7 @@
 
                     <div>
                         <p class="font-medium text-green-800">
-                            Nama instansi wajib ditulis lengkap
+                            Nama instansi wajib ditulis lengkap, tidak menyertakan alamat.
                         </p>
                         <input
                             type="text"
@@ -139,22 +126,72 @@
                 </div>
             </div>
 
+            {{-- ================= DATA AKADEMIK ================= --}}
+            <div>
+                <div class="grid gap-4 md:grid-cols-2">
+
+                    {{-- SEMESTER --}}
+                    <div>
+                        <label class="block mb-1 font-medium text-green-800">
+                            Semester (Angka Romawi) *
+                        </label>
+                        <input
+                            type="text"
+                            name="semester"
+                            value="{{ old('semester') }}"
+                            required
+                            pattern="^(I|II|III|IV|V|VI|VII|VIII|IX|X)$"
+                            title="Gunakan angka romawi, contoh: V"
+                            class="block w-full uppercase rounded-lg input focus:ring-green-500 focus:border-green-500"
+                            style="text-transform: uppercase;"
+                        >
+                        <p class="mt-1 text-xs text-gray-500">
+                            Gunakan angka romawi (I, II, III, IV, V, dst).
+                        </p>
+                    </div>
+
+                    {{-- ALAMAT ASAL --}}
+                    <div>
+                        <label class="block mb-1 font-medium text-green-800">
+                            Alamat Asal Mahasiswa *
+                        </label>
+                        <textarea
+                            name="alamat_asal"
+                            required
+                            rows="3"
+                            class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500"
+                            placeholder="Contoh: Ds. Sidomulyo RT 01/RW 02, Kec. Deket, Kab. Lamongan"
+                        >{{ old('alamat_asal') }}</textarea>
+                    </div>
+
+                </div>
+            </div>
+
             {{-- ================= DOKUMEN ================= --}}
             <div>
                 <h4 class="mb-3 font-semibold text-green-800">
                     Upload Dokumen Wajib
                 </h4>
 
-                <div class="mb-4">
-                    <label class="block mb-1 font-medium text-green-800">
-                        KHS Terbaru *
-                    </label>
-                    <input type="file"
-                        name="dokumen_khs"
-                        required
-                        accept=".pdf,.doc,.docx">
+                <div class="p-4 mb-4 text-sm text-gray-600 border border-gray-200 rounded-lg bg-gray-50">
+                    • Upload KHS dari semester 1 sampai semester terakhir. <br>
+                    • Semua dokumen wajib dalam format PDF (kecuali pembayaran boleh gambar).
                 </div>
 
+                {{-- ================= KHS MULTIPLE ================= --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">
+                        KHS Semester 1 - Terakhir *
+                    </label>
+                    <input type="file"
+                        name="dokumen_khs[]"
+                        multiple
+                        required
+                        accept=".pdf,.doc,.docx"
+                        class="block w-full text-sm">
+                </div>
+
+                {{-- ================= PEMBAYARAN ================= --}}
                 <div class="mb-4">
                     <label class="block mb-1 font-medium text-green-800">
                         Bukti Pembayaran PKL *
@@ -162,17 +199,44 @@
                     <input type="file"
                         name="dokumen_pembayaran"
                         required
-                        accept=".pdf,.jpg,.png">
+                        accept=".pdf,.jpg,.png"
+                        class="block w-full text-sm">
                 </div>
 
-                <div>
+                {{-- ================= STUDI TOUR ================= --}}
+                <div class="mb-4">
                     <label class="block mb-1 font-medium text-green-800">
                         Sertifikat Studi Tour *
                     </label>
                     <input type="file"
                         name="dokumen_studi_tour"
                         required
-                        accept=".pdf,.doc,.docx">
+                        accept=".pdf,.doc,.docx"
+                        class="block w-full text-sm">
+                </div>
+
+                {{-- ================= FORM PKN (BARU) ================= --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">
+                        Form Pengajuan PKN *
+                    </label>
+                    <input type="file"
+                        name="dokumen_form_pkn"
+                        required
+                        accept=".pdf"
+                        class="block w-full text-sm">
+                </div>
+
+                {{-- ================= KRS REMEDIAL (BARU) ================= --}}
+                <div>
+                    <label class="block mb-1 font-medium text-green-800">
+                        KRS Remedial *
+                    </label>
+                    <input type="file"
+                        name="dokumen_krs_remedial"
+                        required
+                        accept=".pdf"
+                        class="block w-full text-sm">
                 </div>
             </div>
 
@@ -243,6 +307,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
+
+// Auto Uppercase Semester
+const semesterInput = document.querySelector('input[name="semester"]');
+
+if (semesterInput) {
+    semesterInput.addEventListener('input', function () {
+        this.value = this.value.toUpperCase();
+    });
+}
 </script>
 
 

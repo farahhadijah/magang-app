@@ -208,20 +208,6 @@ function submitReview(event, id) {
         alert("Terjadi kesalahan saat mengirim data. Silakan coba lagi.");
     });
 }
-// ======================menangani refresh halaman============
-document.addEventListener("DOMContentLoaded", function () {
-        if (localStorage.getItem("scrollPosition")) {
-            window.scrollTo(0, localStorage.getItem("scrollPosition"));
-            localStorage.removeItem("scrollPosition");
-        }
-
-        document.querySelectorAll("form").forEach(form => {
-            form.addEventListener("submit", function () {
-                localStorage.setItem("scrollPosition", window.scrollY);
-            });
-        });
-    });
-
     </script>
 @stack('scripts')
 

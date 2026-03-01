@@ -1,35 +1,36 @@
 <?php
 
+use App\Http\Controllers\Admin\DosenController;
+use App\Http\Controllers\Admin\FakultasController;
+use App\Http\Controllers\Admin\FormulirController;
+use App\Http\Controllers\Admin\MahasiswaController;
+use App\Http\Controllers\Admin\ProdiController;
+use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\FirstLoginController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
+use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirController;
+use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
+use App\Http\Controllers\Dosen\NilaiPklController as DosenNilaiPklController;
+use App\Http\Controllers\Dosen\ReviewLogbookController;
+use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
+use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
+use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanController;
+use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
+use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
+use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookController;
+use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
+use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
+use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Auth\FirstLoginController;
-
-use App\Http\Controllers\Admin\UserController;
-
-use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
-use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookController;
-use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
-use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
-use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
-
-use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
-use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
-use App\Http\Controllers\Dosen\ReviewLogbookController;
-use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirController;
-use App\Http\Controllers\Dosen\NilaiPklController as DosenNilaiPklController;
-
-use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
-use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
-use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanController;
-
-use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanController;
-use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
-use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,7 +85,14 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->name('mahasiswa.')
     ->group(function () {
         Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
+        // formulir
+        Route::get('/formulir', 
+            [\App\Http\Controllers\Mahasiswa\FormulirController::class,'index']
+        )->name('formulir.index');
 
+        Route::get('/formulir/download/{id}', 
+            [\App\Http\Controllers\Mahasiswa\FormulirController::class,'download']
+        )->name('formulir.download');
         // Pengajuan PKL
         Route::get('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
         Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
@@ -197,12 +205,38 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
 | ADMIN AREA
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth', 'first.login', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
         Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
+
         Route::resource('users', UserController::class)->only(['create', 'store']);
+
+        Route::resource('formulir', FormulirController::class);
+
+        Route::resource('prodi', ProdiController::class);
+        Route::post('prodi/import', [ProdiController::class, 'import'])->name('prodi.import');
+
+        Route::resource('mahasiswa', MahasiswaController::class);
+        Route::post('mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
+        Route::post('mahasiswa/{mahasiswa}/reset-password',[MahasiswaController::class, 'resetPassword'])->name('mahasiswa.reset-password');
+
+        Route::resource('dosen', DosenController::class);
+        Route::post('dosen/{dosen}/reset-password',[DosenController::class,'resetPassword'])->name('dosen.reset-password');
+        Route::post('dosen/import',[DosenController::class,'import'])->name('dosen.import');
+
+        Route::resource('staff', StaffController::class);
+        Route::post('staff/{id}/reset', [StaffController::class,'reset'])->name('staff.reset');
+        Route::post('staff/import',[StaffController::class, 'import'])->name('staff.import');
+
+        Route::resource('fakultas', FakultasController::class)->parameters([
+        'fakultas' => 'fakultas']);
+
+        Route::post('fakultas/import',[FakultasController::class, 'import']
+        )->name('fakultas.import');
     });
 
 /*

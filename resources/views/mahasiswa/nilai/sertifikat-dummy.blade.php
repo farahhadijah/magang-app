@@ -8,9 +8,5 @@
             Sertifikat ini menyatakan bahwa mahasiswa telah menyelesaikan
             Program Kerja Lapangan (PKL).
         </p>
-
-        <p class="mt-8 text-gray-600">
-            (Versi Dummy - Belum Final)
-        </p>
     </div>
 </x-app-layout>

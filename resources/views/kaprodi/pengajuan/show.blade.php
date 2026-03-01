@@ -145,8 +145,8 @@
                                 class="w-full p-2 border rounded-md">
                             <option value="">-- Pilih Dosen Pembimbing --</option>
                             @foreach($dosenList as $d)
-                                <option value="{{ $d->dosen->id }}">
-                                    {{ $d->dosen?->nama ?? $d->username }}
+                                <option value="{{ $d->id }}">
+                                    {{ $d->nama }}
                                 </option>
                             @endforeach
                         </select>

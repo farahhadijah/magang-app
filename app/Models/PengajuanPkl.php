@@ -9,6 +9,8 @@ class PengajuanPkl extends Model
         'id_tempat_pkl',
         'status',
         'tgl_pengajuan',
+        'semester',
+        'alamat_asal',
         'catatan_tu',
         'catatan_kaprodi',
     ];
@@ -25,6 +27,23 @@ class PengajuanPkl extends Model
     {
         return $this->hasMany(DokumenPengajuan::class, 'id_pengajuan_pkl');
     }
+    public function khs()
+{
+    return $this->dokumenPengajuan()
+        ->where('jenis_dokumen', DokumenPengajuan::JENIS_KHS);
+}
+
+public function formPkn()
+{
+    return $this->dokumenPengajuan()
+        ->where('jenis_dokumen', DokumenPengajuan::JENIS_FORM_PKN);
+}
+
+public function krsRemedial()
+{
+    return $this->dokumenPengajuan()
+        ->where('jenis_dokumen', DokumenPengajuan::JENIS_KRS_REMEDIAL);
+}
     public function pkl()
     {
         return $this->hasOne(Pkl::class, 'id_pengajuan_pkl');
@@ -34,6 +53,26 @@ class PengajuanPkl extends Model
         return $this->hasMany(Verifikasi::class, 'id_pengajuan_pkl');
     }
     /* ================= HELPER TU ================= */
+    public function dokumenWajibLengkap(): bool
+    {
+        $wajib = [
+            DokumenPengajuan::JENIS_KHS,
+            DokumenPengajuan::JENIS_PEMBAYARAN,
+            DokumenPengajuan::JENIS_STUDI_TOUR,
+            DokumenPengajuan::JENIS_FORM_PKN,
+            DokumenPengajuan::JENIS_KRS_REMEDIAL,
+        ];
+
+        foreach ($wajib as $jenis) {
+            if (! $this->dokumenPengajuan()
+                    ->where('jenis_dokumen', $jenis)
+                    ->exists()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
     public function bisaDiverifikasiTu(): bool
     {
         // TU dapat melakukan verifikasi ketika status pengajuan masih pending_tu
@@ -61,6 +100,7 @@ class PengajuanPkl extends Model
     public function bisaDisetujuiTu(): bool
     {
         return $this->bisaDiverifikasiTu()
+            && $this->dokumenWajibLengkap()
             && $this->semuaDokumenValid();
     }
     public function bisaDikembalikanKeMahasiswa(): bool
@@ -80,16 +120,29 @@ class PengajuanPkl extends Model
     }
     /* ================= HELPER KAPRODI ================= */
     public function bisaDiverifikasiKaprodi(): bool
-    {
-        return $this->status === 'pending_kaprodi'
-            && $this->verifikasi()
-                ->where('level', 'tu')
-                ->where('status', 'approved')
-                ->exists()
-            && ! $this->verifikasi()
-                ->where('level', 'kaprodi')
-                ->exists();
+{
+    if ($this->status !== 'pending_kaprodi') {
+        return false;
     }
+
+    // Pastikan relasi sudah diload untuk mencegah query tambahan
+    if (! $this->relationLoaded('verifikasi')) {
+        $this->load('verifikasi');
+    }
+
+    $verifikasi = $this->verifikasi;
+
+    $sudahDisetujuiTU = $verifikasi
+        ->where('level', 'tu')
+        ->where('status', 'approved')
+        ->isNotEmpty();
+
+    $sudahDiverifikasiKaprodi = $verifikasi
+        ->where('level', 'kaprodi')
+        ->isNotEmpty();
+
+    return $sudahDisetujuiTU && ! $sudahDiverifikasiKaprodi;
+}
     /* ================= QUERY SCOPE ================= */
     public function scopeUntukTu($query)
     {

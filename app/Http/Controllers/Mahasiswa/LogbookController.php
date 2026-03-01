@@ -47,21 +47,13 @@ class LogbookController extends Controller
     public function create()
     {
         $pkl = $this->getActivePkl();
+
         if (!$pkl) {
             return redirect()
                 ->route('mahasiswa.logbook.index')
                 ->with('warning', 'Belum ada PKL aktif.');
         }
-        // Cegah lebih dari satu logbook per hari (gunakan timezone lokal)
-        $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
-        $hasToday = $pkl->logbooks()
-            ->whereDate('tgl', $todayJakarta)
-            ->exists();
-        if ($hasToday) {
-            return redirect()
-                ->route('mahasiswa.logbook.index')
-                ->with('warning', 'Anda sudah membuat logbook untuk hari ini.');
-        }
+
         return view('mahasiswa.logbook.create', compact('pkl'));
     }
     /**
@@ -103,7 +95,9 @@ class LogbookController extends Controller
             ->whereDate('tgl', $request->tgl)
             ->exists();
         if ($exists) {
-            return back()->with('error', 'Logbook untuk tanggal tersebut sudah ada.');
+            return back()
+                ->withErrors(['tgl' => 'Logbook untuk tanggal tersebut sudah ada.'])
+                ->withInput();
         }
         Logbook::create([
             'id_pkl'         => $pkl->id,
