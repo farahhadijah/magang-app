@@ -63,7 +63,7 @@ class PengajuanPklController extends Controller
 
         // 🔥 Dokumen baru (ditambahkan, bukan mengganti)
         'dokumen_form_pkn'     => 'required|file|mimes:pdf|max:2048',
-        'dokumen_krs_remedial' => 'required|file|mimes:pdf|max:2048',
+        // 'dokumen_krs_remedial' => 'required|file|mimes:pdf|max:2048',
     ]);
 
     $mahasiswa = Auth::user()->mahasiswa;
@@ -164,15 +164,15 @@ class PengajuanPklController extends Controller
         | 5️⃣ KRS REMEDIAL (BARU)
         |--------------------------------------------------------------------------
         */
-        $krsPath = $request->file('dokumen_krs_remedial')
-            ->store($basePath, 'public');
+        // $krsPath = $request->file('dokumen_krs_remedial')
+        //     ->store($basePath, 'public');
 
-        DokumenPengajuan::create([
-            'id_pengajuan_pkl' => $pengajuan->id,
-            'jenis_dokumen'    => DokumenPengajuan::JENIS_KRS_REMEDIAL,
-            'path_file'        => $krsPath,
-            'status_verifikasi'=> 'pending',
-        ]);
+        // DokumenPengajuan::create([
+        //     'id_pengajuan_pkl' => $pengajuan->id,
+        //     'jenis_dokumen'    => DokumenPengajuan::JENIS_KRS_REMEDIAL,
+        //     'path_file'        => $krsPath,
+        //     'status_verifikasi'=> 'pending',
+        // ]);
     });
 
     return redirect()
