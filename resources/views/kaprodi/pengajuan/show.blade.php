@@ -6,17 +6,44 @@
     <div class="py-6 space-y-6">
         {{-- Informasi Mahasiswa --}}
         <div class="p-6 space-y-2 border border-green-200 rounded-lg shadow-sm bg-green-50">
-            <p><strong class="text-green-800">Nama:</strong> {{ $pengajuan->mahasiswa->nama ?? '-' }}</p>
-            <p><strong class="text-green-800">NIM:</strong> {{ $pengajuan->mahasiswa->nim ?? '-' }}</p>
-            <p><strong class="text-green-800">Instansi:</strong> {{ $pengajuan->tempatPkl->nama_tempat ?? '-' }}</p>
-            <p><strong class="text-green-800">Jenis Instansi:</strong> {{ $pengajuan->tempatPkl->jenis_tempat ?? '-' }}</p>
+            <p class="text-gray-700"><strong class="text-green-800">Nama:</strong> {{ $pengajuan->mahasiswa->nama ?? '-' }}</p>
+            <p class="text-gray-700"><strong class="text-green-800">NIM:</strong> {{ $pengajuan->mahasiswa->nim ?? '-' }}</p>
+            <p class="text-gray-700"><strong class="text-green-800">Instansi:</strong> {{ $pengajuan->tempatPkl->nama_tempat ?? '-' }}</p>
+            <p class="text-gray-700"><strong class="text-green-800">Jenis Instansi:</strong> {{ $pengajuan->tempatPkl->jenis_tempat ?? '-' }}</p>
         </div>
         @if($jarak)
-            <div class="p-3 mb-3 text-sm text-blue-800 border border-blue-200 rounded bg-blue-50">
+            <div class="p-3 mb-3 text-sm text-green-800 border border-green-200 rounded bg-green-50">
                 Jarak dari Kampus :
                 <strong>{{ number_format($jarak,2) }} KM</strong>
             </div>
         @endif
+        <div class="p-4 mt-4 border border-green-200 rounded-lg bg-green-50">
+
+    <h4 class="mb-2 font-semibold text-green-800">
+        Riwayat Tempat PKL
+    </h4>
+
+    @if($jumlahRiwayat > 0)
+
+        <p class="text-sm text-green-800">
+            ✔ Tempat ini sudah pernah digunakan oleh
+            <strong>{{ $jumlahRiwayat }}</strong> mahasiswa.
+        </p>
+
+        <p class="text-sm text-green-800">
+            ✔ Terakhir digunakan:
+            <strong>{{ $terakhirDigunakan->format('d M Y') }}</strong>
+        </p>
+
+    @else
+
+        <p class="text-sm text-gray-700">
+            Belum pernah ada mahasiswa PKL di tempat ini.
+        </p>
+
+    @endif
+
+</div>
         @php
             $lokasi = $pengajuan->tempatPkl->lokasi_maps ?? null;
         @endphp

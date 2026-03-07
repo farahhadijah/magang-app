@@ -126,11 +126,32 @@ class PengajuanPklController extends Controller
             $coords['lng']
         );
     }
+    /* ================= RIWAYAT TEMPAT PKL ================= */
+    $tempatId = $pengajuan->tempatPkl->id ?? null;
+
+    $jumlahRiwayat = 0;
+    $terakhirDigunakan = null;
+
+    if ($tempatId) {
+
+        $riwayat = PengajuanPkl::where('id_tempat_pkl', $tempatId)
+            ->where('id', '!=', $pengajuan->id) // selain pengajuan ini
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $jumlahRiwayat = $riwayat->count();
+
+        if ($jumlahRiwayat > 0) {
+            $terakhirDigunakan = $riwayat->first()->created_at;
+        }
+    }
 
     return view('kaprodi.pengajuan.show', compact(
         'pengajuan',
         'dosenList',
-        'jarak'
+        'jarak',
+        'jumlahRiwayat',
+        'terakhirDigunakan'
     ));
     }
 
