@@ -11,6 +11,12 @@
             <p><strong class="text-green-800">Instansi:</strong> {{ $pengajuan->tempatPkl->nama_tempat ?? '-' }}</p>
             <p><strong class="text-green-800">Jenis Instansi:</strong> {{ $pengajuan->tempatPkl->jenis_tempat ?? '-' }}</p>
         </div>
+        @if($jarak)
+            <div class="p-3 mb-3 text-sm text-blue-800 border border-blue-200 rounded bg-blue-50">
+                Jarak dari Kampus :
+                <strong>{{ number_format($jarak,2) }} KM</strong>
+            </div>
+        @endif
         @php
             $lokasi = $pengajuan->tempatPkl->lokasi_maps ?? null;
         @endphp
@@ -36,6 +42,7 @@
                 <h3 class="text-lg font-semibold text-green-800">
                     Lokasi Tempat PKL
                 </h3>
+                
             </div>
 
             <p class="mb-4 text-sm text-green-700">
