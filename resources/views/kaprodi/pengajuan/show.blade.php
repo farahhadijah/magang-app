@@ -63,7 +63,7 @@
 
 
         {{-- Dokumen --}}
-        <div class="p-6 bg-white border border-green-200 rounded-lg shadow-sm">
+        <div class="relative z-50 p-6 bg-white border border-green-200 rounded-lg shadow-sm">
             <h3 class="mb-3 text-lg font-semibold text-green-900">Dokumen Pengajuan</h3>
 
             @if ($pengajuan->dokumenPengajuan->count())
@@ -179,10 +179,10 @@
         <div
             x-show="isOpen"
             x-transition
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+            class="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-60"
             style="display: none;">
 
-            <div class="relative w-11/12 bg-white rounded-lg shadow-lg h-[90vh]">
+            <div class="relative z-50 w-11/12 bg-white rounded-lg shadow-lg h-[90vh]">
 
                 {{-- Tombol Close --}}
                 <button
