@@ -37,7 +37,7 @@
 
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
-                        <p class="font-medium text-green-800">Nama instansi. <span class="italic text-red-500">*tidak boleh berupa kalimat singkatan!</span> </p>
+                        <p class="font-medium text-green-800">Nama instansi </p>
                         <input type="text" id="nama_tempat" name="nama_tempat" value="{{ old('nama_tempat') }}" required autocomplete="off" class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500">
                         <div id="warningTempat" class="hidden mt-2 text-sm text-amber-600"></div>
                     </div>
@@ -180,29 +180,19 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-
             const inputNama = document.getElementById("nama_tempat");
             const warningBox = document.getElementById('warningTempat');
             const lokasiInput = document.getElementById("lokasi_maps");
             const form = document.getElementById("formPengajuan");
-
             let timeout = null;
-
-            /* ===============================
-            CEK KEMIRIPAN NAMA TEMPAT
-            =============================== */
-
+            // CEK KEMIRIPAN NAMA TEMPAT
             inputNama.addEventListener('input', function () {
-
                 clearTimeout(timeout);
-
                 timeout = setTimeout(() => {
-
                     if (inputNama.value.length < 4) {
                         warningBox.classList.add('hidden');
                         return;
                     }
-
                     fetch("{{ route('mahasiswa.pengajuan.cek-kemiripan') }}", {
                         method: "POST",
                         headers: {
@@ -215,183 +205,133 @@
                     })
                     .then(res => res.json())
                     .then(data => {
-
                         if (data.mirip) {
-
                             warningBox.innerHTML =
                                 `⚠️ Nama ini mirip dengan <b>${data.nama_mirip}</b>. Pastikan ini memang tempat yang berbeda, jika ya abaikan pesan ini`;
-
                             warningBox.classList.remove('hidden');
-
                         } else {
-
                             warningBox.classList.add('hidden');
-
                         }
-
                     });
-
                 }, 600);
-
             });
-
-
-            /* ===============================
-            AUTO UPPERCASE SEMESTER
-            =============================== */
-
+            // AUTO UPPERCASE SEMESTER
             const semesterInput = document.querySelector('input[name="semester"]');
-
             if (semesterInput) {
                 semesterInput.addEventListener('input', function () {
                     this.value = this.value.toUpperCase();
                 });
             }
-
-
-            /* ===============================
-            MAP PREVIEW
-            =============================== */
-
+            // MAP PREVIEW
             let map;
             let marker;
-
             inputNama.addEventListener("blur", function () {
-
                 let tempat = this.value.trim();
-
                 if (!tempat || tempat.length < 3) return;
-
                 lokasiInput.value = "Mencari lokasi...";
                 lokasiInput.readOnly = true;
-
                 let query = `${tempat} Indonesia`;
-
                 fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`)
-
                 .then(res => res.json())
-
                 .then(data => {
-
                     if (!data.features || data.features.length === 0) {
-
                         alert("Lokasi tidak ditemukan otomatis. Silakan cari melalui Google Maps.");
-
                         lokasiInput.readOnly = false;
                         lokasiInput.value = "";
-
                         document.getElementById("manualGuide")?.classList.remove("hidden");
                         document.getElementById("mapPreview").classList.add("hidden");
-
                         return;
                     }
-
                     let coords = data.features[0].geometry.coordinates;
-
                     let lon = coords[0];
                     let lat = coords[1];
-
                     let mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
-
                     lokasiInput.value = mapsLink;
-
                     showMap(lat, lon);
-
                 })
-
                 .catch(err => {
-
                     console.error(err);
-
                     alert("Gagal mencari lokasi otomatis. Silakan isi manual.");
-
                     lokasiInput.readOnly = false;
                     lokasiInput.value = "";
-
                 });
-
             });
-
-
-            /* ===============================
-            FUNGSI MENAMPILKAN MAP
-            =============================== */
-
+            // FUNGSI MENAMPILKAN MAP
             function showMap(lat, lon) {
-
                 const mapContainer = document.getElementById("mapPreview");
-
                 mapContainer.classList.remove("hidden");
-
                 if (!map) {
-
                     map = L.map('map').setView([lat, lon], 16);
-
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 19
                     }).addTo(map);
-
                 } else {
-
                     map.setView([lat, lon], 16);
-
                     if (marker) {
                         map.removeLayer(marker);
                     }
-
                 }
-
                 marker = L.marker([lat, lon]).addTo(map);
-
                 map.invalidateSize();
             }
-
-
-            /* ===============================
-            TOMBOL BUKA GOOGLE MAPS
-            =============================== */
-
+            // TOMBOL BUKA GOOGLE MAPS
             let btnMaps = document.getElementById("btnGoogleMaps");
-
             if (btnMaps) {
-
                 btnMaps.addEventListener("click", function () {
-
                     let tempat = inputNama.value.trim();
-
                     let url = "https://www.google.com/maps";
-
                     if (tempat) {
                         url = `https://www.google.com/maps/search/${encodeURIComponent(tempat)}`;
                     }
-
                     window.open(url, "_blank");
-
                     document.getElementById("manualGuide")?.classList.remove("hidden");
-
                 });
-
             }
-
-
-            /* ===============================
-            VALIDASI LINK GOOGLE MAPS
-            =============================== */
-
+            function extractLatLng(url){
+                if(!url) return null;
+                // format ?q=lat,lng
+                let match1 = url.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if(match1){
+                    return {
+                        lat: parseFloat(match1[1]),
+                        lng: parseFloat(match1[2])
+                    };
+                }
+                // format @lat,lng
+                let match2 = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if(match2){
+                    return {
+                        lat: parseFloat(match2[1]),
+                        lng: parseFloat(match2[2])
+                    };
+                }
+                // format /place/.../@lat,lng
+                let match3 = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+),/);
+                if(match3){
+                    return {
+                        lat: parseFloat(match3[1]),
+                        lng: parseFloat(match3[2])
+                    };
+                }
+                return null;
+            }
+            // VALIDASI LINK GOOGLE MAPS
             form.addEventListener("submit", function (e) {
 
-                let lokasi = lokasiInput.value;
+                let lokasi = lokasiInput.value.trim();
 
-                if (!lokasi.includes("google.com/maps")) {
-
-                    alert("Lokasi harus berupa link dari Google Maps.");
-
+                if(
+                    !lokasi.includes("google.com/maps") &&
+                    !lokasi.includes("maps.app.goo.gl")
+                ){
+                    alert("Lokasi harus berupa link Google Maps.");
                     e.preventDefault();
-
+                    return;
                 }
 
+                // jangan cek koordinat di frontend
+                // server Laravel akan memproses linknya
             });
-
         });
     </script>
 </x-app-layout>

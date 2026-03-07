@@ -16,73 +16,49 @@
         @endphp
 
         @if($lokasi)
-            <div class="p-5 mt-6 border border-green-200 shadow-sm bg-green-50 rounded-xl">
+        <div class="p-5 mt-6 border border-green-200 shadow-sm bg-green-50 rounded-xl">
 
-                <div class="flex items-center mb-3 space-x-2">
-                    {{-- Icon Location --}}
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="w-6 h-6 text-blue-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2">
-                        <path stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0L6.343 16.657A8 8 0 1117.657 16.657z" />
-                        <path stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+            <div class="flex items-center mb-3 space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-6 h-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0L6.343 16.657A8 8 0 1117.657 16.657z"/>
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
 
-                    <h3 class="text-lg font-semibold text-green-800">
-                        Lokasi Tempat PKL
-                    </h3>
-                </div>
+                <h3 class="text-lg font-semibold text-green-800">
+                    Lokasi Tempat PKL
+                </h3>
+            </div>
 
-                <p class="mb-4 text-sm text-green-700">
-                    Pastikan lokasi instansi layak dan sesuai dengan program studi sebelum menyetujui pengajuan.
-                </p>
+            <p class="mb-4 text-sm text-green-700">
+                Lokasi instansi tempat PKL mahasiswa.
+            </p>
 
-                {{-- Tombol Buka Google Maps --}}
-                <a href="https://www.google.com/maps?q={{ urlencode($lokasi) }}"
+            {{-- Leaflet Map --}}
+            <div id="mapKaprodi" class="w-full h-[300px] border rounded-lg"></div>
+
+            {{-- tombol opsional --}}
+            <a href="{{ $lokasi }}"
                 target="_blank"
-                class="inline-flex items-center px-4 py-2 space-x-2 font-medium text-white transition bg-green-600 rounded-lg hover:bg-green-700">
+                class="inline-block px-4 py-2 mt-3 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700">
+                Buka di Google Maps
+            </a>
 
-                    {{-- Icon external link --}}
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2">
-                        <path stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M14 3h7m0 0v7m0-7L10 14" />
-                        <path stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M5 10v11h11" />
-                    </svg>
+        </div>
 
-                    <span>Buka di Google Maps</span>
-                </a>
 
-                {{-- Embed Map --}}
-                <div class="mt-5 overflow-hidden border rounded-lg">
-                    <iframe
-                        width="100%"
-                        height="250"
-                        style="border:0"
-                        loading="lazy"
-                        allowfullscreen
-                        src="https://www.google.com/maps?q={{ urlencode($lokasi) }}&output=embed">
-                    </iframe>
-                </div>
-
-            </div>
         @else
-            <div class="p-4 mt-6 text-yellow-800 border border-yellow-300 rounded-lg bg-yellow-50">
-                Lokasi PKL belum tersedia.
-            </div>
+        <div class="p-4 mt-6 text-yellow-800 border border-yellow-300 rounded-lg bg-yellow-50">
+            Lokasi PKL belum tersedia.
+        </div>
         @endif
 
 
@@ -241,6 +217,59 @@
                     }
                 }
             }
+
+       document.addEventListener("DOMContentLoaded", function(){
+
+        let lokasi = @json($lokasi);
+
+        if(!lokasi) return;
+
+        let lat = null;
+        let lon = null;
+
+        // =============================
+        // Format 1 : ?q=lat,lon
+        // =============================
+        let qMatch = lokasi.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+        if(qMatch){
+            lat = parseFloat(qMatch[1]);
+            lon = parseFloat(qMatch[2]);
+        }
+
+        // =============================
+        // Format 2 : @lat,lon
+        // =============================
+        if(!lat){
+            let atMatch = lokasi.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+            if(atMatch){
+                lat = parseFloat(atMatch[1]);
+                lon = parseFloat(atMatch[2]);
+            }
+        }
+
+        // =============================
+        // Jika tidak ada koordinat
+        // =============================
+        if(!lat || !lon){
+            console.warn("Koordinat tidak ditemukan:", lokasi);
+            return;
+        }
+
+        // =============================
+        // Render Leaflet
+        // =============================
+        let map = L.map('mapKaprodi').setView([lat, lon], 16);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+            maxZoom:19
+        }).addTo(map);
+
+        L.marker([lat, lon]).addTo(map)
+            .bindPopup("Lokasi Tempat PKL")
+            .openPopup();
+});
         </script>
     </div>
 </x-app-layout>
