@@ -49,7 +49,7 @@
         <!-- ================= SIDEBAR ================= -->
         <div
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-            class="fixed inset-y-0 left-0 z-40 w-64 transition-transform duration-300 transform bg-primary md:translate-x-0 md:static md:inset-0"
+            class="fixed z-[9999] inset-y-0 left-0 w-64 transition-transform duration-300 transform bg-primary md:translate-x-0 md:static md:inset-0"
         >
 
             @include('layouts.navigation')

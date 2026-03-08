@@ -1,5 +1,5 @@
 <nav
-    class="flex flex-col w-64 h-full text-green-100"
+    class="relative z-[999] flex flex-col w-64 h-full text-green-100"
 >
 
     <!-- ================= LOGO ================= -->

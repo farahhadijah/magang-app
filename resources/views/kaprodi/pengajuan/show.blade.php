@@ -235,75 +235,123 @@
             </div>
         </div>
         <script>
-            function pdfViewer() {
-                return {
-                    isOpen: false,
-                    fileUrl: '',
+function pdfViewer() {
+    return {
+        isOpen: false,
+        fileUrl: '',
 
-                    openModal(url) {
-                        this.fileUrl = url;
-                        this.isOpen = true;
-                    },
+        openModal(url) {
+            this.fileUrl = url;
+            this.isOpen = true;
+        },
 
-                    closeModal() {
-                        this.fileUrl = '';
-                        this.isOpen = false;
-                    }
-                }
-            }
-
-       document.addEventListener("DOMContentLoaded", function(){
-
-        let lokasi = @json($lokasi);
-
-        if(!lokasi) return;
-
-        let lat = null;
-        let lon = null;
-
-        // =============================
-        // Format 1 : ?q=lat,lon
-        // =============================
-        let qMatch = lokasi.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-
-        if(qMatch){
-            lat = parseFloat(qMatch[1]);
-            lon = parseFloat(qMatch[2]);
+        closeModal() {
+            this.fileUrl = '';
+            this.isOpen = false;
         }
+    }
+}
 
-        // =============================
-        // Format 2 : @lat,lon
-        // =============================
-        if(!lat){
-            let atMatch = lokasi.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+document.addEventListener("DOMContentLoaded", function(){
 
-            if(atMatch){
-                lat = parseFloat(atMatch[1]);
-                lon = parseFloat(atMatch[2]);
-            }
+    let lokasi = @json($lokasi);
+
+    if(!lokasi) return;
+
+    let lat = null;
+    let lon = null;
+
+    // =============================
+    // Format 1 : ?q=lat,lon
+    // =============================
+    let qMatch = lokasi.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+    if(qMatch){
+        lat = parseFloat(qMatch[1]);
+        lon = parseFloat(qMatch[2]);
+    }
+
+    // =============================
+    // Format 2 : @lat,lon
+    // =============================
+    if(!lat){
+        let atMatch = lokasi.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+        if(atMatch){
+            lat = parseFloat(atMatch[1]);
+            lon = parseFloat(atMatch[2]);
         }
+    }
 
-        // =============================
-        // Jika tidak ada koordinat
-        // =============================
-        if(!lat || !lon){
-            console.warn("Koordinat tidak ditemukan:", lokasi);
-            return;
-        }
+    // =============================
+    // Jika tidak ada koordinat
+    // =============================
+    if(!lat || !lon){
+        console.warn("Koordinat tidak ditemukan:", lokasi);
+        return;
+    }
 
-        // =============================
-        // Render Leaflet
-        // =============================
-        let map = L.map('mapKaprodi').setView([lat, lon], 16);
+    // =============================
+    // KOORDINAT KAMPUS
+    // =============================
+    const kampusLat = -7.1224094;
+    const kampusLng = 112.4223971;
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-            maxZoom:19
-        }).addTo(map);
+    // =============================
+    // INIT MAP
+    // =============================
+    let map = L.map('mapKaprodi').setView([lat, lon], 13);
 
-        L.marker([lat, lon]).addTo(map)
-            .bindPopup("Lokasi Tempat PKL")
-            .openPopup();
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        maxZoom:19
+    }).addTo(map);
+
+    // =============================
+    // ICON MARKER KAMPUS (HIJAU)
+    // =============================
+    var greenIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25,41],
+        iconAnchor: [12,41],
+        popupAnchor: [1,-34],
+        shadowSize: [41,41]
+    });
+
+    // =============================
+    // MARKER TEMPAT PKL
+    // =============================
+    let markerPkl = L.marker([lat, lon])
+        .addTo(map)
+        .bindPopup("Tempat PKL Mahasiswa")
+        .openPopup();
+
+    // =============================
+    // MARKER KAMPUS
+    // =============================
+    let markerKampus = L.marker([kampusLat, kampusLng], {icon: greenIcon})
+        .addTo(map)
+        .bindPopup("Kampus Universitas Islam Lamongan");
+
+    // =============================
+    // GARIS JARAK
+    // =============================
+    let garis = L.polyline([
+        [kampusLat, kampusLng],
+        [lat, lon]
+    ],{
+        color: 'blue',
+        weight: 4,
+        opacity: 0.7
+    }).addTo(map);
+
+    // =============================
+    // AUTO ZOOM KE SEMUA MARKER
+    // =============================
+    let group = new L.featureGroup([markerPkl, markerKampus]);
+    map.fitBounds(group.getBounds().pad(0.3));
+
 });
-        </script>
+</script>
     </div>
 </x-app-layout>

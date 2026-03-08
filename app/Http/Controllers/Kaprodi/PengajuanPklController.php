@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Verifikasi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -135,14 +136,14 @@ class PengajuanPklController extends Controller
     if ($tempatId) {
 
         $riwayat = PengajuanPkl::where('id_tempat_pkl', $tempatId)
-            ->where('id', '!=', $pengajuan->id) // selain pengajuan ini
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->where('id', '!=', $pengajuan->id)
+            ->selectRaw('COUNT(*) as total, MAX(created_at) as terakhir')
+            ->first();
 
-        $jumlahRiwayat = $riwayat->count();
+        $jumlahRiwayat = $riwayat->total ?? 0;
 
-        if ($jumlahRiwayat > 0) {
-            $terakhirDigunakan = $riwayat->first()->created_at;
+        if ($riwayat->terakhir) {
+            $terakhirDigunakan = Carbon::parse($riwayat->terakhir);
         }
     }
 
