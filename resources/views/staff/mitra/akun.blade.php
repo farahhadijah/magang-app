@@ -5,15 +5,19 @@
 
     <div class="max-w-4xl px-4 py-8 mx-auto">
 
+        @if(session('wa_sent') === true)
+            <div class="p-4 mb-4 text-green-800 border border-green-200 rounded-lg bg-green-50">
+                ✅ Pesan WhatsApp berhasil dikirim otomatis ke mitra.
+            </div>
+        @endif
+
+        @if(session('wa_sent') === false)
+            <div class="p-4 mb-4 text-yellow-800 border border-yellow-200 rounded-lg bg-yellow-50">
+                ⚠️ WhatsApp gagal dikirim otomatis. Silakan kirim manual menggunakan tombol di bawah.
+            </div>
+        @endif
+
         <div class="overflow-hidden bg-white border border-green-200 shadow-lg rounded-2xl">
-            @if($account_notice ?? false)
-                <div class="p-4 text-sm text-yellow-800 border border-yellow-200 rounded-lg bg-yellow-50">
-                    ⚠️ Data akun ini hanya ditampilkan satu kali.
-                    Jika Anda merefresh, logout, atau meninggalkan halaman ini,
-                    informasi akun tidak akan ditampilkan kembali.
-                    Pastikan Anda menyimpan atau mengirimkan data ini sebelum keluar.
-                </div>
-            @endif
             {{-- Header --}}
             <div class="px-6 py-4 bg-green-700">
                 <h3 class="text-lg font-semibold text-white">
@@ -23,6 +27,14 @@
                     Informasi akun login untuk mitra PKL
                 </p>
             </div>
+            @if($account_notice ?? false)
+                <div class="p-4 text-sm text-yellow-800 border border-yellow-200 rounded-lg bg-yellow-50">
+                    ⚠️ Data akun ini hanya ditampilkan satu kali.
+                    Jika Anda merefresh, logout, atau meninggalkan halaman ini,
+                    informasi akun tidak akan ditampilkan kembali.
+                    Pastikan Anda menyimpan atau mengirimkan data ini sebelum keluar.
+                </div>
+            @endif
 
             <div class="p-6 space-y-6">
 
@@ -62,7 +74,7 @@
                             . "Berikut akun login Mitra PKL:\n"
                             . "Username: {$akun['username']}\n"
                             . "Password: {$akun['password']}\n\n"
-                            . "Silakan login di:\n"
+                            . "Silakan login:\n"
                             . url('/login') . "\n\n"
                             . "Dimohon segera mengganti password setelah login pertama.\n\n"
                             . "Terima kasih.";

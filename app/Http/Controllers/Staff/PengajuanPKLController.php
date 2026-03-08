@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Services\WhatsappService;
 
 class PengajuanPklController extends Controller
 {
@@ -213,12 +214,26 @@ class PengajuanPklController extends Controller
             'no_hp' => $tempat->no_hp,
         ]);
 
+        $pesan = "Yth. {$tempat->nama_tempat},\n\n"
+            . "Berikut akun login Mitra PKL:\n"
+            . "Username: {$username}\n"
+            . "Password: {$password}\n\n"
+            . "Silakan login:\n"
+            . url('/login') . "\n\n"
+            . "Dimohon segera mengganti password setelah login pertama.\n\n"
+            . "Terima kasih.";
+
+        $noHp = preg_replace('/^0/', '62', $tempat->no_hp);
+
+        $waBerhasil = WhatsappService::send($noHp, $pesan);
+
         return redirect()
             ->route('staff.mitra.akun', ['id' => $tempat->id])
             ->with('generated_account', [
                 'username' => $username,
                 'password' => $password
-            ]);
+            ])
+            ->with('wa_sent', $waBerhasil);
     });
 }
     public function showAkunMitra($id)

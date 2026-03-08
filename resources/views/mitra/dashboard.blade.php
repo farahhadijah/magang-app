@@ -1,8 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-900">
-            Dashboard Mitra
-        </h2>
+    <x-slot name="title">
+        Dashboard - MagangApp
     </x-slot>
 
     <div class="py-6 mx-auto space-y-6 max-w-7xl">
