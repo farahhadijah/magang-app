@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Services\WhatsappService;
 
 class PengajuanPklController extends Controller
 {
@@ -214,26 +213,12 @@ class PengajuanPklController extends Controller
             'no_hp' => $tempat->no_hp,
         ]);
 
-        $pesan = "Yth. {$tempat->nama_tempat},\n\n"
-            . "Berikut akun login Mitra PKL:\n"
-            . "Username: {$username}\n"
-            . "Password: {$password}\n\n"
-            . "Silakan login:\n"
-            . url('/login') . "\n\n"
-            . "Dimohon segera mengganti password setelah login pertama.\n\n"
-            . "Terima kasih.";
-
-        $noHp = preg_replace('/^0/', '62', $tempat->no_hp);
-
-        $waBerhasil = WhatsappService::send($noHp, $pesan);
-
         return redirect()
             ->route('staff.mitra.akun', ['id' => $tempat->id])
             ->with('generated_account', [
                 'username' => $username,
                 'password' => $password
-            ])
-            ->with('wa_sent', $waBerhasil);
+            ]);
     });
 }
     public function showAkunMitra($id)
@@ -246,14 +231,25 @@ class PengajuanPklController extends Controller
             ->with('warning', 'Akun hanya dapat dilihat setelah dibuat.');
     }
 
-    $tempat = TempatPkl::with('mitra.user')->findOrFail($id);
+    $tempat = TempatPkl::with([
+        'mitra.user',
+        'pengajuans.mahasiswa'
+    ])->findOrFail($id);
+
+    // ambil semua mahasiswa yang memiliki no_hp
+    $mahasiswas = $tempat->pengajuans
+        ->pluck('mahasiswa')
+        ->filter(function ($mhs) {
+            return !empty($mhs->no_hp);
+        });
 
     return view('staff.mitra.akun', [
         'tempat' => $tempat,
         'akun' => $akun,
+        'mahasiswas' => $mahasiswas,
         'account_notice' => true,
     ]);
-} 
+}
     public function manajemenMitra()
 {
     $prodiId = $this->getProdiId();

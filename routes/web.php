@@ -24,9 +24,7 @@ use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookControll
 use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
 use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
-use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
-use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanController;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -169,6 +167,10 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
 | STAFF TU AREA
 |--------------------------------------------------------------------------
 */
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
+use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanController;
+use App\Http\Controllers\Staff\MitraController as StaffMitraController;
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
     ->name('staff.')
@@ -197,7 +199,11 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
             [StaffPengajuanController::class, 'storeMitra']
         )->name('mitra.store');
 
-
+        Route::get('/manajemen-mitra', [StaffMitraController::class, 'index']
+        )->name('manajemen-mitra.index');
+        Route::get('/manajemen-mitra/{id}', [StaffMitraController::class, 'show']
+        )->name('manajemen-mitra.show');
+        Route::post('/mitra/{id}/regenerate', [StaffMitraController::class, 'regenerate'])->name('mitra.regenerate');
     });
 
 /*
