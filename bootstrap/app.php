@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\KaprodiMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
      $middleware->alias([
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'first.login' => \App\Http\Middleware\FirstLoginGuard::class,
+    ]);
+    
+
+    $middleware->alias([
+        'kaprodi' => KaprodiMiddleware::class,
     ]);
     
 })

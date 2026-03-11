@@ -53,11 +53,22 @@
 
         {{-- ================= ROLE MENU ================= --}}
 
-            @if(auth()->user()->role === 'mahasiswa')
-                @include('layouts.navbar.mahasiswa')
+        @if(auth()->user()->role === 'mahasiswa')
+            @include('layouts.navbar.mahasiswa')
 
-            @elseif(auth()->user()->role === 'dosen')
-                @include('layouts.navbar.dosen')
+        @elseif(auth()->user()->role === 'dosen')
+
+            {{-- NAVBAR DOSEN --}}
+            @include('layouts.navbar.dosen')
+
+            {{-- TAMBAHAN NAVBAR KAPRODI --}}
+            @if(auth()->user()->isKaprodi())
+                <div class="px-4 pt-4 mt-6 text-xs text-gray-300 uppercase border-t border-green-700">
+                    Menu Kaprodi
+                </div>
+
+                @include('layouts.navbar.kaprodi')
+                @endif
 
             @elseif(auth()->user()->role === 'admin')
                 @include('layouts.navbar.admin')
@@ -65,12 +76,10 @@
             @elseif(auth()->user()->role === 'staff_tu')
                 @include('layouts.navbar.staff')
 
-            @elseif(auth()->user()->role === 'kaprodi')
-                @include('layouts.navbar.kaprodi')
-                
             @elseif(auth()->user()->role === 'mitra')
                 @include('layouts.navbar.mitra')
-            @endif
+
+        @endif
 
 
     </div>

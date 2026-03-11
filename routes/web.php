@@ -10,14 +10,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
-use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirController;
-use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
-use App\Http\Controllers\Dosen\NilaiPklController as DosenNilaiPklController;
-use App\Http\Controllers\Dosen\ReviewLogbookController;
-use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
-use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
-use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanController;
+
 
 use App\Http\Controllers\ProfileController;
 
@@ -132,6 +125,11 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
 | DOSEN AREA
 |--------------------------------------------------------------------------
 */
+use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
+use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirController;
+use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
+use App\Http\Controllers\Dosen\NilaiPklController as DosenNilaiPklController;
+use App\Http\Controllers\Dosen\ReviewLogbookController;
 Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->prefix('dosen')
     ->name('dosen.')
@@ -173,6 +171,29 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         )->name('laporan.approve');
         Route::post('/laporan/{pkl}/reject',[DosenLaporanAkhirController::class, 'reject']
         )->name('laporan.reject');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| KAPRODI AREA
+|--------------------------------------------------------------------------
+*/
+use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
+use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
+use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanController;
+Route::middleware(['auth', 'kaprodi'])
+    ->prefix('kaprodi')
+    ->name('kaprodi.')
+    ->group(function () {
+        Route::get('/dashboard', [KaprodiPengajuanController::class, 'dashboard'])->name('dashboard');
+        Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
+        Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
+        Route::get('/nilai-pkl',[KaprodiNilaiController::class, 'index'])->name('nilai.index');
+        Route::get('/pengajuan/{id}', [KaprodiPengajuanController::class, 'show'])->name('pengajuan.show');
+        Route::post('/pengajuan/{id}/approve', [KaprodiPengajuanController::class, 'approve'])->name('pengajuan.approve');
+        Route::post('/pengajuan/{id}/reject', [KaprodiPengajuanController::class, 'reject'])->name('pengajuan.reject');
+        Route::get('/histori',[KaprodiPengajuanController::class, 'histori'])->name('pengajuan.histori');
+       Route::get('/mahasiswa/belum',[KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
     });
 /*
 |--------------------------------------------------------------------------
@@ -255,26 +276,6 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
 
         Route::post('fakultas/import',[FakultasController::class, 'import']
         )->name('fakultas.import');
-    });
-
-/*
-|--------------------------------------------------------------------------
-| KAPRODI AREA
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'role:kaprodi'])
-    ->prefix('kaprodi')
-    ->name('kaprodi.')
-    ->group(function () {
-        Route::get('/dashboard', [KaprodiPengajuanController::class, 'dashboard'])->name('dashboard');
-        Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
-        Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
-        Route::get('/nilai-pkl',[KaprodiNilaiController::class, 'index'])->name('nilai.index');
-        Route::get('/pengajuan/{id}', [KaprodiPengajuanController::class, 'show'])->name('pengajuan.show');
-        Route::post('/pengajuan/{id}/approve', [KaprodiPengajuanController::class, 'approve'])->name('pengajuan.approve');
-        Route::post('/pengajuan/{id}/reject', [KaprodiPengajuanController::class, 'reject'])->name('pengajuan.reject');
-        Route::get('/histori',[KaprodiPengajuanController::class, 'histori'])->name('pengajuan.histori');
-       Route::get('/mahasiswa/belum',[KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
     });
 
 /*
