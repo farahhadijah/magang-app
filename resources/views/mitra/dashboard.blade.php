@@ -5,29 +5,6 @@
 
     <div class="py-6 mx-auto space-y-6 max-w-7xl">
 
-        {{-- Info Mitra --}}
-        <div class="p-6 transition border border-green-200 shadow-lg bg-green-50 rounded-xl hover:shadow-xl">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="flex items-center justify-center w-10 h-10 text-white bg-green-600 rounded-lg">
-                    <i class="fa-solid fa-building"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-green-900">
-                    Informasi Mitra
-                </h3>
-            </div>
-
-            @if($mitra->jabatan)
-                <p class="text-green-800">
-                    <span class="font-semibold">Jabatan:</span>
-                    {{ $mitra->jabatan }}
-                </p>
-            @else
-                <p class="text-green-700">
-                    Data jabatan belum diisi.
-                </p>
-            @endif
-        </div>
-
         {{-- Statistik --}}
         <div class="p-6 transition bg-white border border-green-200 shadow-lg rounded-xl hover:shadow-xl">
             <div class="flex items-center justify-between">
@@ -59,6 +36,138 @@
 
             </div>
         </div>
+
+        {{-- Statistik Tugas Mahasiswa --}}
+<div class="grid gap-6 md:grid-cols-2">
+
+    {{-- Sudah Mengumpulkan --}}
+    <div class="p-6 transition border border-green-200 shadow-lg bg-green-50 rounded-xl hover:shadow-xl">
+
+        <div class="flex items-center justify-between">
+
+            <div>
+                <h3 class="text-lg font-semibold text-green-900">
+                    Tugas Dikumpulkan
+                </h3>
+
+                <div class="mt-2 text-4xl font-bold text-green-600">
+                    {{ $sudahSubmit }}
+                </div>
+
+                <p class="mt-1 text-green-700">
+                    Mahasiswa sudah mengumpulkan tugas
+                </p>
+            </div>
+
+            <div class="flex items-center justify-center w-16 h-16 text-green-100 bg-green-500 rounded-full">
+                <i class="text-2xl fa-solid fa-check"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- Belum Mengumpulkan --}}
+    <div class="p-6 transition border border-red-200 shadow-lg bg-red-50 rounded-xl hover:shadow-xl">
+
+        <div class="flex items-center justify-between">
+
+            <div>
+                <h3 class="text-lg font-semibold text-red-900">
+                    Belum Mengumpulkan
+                </h3>
+
+                <div class="mt-2 text-4xl font-bold text-red-600">
+                    {{ $belumSubmit }}
+                </div>
+
+                <p class="mt-1 text-red-700">
+                    Mahasiswa belum mengumpulkan tugas
+                </p>
+            </div>
+
+            <div class="flex items-center justify-center w-16 h-16 text-red-100 bg-red-500 rounded-full">
+                <i class="text-2xl fa-solid fa-clock"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{{-- Statistik Tugas --}}
+<div class="grid gap-6 md:grid-cols-4">
+
+    {{-- Total Tugas --}}
+    <div class="p-5 bg-white border border-gray-200 shadow rounded-xl">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">Total Tugas</p>
+                <div class="text-3xl font-bold text-gray-800">
+                    {{ $totalTugas }}
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center w-12 h-12 text-white bg-gray-500 rounded-lg">
+                <i class="fa-solid fa-file"></i>
+            </div>
+        </div>
+    </div>
+
+
+    {{-- Pending --}}
+    <div class="p-5 border border-yellow-200 shadow bg-yellow-50 rounded-xl">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-yellow-700">Pending</p>
+                <div class="text-3xl font-bold text-yellow-600">
+                    {{ $tugasPending }}
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center w-12 h-12 text-white bg-yellow-500 rounded-lg">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+        </div>
+    </div>
+
+
+    {{-- Revisi --}}
+    <div class="p-5 border border-red-200 shadow bg-red-50 rounded-xl">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-red-700">Revisi</p>
+                <div class="text-3xl font-bold text-red-600">
+                    {{ $tugasRevisi }}
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center w-12 h-12 text-white bg-red-500 rounded-lg">
+                <i class="fa-solid fa-rotate"></i>
+            </div>
+        </div>
+    </div>
+
+
+    {{-- Selesai --}}
+    <div class="p-5 border border-green-200 shadow bg-green-50 rounded-xl">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-green-700">Selesai</p>
+                <div class="text-3xl font-bold text-green-600">
+                    {{ $tugasSelesai }}
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center w-12 h-12 text-white bg-green-500 rounded-lg">
+                <i class="fa-solid fa-check"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
 
     </div>
 </x-app-layout>

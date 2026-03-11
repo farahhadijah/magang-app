@@ -231,25 +231,14 @@ class PengajuanPklController extends Controller
             ->with('warning', 'Akun hanya dapat dilihat setelah dibuat.');
     }
 
-    $tempat = TempatPkl::with([
-        'mitra.user',
-        'pengajuans.mahasiswa'
-    ])->findOrFail($id);
-
-    // ambil semua mahasiswa yang memiliki no_hp
-    $mahasiswas = $tempat->pengajuans
-        ->pluck('mahasiswa')
-        ->filter(function ($mhs) {
-            return !empty($mhs->no_hp);
-        });
+    $tempat = TempatPkl::with('mitra.user')->findOrFail($id);
 
     return view('staff.mitra.akun', [
         'tempat' => $tempat,
         'akun' => $akun,
-        'mahasiswas' => $mahasiswas,
         'account_notice' => true,
     ]);
-}
+} 
     public function manajemenMitra()
 {
     $prodiId = $this->getProdiId();

@@ -29,7 +29,7 @@
         Tambah Logbook
     </a>
 
-    <div class="px-4 py-2 bg-white border border-green-100 rounded-xl shadow text-center md:text-left">
+    <div class="px-4 py-2 text-center bg-white border border-green-100 shadow rounded-xl md:text-left">
         <p class="text-sm text-gray-500">
             Total Logbook Dibuat
             <span class="font-bold text-green-700">
@@ -37,6 +37,32 @@
             </span>
         </p>
     </div>
+    @if(isset($tanggalKosong) && $tanggalKosong->count() > 0)
+
+    <div class="p-4 border border-red-200 bg-red-50 rounded-xl">
+
+        <div class="flex items-center gap-2 mb-2 text-red-800">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span class="font-semibold">
+                Logbook Belum Diisi
+            </span>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+
+            @foreach($tanggalKosong as $tgl)
+
+                <span class="px-3 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-full">
+                    {{ $tgl->format('d M Y') }}
+                </span>
+
+            @endforeach
+
+        </div>
+
+    </div>
+
+    @endif
 
 </div>
 

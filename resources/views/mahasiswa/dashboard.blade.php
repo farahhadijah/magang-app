@@ -116,14 +116,101 @@
                 </div>
             </div>
         @endif
-        {{-- ================= INFO ================= --}}
-        <div class="p-5 border border-amber-300 bg-amber-50 rounded-xl">
-            <h4 class="font-semibold text-amber-700">
-                ℹ️ Informasi
-            </h4>
-            <p class="mt-1 text-sm text-amber-600">
-                Pastikan seluruh dokumen PKL sudah diunggah dan menunggu verifikasi TU sebelum diteruskan ke Kaprodi.
-            </p>
+
+        {{-- ================= LOGBOOK PROGRESS ================= --}}
+        @if($pengajuan && $pengajuan->pkl)
+
+        <div class="p-6 bg-white border border-green-200 shadow-sm rounded-xl">
+
+            <h3 class="text-lg font-semibold text-green-800">
+                Progress Logbook
+            </h3>
+
+            <div class="grid grid-cols-3 gap-4 mt-4 text-center">
+
+                <div>
+                    <p class="text-sm text-gray-500">
+                        Hari PKL
+                    </p>
+                    <p class="text-xl font-bold text-gray-800">
+                        {{ $hariPkl }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-500">
+                        Logbook Terisi
+                    </p>
+                    <p class="text-xl font-bold text-green-600">
+                        {{ $logbookTotal }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-500">
+                        Logbook Kosong
+                    </p>
+
+                    @if($logbookKosong > 0)
+                        <p class="text-xl font-bold text-red-600">
+                            {{ $logbookKosong }}
+                        </p>
+                    @else
+                        <p class="text-xl font-bold text-green-600">
+                            0
+                        </p>
+                    @endif
+
+                </div>
+
+            </div>
+
         </div>
-    </div>
+
+        @endif
+
+        
+        {{-- ================= TUGAS TERBARU ================= --}}
+        @if($tugas)
+
+        <div class="p-6 bg-white border border-green-200 shadow-sm rounded-xl">
+
+            <h3 class="text-lg font-semibold text-green-800">
+                Tugas Terbaru
+            </h3>
+
+            <div class="mt-4 space-y-2">
+
+                <p class="text-base font-semibold text-gray-800">
+                    {{ $tugas->judul }}
+                </p>
+
+                <p class="text-sm text-gray-600">
+                    Deadline :
+                    {{ \Carbon\Carbon::parse($tugas->deadline)->format('d M Y H:i') }}
+                </p>
+
+                {{-- STATUS --}}
+                @if(!$submit)
+                    <span class="inline-block px-3 py-1 mt-2 text-sm font-medium text-yellow-800 bg-yellow-100 rounded-full">
+                        Belum dikumpulkan
+                    </span>
+
+                @elseif($submit->revisi)
+                    <span class="inline-block px-3 py-1 mt-2 text-sm font-medium text-red-800 bg-red-100 rounded-full">
+                        Perlu Revisi
+                    </span>
+
+                @else
+                    <span class="inline-block px-3 py-1 mt-2 text-sm font-medium text-green-800 bg-green-100 rounded-full">
+                        Sudah dikumpulkan
+                    </span>
+                @endif
+
+            </div>
+
+        </div>
+
+        @endif
+            </div>
 </x-app-layout>

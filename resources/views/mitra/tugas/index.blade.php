@@ -1,0 +1,162 @@
+<x-app-layout>
+    <x-slot name="title">
+        Tugas Mahasiswa - MagangApp
+    </x-slot>
+
+<div class="px-3 py-6 mx-auto space-y-6 max-w-7xl sm:px-4">
+
+    {{-- Header --}}
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-lg font-bold text-gray-800 sm:text-xl">
+            Daftar Tugas Mahasiswa
+        </h2>
+
+        <a href="{{ route('mitra.tugas.create') }}"
+           class="px-4 py-2 text-sm font-medium text-center text-white bg-green-500 rounded-lg hover:bg-green-600">
+            + Buat Tugas
+        </a>
+    </div>
+
+    {{-- Flash Message --}}
+    @if(session('success'))
+        <div class="p-3 text-sm text-green-800 bg-green-100 rounded">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- Tabel Tugas --}}
+    @if($tugas->isEmpty())
+        <div class="p-6 text-center text-gray-600 bg-white rounded-lg shadow">
+            Belum ada tugas yang dibuat.
+        </div>
+    @else
+        <div class="overflow-hidden bg-white rounded-lg shadow">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-xs divide-y divide-gray-200 sm:text-sm">
+
+                    <thead class="bg-green-100">
+                        <tr>
+                            <th class="px-3 py-3 text-left text-gray-700 sm:px-6">No</th>
+                            <th class="px-3 py-3 text-left text-gray-700 sm:px-6">Mahasiswa</th>
+                            <th class="px-3 py-3 text-left text-gray-700 sm:px-6">Judul Tugas</th>
+                            <th class="px-3 py-3 text-left text-gray-700 sm:px-6">Deadline</th>
+                            <th class="px-3 py-3 text-left text-gray-700 sm:px-6">Status</th>
+                            <th class="px-3 py-3 text-center text-gray-700 sm:px-6">Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($tugas as $index => $item)
+                            <tr class="hover:bg-gray-50">
+
+                                <td class="px-3 py-3 text-[0.6rem] md:text-xs text-gray-700 sm:px-6">
+                                    {{ $index + 1 }}
+                                </td>
+
+                                <td class="px-3 py-3 text-[0.6rem] md:text-xs font-semibold text-gray-900 sm:px-6">
+                                    {{ $item->pkl->mahasiswa->nama ?? '-' }}
+                                </td>
+
+                                <td class="px-3 py-3 text-[0.6rem] md:text-xs text-gray-700 sm:px-6">
+                                    {{ $item->judul }}
+                                </td>
+
+                                <td class="px-3 py-3 text-[0.6rem] md:text-xs text-gray-700 sm:px-6">
+                                    {{ $item->deadline 
+                                        ? \Carbon\Carbon::parse($item->deadline)->format('d M Y') 
+                                        : '-' }}
+                                </td>
+
+                                <td class="px-3 py-3 sm:px-6">
+                                    @php
+                                        $submit = $item->submit->first();
+                                    @endphp
+
+                                    @if(!$submit)
+
+                                    <span class="px-3 py-1 text-[0.6rem] md:text-xs font-semibold text-red-800 bg-red-100 rounded-full">
+                                        Belum Dikumpulkan
+                                    </span>
+
+                                    @elseif($submit->status == 'pending' && !$submit->revisi)
+
+                                    <span class="px-3 py-1 text-[0.6rem] md:text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">
+                                        Pending
+                                    </span>
+
+                                    @elseif($submit->revisi)
+
+                                    <span class="px-3 py-1 text-[0.6rem] md:text-xs font-semibold text-red-800 bg-red-100 rounded-full">
+                                        Revisi
+                                    </span>
+
+                                    @elseif($submit->status == 'selesai')
+
+                                    <span class="px-3 py-1 text-[0.6rem] md:text-xs font-semibold text-green-800 bg-green-100 rounded-full">
+                                        Selesai
+                                    </span>
+
+                                    {{-- @endif --}}
+                                    @else
+                                        <span class="px-3 py-1 text-[0.6rem] md:text-xs font-semibold text-red-800 bg-red-100 rounded-full">
+                                            Belum Dikumpulkan
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <td class="px-3 py-3 text-center sm:px-6">
+
+                                    <div class="flex items-center justify-center gap-2">
+
+                                        <a href="{{ route('mitra.tugas.show', $item->id) }}"
+                                        class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 text-[0.6rem] md:text-xs">
+                                            Lihat
+                                        </a>
+
+                                        @if($submit && $submit->status == 'selesai')
+
+                                            <button
+                                            class="px-3 py-1 text-xs text-white bg-gray-400 rounded cursor-not-allowed text-[0.6rem] md:text-xs"
+                                            disabled>
+                                                Edit
+                                            </button>
+
+                                            @else
+
+                                            <a href="{{ route('mitra.tugas.edit', $item->id) }}"
+                                            class="px-3 py-1 text-xs text-white bg-yellow-500 rounded hover:bg-yellow-600 text-[0.6rem] md:text-xs">
+                                                Edit
+                                            </a>
+
+                                            @endif
+
+                                        <form action="{{ route('mitra.tugas.destroy', $item->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Hapus tugas ini?')">
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit"
+                                                    class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 text-[0.6rem] md:text-xs">
+                                                Hapus
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        @endforeach
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    @endif
+
+</div>
+
+</x-app-layout>

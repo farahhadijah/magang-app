@@ -17,16 +17,25 @@ public function index(Request $request)
 {
     $search = $request->search;
 
-    $mitras = Mitra::join('tempat_pkl','mitra.tempat_pkl_id','=','tempat_pkl.id')
-        ->select(
-            'mitra.*',
-            'tempat_pkl.nama_tempat',
-            'tempat_pkl.jenis_tempat'
-        )
-        ->when($search, function($query) use ($search){
-            $query->where('tempat_pkl.nama_tempat','like',"%$search%");
+    $mitras = Mitra::with('tempatPkl')
+        ->when($search, function ($query) use ($search) {
+
+            $query->where(function ($q) use ($search) {
+
+                // search di jabatan
+                $q->where('jabatan', 'like', "%{$search}%")
+
+                // search di tempat pkl
+                ->orWhereHas('tempatPkl', function ($sub) use ($search) {
+                    $sub->where('nama_tempat', 'like', "%{$search}%")
+                        ->orWhere('jenis_tempat', 'like', "%{$search}%");
+                });
+
+            });
+
         })
-        ->paginate(10);
+        ->paginate(10)
+        ->withQueryString();
 
     return view('staff.manajemenMitra.index', compact('mitras','search'));
 }

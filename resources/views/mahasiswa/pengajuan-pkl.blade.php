@@ -136,7 +136,6 @@
 
                 <div class="p-4 mb-4 text-sm text-gray-600 border border-gray-200 rounded-lg bg-gray-50">
                     • Upload KHS dari semester 1 sampai semester terakhir. <br>
-                    • KHS dengan matakuliah E akan ditolak TU. <br>
                     • Semua dokumen wajib dalam format PDF (kecuali pembayaran boleh gambar).
                 </div>
 

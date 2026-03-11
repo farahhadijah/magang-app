@@ -11,13 +11,13 @@
     </h1>
 
     <!-- Search -->
-    <form method="GET" action="{{ route('staff.mitra.index') }}" class="mb-4">
+    <form method="GET" action="{{ route('staff.manajemen-mitra.index') }}" class="mb-4">
         <div class="flex gap-2">
             <input 
                 type="text"
                 name="search"
-                value="{{ $search }}"
-                placeholder="Cari tempat PKL..."
+                value="{{ request('search') }}"
+                placeholder="Cari tempat PKL / jabatan..."
                 class="w-64 px-3 py-2 border rounded"
             >
 
@@ -53,11 +53,11 @@
                 <tr class="border-t text-slate-800">
 
                     <td class="p-3">
-                        {{ $mitra->nama_tempat }}
+                        {{ $mitra->tempatPkl->nama_tempat }}
                     </td>
 
                     <td class="p-3">
-                        {{ $mitra->jenis_tempat }}
+                        {{ $mitra->tempatPkl->jenis_tempat }}
                     </td>
 
                     <td class="p-3">
