@@ -4,16 +4,42 @@
     </x-slot>
 
     <div class="py-6 space-y-6">
+        @if($isKaprodi)
+            {{-- Statistik Kaprodi --}}
+        @endif
+        @if($isKaprodi)
 
-        {{-- Welcome --}}
-        <div class="p-6 transition border border-green-200 shadow-lg rounded-xl bg-green-50 hover:shadow-xl">
-            <h1 class="flex items-center gap-2 text-2xl font-bold text-green-800">
-                <i class="fa-solid fa-hand-wave"></i> Selamat datang, {{ auth()->user()->name }}
-            </h1>
-            <p class="mt-2 text-green-700">
-                Berikut ringkasan kegiatan bimbingan PKL.
-            </p>
-        </div>
+            <div class="mt-6 space-y-6">
+
+            <h2 class="text-lg font-semibold">Ringkasan Statistik Prodi</h2>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+
+            <div class="p-6 bg-blue-100 rounded shadow">
+            <h3 class="font-semibold">Mahasiswa Ajukan PKL</h3>
+            <p class="mt-2 text-3xl font-bold">{{ $totalMahasiswa }}</p>
+            </div>
+
+            <div class="p-6 bg-yellow-100 rounded shadow">
+            <h3 class="font-semibold">Menunggu Verifikasi</h3>
+            <p class="mt-2 text-3xl font-bold">{{ $totalMenunggu }}</p>
+            </div>
+
+            <div class="p-6 bg-green-100 rounded shadow">
+            <h3 class="font-semibold">PKL Aktif</h3>
+            <p class="mt-2 text-3xl font-bold">{{ $totalAktif }}</p>
+            </div>
+
+            <div class="p-6 bg-purple-100 rounded shadow">
+            <h3 class="font-semibold">PKL Selesai</h3>
+            <p class="mt-2 text-3xl font-bold">{{ $totalSelesai }}</p>
+            </div>
+
+            </div>
+
+            </div>
+
+            @endif
 
         {{-- Ringkasan Statistik --}}
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">

@@ -239,9 +239,9 @@ class PengajuanPklController extends Controller
 
         /* ================= AMBIL DATA KAPRODI ================= */
 
-        $kaprodi = \App\Models\Staff::where('jabatan', 'kaprodi')
-            ->where('is_active', 1)
-            ->first();
+        $kaprodi = \App\Models\Dosen::where('jabatan', 'kaprodi')
+        ->where('is_active', 1)
+        ->first();
 
         /* ================= GENERATE PDF ================= */
 
