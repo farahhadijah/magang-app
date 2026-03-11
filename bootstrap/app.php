@@ -12,14 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
    ->withMiddleware(function (Middleware $middleware): void {
-     $middleware->alias([
-        'role' => \App\Http\Middleware\RoleMiddleware::class,
-        'first.login' => \App\Http\Middleware\FirstLoginGuard::class,
-    ]);
-    
 
     $middleware->alias([
-        'kaprodi' => KaprodiMiddleware::class,
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'first.login' => \App\Http\Middleware\FirstLoginGuard::class,
+        'kaprodi' => \App\Http\Middleware\KaprodiMiddleware::class,
     ]);
     
 })

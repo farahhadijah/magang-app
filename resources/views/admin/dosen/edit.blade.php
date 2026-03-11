@@ -2,6 +2,7 @@
     <x-slot name="title">
         Update - MagangApp
     </x-slot>
+
 <div class="max-w-3xl py-6 mx-auto">
 
     <h2 class="mb-6 text-xl font-bold">Edit Dosen</h2>
@@ -30,12 +31,36 @@
             <label class="block mb-1 font-medium">Prodi</label>
             <select name="prodi_id"
                     class="w-full px-3 py-2 border rounded">
+
                 @foreach($prodi as $p)
                     <option value="{{ $p->id }}"
-                        {{ $dosen->prodi_id == $p->id ? 'selected' : '' }}>
+                        {{ old('prodi_id', $dosen->prodi_id) == $p->id ? 'selected' : '' }}>
                         {{ $p->nama }}
                     </option>
                 @endforeach
+
+            </select>
+        </div>
+
+        <!-- JABATAN -->
+        <div>
+            <label class="block mb-1 font-medium">Jabatan</label>
+
+            <select name="jabatan"
+                    class="w-full px-3 py-2 border rounded">
+
+                <option value="">-- Pilih Jabatan --</option>
+
+                <option value="dosen"
+                    {{ old('jabatan', $dosen->jabatan) == 'dosen' ? 'selected' : '' }}>
+                    Dosen
+                </option>
+
+                <option value="kaprodi"
+                    {{ old('jabatan', $dosen->jabatan) == 'kaprodi' ? 'selected' : '' }}>
+                    Kaprodi
+                </option>
+
             </select>
         </div>
 

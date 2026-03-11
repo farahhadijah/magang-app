@@ -1,12 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\DosenController;
-use App\Http\Controllers\Admin\FakultasController;
-use App\Http\Controllers\Admin\FormulirController;
-use App\Http\Controllers\Admin\MahasiswaController;
-use App\Http\Controllers\Admin\ProdiController;
-use App\Http\Controllers\Admin\StaffController;
-use App\Http\Controllers\Admin\UserController;
+
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -244,13 +238,22 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
 | ADMIN AREA
 |--------------------------------------------------------------------------
 */
+use App\Http\Controllers\Admin\DosenController;
+use App\Http\Controllers\Admin\FakultasController;
+use App\Http\Controllers\Admin\FormulirController;
+use App\Http\Controllers\Admin\MahasiswaController;
+use App\Http\Controllers\Admin\ProdiController;
+use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 Route::middleware(['auth', 'first.login', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
-        Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
+        Route::get('/dashboard',[AdminDashboardController::class,'index'])
+            ->name('dashboard');
 
         Route::resource('users', UserController::class)->only(['create', 'store']);
 
@@ -271,6 +274,8 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
         Route::post('staff/{id}/reset', [StaffController::class,'reset'])->name('staff.reset');
         Route::post('staff/import',[StaffController::class, 'import'])->name('staff.import');
 
+        Route::delete('fakultas/bulk-delete',[ FakultasController::class, 'bulkDelete'])
+        ->name('fakultas.bulkDelete');
         Route::resource('fakultas', FakultasController::class)->parameters([
         'fakultas' => 'fakultas']);
 

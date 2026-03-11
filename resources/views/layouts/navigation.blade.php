@@ -1,9 +1,9 @@
 <nav
-    class="relative z-[999] flex flex-col w-64 h-full text-green-100"
+    class="relative z-[999] flex flex-col w-64 h-screen text-green-100"
 >
 
     <!-- ================= LOGO ================= -->
-    <div class="flex items-center justify-center h-16 border-b border-green-800">
+    <div class="flex items-center justify-center h-16 border-b border-green-800 shrink-0">
 
         <a href="{{ route('dashboard') }}"
            class="flex items-center gap-2 font-semibold text-white">
@@ -18,8 +18,7 @@
 
 
     <!-- ================= MENU ================= -->
-    <div class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-
+    <div class="flex-1 px-3 py-4 space-y-1 overflow-y-auto sidebar-scroll">
 
         <!-- Dashboard -->
         <a
@@ -35,7 +34,6 @@
             Dashboard
         </a>
 
-
         <!-- Profile -->
         <a
             href="{{ route('profile.edit') }}"
@@ -49,7 +47,6 @@
             <i class="w-5 fa-solid fa-user"></i>
             Profile
         </a>
-
 
         {{-- ================= ROLE MENU ================= --}}
 
@@ -68,24 +65,24 @@
                 </div>
 
                 @include('layouts.navbar.kaprodi')
-                @endif
+            @endif
 
-            @elseif(auth()->user()->role === 'admin')
-                @include('layouts.navbar.admin')
+        @elseif(auth()->user()->role === 'admin')
+            @include('layouts.navbar.admin')
 
-            @elseif(auth()->user()->role === 'staff_tu')
-                @include('layouts.navbar.staff')
+        @elseif(auth()->user()->role === 'staff_tu')
+            @include('layouts.navbar.staff')
 
-            @elseif(auth()->user()->role === 'mitra')
-                @include('layouts.navbar.mitra')
+        @elseif(auth()->user()->role === 'mitra')
+            @include('layouts.navbar.mitra')
 
         @endif
 
-
     </div>
-    
+
+
     <!-- ================= USER ================= -->
-    <div class="p-4 border-t border-green-800">
+    <div class="p-4 border-t border-green-800 shrink-0">
 
         <div class="text-sm font-medium text-white truncate">
             {{ auth()->user()->getNama() }}
@@ -94,7 +91,6 @@
         <div class="mb-3 text-xs text-green-300 truncate">
             {{ auth()->user()->email }}
         </div>
-
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
@@ -110,6 +106,5 @@
         </form>
 
     </div>
-
 
 </nav>

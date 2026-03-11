@@ -13,7 +13,8 @@ class FakultasController extends Controller
 {
     public function index()
     {
-        $fakultas = Fakultas::latest()->paginate(10);
+        $fakultas = Fakultas::orderBy('id','asc')->paginate(10);
+
         return view('admin.fakultas.index', compact('fakultas'));
     }
 
@@ -40,7 +41,7 @@ class FakultasController extends Controller
 
         return redirect()
             ->route('admin.fakultas.index')
-            ->with('success', 'Fakultas berhasil ditambahkan.');
+            ->with('success','Fakultas berhasil ditambahkan.');
     }
 
     public function update(Request $request, Fakultas $fakultas)
@@ -56,20 +57,26 @@ class FakultasController extends Controller
 
         return redirect()
             ->route('admin.fakultas.index')
-            ->with('success', 'Fakultas berhasil diperbarui.');
+            ->with('success','Fakultas berhasil diperbarui.');
     }
 
     public function destroy(Fakultas $fakultas)
     {
-        if ($fakultas->prodi()->exists()) {
-            return back()->with('error',
-                'Fakultas tidak dapat dihapus karena masih memiliki prodi.'
-            );
+        $jumlahProdi = $fakultas->prodi()->count();
+
+        if ($jumlahProdi > 0) {
+            return redirect()
+                ->route('admin.fakultas.index')
+                ->with('error',
+                    "Fakultas tidak dapat dihapus karena masih digunakan oleh $jumlahProdi data prodi."
+                );
         }
 
         $fakultas->delete();
 
-        return back()->with('success', 'Fakultas berhasil dihapus.');
+        return redirect()
+            ->route('admin.fakultas.index')
+            ->with('success','Fakultas berhasil dihapus.');
     }
 
     public function import(Request $request)
@@ -85,16 +92,12 @@ class FakultasController extends Controller
 
         $required = ['nama'];
 
-        $header = array_map(
-            fn($h) => strtolower(trim($h)),
-            $header
-        );
+        $header = array_map(fn($h) => strtolower(trim($h)), $header);
 
         foreach ($required as $col) {
             if (!in_array($col, $header)) {
                 return back()->with('error',
-                    'Format file salah. Kolom wajib: nama'
-                );
+                    'Format file salah. Kolom wajib: nama');
             }
         }
 
@@ -103,4 +106,34 @@ class FakultasController extends Controller
         return back()->with('success',
             'Data Fakultas berhasil diimport.');
     }
+
+    public function bulkDelete(Request $request)
+{
+    $ids = $request->ids;
+
+    if (!$ids) {
+        return back()->with('error','Tidak ada data yang dipilih.');
+    }
+
+    // ubah string jadi array
+    $ids = explode(',', $ids);
+
+    $fakultasList = Fakultas::whereIn('id', $ids)->get();
+
+    $deleted = 0;
+    $skipped = 0;
+
+    foreach ($fakultasList as $fakultas) {
+
+        if ($fakultas->prodi()->exists()) {
+            $skipped++;
+            continue;
+        }
+
+        $fakultas->delete();
+        $deleted++;
+    }
+
+    return back()->with('success', "$deleted data dihapus, $skipped tidak bisa dihapus, karna digunakan oleh master data.");
+}
 }

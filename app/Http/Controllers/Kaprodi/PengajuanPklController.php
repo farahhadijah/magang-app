@@ -343,13 +343,13 @@ class PengajuanPklController extends Controller
     }
     private function getProdiId()
     {
-        $staff = auth()->user()->staff;
+        $dosen = auth()->user()->dosen;
 
-        if (!$staff || !$staff->prodi_id) {
+        if (!$dosen || !$dosen->prodi_id) {
             abort(403, 'Kaprodi tidak memiliki prodi.');
         }
 
-        return $staff->prodi_id;
+        return $dosen->prodi_id;
     }
 
     private function extractLatLng($url)
