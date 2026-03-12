@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Logbook;
 use App\Models\PengajuanPkl;
 use App\Models\Pkl;
+use App\Models\LaporanAkhir;
 
 class DashboardController extends Controller
 {
@@ -31,6 +32,10 @@ class DashboardController extends Controller
             ->where('status', 'selesai')
             ->count();
 
+        $laporanAkhirCount = LaporanAkhir::whereHas('pkl', function ($q) use ($dosenId) {
+            $q->where('id_dosen', $dosenId);
+        })
+        ->count();
         /* ================= CEK KAPRODI ================= */
 
         $isKaprodi = $dosen && strtolower($dosen->jabatan) === 'kaprodi';
@@ -68,6 +73,7 @@ class DashboardController extends Controller
             'mahasiswaCount',
             'logbookPendingCount',
             'pklSelesaiCount',
+            'laporanAkhirCount',
 
             // statistik kaprodi
             'totalMahasiswa',

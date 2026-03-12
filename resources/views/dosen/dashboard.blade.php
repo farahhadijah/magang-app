@@ -42,7 +42,7 @@
             @endif
 
         {{-- Ringkasan Statistik --}}
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
 
             {{-- Mahasiswa Aktif --}}
             <div class="p-6 transition bg-white border border-green-100 shadow rounded-2xl hover:shadow-xl">
@@ -69,6 +69,20 @@
 
                 <p class="mt-4 text-3xl font-bold text-amber-900">
                     {{ $logbookPendingCount ?? 0 }}
+                </p>
+            </div>
+
+            {{-- Laporan Akhir --}}
+            <div class="p-6 transition bg-white border border-blue-100 shadow rounded-2xl hover:shadow-xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-blue-700">
+                        Laporan Akhir
+                    </h3>
+                    <i class="text-blue-600 fa-solid fa-file-pdf"></i>
+                </div>
+
+                <p class="mt-4 text-3xl font-bold text-blue-900">
+                    {{ $laporanAkhirCount ?? 0 }}
                 </p>
             </div>
 
