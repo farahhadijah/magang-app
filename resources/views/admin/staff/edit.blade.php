@@ -29,14 +29,6 @@
                 class="w-full px-3 py-2 border rounded"
                 required>
             </div>
-            
-            <div>
-                <label class="block mb-1 font-medium">Jabatan</label>
-                <select name="jabatan" class="w-full px-3 py-2 border rounded" required>
-                    <option value="Staf Akademik">Staff Tu</option>
-                    <option value="Staf Administrasi">Kaprodi</option>
-                </select>
-            </div>
 
             <div>
                 <label class="block mb-1 font-medium">Prodi</label>

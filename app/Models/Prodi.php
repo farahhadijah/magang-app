@@ -18,6 +18,14 @@ class Prodi extends Model
     {
         return $this->hasMany(Mahasiswa::class, 'prodi_id');
     }
+     public function staff()
+    {
+        return $this->hasMany(Staff::class);
+    }
+     public function dosen()
+    {
+        return $this->hasMany(Dosen::class);
+    }
     public function fakultas()
 {
     return $this->belongsTo(Fakultas::class);

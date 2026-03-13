@@ -1,16 +1,19 @@
 <x-app-layout>
+    <x-slot name="title">
+        Download - MagangApp
+    </x-slot>
     <div class="mb-8">
         <h2 class="text-3xl font-bold text-green-800">
             Download Formulir Magang
         </h2>
-        <p class="text-gray-600 mt-2">
+        <p class="mt-2 text-gray-600">
             Silakan unduh formulir pengajuan magang dan dokumen pendukung yang diperlukan.
         </p>
     </div>
 
-    <div class="bg-white shadow-md rounded-xl overflow-hidden border border-green-100">
+    <div class="overflow-hidden bg-white border border-green-100 shadow-md rounded-xl">
         <table class="min-w-full">
-            <thead class="bg-green-700 text-white">
+            <thead class="text-white bg-green-700">
                 <tr>
                     <th class="p-4 text-center">No</th>
                     <th class="p-4 text-left">Nama Formulir</th>
@@ -19,7 +22,7 @@
             </thead>
             <tbody>
                 @forelse($formulir as $index => $f)
-                    <tr class="border-b hover:bg-green-50 transition">
+                    <tr class="transition border-b hover:bg-green-50">
                         <td class="p-4 text-center">
                             {{ $index + 1 }}
                         </td>
@@ -28,8 +31,8 @@
                         </td>
                         <td class="p-4 text-center">
                             <a href="{{ route('mahasiswa.formulir.download',$f->id) }}"
-                               class="hover:text-green-600 transition text-green-700">
-                                <i class="fa-solid fa-download mr-1"></i>
+                               class="text-green-700 transition hover:text-green-600">
+                                <i class="mr-1 fa-solid fa-download"></i>
                                 Download
                             </a>
                         </td>

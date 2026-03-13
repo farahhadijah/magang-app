@@ -23,7 +23,6 @@ class StaffSeeder extends Seeder
             ['nip' => '19800101'], // UNIQUE
             [
                 'nama'       => 'Admin Akademik',
-                'jabatan'    => 'Staff TU',
                 'no_hp'      => '08123456789',
                 'is_active'  => true,
                 'prodi_id'   => $prodi->id, // WAJIB SEKARANG

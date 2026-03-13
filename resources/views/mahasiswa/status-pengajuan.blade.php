@@ -324,8 +324,7 @@
                         📄 Surat Pengantar PKL
                     </h4>
 
-                    <a href="{{ asset('storage/' . $pengajuan->pkl->suratPengantar->path_file) }}"
-                    target="_blank"
+                    <a href="{{ route('mahasiswa.surat-pengantar.download', $pengajuan->pkl->suratPengantar->id) }}"
                     class="inline-block px-5 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">
                         Download Surat Pengantar
                     </a>

@@ -10,6 +10,15 @@
     // Use the single authoritative check
     $bolehUploadLaporan = $pkl?->isSiapUploadLaporan();
 @endphp
+@php
+    $logbookCount = $pkl?->logbooks()->count() ?? 0;
+
+    $logbookApproved = $pkl?->logbooks()
+        ->where('status_approve', 'approved')
+        ->count() ?? 0;
+
+    $bolehAjukanSertifikat = $logbookCount >= 30 && $logbookCount === $logbookApproved;
+@endphp
 <div class="space-y-1">
     {{-- ================= DOWNLOAD FORMULIR ================= --}}
         <a href="{{ route('mahasiswa.formulir.index') }}"
@@ -97,6 +106,37 @@
     </div>
 @endif
 
+{{-- ================= TUGAS DARI MITRA ================= --}}
+@if($pkl && $pkl->status !== 'selesai')
+    <a
+        href="{{ route('mahasiswa.tugas') }}"
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            transition
+            hover:bg-green-800
+            {{ request()->routeIs('mahasiswa.tugas') ? 'bg-green-800 text-amber-300' : '' }}
+        "
+    >
+        <i class="w-5 fa-solid fa-list-check"></i>
+        Tugas
+    </a>
+@else
+    <div
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            opacity-60
+            cursor-not-allowed
+        "
+    >
+        <i class="w-5 fa-solid fa-list-check"></i>
+        Tugas
+    </div>
+@endif
+
         {{-- ================= LAPORAN AKHIR ================= --}}
 @if($pkl)
     @if($bolehUploadLaporan)
@@ -128,6 +168,36 @@
             Laporan Akhir
         </div>
     @endif
+@endif
+{{-- ================= PENGAJUAN SERTIFIKAT ================= --}}
+@if($pkl && $bolehAjukanSertifikat)
+    <a
+        href="{{ route('mahasiswa.sertifikat.index') }}"
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            transition
+            hover:bg-green-800
+            {{ request()->routeIs('mahasiswa.sertifikat.*') ? 'bg-green-800 text-amber-300' : '' }}
+        "
+    >
+        <i class="w-5 fa-solid fa-certificate"></i>
+        Pengajuan Sertifikat
+    </a>
+@else
+    <div
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            opacity-60
+            cursor-not-allowed
+        "
+    >
+        <i class="w-5 fa-solid fa-certificate"></i>
+        Pengajuan Sertifikat
+    </div>
 @endif
     {{-- ================= NILAI PKL ================= --}}
 @if($pkl && $pkl->status === 'selesai')

@@ -211,7 +211,7 @@
 
     {{-- ================= MODAL PREVIEW PDF ================= --}}
     <div id="pdfModal"
-         class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-60">
+         class="fixed inset-0 z-[999999] flex items-center justify-center hidden bg-black bg-opacity-60">
         <div class="relative w-11/12 h-[90vh] bg-white rounded-lg shadow-lg">
             <button onclick="closeModal()"
                     class="absolute z-10 w-10 h-10 text-2xl text-white bg-red-600 rounded-full -top-4 -right-4">

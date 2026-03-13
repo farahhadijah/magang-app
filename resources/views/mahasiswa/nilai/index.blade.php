@@ -70,13 +70,13 @@
                     </div>
 
                     <!-- Button -->
-                    <div class="pt-6">
+                    {{-- <div class="pt-6">
                         <a href="{{ route('mahasiswa.sertifikat.dummy', $pkl->id) }}"
                            class="inline-flex items-center px-6 py-3 font-semibold text-white transition-all duration-200 bg-green-600 shadow rounded-xl hover:bg-green-700 hover:shadow-lg">
 
                             Generate Sertifikat PKL
                         </a>
-                    </div>
+                    </div> --}}
 
                 </div>
             </div>

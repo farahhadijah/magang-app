@@ -16,7 +16,8 @@ class ProdiController extends Controller
     {
         $prodi = Prodi::with('fakultas')
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.prodi.index', compact('prodi'));
     }
@@ -73,15 +74,31 @@ class ProdiController extends Controller
             'is_active' => $request->has('is_active'),
         ]);
 
-        return redirect()->route('admin.prodi.index')
-            ->with('success', 'Prodi berhasil diperbarui.');
+        return redirect()->route('admin.prodi.index', [
+            'page' => $request->page
+        ])->with('success', 'Prodi berhasil diperbarui.');
     }
 
-    public function destroy(Prodi $prodi)
-    {
-        $prodi->delete();
-        return back()->with('success', 'Prodi berhasil dihapus.');
+    public function destroy(Request $request, Prodi $prodi)
+{
+    if (
+        $prodi->dosen()->exists() ||
+        $prodi->mahasiswa()->exists() ||
+        $prodi->staff()->exists()
+    ) {
+        return redirect()->route('admin.prodi.index', [
+            'page' => $request->page
+        ])->with('error',
+            'Prodi tidak dapat dihapus karena masih digunakan oleh master data.'
+        );
     }
+
+    $prodi->delete();
+
+    return redirect()->route('admin.prodi.index', [
+        'page' => $request->page
+    ])->with('success','Prodi berhasil dihapus');
+}
 
     public function import(Request $request)
     {

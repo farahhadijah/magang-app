@@ -2,7 +2,18 @@
     <x-slot name="title">
         Prodi - MagangApp
     </x-slot>
+        {{-- modal --}}
+    @if(session('error'))
+    <div class="p-3 text-red-800 bg-red-100 rounded-lg">
+        {{ session('error') }}
+    </div>
+    @endif
 
+    @if(session('success'))
+    <div class="p-3 text-green-800 bg-green-100 rounded-lg">
+        {{ session('success') }}
+    </div>
+    @endif
     <div class="px-4 py-6 mx-auto space-y-6 max-w-7xl">
 
         {{-- Card Panduan --}}
@@ -97,17 +108,19 @@
                             <td class="p-3 border">
                                 <div class="flex flex-col justify-center gap-2 sm:flex-row">
 
-                                    <a href="{{ route('admin.prodi.edit', $p) }}"
-                                       class="px-3 py-1 text-xs text-center text-white bg-yellow-500 rounded hover:bg-yellow-600">
+                                    <a href="{{ route('admin.prodi.edit', [$p, 'page' => request('page')]) }}"
+                                    class="px-3 py-1 text-xs text-center text-white bg-yellow-500 rounded hover:bg-yellow-600">
                                         Edit
                                     </a>
 
                                     <form action="{{ route('admin.prodi.destroy', $p) }}"
-                                          method="POST"
-                                          onsubmit="return confirm('Yakin hapus data ini?')">
+                                        method="POST"
+                                        onsubmit="return confirm('Yakin hapus data ini?')">
 
                                         @csrf
                                         @method('DELETE')
+
+                                        <input type="hidden" name="page" value="{{ request('page') }}">
 
                                         <button type="submit"
                                                 class="w-full px-3 py-1 text-xs text-white bg-red-600 rounded hover:bg-red-700">
@@ -135,8 +148,9 @@
 
         {{-- Pagination --}}
         <div class="flex justify-center mt-4">
-            {{ $prodi->links() }}
+            {{ $prodi->appends(request()->query())->links() }}
         </div>
-
+        
     </div>
+
 </x-app-layout>

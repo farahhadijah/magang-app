@@ -9,12 +9,12 @@
         {{ $title ?? config('app.name', 'MagangApp') }}
     </title>
     <link rel="icon" type="image/png" href="{{ asset('img/logounisla.png') }}">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
+    {{-- Map Preview --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -49,7 +49,7 @@
         <!-- ================= SIDEBAR ================= -->
         <div
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-            class="fixed inset-y-0 left-0 z-40 w-64 transition-transform duration-300 transform bg-primary md:translate-x-0 md:static md:inset-0"
+            class="fixed z-[9999] inset-y-0 left-0 w-64 transition-transform duration-300 transform bg-primary md:translate-x-0 md:static md:inset-0"
         >
 
             @include('layouts.navigation')
@@ -210,7 +210,8 @@ function submitReview(event, id) {
 }
     </script>
 @stack('scripts')
-
+{{-- map preview --}}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </body>
 
 

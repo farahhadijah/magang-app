@@ -39,11 +39,11 @@ public function formPkn()
         ->where('jenis_dokumen', DokumenPengajuan::JENIS_FORM_PKN);
 }
 
-public function krsRemedial()
-{
-    return $this->dokumenPengajuan()
-        ->where('jenis_dokumen', DokumenPengajuan::JENIS_KRS_REMEDIAL);
-}
+// public function krsRemedial()
+// {
+//     return $this->dokumenPengajuan()
+//         ->where('jenis_dokumen', DokumenPengajuan::JENIS_KRS_REMEDIAL);
+// }
     public function pkl()
     {
         return $this->hasOne(Pkl::class, 'id_pengajuan_pkl');
@@ -60,7 +60,7 @@ public function krsRemedial()
             DokumenPengajuan::JENIS_PEMBAYARAN,
             DokumenPengajuan::JENIS_STUDI_TOUR,
             DokumenPengajuan::JENIS_FORM_PKN,
-            DokumenPengajuan::JENIS_KRS_REMEDIAL,
+            // DokumenPengajuan::JENIS_KRS_REMEDIAL,
         ];
 
         foreach ($wajib as $jenis) {
