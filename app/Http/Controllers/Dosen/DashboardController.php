@@ -38,33 +38,51 @@ class DashboardController extends Controller
         ->count();
         /* ================= CEK KAPRODI ================= */
 
-        $isKaprodi = $dosen && strtolower($dosen->jabatan) === 'kaprodi';
+        /* ================= CEK KAPRODI ================= */
 
-        $totalMahasiswa = 0;
-        $totalMenunggu = 0;
-        $totalAktif = 0;
-        $totalSelesai = 0;
+$isKaprodi = $dosen && strtolower($dosen->jabatan) === 'kaprodi';
 
-        if ($isKaprodi) {
+$totalMahasiswa = 0;
+$totalMenunggu = 0;
+$totalAktif = 0;
+$totalSelesai = 0;
 
-            $prodiId = $dosen->prodi_id;
+if ($isKaprodi) {
 
-            $totalMahasiswa = PengajuanPkl::whereHas('mahasiswa', function ($q) use ($prodiId) {
-                $q->where('prodi_id', $prodiId);
-            })->count();
+    $prodiId = $dosen->prodi_id;
 
-            $totalMenunggu = PengajuanPkl::where('status','pending_kaprodi')
-                ->whereHas('mahasiswa', fn($q)=>$q->where('prodi_id',$prodiId))
-                ->count();
+    // Mahasiswa yang mengajukan PKL
+    $totalMahasiswa = PengajuanPkl::whereHas('mahasiswa', function ($q) use ($prodiId) {
+        $q->where('prodi_id', $prodiId);
+    })
+    ->distinct('id_mhs')
+    ->count('id_mhs');
 
-            $totalAktif = Pkl::where('status','aktif')
-                ->whereHas('pengajuan.mahasiswa', fn($q)=>$q->where('prodi_id',$prodiId))
-                ->count();
+    // Menunggu verifikasi kaprodi
+    $totalMenunggu = PengajuanPkl::where('status', 'pending_kaprodi')
+        ->whereHas('mahasiswa', function ($q) use ($prodiId) {
+            $q->where('prodi_id', $prodiId);
+        })
+        ->count();
 
-            $totalSelesai = Pkl::where('status','selesai')
-                ->whereHas('pengajuan.mahasiswa', fn($q)=>$q->where('prodi_id',$prodiId))
-                ->count();
-        }
+    // PKL aktif
+    $totalAktif = Pkl::where('status', 'aktif')
+        ->whereHas('pengajuan', function ($q) use ($prodiId) {
+            $q->whereHas('mahasiswa', function ($q2) use ($prodiId) {
+                $q2->where('prodi_id', $prodiId);
+            });
+        })
+        ->count();
+
+    // PKL selesai
+    $totalSelesai = Pkl::where('status', 'selesai')
+        ->whereHas('pengajuan', function ($q) use ($prodiId) {
+            $q->whereHas('mahasiswa', function ($q2) use ($prodiId) {
+                $q2->where('prodi_id', $prodiId);
+            });
+        })
+        ->count();
+}
 
         return view('dosen.dashboard', compact(
             'isKaprodi',

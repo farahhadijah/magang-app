@@ -4,7 +4,7 @@
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\Monitoring\SertifikatController;
 
 use App\Http\Controllers\ProfileController;
 
@@ -67,6 +67,7 @@ use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookControll
 use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
 use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
 use App\Http\Controllers\Mahasiswa\TugasController as TugasMahasiswaController;
+use App\Http\Controllers\Mahasiswa\PengajuanSertifikatController;
 Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
@@ -88,6 +89,11 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
             ->name('pengajuan.dokumen.upload-ulang');
         Route::get('/surat-pengantar/{id}/download',[MahasiswaPengajuanController::class, 'downloadSuratPengantar'])->name('surat-pengantar.download');
         
+        Route::get('/sertifikat', [PengajuanSertifikatController::class,'index'])
+        ->name('sertifikat.index');
+
+        Route::post('/sertifikat', [PengajuanSertifikatController::class,'store'])
+        ->name('sertifikat.store');
 
         // Logbook
         Route::get('/logbook', [MahasiswaLogbookController::class, 'index'])->name('logbook.index');
@@ -128,6 +134,9 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->prefix('dosen')
     ->name('dosen.')
     ->group(function () {
+        // Sertifikat Mahasiswa
+        Route::get('/sertifikat', [SertifikatController::class, 'indexDosen'])
+            ->name('sertifikat.index');
 
         Route::get('/dashboard', [DosenDashboardController::class, 'index'])
         ->name('dashboard');
@@ -165,6 +174,8 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         )->name('laporan.approve');
         Route::post('/laporan/{pkl}/reject',[DosenLaporanAkhirController::class, 'reject']
         )->name('laporan.reject');
+
+        
     });
 
 /*
@@ -179,6 +190,9 @@ Route::middleware(['auth', 'kaprodi'])
     ->prefix('kaprodi')
     ->name('kaprodi.')
     ->group(function () {
+        // Sertifikat Mahasiswa
+         Route::get('/sertifikat', [SertifikatController::class, 'indexKaprodi'])
+            ->name('sertifikat.index');
         Route::get('/dashboard', [KaprodiPengajuanController::class, 'dashboard'])->name('dashboard');
         Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
         Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
@@ -307,6 +321,11 @@ Route::middleware(['auth', 'first.login', 'role:mitra'])
         Route::get('/logbook/{pkl}', [App\Http\Controllers\Mitra\MitraController::class, 'logbook'])
             ->name('logbook');
         
+        Route::get('/sertifikat', [App\Http\Controllers\Mitra\PengajuanSertifikatController::class,'index'])
+        ->name('sertifikat.index');
+
+        Route::post('/sertifikat/upload/{id}', [App\Http\Controllers\Mitra\PengajuanSertifikatController::class,'upload'])
+        ->name('sertifikat.upload');
         Route::get('/tugas', [App\Http\Controllers\Mitra\TugasMitraController::class, 'index'])
             ->name('tugas.index');
         Route::get('/tugas/create', [App\Http\Controllers\Mitra\TugasMitraController::class, 'create'])

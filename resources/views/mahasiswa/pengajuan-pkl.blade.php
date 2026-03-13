@@ -125,7 +125,7 @@
                     {{-- ALAMAT ASAL --}}
                     <div>
                         <label class="block mb-1 font-medium text-green-800">Alamat Asal Mahasiswa *</label>
-                        <textarea name="alamat_asal" required rows="3" class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500" placeholder="Contoh: Ds. Sidomulyo RT 01/RW 02, Kec. Deket, Kab. Lamongan">{{ old('alamat_asal') }}</textarea>
+                        <textarea name="alamat_asal" required rows="3" class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500" placeholder="Contoh: Ds. Sumberagung RT 13/RW 01, Kec. Sukodadi, Kab. Lamongan">{{ old('alamat_asal') }}</textarea>
                     </div>
                 </div>
             </div>

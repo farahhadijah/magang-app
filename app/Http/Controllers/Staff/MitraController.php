@@ -17,15 +17,23 @@ public function index(Request $request)
 {
     $search = $request->search;
 
+    $prodiId = auth()->user()->staff->prodi_id;
+
     $mitras = Mitra::with('tempatPkl')
+
+        ->whereHas('tempatPkl.pengajuans', function ($q) use ($prodiId) {
+            $q->where('status','disetujui')
+              ->whereHas('mahasiswa', function ($m) use ($prodiId) {
+                    $m->where('prodi_id', $prodiId);
+              });
+        })
+
         ->when($search, function ($query) use ($search) {
 
             $query->where(function ($q) use ($search) {
 
-                // search di jabatan
                 $q->where('jabatan', 'like', "%{$search}%")
 
-                // search di tempat pkl
                 ->orWhereHas('tempatPkl', function ($sub) use ($search) {
                     $sub->where('nama_tempat', 'like', "%{$search}%")
                         ->orWhere('jenis_tempat', 'like', "%{$search}%");
@@ -52,10 +60,13 @@ public function show($id)
         ->firstOrFail();
 
     // mahasiswa yang PKL di tempat tersebut
+    $prodiId = auth()->user()->staff->prodi_id;
+
     $mahasiswa = DB::table('pengajuan_pkl')
         ->join('mahasiswa','pengajuan_pkl.id_mhs','=','mahasiswa.id')
         ->where('pengajuan_pkl.id_tempat_pkl', $mitra->tempat_pkl_id)
         ->where('pengajuan_pkl.status', 'disetujui')
+        ->where('mahasiswa.prodi_id', $prodiId) // FILTER
         ->select(
             'mahasiswa.nim',
             'mahasiswa.nama',

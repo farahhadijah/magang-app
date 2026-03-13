@@ -109,10 +109,6 @@
                     {{ $totalTugas }}
                 </div>
             </div>
-
-            <div class="flex items-center justify-center w-12 h-12 text-white bg-gray-500 rounded-lg">
-                <i class="fa-solid fa-file"></i>
-            </div>
         </div>
     </div>
 
@@ -125,10 +121,6 @@
                 <div class="text-3xl font-bold text-yellow-600">
                     {{ $tugasPending }}
                 </div>
-            </div>
-
-            <div class="flex items-center justify-center w-12 h-12 text-white bg-yellow-500 rounded-lg">
-                <i class="fa-solid fa-clock"></i>
             </div>
         </div>
     </div>
@@ -143,10 +135,6 @@
                     {{ $tugasRevisi }}
                 </div>
             </div>
-
-            <div class="flex items-center justify-center w-12 h-12 text-white bg-red-500 rounded-lg">
-                <i class="fa-solid fa-rotate"></i>
-            </div>
         </div>
     </div>
 
@@ -159,10 +147,6 @@
                 <div class="text-3xl font-bold text-green-600">
                     {{ $tugasSelesai }}
                 </div>
-            </div>
-
-            <div class="flex items-center justify-center w-12 h-12 text-white bg-green-500 rounded-lg">
-                <i class="fa-solid fa-check"></i>
             </div>
         </div>
     </div>

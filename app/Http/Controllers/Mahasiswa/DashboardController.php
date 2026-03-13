@@ -27,14 +27,17 @@ class DashboardController extends Controller
     ->latest('created_at')
     ->first();
 
+    $tugasList = collect();
     $tugas = null;
     $submit = null;
 
     if ($pengajuan && $pengajuan->pkl) {
 
-        $tugas = TugasMitra::where('id_pkl', $pengajuan->pkl->id)
+        $tugasList = TugasMitra::where('id_pkl', $pengajuan->pkl->id)
             ->latest()
-            ->first();
+            ->get();
+
+        $tugas = $tugasList->first();
 
         if ($tugas) {
             $submit = $tugas->submit()
@@ -64,6 +67,7 @@ class DashboardController extends Controller
     return view('mahasiswa.dashboard', compact(
         'pengajuan',
         'tugas',
+        'tugasList',
         'submit',
         'hariPkl',
         'logbookTotal',
