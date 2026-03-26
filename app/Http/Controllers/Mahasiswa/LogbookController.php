@@ -30,9 +30,12 @@ class LogbookController extends Controller
     public function index()
     {
         $pkl = $this->getActivePkl();
-        $logbooks = $pkl
-            ? $pkl->logbooks()->orderBy('tgl', 'desc')->get()
-            : collect();
+
+        if (!$pkl) {
+            abort(403, 'PKL sudah selesai atau belum dimulai.');
+        }
+
+        $logbooks = $pkl->logbooks()->orderBy('tgl', 'desc')->get();
         $hasToday = false;
         if ($pkl) {
             $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();

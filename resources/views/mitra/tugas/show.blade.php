@@ -198,22 +198,32 @@
 
     <script>
         function openFileModal(url) {
-            let viewer = document.getElementById('fileViewer');
-            let download = document.getElementById('downloadBtn');
-            document.getElementById('fileModal').classList.remove('hidden');
+    let viewer = document.getElementById('fileViewer');
+    let download = document.getElementById('downloadBtn');
+    let ext = url.split('.').pop().toLowerCase();
 
-            let ext = url.split('.').pop().toLowerCase();
+    document.getElementById('fileModal').classList.remove('hidden');
 
-            if (ext === 'pdf') {
-                viewer.src = url;
-            } else if (ext === 'doc' || ext === 'docx' || ext === 'xls' || ext === 'xlsx') {
-                viewer.src = "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(url);
-            } else {
-                viewer.src = "";
-            }
+    // RESET isi viewer
+    viewer.style.display = 'block';
 
-            download.href = url;
-        }
+    // HANDLE FILE
+    if (ext === 'pdf') {
+        viewer.src = url;
+
+    } else if (ext === 'doc' || ext === 'docx' || ext === 'xls' || ext === 'xlsx') {
+        viewer.src = "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(url);
+
+    } else if (ext === 'jpg' || ext === 'jpeg' || ext === 'png') {
+        // 🔥 HANDLE GAMBAR
+        viewer.src = url;
+
+    } else {
+        viewer.src = "";
+    }
+
+    download.href = url;
+}
 
         function closeFileModal() {
             document.getElementById('fileModal').classList.add('hidden');

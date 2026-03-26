@@ -213,7 +213,7 @@
         <div
             x-show="isOpen"
             x-transition
-            class="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-60"
+            class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-60"
             style="display: none;">
 
             <div class="relative z-50 w-11/12 bg-white rounded-lg shadow-lg h-[90vh]">

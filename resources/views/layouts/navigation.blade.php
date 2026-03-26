@@ -32,16 +32,16 @@
 
         @elseif(auth()->user()->role === 'dosen')
 
-            {{-- NAVBAR DOSEN --}}
-            @include('layouts.navbar.dosen')
-
             {{-- TAMBAHAN NAVBAR KAPRODI --}}
             @if(auth()->user()->isKaprodi())
-                <div class="px-4 pt-4 mt-6 text-xs text-gray-300 uppercase border-t border-green-700">
-                    Menu Kaprodi
-                </div>
                 @include('layouts.navbar.kaprodi')
-            @endif
+                @endif
+                
+                <div class="px-4 pt-4 mt-6 text-xs text-gray-300 uppercase border-t border-green-700">
+                    Menu Dosen
+                </div>
+            {{-- NAVBAR DOSEN --}}
+            @include('layouts.navbar.dosen')
 
         @elseif(auth()->user()->role === 'admin')
             @include('layouts.navbar.admin')

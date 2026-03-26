@@ -9,7 +9,7 @@ use App\Models\Logbook;
 
 class DashboardController extends Controller
 {
-        public function index()
+    public function index()
 {
     $user = Auth::user();
     $mahasiswa = $user->mahasiswa;
@@ -31,37 +31,44 @@ class DashboardController extends Controller
     $tugas = null;
     $submit = null;
 
-    if ($pengajuan && $pengajuan->pkl) {
-
-        $tugasList = TugasMitra::where('id_pkl', $pengajuan->pkl->id)
-            ->latest()
-            ->get();
-
-        $tugas = $tugasList->first();
-
-        if ($tugas) {
-            $submit = $tugas->submit()
-                ->where('id_pkl', $pengajuan->pkl->id)
-                ->first();
-        }
-    }
-
-    $logbookTotal = 0;
     $hariPkl = 0;
+    $logbookTotal = 0;
     $logbookKosong = 0;
+    $isPklSelesai = false;
 
     if ($pengajuan && $pengajuan->pkl) {
 
         $pkl = $pengajuan->pkl;
 
+        // ================= LOGBOOK =================
         $mulai = Carbon::parse($pkl->tgl_mulai)->startOfDay();
-        $today = Carbon::now('Asia/Jakarta')->startOfDay();
 
-        $hariPkl = $mulai->diffInDays($today) + 1;
+        if ($pkl->status === 'selesai' && $pkl->tgl_selesai) {
+            $end = Carbon::parse($pkl->tgl_selesai)->startOfDay();
+        } else {
+            $end = Carbon::now('Asia/Jakarta')->startOfDay();
+        }
 
+        $hariPkl = $mulai->diffInDays($end) + 1;
+        $targetHari = 30;
         $logbookTotal = Logbook::where('id_pkl', $pkl->id)->count();
 
         $logbookKosong = max($hariPkl - $logbookTotal, 0);
+
+        $isPklSelesai = $pkl->status === 'selesai';
+
+        // ================= TUGAS =================
+        $tugasList = TugasMitra::where('id_pkl', $pkl->id)
+                        ->latest()
+                        ->get();
+
+        $tugas = $tugasList->first();
+
+        $submit = $tugas 
+        ? $tugas->submit()
+            ->where('id_pkl', $pkl->id)
+            ->first()
+        : null;
     }
 
     return view('mahasiswa.dashboard', compact(
@@ -71,7 +78,9 @@ class DashboardController extends Controller
         'submit',
         'hariPkl',
         'logbookTotal',
-        'logbookKosong'
+        'logbookKosong',
+        'isPklSelesai',
+        'targetHari'
     ));
 }
 }

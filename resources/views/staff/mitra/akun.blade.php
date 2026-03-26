@@ -106,7 +106,7 @@
                                 . url('/login');
                         @endphp
 
-                        <div class="flex items-center justify-between p-4 mb-3 bg-green-100 border border-green-200 rounded-lg">
+                        <div class="flex items-center justify-between p-4 mb-3 border border-green-200 rounded-lg bg-green-50">
 
                             <div>
                                 <p class="font-semibold text-gray-800">

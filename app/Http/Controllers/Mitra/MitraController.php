@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Pkl;
 use App\Models\TugasMitra;
 use App\Models\TugasMitraSubmit;
+use App\Models\PengajuanSertifikat;
 class MitraController extends Controller
 {
     public function mahasiswa()
@@ -94,6 +95,14 @@ public function dashboard()
     $pklIds = $pkls->pluck('id');
 
     // ======================
+    // PENGAJUAN SERTIFIKAT
+    // ======================
+
+    $sertifikatPending = PengajuanSertifikat::whereIn('pkl_id', $pklIds)
+        ->where('status', 'pending')
+        ->count();
+
+    // ======================
     // STATISTIK TUGAS
     // ======================
 
@@ -133,7 +142,8 @@ public function dashboard()
         'totalTugas' => $totalTugas,
         'tugasPending' => $tugasPending,
         'tugasRevisi' => $tugasRevisi,
-        'tugasSelesai' => $tugasSelesai
+        'tugasSelesai' => $tugasSelesai,
+        'sertifikatPending' => $sertifikatPending,
     ]);
 }
 }
