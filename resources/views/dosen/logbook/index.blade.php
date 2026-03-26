@@ -26,11 +26,25 @@
                 @csrf
 
                 {{-- Action Bar --}}
-                <div class="flex items-center justify-between p-4 border-b bg-gray-50 rounded-t-xl">
+                <div class="flex flex-wrap items-center justify-start gap-3 p-4 border-b bg-gray-50 rounded-t-xl">
                     <button type="submit"
                         class="px-4 py-2 text-sm text-white bg-green-600 rounded hover:bg-green-700">
                         Setujui yang Dipilih
                     </button>
+
+                        @if($belumApprove > 0)
+                        <div class="px-4 py-2 rounded-xl bg-amber-50">
+                            <div class="flex items-center gap-3">
+                                <i class="text-xl text-amber-600 fa-solid fa-triangle-exclamation"></i>
+
+                                <div>
+                                    <p class="font-semibold text-amber-800">
+                                        {{ $belumApprove }} logbook belum direview
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                 </div>
 
                 {{-- Table --}}
@@ -41,6 +55,7 @@
                                 <th class="px-4 py-3 text-center">
                                     <input type="checkbox" id="select-all">
                                 </th>
+                                <th class="px-4 py-3 text-center">No</th>
                                 <th class="px-4 py-3 text-left">Tanggal</th>
                                 <th class="px-4 py-3 text-left">Mahasiswa</th>
                                 <th class="px-4 py-3 text-left">Kegiatan</th>
@@ -61,6 +76,9 @@
                                                 value="{{ $log->id }}"
                                                 class="logbook-checkbox">
                                         @endif
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        {{ ($logbooks->currentPage() - 1) * $logbooks->perPage() + $loop->iteration }}
                                     </td>
 
                                     <td class="px-4 py-3">

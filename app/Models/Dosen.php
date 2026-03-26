@@ -12,6 +12,7 @@ class Dosen extends Model
         'nama',
         'prodi_id',
         'keahlian',
+        'jabatan',
         'no_hp',
         'is_active',
     ];
@@ -28,7 +29,7 @@ class Dosen extends Model
     }
      public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasOne(User::class, 'dosen_id');
     }
     public function pkl()
     {

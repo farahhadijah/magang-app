@@ -8,6 +8,7 @@ use App\Models\SuratPengantar;
 use App\Models\LaporanAkhir;
 use App\Models\NilaiPkl;
 use App\Models\Mahasiswa;
+use App\Models\PengajuanSertifikat;
 use Carbon\Carbon;
 class Pkl extends Model
 {
@@ -50,6 +51,17 @@ class Pkl extends Model
     {
         return $this->hasOne(SuratPengantar::class, 'id_pkl');
     }
+    public function tempatPkl()
+{
+    return $this->hasOneThrough(
+        \App\Models\TempatPkl::class,
+        \App\Models\PengajuanPkl::class,
+        'id',              // foreign key di pengajuan_pkl
+        'id',              // foreign key di tempat_pkl
+        'id_pengajuan_pkl',
+        'tempat_pkl_id'
+    );
+}
     public function laporanAkhir()
     {
         return $this->hasOne(LaporanAkhir::class, 'id_pkl');
@@ -61,6 +73,10 @@ class Pkl extends Model
     public function pengajuan()
     {
         return $this->belongsTo(\App\Models\PengajuanPkl::class, 'id_pengajuan_pkl');
+    }
+    public function pengajuanSertifikat()
+    {
+        return $this->hasOne(PengajuanSertifikat::class);
     }
     public function totalLogbook()
     {

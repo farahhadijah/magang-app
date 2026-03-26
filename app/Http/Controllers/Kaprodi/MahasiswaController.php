@@ -7,9 +7,20 @@ use App\Models\Mahasiswa;
 
 class MahasiswaController extends Controller
 {
+    private function getProdiId()
+    {
+        $dosen = auth()->user()->dosen;
+
+        if (!$dosen || !$dosen->prodi_id) {
+            abort(403, 'Kaprodi tidak memiliki prodi.');
+        }
+
+        return $dosen->prodi_id;
+    }
+
     public function index()
     {
-        $prodiId = auth()->user()->staff->prodi_id;
+        $prodiId = $this->getProdiId();
 
         $mahasiswas = Mahasiswa::where('prodi_id', $prodiId)
             ->whereHas('pengajuanPkl.pkl', function ($q) {
@@ -21,9 +32,10 @@ class MahasiswaController extends Controller
 
         return view('kaprodi.mahasiswa.index', compact('mahasiswas'));
     }
+
     public function belumMengajukan()
     {
-        $prodiId = auth()->user()->staff->prodi_id;
+        $prodiId = $this->getProdiId();
 
         $mahasiswas = Mahasiswa::where('prodi_id', $prodiId)
             ->whereDoesntHave('pengajuanPkl', function ($q) {

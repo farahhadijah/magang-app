@@ -28,20 +28,6 @@
             </div>
             
             <div>
-                <label class="block mb-1 font-medium">Jabatan</label>
-                <select name="jabatan"
-                        class="w-full px-3 py-2 border rounded"
-                        required>
-
-                    <option value="">-- Pilih Jabatan --</option>
-
-                    <option value="Kaprodi">Kaprodi</option>
-                    <option value="Staff TU">Staff TU</option>
-
-                </select>
-            </div>
-            
-            <div>
                 <label class="block mb-1 font-medium">Prodi</label>
                 <select name="prodi_id"
                         class="w-full px-3 py-2 border rounded"

@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanPkl;
 use App\Models\TempatPkl;
 use App\Models\DokumenPengajuan;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use App\Models\SuratPengantar;
 
 class PengajuanPklController extends Controller
 {
@@ -46,7 +49,7 @@ class PengajuanPklController extends Controller
         'nama_tempat'  => 'required|string|max:150',
         'jenis_tempat' => 'required|in:Pemerintah,Sekolah,PT,CV',
         'no_hp'        => ['required', 'regex:/^08[0-9]{7,14}$/'],
-        'lokasi_maps'  => ['required', 'url', 'regex:/google\\./i'],
+        'lokasi_maps' => 'required|string|max:500',
         'semester' => [
             'required',
             'regex:/^(I|II|III|IV|V|VI|VII|VIII|IX|X)$/'
@@ -63,7 +66,6 @@ class PengajuanPklController extends Controller
 
         // 🔥 Dokumen baru (ditambahkan, bukan mengganti)
         'dokumen_form_pkn'     => 'required|file|mimes:pdf|max:2048',
-        'dokumen_krs_remedial' => 'required|file|mimes:pdf|max:2048',
     ]);
 
     $mahasiswa = Auth::user()->mahasiswa;
@@ -78,12 +80,14 @@ class PengajuanPklController extends Controller
             ->first();
 
         if (!$tempatPkl) {
+            $lokasi = $this->normalizeGoogleMapsLink($request->lokasi_maps);
+
             $tempatPkl = TempatPkl::create([
                 'nama_tempat'     => $request->nama_tempat,
                 'nama_normalized' => $namaNormalized,
                 'jenis_tempat'    => $request->jenis_tempat,
                 'no_hp'           => $request->no_hp,
-                'lokasi_maps'     => $request->lokasi_maps,
+                'lokasi_maps'     => $lokasi,
             ]);
         }
 
@@ -158,26 +162,67 @@ class PengajuanPklController extends Controller
             'path_file'        => $formPknPath,
             'status_verifikasi'=> 'pending',
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | 5️⃣ KRS REMEDIAL (BARU)
-        |--------------------------------------------------------------------------
-        */
-        $krsPath = $request->file('dokumen_krs_remedial')
-            ->store($basePath, 'public');
-
-        DokumenPengajuan::create([
-            'id_pengajuan_pkl' => $pengajuan->id,
-            'jenis_dokumen'    => DokumenPengajuan::JENIS_KRS_REMEDIAL,
-            'path_file'        => $krsPath,
-            'status_verifikasi'=> 'pending',
-        ]);
     });
 
     return redirect()
         ->route('mahasiswa.pengajuan.status')
         ->with('success', 'Pengajuan PKL berhasil dikirim dan menunggu verifikasi TU.');
+}
+    private function normalizeGoogleMapsLink($url)
+{
+    // jika shortlink → resolve dulu
+    if (str_contains($url, 'maps.app.goo.gl') || str_contains($url, 'goo.gl')) {
+
+        $resolved = $this->resolveGoogleMapsUrl($url);
+
+        if ($resolved) {
+            $url = $resolved;
+        }
+    }
+
+    // ambil koordinat dari URL
+    $coords = $this->extractCoordinates($url);
+
+    if ($coords) {
+        return "https://www.google.com/maps?q={$coords['lat']},{$coords['lng']}";
+    }
+
+    // fallback jika gagal
+    return $url;
+}
+
+    private function resolveGoogleMapsUrl($url)
+    {
+        try {
+            $response = Http::withOptions([
+                'allow_redirects' => true,
+            ])->get($url);
+
+            return (string) $response->effectiveUri();
+
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+    private function extractCoordinates($url)
+{
+    // format paling akurat dari google maps
+    if (preg_match('/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/', $url, $match)) {
+        return [
+            'lat' => $match[1],
+            'lng' => $match[2]
+        ];
+    }
+
+    // fallback jika format !3d !4d tidak ada
+    if (preg_match('/@(-?\d+\.\d+),(-?\d+\.\d+)/', $url, $match)) {
+        return [
+            'lat' => $match[1],
+            'lng' => $match[2]
+        ];
+    }
+
+    return null;
 }
 
     /**
@@ -317,4 +362,23 @@ class PengajuanPklController extends Controller
 
         return back()->with('success', 'Dokumen berhasil diupload ulang dan menunggu verifikasi TU.');
     }
+    public function downloadSuratPengantar($id)
+{
+    $mahasiswa = Auth::user()->mahasiswa;
+    abort_if(!$mahasiswa, 403);
+
+    $surat = SuratPengantar::findOrFail($id);
+
+    $path = $surat->path_file;
+
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404, 'File tidak ditemukan.');
+    }
+
+    return Storage::disk('public')->download(
+        $path,
+        'Surat_Pengantar_PKL.pdf'
+    );
+}
+
 }

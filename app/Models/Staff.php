@@ -6,7 +6,7 @@ class Staff extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'nip', 'nama', 'prodi_id', 'jabatan', 'no_hp', 'is_active'
+        'nip', 'nama', 'prodi_id', 'no_hp', 'is_active'
     ];
     protected $attributes = [
         'is_active' => true,

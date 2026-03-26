@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
-// use App\Models\User;
 use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,21 +31,20 @@ class StaffController extends Controller
         $request->validate([
             'nip' => 'required|unique:staff,nip',
             'nama' => 'required|string|max:100',
-            'jabatan' => 'required|string|max:100',
             'no_hp' => 'nullable|string|max:20',
             'prodi_id' => 'required|exists:prodi,id',
         ]);
 
         DB::transaction(function () use ($request) {
 
-            $staff = Staff::create([
+            Staff::create([
                 'nip' => $request->nip,
                 'nama' => $request->nama,
-                'jabatan' => $request->jabatan,
                 'no_hp' => $request->no_hp,
                 'prodi_id' => $request->prodi_id,
                 'is_active' => 1,
             ]);
+
         });
 
         return redirect()->route('admin.staff.index')
@@ -63,14 +61,12 @@ class StaffController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:100',
-            'jabatan' => 'required|string|max:100',
             'no_hp' => 'nullable|string|max:20',
             'prodi_id' => 'required|exists:prodi,id',
         ]);
 
         $staff->update([
             'nama' => $request->nama,
-            'jabatan' => $request->jabatan,
             'no_hp' => $request->no_hp,
             'prodi_id' => $request->prodi_id,
         ]);
@@ -87,6 +83,7 @@ class StaffController extends Controller
             if ($staff->user) {
                 $staff->user->update(['is_active' => 0]);
             }
+
         });
 
         return back()->with('success','Staff dinonaktifkan.');
@@ -106,32 +103,31 @@ class StaffController extends Controller
         return back()->with('success','Password berhasil direset.');
     }
 
-    
 
-public function import(Request $request)
-{
-    $request->validate([
-        'file' => 'required|mimes:xlsx,xls,csv'
-    ]);
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
 
-    $headings = (new HeadingRowImport)->toArray($request->file('file'));
-    $header = $headings[0][0] ?? [];
+        $headings = (new HeadingRowImport)->toArray($request->file('file'));
+        $header = $headings[0][0] ?? [];
 
-    $required = ['nip','nama','jabatan','no_hp','kode_prodi'];
+        $required = ['nip','nama','no_hp','kode_prodi'];
 
-    $header = array_map(fn($h) => strtolower(trim($h)), $header);
+        $header = array_map(fn($h) => strtolower(trim($h)), $header);
 
-    foreach ($required as $col) {
-        if (!in_array($col, $header)) {
-            return back()->with(
-                'error',
-                'Format file salah. Kolom wajib: nip, nama, jabatan, no_hp, kode_prodi'
-            );
+        foreach ($required as $col) {
+            if (!in_array($col, $header)) {
+                return back()->with(
+                    'error',
+                    'Format file salah. Kolom wajib: nip, nama, no_hp, kode_prodi'
+                );
+            }
         }
+
+        Excel::import(new StaffImport, $request->file('file'));
+
+        return back()->with('success','Import staff berhasil.');
     }
-
-    Excel::import(new StaffImport, $request->file('file'));
-
-    return back()->with('success','Import staff berhasil.');
-}
 }

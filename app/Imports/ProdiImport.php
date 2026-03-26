@@ -14,13 +14,13 @@ class ProdiImport implements ToModel, WithHeadingRow
         if (
             empty($row['kode']) ||
             empty($row['nama']) ||
-            empty($row['id_fakultas'])
+            empty($row['fakultas_id'])
         ) {
             return null;
         }
 
         // Pastikan fakultas ada
-        $fakultas = Fakultas::find($row['id_fakultas']);
+        $fakultas = Fakultas::find($row['fakultas_id']);
         if (!$fakultas) {
             return null;
         }
@@ -29,7 +29,7 @@ class ProdiImport implements ToModel, WithHeadingRow
             ['kode' => strtoupper(trim($row['kode']))],
             [
                 'nama' => trim($row['nama']),
-                'id_fakultas' => $fakultas->id,
+                'fakultas_id' => $fakultas->id,
                 'is_active' => 1,
             ]
         );

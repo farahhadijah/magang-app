@@ -1,4 +1,7 @@
 <x-app-layout>
+    <x-slot name="title">
+        Laporan Akhir - MagangApp
+    </x-slot>
     <div class="max-w-4xl py-10 mx-auto">
 
         <!-- Header -->

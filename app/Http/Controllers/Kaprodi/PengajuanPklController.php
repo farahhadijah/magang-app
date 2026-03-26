@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Verifikasi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -103,23 +104,57 @@ class PengajuanPklController extends Controller
             ->with('warning', 'Pengajuan sudah diproses.');
     }
 
-    // $dosenList = User::query()
-    // ->select('id', 'username')
-    // ->where('role', 'dosen')
-    // ->where('is_active', 1)
-    // ->whereHas('dosen', function ($q) use ($prodiId) {
-    //     $q->where('prodi_id', $prodiId)
-    //       ->where('is_active', 1);
-    // })
-    // ->with(['dosen:id,nama,prodi_id'])
-    // ->get();
     $dosenList = Dosen::where('prodi_id', $prodiId)
     ->where('is_active', 1)
     ->orderBy('nama')
     ->get(['id', 'nama']);
 
-    return view('kaprodi.pengajuan.show', compact('pengajuan', 'dosenList'));
-}
+    /* ================= HITUNG JARAK ================= */
+    $jarak = null;
+
+    $mapsUrl = $pengajuan->tempatPkl->lokasi_maps ?? null;
+
+    $kampusLat = -7.1224094;
+    $kampusLng = 112.4223971;
+
+    $coords = $this->extractLatLng($mapsUrl);
+
+    if ($coords) {
+        $jarak = $this->hitungJarak(
+            $kampusLat,
+            $kampusLng,
+            $coords['lat'],
+            $coords['lng']
+        );
+    }
+    /* ================= RIWAYAT TEMPAT PKL ================= */
+    $tempatId = $pengajuan->tempatPkl->id ?? null;
+
+    $jumlahRiwayat = 0;
+    $terakhirDigunakan = null;
+
+    if ($tempatId) {
+
+        $riwayat = PengajuanPkl::where('id_tempat_pkl', $tempatId)
+            ->where('id', '!=', $pengajuan->id)
+            ->selectRaw('COUNT(*) as total, MAX(created_at) as terakhir')
+            ->first();
+
+        $jumlahRiwayat = $riwayat->total ?? 0;
+
+        if ($riwayat->terakhir) {
+            $terakhirDigunakan = Carbon::parse($riwayat->terakhir);
+        }
+    }
+
+    return view('kaprodi.pengajuan.show', compact(
+        'pengajuan',
+        'dosenList',
+        'jarak',
+        'jumlahRiwayat',
+        'terakhirDigunakan'
+    ));
+    }
 
 
 
@@ -204,9 +239,9 @@ class PengajuanPklController extends Controller
 
         /* ================= AMBIL DATA KAPRODI ================= */
 
-        $kaprodi = \App\Models\Staff::where('jabatan', 'kaprodi')
-            ->where('is_active', 1)
-            ->first();
+        $kaprodi = \App\Models\Dosen::where('jabatan', 'kaprodi')
+        ->where('is_active', 1)
+        ->first();
 
         /* ================= GENERATE PDF ================= */
 
@@ -308,12 +343,50 @@ class PengajuanPklController extends Controller
     }
     private function getProdiId()
     {
-        $staff = auth()->user()->staff;
+        $dosen = auth()->user()->dosen;
 
-        if (!$staff || !$staff->prodi_id) {
+        if (!$dosen || !$dosen->prodi_id) {
             abort(403, 'Kaprodi tidak memiliki prodi.');
         }
 
-        return $staff->prodi_id;
+        return $dosen->prodi_id;
+    }
+
+    private function extractLatLng($url)
+    {
+        if (!$url) return null;
+
+        // format ?q=lat,lng
+        if (preg_match('/q=(-?\d+\.\d+),(-?\d+\.\d+)/', $url, $matches)) {
+            return [
+                'lat' => (float)$matches[1],
+                'lng' => (float)$matches[2]
+            ];
+        }
+
+        // format @lat,lng
+        if (preg_match('/@(-?\d+\.\d+),(-?\d+\.\d+)/', $url, $matches)) {
+            return [
+                'lat' => (float)$matches[1],
+                'lng' => (float)$matches[2]
+            ];
+        }
+
+        return null;
+    }
+    private function hitungJarak($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371;
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat/2) * sin($dLat/2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon/2) * sin($dLon/2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+
+        return $earthRadius * $c;
     }
 }
