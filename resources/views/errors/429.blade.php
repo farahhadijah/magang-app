@@ -113,7 +113,7 @@
         }
     </style>
 </head>
-<body class="relative flex items-center justify-center min-h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-white to-red-50">
+<body class="relative flex items-center justify-center min-h-screen overflow-y-auto bg-gradient-to-br from-gray-50 via-white to-green-50">
     
     {{-- Background Decorative Elements --}}
     <div class="absolute inset-0 overflow-hidden">

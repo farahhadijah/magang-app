@@ -12,27 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-
-
-// ==============================================
-// TESTING ERROR PAGES (HANYA UNTUK DEVELOPMENT)
-// ==============================================
-if (app()->environment('local')) {
-    Route::get('/test-error/{code}', function ($code) {
-        $validErrors = [401, 403, 404, 419, 429, 500, 503];
-        
-        if (in_array($code, $validErrors)) {
-            abort($code);
-        }
-        
-        abort(404);
-    })->name('test.error');
-    
-    // Optional: Halaman index untuk melihat semua error page
-    Route::get('/error-pages', function () {
-        return view('errors.index');
-    })->name('errors.index');
-}
 /*
 |--------------------------------------------------------------------------
 | ROOT & AUTH

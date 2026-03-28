@@ -35,6 +35,7 @@ class DashboardController extends Controller
     $logbookTotal = 0;
     $logbookKosong = 0;
     $isPklSelesai = false;
+    $targetHari = 30;
 
     if ($pengajuan && $pengajuan->pkl) {
 
