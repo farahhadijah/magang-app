@@ -27,6 +27,7 @@ class PengajuanPklController extends Controller
             ->whereIn('status', [
                 'pending_tu',
                 'diverifikasi_tu',
+                'disetujui',
                 'pending_kaprodi'
             ])
             ->exists();
@@ -70,6 +71,20 @@ class PengajuanPklController extends Controller
 
     $mahasiswa = Auth::user()->mahasiswa;
     abort_if(!$mahasiswa, 403);
+
+    $pengajuanAktif = PengajuanPkl::where('id_mhs', $mahasiswa->id)
+    ->whereIn('status', [
+        'pending_tu',
+        'diverifikasi_tu',
+        'pending_kaprodi'
+    ])
+    ->exists();
+
+if ($pengajuanAktif) {
+    return redirect()
+        ->route('mahasiswa.dashboard')
+        ->with('error', 'Kamu sudah memiliki pengajuan PKL yang sedang diproses.');
+}
 
     $namaNormalized = $this->normalizeNamaTempat($request->nama_tempat);
 
