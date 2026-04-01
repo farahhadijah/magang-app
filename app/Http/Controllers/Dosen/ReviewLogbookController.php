@@ -9,38 +9,30 @@ class ReviewLogbookController extends Controller
      * Halaman index review logbook dosen
      */
     public function index()
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    if (!$user || !$user->dosen) {
-        abort(403, 'Akun ini bukan dosen');
+        if (!$user || !$user->dosen) {
+            abort(403, 'Akun ini bukan dosen');
+        }
+
+        $dosen = $user->dosen;
+
+        $logbooks = Logbook::query()
+            ->whereHas('pkl', function ($q) use ($dosen) {
+                $q->where('id_dosen', $dosen->id)
+                ->where('status', 'aktif');
+            })
+            ->with([
+                'pkl:id,id_dosen,status,id_pengajuan_pkl',
+                'pkl.pengajuanPkl.mahasiswa',
+                'pkl.pengajuanPkl.mahasiswa:id,nama'
+            ])
+            ->orderByDesc('tgl')
+            ->paginate(20); 
+
+        return view('dosen.logbook.index', compact('logbooks'));
     }
-
-    $dosen = $user->dosen;
-
-    $query = Logbook::query()
-        ->whereHas('pkl', function ($q) use ($dosen) {
-            $q->where('id_dosen', $dosen->id)
-              ->where('status', 'aktif');
-        });
-
-    // ambil data logbook
-    $logbooks = $query
-        ->with([
-            'pkl:id,id_dosen,status,id_pengajuan_pkl',
-            'pkl.pengajuanPkl.mahasiswa',
-            'pkl.pengajuanPkl.mahasiswa:id,nama'
-        ])
-        ->orderByDesc('tgl')
-        ->paginate(20);
-
-    // hitung logbook yang belum disetujui
-    $belumApprove = $query
-        ->whereIn('status_approve', ['pending','revisi'])
-        ->count();
-
-    return view('dosen.logbook.index', compact('logbooks','belumApprove'));
-}
     /**
      * Review logbook (NON AJAX)
      */

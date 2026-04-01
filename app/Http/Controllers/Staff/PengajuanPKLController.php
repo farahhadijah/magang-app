@@ -233,24 +233,12 @@ class PengajuanPklController extends Controller
 
     $tempat = TempatPkl::with('mitra.user')->findOrFail($id);
 
-    // ambil mahasiswa yang PKL di tempat ini
-    $mahasiswas = DB::table('pengajuan_pkl')
-        ->join('mahasiswa','pengajuan_pkl.id_mhs','=','mahasiswa.id')
-        ->where('pengajuan_pkl.id_tempat_pkl', $tempat->id)
-        ->where('pengajuan_pkl.status','disetujui')
-        ->select(
-            'mahasiswa.nama',
-            'mahasiswa.no_hp'
-        )
-        ->get();
-
     return view('staff.mitra.akun', [
         'tempat' => $tempat,
         'akun' => $akun,
-        'mahasiswas' => $mahasiswas,
         'account_notice' => true,
     ]);
-}
+} 
     public function manajemenMitra()
 {
     $prodiId = $this->getProdiId();

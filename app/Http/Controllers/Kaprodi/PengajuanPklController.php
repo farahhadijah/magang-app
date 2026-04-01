@@ -239,9 +239,9 @@ class PengajuanPklController extends Controller
 
         /* ================= AMBIL DATA KAPRODI ================= */
 
-        $kaprodi = \App\Models\Dosen::where('jabatan', 'kaprodi')
-        ->where('is_active', 1)
-        ->first();
+        $kaprodi = \App\Models\Staff::where('jabatan', 'kaprodi')
+            ->where('is_active', 1)
+            ->first();
 
         /* ================= GENERATE PDF ================= */
 
@@ -343,13 +343,13 @@ class PengajuanPklController extends Controller
     }
     private function getProdiId()
     {
-        $dosen = auth()->user()->dosen;
+        $staff = auth()->user()->staff;
 
-        if (!$dosen || !$dosen->prodi_id) {
+        if (!$staff || !$staff->prodi_id) {
             abort(403, 'Kaprodi tidak memiliki prodi.');
         }
 
-        return $dosen->prodi_id;
+        return $staff->prodi_id;
     }
 
     private function extractLatLng($url)

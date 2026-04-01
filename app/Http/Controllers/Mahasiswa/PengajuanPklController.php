@@ -10,8 +10,7 @@ use App\Models\PengajuanPkl;
 use App\Models\TempatPkl;
 use App\Models\DokumenPengajuan;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
-use App\Models\SuratPengantar;
+
 
 class PengajuanPklController extends Controller
 {
@@ -27,7 +26,6 @@ class PengajuanPklController extends Controller
             ->whereIn('status', [
                 'pending_tu',
                 'diverifikasi_tu',
-                'disetujui',
                 'pending_kaprodi'
             ])
             ->exists();
@@ -71,20 +69,6 @@ class PengajuanPklController extends Controller
 
     $mahasiswa = Auth::user()->mahasiswa;
     abort_if(!$mahasiswa, 403);
-
-    $pengajuanAktif = PengajuanPkl::where('id_mhs', $mahasiswa->id)
-    ->whereIn('status', [
-        'pending_tu',
-        'diverifikasi_tu',
-        'pending_kaprodi'
-    ])
-    ->exists();
-
-if ($pengajuanAktif) {
-    return redirect()
-        ->route('mahasiswa.dashboard')
-        ->with('error', 'Kamu sudah memiliki pengajuan PKL yang sedang diproses.');
-}
 
     $namaNormalized = $this->normalizeNamaTempat($request->nama_tempat);
 
@@ -377,23 +361,5 @@ if ($pengajuanAktif) {
 
         return back()->with('success', 'Dokumen berhasil diupload ulang dan menunggu verifikasi TU.');
     }
-    public function downloadSuratPengantar($id)
-{
-    $mahasiswa = Auth::user()->mahasiswa;
-    abort_if(!$mahasiswa, 403);
-
-    $surat = SuratPengantar::findOrFail($id);
-
-    $path = $surat->path_file;
-
-    if (!Storage::disk('public')->exists($path)) {
-        abort(404, 'File tidak ditemukan.');
-    }
-
-    return Storage::disk('public')->download(
-        $path,
-        'Surat_Pengantar_PKL.pdf'
-    );
-}
 
 }

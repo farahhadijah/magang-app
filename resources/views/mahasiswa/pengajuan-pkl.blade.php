@@ -3,356 +3,190 @@
         Pengajuan PKL - MagangApp
     </x-slot>
 
-    <div class="min-h-screen px-4 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 via-white to-emerald-50">
-        <div class="max-w-5xl mx-auto space-y-6">
-            {{-- ================= HEADER SECTION ================= --}}
-            <div class="mb-8 text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 mb-4 shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl">
-                    Pengajuan <span class="text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text">PKL</span>
-                </h1>
-                <p class="mt-2 text-gray-600">Isi formulir berikut untuk mengajukan Praktik Kerja Lapangan</p>
-            </div>
-
-            {{-- ================= NOTIFIKASI ================= --}}
-            @foreach (['success', 'error'] as $msg)
-                @if (session($msg))
-                    <div class="flex items-center gap-3 p-4 rounded-xl shadow-sm transform transition-all duration-300 animate-in slide-in-from-top-2 {{ $msg === 'success' ? 'bg-green-50 border-l-4 border-green-500 text-green-800' : 'bg-red-50 border-l-4 border-red-500 text-red-800' }}">
-                        <i class="fa-solid text-xl {{ $msg === 'success' ? 'fa-circle-check text-green-600' : 'fa-circle-xmark text-red-600' }}"></i>
-                        <span class="font-medium">{{ session($msg) }}</span>
-                    </div>
-                @endif
-            @endforeach
-
-            {{-- ================= ERROR VALIDASI ================= --}}
-            @if ($errors->any())
-                <div class="p-5 border-l-4 border-red-500 shadow-sm rounded-xl bg-red-50">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i class="text-red-600 fa-solid fa-circle-exclamation"></i>
-                        <h4 class="font-semibold text-red-700">Terjadi Kesalahan Validasi</h4>
-                    </div>
-                    <ul class="pl-6 space-y-1 text-sm text-red-700 list-disc">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+    <div class="max-w-5xl py-6 mx-auto space-y-6">
+        {{-- ================= NOTIFIKASI ================= --}}
+        @foreach (['success', 'error'] as $msg)
+            @if (session($msg))
+                <div class="flex items-center gap-2 p-4 rounded-xl border {{ $msg === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800' }}">
+                    <i class="fa-solid {{ $msg === 'success' ? 'fa-circle-check text-green-600' : 'fa-circle-xmark text-red-600' }}"></i>
+                    <span>{{ session($msg) }}</span>
                 </div>
             @endif
+        @endforeach
 
-            {{-- ================= FORM ================= --}}
-            <form id="formPengajuan" method="POST" action="{{ route('mahasiswa.pengajuan.store') }}" enctype="multipart/form-data" class="overflow-hidden bg-white border border-gray-100 shadow-xl rounded-2xl">
-                @csrf
-                <input type="hidden" name="force_create" id="force_create" value="0">
+        {{-- ================= ERROR VALIDASI ================= --}}
+        @if ($errors->any())
+            <div class="p-4 border border-red-200 rounded-xl bg-red-50">
+                <h4 class="mb-2 font-semibold text-red-700">Terjadi Kesalahan</h4>
+                <ul class="pl-4 text-sm text-red-700 list-disc">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-                {{-- ================= DATA TEMPAT ================= --}}
-                <div class="p-6 border-b border-gray-100 md:p-8 bg-gradient-to-r from-green-50/30 to-transparent">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                        </div>
-                        <h4 class="text-xl font-bold text-gray-800">Data Tempat PKL</h4>
+        {{-- ================= FORM ================= --}}
+        <form id="formPengajuan" method="POST" action="{{ route('mahasiswa.pengajuan.store') }}" enctype="multipart/form-data" class="p-6 space-y-6 bg-white border border-green-100 shadow rounded-xl">
+            @csrf
+            <input type="hidden" name="force_create" id="force_create" value="0">
+
+            {{-- ================= DATA TEMPAT ================= --}}
+            <div>
+                <h4 class="mb-4 text-lg font-semibold text-green-800">Data Tempat PKL</h4>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <p class="font-medium text-green-800">Nama instansi </p>
+                        <input type="text" id="nama_tempat" name="nama_tempat" value="{{ old('nama_tempat') }}" required autocomplete="off" class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500">
+                        <div id="warningTempat" class="hidden mt-2 text-sm text-amber-600"></div>
                     </div>
 
-                    <div class="grid gap-5 md:grid-cols-2">
-                        <div class="md:col-span-2">
-                            <label class="block mb-2 text-sm font-semibold text-gray-700">Nama Instansi <span class="text-red-500">*</span></label>
-                            <input type="text" id="nama_tempat" name="nama_tempat" value="{{ old('nama_tempat') }}" required autocomplete="off" 
-                                class="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
-                            <div id="warningTempat" class="flex items-center hidden gap-1 mt-2 text-sm text-amber-600">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                                <span></span>
-                            </div>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block mb-2 text-sm font-semibold text-gray-700">
-                                Lokasi Instansi (Google Maps) <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <input type="text" id="lokasi_maps" name="lokasi_maps" value="{{ old('lokasi_maps') }}" required autocomplete="off"
-                                    class="w-full px-4 py-3 pl-10 transition-all duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
-                                <div class="absolute -translate-y-1/2 left-3 top-1/2">
-                                    <i class="text-gray-400 fa-solid fa-map-location-dot"></i>
-                                </div>
-                            </div>
-                            
-                            <div class="flex flex-wrap gap-3 mt-3">
+                    <div class="md:col-span-2">
+                        <label class="block mb-1 font-medium text-green-800">
+                            Lokasi Instansi (Google Maps)
+                        </label>
+                        <input 
+                            type="text"
+                            id="lokasi_maps"
+                            name="lokasi_maps"
+                            value="{{ old('lokasi_maps') }}"
+                            required
+                            autocomplete="off"
+                            class="block w-full border-gray-300 rounded-lg focus:border-green-500 focus:ring-green-500">
+                            <div class="mt-2 space-y-2">
                                 <button type="button" id="btnGoogleMaps"
-                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 shadow-sm bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl hover:from-blue-700 hover:to-blue-800">
-                                    <i class="fa-solid fa-map"></i>
+                                    class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
                                     Cari Lokasi di Google Maps
                                 </button>
-                            </div>
-                            
-                            <div id="manualGuide" class="hidden p-4 mt-3 text-sm text-gray-700 border border-blue-200 bg-blue-50 rounded-xl">
-                                <p class="flex items-center gap-2 mb-2 font-semibold text-blue-800">
-                                    <i class="fa-solid fa-lightbulb"></i>
-                                    Jika lokasi tidak ditemukan otomatis:
-                                </p>
-                                <ol class="pl-5 space-y-1 text-gray-600 list-decimal">
-                                    <li>Klik tombol <b>"Cari Lokasi di Google Maps"</b></li>
-                                    <li>Cari nama instansi Anda</li>
-                                    <li>Klik tombol <b>Bagikan (Share)</b></li>
-                                    <li>Pilih <b>Salin Link</b></li>
-                                    <li>Tempelkan link tersebut ke kolom lokasi</li>
-                                </ol>
-                            </div>
-                            
-                            <p class="flex items-center gap-1 mt-2 text-xs text-gray-500">
-                                <i class="fa-solid fa-info-circle"></i>
-                                Lokasi akan terisi otomatis setelah nama instansi dimasukkan. Jika tidak ditemukan, Anda dapat mengisinya secara manual.
-                            </p>
-                            
-                            {{-- MAP PREVIEW --}}
-                            <div id="mapPreview" class="hidden mt-4 transition-all duration-300">
-                                <div class="p-4 border border-green-200 shadow-sm bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <h5 class="flex items-center gap-2 text-sm font-semibold text-green-800">
-                                            <i class="fa-solid fa-map"></i>
-                                            Preview Lokasi
-                                        </h5>
-                                        <span class="text-xs text-gray-500">
-                                            <i class="fa-solid fa-arrows-up-down-left-right"></i> Drag untuk melihat area sekitar
-                                        </span>
-                                    </div>
-                                    <div id="map" class="rounded-lg shadow-md" style="height:320px;"></div>
+                                <div id="manualGuide" class="hidden p-3 text-sm text-gray-700 border rounded-lg bg-gray-50">
+                                    <p class="mb-2 font-semibold text-gray-800">
+                                        Jika lokasi tidak ditemukan otomatis:
+                                    </p>
+                                    <ol class="pl-5 space-y-1 list-decimal">
+                                        <li>Klik tombol <b>"Cari Lokasi di Google Maps"</b></li>
+                                        <li>Cari nama instansi Anda</li>
+                                        <li>Klik tombol <b>Bagikan (Share)</b></li>
+                                        <li>Pilih <b>Salin Link</b></li>
+                                        <li>Tempelkan link tersebut ke kolom lokasi</li>
+                                    </ol>
                                 </div>
                             </div>
-                            <p id="previewInfo" class="hidden mt-2 text-xs text-gray-500">
-                                <i class="fa-solid fa-eye-slash"></i> Preview hanya tersedia untuk lokasi yang ditemukan otomatis.
-                            </p>
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-gray-700">Jenis Instansi <span class="text-red-500">*</span></label>
-                            <select name="jenis_tempat" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
-                                <option value="">-- Pilih Jenis Instansi --</option>
-                                @foreach (['Pemerintah','Sekolah','PT','CV'] as $jenis)
-                                    <option value="{{ $jenis }}" @selected(old('jenis_tempat') === $jenis)>{{ $jenis }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-gray-700">No HP Instansi <span class="text-red-500">*</span></label>
-                            <input type="text" name="no_hp" pattern="^08[0-9]{7,14}$" value="{{ old('no_hp') }}" required autocomplete="off" 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
-                            <p class="mt-1 text-xs text-gray-500">Format: 08xxxxxxxx (min 9 digit, max 15 digit)</p>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- ================= DATA AKADEMIK ================= --}}
-                <div class="p-6 border-b border-gray-100 md:p-8">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                            </svg>
-                        </div>
-                        <h4 class="text-xl font-bold text-gray-800">Data Akademik</h4>
-                    </div>
-
-                    <div class="grid gap-5 md:grid-cols-2">
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-gray-700">Semester (Angka Romawi) <span class="text-red-500">*</span></label>
-                            <input type="text" name="semester" value="{{ old('semester') }}" required pattern="^(I|II|III|IV|V|VI|VII|VIII|IX|X)$" 
-                                title="Gunakan angka romawi, contoh: V" 
-                                class="w-full px-4 py-3 uppercase border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white" 
-                                style="text-transform: uppercase;" placeholder="Contoh: V">
-                            <p class="flex items-center gap-1 mt-1 text-xs text-gray-500">
-                                <i class="fa-solid fa-graduation-cap"></i>
-                                Gunakan angka romawi (I, II, III, IV, V, dst)
-                            </p>
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-gray-700">Alamat Asal Mahasiswa <span class="text-red-500">*</span></label>
-                            <textarea name="alamat_asal" required rows="3" 
-                                class="w-full px-4 py-3 border border-gray-300 resize-none rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white" 
-                                placeholder="Contoh: Ds. Sumberagung RT 13/RW 01, Kec. Sukodadi, Kab. Lamongan">{{ old('alamat_asal') }}</textarea>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- ================= DOKUMEN ================= --}}
-                <div class="p-6 md:p-8">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                        </div>
-                        <h4 class="text-xl font-bold text-gray-800">Upload Dokumen Wajib</h4>
-                    </div>
-
-                    <div class="p-4 mb-6 border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-                        <div class="flex items-start gap-3">
-                            <i class="fa-solid fa-circle-info text-blue-600 text-lg mt-0.5"></i>
-                            <div class="text-sm text-gray-700">
-                                <p>• Upload KHS dari semester 1 sampai semester terakhir.</p>
-                                <p>• Semua dokumen wajib dalam format PDF (kecuali pembayaran boleh gambar).</p>
-                                <p class="mt-1 text-xs text-blue-600">• Maksimal ukuran file: 2MB per file</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- UPLOAD AREA STYLING DENGAN FILE LIST PREVIEW --}}
-                    @php
-                        $dokumenFields = [
-                            'dokumen_khs' => ['label' => 'KHS Semester 1 - Terakhir', 'accept' => '.pdf,.doc,.docx', 'multiple' => true, 'icon' => 'fa-file-pdf', 'required' => true, 'color' => 'green'],
-                            'dokumen_pembayaran' => ['label' => 'Bukti Pembayaran PKL', 'accept' => '.pdf,.jpg,.png', 'multiple' => false, 'icon' => 'fa-receipt', 'required' => true, 'color' => 'blue'],
-                            'dokumen_studi_tour' => ['label' => 'Sertifikat Studi Tour', 'accept' => '.pdf,.doc,.docx', 'multiple' => false, 'icon' => 'fa-ticket', 'required' => true, 'color' => 'purple'],
-                            'dokumen_form_pkn' => ['label' => 'Form Pengajuan PKN', 'accept' => '.pdf', 'multiple' => false, 'icon' => 'fa-file-alt', 'required' => true, 'color' => 'orange'],
-                        ];
-                    @endphp
-
-                    @foreach ($dokumenFields as $name => $field)
-                        <div class="mb-6 group">
-                            <label class="block mb-2 text-sm font-semibold text-gray-700">
-                                {{ $field['label'] }} <span class="text-red-500">*</span>
-                            </label>
-                            
-                            {{-- Upload Area --}}
-                            <div class="relative border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/30 hover:bg-gray-50 transition-all duration-200 group-hover:border-{{ $field['color'] }}-400">
-                                <input type="file" 
-                                    name="{{ $name }}{{ $field['multiple'] ? '[]' : '' }}" 
-                                    id="{{ $name }}"
-                                    {{ $field['multiple'] ? 'multiple' : '' }} 
-                                    {{ $field['required'] ? 'required' : '' }}
-                                    accept="{{ $field['accept'] }}"
-                                    class="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer">
-                                <div class="p-5 text-center">
-                                    <i class="fa-solid {{ $field['icon'] }} text-3xl text-gray-400 mb-2 group-hover:text-{{ $field['color'] }}-500 transition-colors"></i>
-                                    <p class="text-sm text-gray-500">
-                                        <span class="font-medium text-{{ $field['color'] }}-600">Klik untuk upload</span> atau drag and drop
-                                    </p>
-                                    <p class="mt-1 text-xs text-gray-400">
-                                        Format: {{ strtoupper(str_replace('.', ', ', $field['accept'])) }} | Max 2MB
-                                        @if($field['multiple']) (Multiple files allowed) @endif
-                                    </p>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Lokasi akan terisi otomatis setelah nama instansi dimasukkan.
+                            Jika tidak ditemukan atau tidak sesuai, Anda dapat mengisinya secara manual.
+                        </p>
+                        {{-- MAP PREVIEW --}}
+                        <div id="mapPreview" class="hidden mt-4 transition-all duration-300">
+                            <div class="p-3 border border-green-100 shadow-sm bg-green-50 rounded-xl">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="text-sm font-semibold text-green-800">
+                                        Preview Lokasi
+                                    </h5>
+                                    <span class="text-xs text-gray-500">
+                                        Drag untuk melihat area sekitar
+                                    </span>
                                 </div>
+                                <div id="map" class="border rounded-lg" style="height:320px;"></div>
                             </div>
-                            
-                            {{-- File List Preview --}}
-                            <div id="{{ $name }}-list" class="mt-3 space-y-2"></div>
                         </div>
-                    @endforeach
+                        <p id="previewInfo" class="hidden mt-2 text-xs text-gray-500">
+                        Preview hanya tersedia untuk lokasi yang ditemukan otomatis.
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="font-medium text-green-800">Jenis instansi</p>
+                        <select name="jenis_tempat" required class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500">
+                            <option value="">-- Jenis Instansi --</option>
+                            @foreach (['Pemerintah','Sekolah','PT','CV'] as $jenis)
+                                <option value="{{ $jenis }}" @selected(old('jenis_tempat') === $jenis)>{{ $jenis }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <p class="font-medium text-green-800">No HP instansi</p>
+                        <input type="text" name="no_hp" pattern="^08[0-9]{7,14}$" value="{{ old('no_hp') }}" required autocomplete="off" class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500">
+                    </div>
+                </div>
+            </div>
+
+            {{-- ================= DATA AKADEMIK ================= --}}
+            <div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    {{-- SEMESTER --}}
+                    <div>
+                        <label class="block mb-1 font-medium text-green-800">Semester (Angka Romawi) *</label>
+                        <input type="text" name="semester" value="{{ old('semester') }}" required pattern="^(I|II|III|IV|V|VI|VII|VIII|IX|X)$" title="Gunakan angka romawi, contoh: V" class="block w-full uppercase rounded-lg input focus:ring-green-500 focus:border-green-500" style="text-transform: uppercase;">
+                        <p class="mt-1 text-xs text-gray-500">Gunakan angka romawi (I, II, III, IV, V, dst).</p>
+                    </div>
+
+                    {{-- ALAMAT ASAL --}}
+                    <div>
+                        <label class="block mb-1 font-medium text-green-800">Alamat Asal Mahasiswa *</label>
+                        <textarea name="alamat_asal" required rows="3" class="block w-full rounded-lg input focus:ring-green-500 focus:border-green-500" placeholder="Contoh: Ds. Sidomulyo RT 01/RW 02, Kec. Deket, Kab. Lamongan">{{ old('alamat_asal') }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ================= DOKUMEN ================= --}}
+            <div>
+                <h4 class="mb-3 font-semibold text-green-800">Upload Dokumen Wajib</h4>
+
+                <div class="p-4 mb-4 text-sm text-gray-600 border border-gray-200 rounded-lg bg-gray-50">
+                    • Upload KHS dari semester 1 sampai semester terakhir. <br>
+                    • Semua dokumen wajib dalam format PDF (kecuali pembayaran boleh gambar).
                 </div>
 
-                {{-- ================= BUTTON ================= --}}
-                <div class="flex flex-col justify-end gap-3 px-6 py-5 border-t border-gray-200 md:px-8 bg-gray-50 sm:flex-row">
-                    <a href="{{ route('mahasiswa.dashboard') }}" 
-                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm">
-                        <i class="fa-solid fa-arrow-left"></i>
-                        Kembali
-                    </a>
-                    <button type="submit" 
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg">
-                        <i class="fa-solid fa-paper-plane"></i>
-                        Ajukan PKL
-                    </button>
+                {{-- ================= KHS MULTIPLE ================= --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">KHS Semester 1 - Terakhir *</label>
+                    <input type="file" name="dokumen_khs[]" multiple required accept=".pdf,.doc,.docx" class="block w-full text-sm">
                 </div>
-            </form>
-        </div>
+
+                {{-- ================= PEMBAYARAN ================= --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">Bukti Pembayaran PKL *</label>
+                    <input type="file" name="dokumen_pembayaran" required accept=".pdf,.jpg,.png" class="block w-full text-sm">
+                </div>
+
+                {{-- ================= STUDI TOUR ================= --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">Sertifikat Studi Tour *</label>
+                    <input type="file" name="dokumen_studi_tour" required accept=".pdf,.doc,.docx" class="block w-full text-sm">
+                </div>
+
+                {{-- ================= FORM PKN (BARU) ================= --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">Form Pengajuan PKN *</label>
+                    <input type="file" name="dokumen_form_pkn" required accept=".pdf" class="block w-full text-sm">
+                </div>
+
+                {{-- ================= KRS REMEDIAL (BARU) ================= --}}
+                {{-- <div>
+                    <label class="block mb-1 font-medium text-green-800">KRS *</label>
+                    <input type="file" name="dokumen_krs_remedial" required accept=".pdf" class="block w-full text-sm">
+                </div> --}}
+            </div>
+
+            {{-- ================= BUTTON ================= --}}
+            <div class="flex justify-end gap-3 pt-4 border-t">
+                <a href="{{ route('mahasiswa.dashboard') }}" class="px-4 py-2 text-sm font-medium text-green-700 transition border border-green-300 rounded-lg hover:bg-green-50">Kembali</a>
+                <button type="submit" class="px-5 py-2 text-sm font-medium text-white transition bg-green-600 rounded-lg hover:bg-green-700">
+                    <i class="mr-1 fa-solid fa-paper-plane"></i>Ajukan PKL
+                </button>
+            </div>
+        </form>
     </div>
 
     <script>
-        // Script untuk menampilkan file list preview
         document.addEventListener('DOMContentLoaded', function () {
-            // Fungsi untuk menampilkan daftar file yang dipilih
-            function setupFilePreview(inputId, listId, isMultiple = false) {
-                const input = document.getElementById(inputId);
-                const listContainer = document.getElementById(listId);
-                
-                if (!input || !listContainer) return;
-                
-                input.addEventListener('change', function(e) {
-                    const files = Array.from(e.target.files);
-                    
-                    if (files.length === 0) {
-                        listContainer.innerHTML = '';
-                        return;
-                    }
-                    
-                    let html = '';
-                    
-                    if (isMultiple) {
-                        // Untuk multiple files (KHS)
-                        html = `
-                            <div class="p-3 border border-green-200 bg-green-50 rounded-xl">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <i class="text-green-600 fa-solid fa-file-circle-check"></i>
-                                    <span class="text-sm font-semibold text-green-700">File yang akan diupload (${files.length} file):</span>
-                                </div>
-                                <div class="space-y-1 overflow-y-auto max-h-40">
-                        `;
-                        
-                        files.forEach((file, index) => {
-                            const fileSize = (file.size / 1024).toFixed(2);
-                            html += `
-                                <div class="flex items-center justify-between p-2 text-sm bg-white border border-green-100 rounded-lg">
-                                    <div class="flex items-center gap-2">
-                                        <i class="text-red-500 fa-regular fa-file-pdf"></i>
-                                        <span class="max-w-xs text-gray-700 truncate">${file.name}</span>
-                                    </div>
-                                    <span class="text-xs text-gray-500">${fileSize} KB</span>
-                                </div>
-                            `;
-                        });
-                        
-                        html += `</div></div>`;
-                    } else {
-                        // Untuk single file
-                        const file = files[0];
-                        const fileSize = (file.size / 1024).toFixed(2);
-                        const fileType = file.type;
-                        const icon = fileType.includes('pdf') ? 'fa-file-pdf' : (fileType.includes('image') ? 'fa-file-image' : 'fa-file-alt');
-                        const color = fileType.includes('pdf') ? 'red' : (fileType.includes('image') ? 'blue' : 'gray');
-                        
-                        html = `
-                            <div class="bg-${color === 'red' ? 'red' : color === 'blue' ? 'blue' : 'green'}-50 rounded-xl p-3 border border-${color === 'red' ? 'red' : color === 'blue' ? 'blue' : 'green'}-200">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex items-center justify-center w-10 h-10 bg-white rounded-lg shadow-sm">
-                                            <i class="fa-regular ${icon} text-${color === 'red' ? 'red' : color === 'blue' ? 'blue' : 'green'}-500 text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-800">${file.name}</p>
-                                            <p class="text-xs text-gray-500">${fileSize} KB</p>
-                                        </div>
-                                    </div>
-                                    <i class="text-lg text-green-500 fa-solid fa-check-circle"></i>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    listContainer.innerHTML = html;
-                    
-                    // Auto scroll ke file list
-                    listContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                });
-            }
-            
-            // Setup preview untuk semua input file
-            setupFilePreview('dokumen_khs', 'dokumen_khs-list', true);
-            setupFilePreview('dokumen_pembayaran', 'dokumen_pembayaran-list', false);
-            setupFilePreview('dokumen_studi_tour', 'dokumen_studi_tour-list', false);
-            setupFilePreview('dokumen_form_pkn', 'dokumen_form_pkn-list', false);
-            
-            // ========== SCRIPT ORIGINAL (TIDAK DIUBAH) ==========
             const inputNama = document.getElementById("nama_tempat");
             const warningBox = document.getElementById('warningTempat');
             const lokasiInput = document.getElementById("lokasi_maps");
 
-            // jika mahasiswa mulai mengedit lokasi manual
+             // jika mahasiswa mulai mengedit lokasi manual
             lokasiInput.addEventListener("focus", function(){
                 this.dataset.auto = "false";
             });

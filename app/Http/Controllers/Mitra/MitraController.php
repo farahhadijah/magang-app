@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Mitra;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pkl;
-use App\Models\TugasMitra;
-use App\Models\TugasMitraSubmit;
-use App\Models\PengajuanSertifikat;
+
 class MitraController extends Controller
 {
     public function mahasiswa()
@@ -74,76 +72,25 @@ class MitraController extends Controller
         return view('mitra.logbook_list', compact('pkls'));
     }
 
+    public function dashboard()
+    {
+        $mitra = Auth::user()->mitra;
 
+        if (!$mitra) {
+            abort(403, 'Data mitra tidak ditemukan.');
+        }
 
-public function dashboard()
-{
-    $mitra = Auth::user()->mitra;
+        $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
+                $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
+            })
+            ->with('mahasiswa')
+            ->get();
 
-    if (!$mitra) {
-        abort(403, 'Data mitra tidak ditemukan.');
+        $jumlahMahasiswa = $pkls->count();
+
+        return view('mitra.dashboard', [
+            'mitra' => $mitra,
+            'jumlahMahasiswa' => $jumlahMahasiswa,
+        ]);
     }
-
-    $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
-            $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
-        })
-        ->with('mahasiswa')
-        ->get();
-
-    $jumlahMahasiswa = $pkls->count();
-
-    $pklIds = $pkls->pluck('id');
-
-    // ======================
-    // PENGAJUAN SERTIFIKAT
-    // ======================
-
-    $sertifikatPending = PengajuanSertifikat::whereIn('pkl_id', $pklIds)
-        ->where('status', 'pending')
-        ->count();
-
-    // ======================
-    // STATISTIK TUGAS
-    // ======================
-
-    $totalTugas = TugasMitra::whereIn('id_pkl', $pklIds)->count();
-
-    // semua tugas yang sudah dikumpulkan
-    $sudahSubmit = TugasMitraSubmit::whereIn('id_pkl', $pklIds)->count();
-
-    // tugas yang belum dikumpulkan
-    $belumSubmit = $totalTugas - $sudahSubmit;
-
-
-    // ======================
-    // STATUS TUGAS
-    // ======================
-
-    $tugasPending = TugasMitraSubmit::whereIn('id_pkl', $pklIds)
-        ->where('status', 'pending')
-        ->where('revisi', false)
-        ->count();
-
-    $tugasRevisi = TugasMitraSubmit::whereIn('id_pkl', $pklIds)
-        ->where('revisi', true)
-        ->count();
-
-    $tugasSelesai = TugasMitraSubmit::whereIn('id_pkl', $pklIds)
-        ->where('status', 'selesai')
-        ->count();
-
-    return view('mitra.dashboard', [
-        'mitra' => $mitra,
-        'jumlahMahasiswa' => $jumlahMahasiswa,
-
-        'sudahSubmit' => $sudahSubmit,
-        'belumSubmit' => $belumSubmit,
-
-        'totalTugas' => $totalTugas,
-        'tugasPending' => $tugasPending,
-        'tugasRevisi' => $tugasRevisi,
-        'tugasSelesai' => $tugasSelesai,
-        'sertifikatPending' => $sertifikatPending,
-    ]);
-}
 }

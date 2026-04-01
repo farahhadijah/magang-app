@@ -44,18 +44,12 @@ class User extends Authenticatable
     {
         return $this->hasOne(Mitra::class);
     }
-    public function isKaprodi()
-    {
-        return $this->role === 'dosen'
-            && $this->dosen
-            && $this->dosen->jabatan === 'kaprodi';
-    }
     public function getNama()
 {
     $role = $this->role;
 
     // STAFF / TU / KAPRODI
-    if (in_array($role, ['staf', 'staff_tu'], true)) {
+    if (in_array($role, ['staf', 'staff_tu', 'kaprodi'], true)) {
         return $this->staff?->nama ?? $this->username ?? null;
     }
 

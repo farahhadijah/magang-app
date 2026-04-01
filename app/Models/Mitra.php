@@ -15,12 +15,8 @@ class Mitra extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function pengajuanSertifikat()
-    {
-        return $this->hasMany(PengajuanSertifikat::class);
-    }
     // Relasi ke Tempat PKL
-    public function tempatPkl() 
+    public function tempatPkl()
     {
         return $this->belongsTo(TempatPkl::class);
     }
