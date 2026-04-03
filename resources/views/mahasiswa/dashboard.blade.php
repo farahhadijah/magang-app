@@ -4,6 +4,55 @@
     </x-slot>
 
     <div class="py-6 rounded-md bg-gradient-to-b from-white from-[8%] via-green-200 to-green-500">
+        @if ($notifikasiPenolakan)
+            <div class="relative overflow-hidden backdrop-blur-sm bg-white/90 border border-red-200 shadow-lg rounded-2xl mb-6 transition-all duration-300 hover:shadow-red-100/50">
+                <!-- Decorative elements -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-400 to-rose-400 rounded-full blur-2xl opacity-10"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-red-300 to-pink-300 rounded-full blur-xl opacity-10"></div>
+                
+                <!-- Progress bar indicator -->
+                <div class="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-red-500 to-rose-500 rounded-full" style="width: 100%;"></div>
+
+                <div class="relative p-5">
+                    <div class="flex items-start gap-4">
+                        <!-- Icon with modern design -->
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-red-500 to-rose-500 rounded-2xl shadow-lg shadow-red-200">
+                                <i class="text-white text-xl fa-solid fa-circle-exclamation"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex-1">
+                            <!-- Title with modern typography -->
+                            <p class="text-base font-semibold text-gray-900">
+                                @if ($notifikasiPenolakan['tipe'] === 'tu')
+                                    Pengajuan PKL ditolak oleh TU
+                                @else
+                                    Pengajuan PKL ditolak oleh Kaprodi
+                                @endif
+                            </p>
+
+                            <!-- Message with better spacing -->
+                            <p class="mt-2 text-sm text-gray-600 leading-relaxed">
+                                <span class="font-medium text-gray-700">Alasan:</span>
+                                <span class="text-gray-600">
+                                    {{ $notifikasiPenolakan['pesan'] ?? 'Tidak ada catatan.' }}
+                                </span>
+                            </p>
+
+                            <!-- Action button with modern styling -->
+                            <div class="mt-4">
+                                <a href="{{ route('mahasiswa.pengajuan.status') }}"
+                                class="inline-flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors duration-200 group">
+                                    <span>Lihat detail pengajuan</span>
+                                    <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform duration-200"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <!-- Hero Section with Green Theme -->
             <div class="mb-8 overflow-hidden shadow-lg bg-gradient-to-br from-green-600 via-green-500 to-emerald-500 rounded-2xl">

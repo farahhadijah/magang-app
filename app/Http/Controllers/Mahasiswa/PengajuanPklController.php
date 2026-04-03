@@ -314,21 +314,33 @@ if ($pengajuanAktif) {
      * Status pengajuan mahasiswa
      */
     public function status()
-    {
-        $mahasiswa = Auth::user()->mahasiswa;
-        abort_if(!$mahasiswa, 403);
+{
+    $mahasiswa = Auth::user()->mahasiswa;
+    abort_if(!$mahasiswa, 403);
 
-        $pengajuan = PengajuanPkl::with([
-                'tempatPkl',
-                'dokumenPengajuan',
-                'pkl.suratPengantar'
-            ])
-            ->where('id_mhs', $mahasiswa->id)
-            ->latest()
-            ->first();
+    $pengajuan = PengajuanPkl::with([
+            'tempatPkl',
+            'dokumenPengajuan',
+            'pkl.suratPengantar'
+        ])
+        ->where('id_mhs', $mahasiswa->id)
+        ->latest()
+        ->first();
 
-        return view('mahasiswa.status-pengajuan', compact('pengajuan'));
+    // 🔥 Hitung dokumen invalid (yang belum diperbaiki)
+    $jumlahInvalid = 0;
+
+    if ($pengajuan) {
+        $jumlahInvalid = $pengajuan->dokumenPengajuan
+            ->where('status_verifikasi', 'invalid')
+            ->count();
     }
+
+    return view('mahasiswa.status-pengajuan', compact(
+        'pengajuan',
+        'jumlahInvalid'
+    ));
+}
 
     /**
      * Upload ulang dokumen invalid

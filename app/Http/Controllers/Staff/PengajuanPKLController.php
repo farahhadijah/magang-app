@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-
 class PengajuanPklController extends Controller
 {
     /**
@@ -33,8 +32,7 @@ class PengajuanPklController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->paginate(15);
-
-        return view('staff.pengajuan.index', compact('pengajuans'));
+     return view('staff.pengajuan.index', compact('pengajuans'));
     }
     /**
      * ===============================

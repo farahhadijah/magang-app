@@ -72,6 +72,24 @@ class DashboardController extends Controller
         : null;
     }
 
+    $notifikasiPenolakan = null;
+
+    if ($pengajuan) {
+        if ($pengajuan->status === 'ditolak_tu') {
+            $notifikasiPenolakan = [
+                'tipe' => 'tu',
+                'pesan' => $pengajuan->catatan_tu
+            ];
+        }
+
+        if ($pengajuan->status === 'ditolak_kaprodi') {
+            $notifikasiPenolakan = [
+                'tipe' => 'kaprodi',
+                'pesan' => $pengajuan->catatan_kaprodi
+            ];
+        }
+    }
+
     return view('mahasiswa.dashboard', compact(
         'pengajuan',
         'tugas',
@@ -81,7 +99,8 @@ class DashboardController extends Controller
         'logbookTotal',
         'logbookKosong',
         'isPklSelesai',
-        'targetHari'
+        'targetHari',
+        'notifikasiPenolakan'
     ));
 }
 }
