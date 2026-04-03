@@ -71,7 +71,8 @@ class NilaiPklController extends Controller
 
         // 🔥 Set PKL selesai
         $pkl->update([
-            'status' => 'selesai'
+            'status' => 'selesai',
+            'tgl_selesai' => now(),
         ]);
         return redirect()->route('dosen.nilai.index')
             ->with('success', 'Nilai berhasil disimpan dan PKL selesai.');

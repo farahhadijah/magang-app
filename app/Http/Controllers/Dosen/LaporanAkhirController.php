@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Dosen;
-
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pkl;
@@ -45,24 +45,33 @@ public function index()
     }
 
     public function approve(Request $request, Pkl $pkl)
-    {
-        if ($pkl->id_dosen !== $this->getDosenId()) {
-            abort(403);
-        }
-        $laporan = $pkl->laporanAkhir;
-        if (!$laporan) {
-            abort(404);
-        }
-        if ($laporan->status_approve === 'approved') {
-            return back()->with('warning', 'Laporan sudah disetujui.');
-        }
-        $request->validate([
-            'catatan_dosen' => 'nullable|string|max:2000'
-        ]);
-        // 🔥 Gunakan business logic model
-        $laporan->approve($this->getDosenId());
-        return back()->with('success', 'Laporan berhasil disetujui dan PKL otomatis selesai.');
+{
+    if ($pkl->id_dosen !== $this->getDosenId()) {
+        abort(403);
     }
+
+    $laporan = $pkl->laporanAkhir;
+
+    if (!$laporan) {
+        abort(404);
+    }
+
+    if ($laporan->status_approve === 'approved') {
+        return back()->with('warning', 'Laporan sudah disetujui.');
+    }
+
+    $request->validate([
+        'catatan_dosen' => 'nullable|string|max:2000'
+    ]);
+
+    DB::transaction(function () use ($laporan, $pkl) {
+
+        // ✅ approve laporan
+        $laporan->approve(auth()->user()->dosen->id);
+    });
+
+    return back()->with('success', 'Laporan disetujui dan PKL selesai.');
+}
 
     public function reject(Request $request, Pkl $pkl)
     {

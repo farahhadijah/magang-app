@@ -20,6 +20,40 @@
             </div>
         @endif
 
+    {{-- PESAN --}}
+        <div class="p-4 mb-4 border-l-4 border-blue-500 rounded-lg bg-blue-50">
+        <div class="flex items-start gap-3">
+            
+            {{-- Icon --}}
+            <div class="mt-1 text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    class="w-6 h-6" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor" 
+                    stroke-width="2">
+                    <path stroke-linecap="round" 
+                        stroke-linejoin="round" 
+                        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                </svg>
+            </div>
+
+            {{-- Text --}}
+            <div class="text-sm text-blue-900">
+                <p class="font-semibold">
+                    Informasi Logbook
+                </p>
+                <p class="mt-1 leading-relaxed">
+                    Silakan mengisi logbook sesuai kebutuhan selama kegiatan PKL berlangsung. 
+                    Namun, mahasiswa diwajibkan memiliki minimal 
+                    <span class="font-semibold">30 logbook berstatus <i>approved</i></span> 
+                    sebagai syarat untuk mengajukan laporan akhir.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
         {{-- Button Tambah --}}
         <div class="flex flex-col gap-3 md:flex-row md:justify-end md:items-center">
 
