@@ -4,128 +4,143 @@
 Detail Mitra - MagangApp
 </x-slot>
 
-<div class="px-6 py-6">
+<div class="px-4 py-6 md:px-6">
 
-<h1 class="mb-6 text-2xl font-bold text-slate-900">
+<h1 class="mb-6 text-xl font-bold md:text-2xl text-slate-900">
 Detail Mitra
 </h1>
 
-<div class="p-5 mb-6 rounded-lg shadow bg-green-50 text-slate-800">
+<!-- INFO MITRA -->
+<div class="p-4 mb-6 rounded-lg shadow bg-green-50 text-slate-800">
 
-<div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <p><b>Tempat PKL :</b> {{ $mitra->nama_tempat }}</p>
+        <p><b>No HP Mitra :</b> {{ $mitra->no_hp ?? '-' }}</p>
+    </div>
 
-<p><b>Tempat PKL :</b> {{ $mitra->nama_tempat }}</p>
-<p><b>No HP Mitra :</b> {{ $mitra->no_hp ?? '-' }}</p>
+    @if(session('username'))
+    <div class="p-4 mt-4 border border-green-300 rounded bg-green-50">
+        <p class="font-semibold text-green-700">
+            Akun Mitra Berhasil Dibuat Ulang
+        </p>
 
-</div>
+        <p class="mt-2">
+            <b>Username :</b> {{ session('username') }}
+        </p>
 
-@if(session('username'))
-
-<div class="p-4 mt-4 border border-green-300 rounded bg-green-50">
-
-<p class="font-semibold text-green-700">
-Akun Mitra Berhasil Dibuat Ulang
-</p>
-
-<p class="mt-2">
-<b>Username :</b> {{ session('username') }}
-</p>
-
-<p>
-<b>Password :</b> {{ session('password') }}
-</p>
-
-</div>
-
-@endif
+        <p>
+            <b>Password :</b> {{ session('password') }}
+        </p>
+    </div>
+    @endif
 
 </div>
 
-<div class="flex items-center justify-between mb-4">
 
-<h2 class="text-xl font-semibold">
-Daftar Mahasiswa PKL ({{ $mahasiswa->total() }})
-</h2>
+<!-- HEADER + AKSI -->
+<div class="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
 
-<div class="flex gap-2">
+    <h2 class="text-lg font-semibold md:text-xl">
+        Daftar Mahasiswa PKL ({{ $mahasiswa->total() }})
+    </h2>
 
-<form action="{{ route('staff.mitra.regenerate', $mitra->id) }}" method="POST">
-@csrf
-<button class="px-4 py-2 text-white bg-yellow-500 rounded hover:bg-yellow-600">
-Generate Ulang Akun
-</button>
-</form>
+    <div class="flex flex-col gap-2 sm:flex-row">
 
-@if(session('username'))
+        <form action="{{ route('staff.mitra.regenerate', $mitra->id) }}" method="POST">
+            @csrf
+            <button class="w-full px-4 py-2 text-white bg-yellow-500 rounded hover:bg-yellow-600">
+                Generate Ulang Akun
+            </button>
+        </form>
 
-<button onclick="kirimWA()" class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
-Kirim ke WhatsApp
-</button>
+        @if(session('username'))
+        <button onclick="kirimWA()" class="w-full px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
+            Kirim ke WhatsApp
+        </button>
+        @endif
 
-@endif
+    </div>
 
+</div>
+
+
+<!-- DESKTOP TABLE -->
+<div class="hidden md:block overflow-x-auto bg-white rounded-lg shadow">
+    <table class="w-full">
+
+        <thead class="bg-green-100 border border-green-200 text-slate-800">
+            <tr>
+                <th class="p-3 text-left">NIM</th>
+                <th class="p-3 text-left">Nama</th>
+                <th class="p-3 text-left">Angkatan</th>
+                <th class="p-3 text-left">No HP</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        @forelse($mahasiswa as $mhs)
+            <tr class="border-t">
+                <td class="p-3">{{ $mhs->nim }}</td>
+                <td class="p-3">{{ $mhs->nama }}</td>
+                <td class="p-3">{{ $mhs->angkatan }}</td>
+                <td class="p-3 nomor">{{ $mhs->no_hp }}</td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="4" class="p-4 text-center text-gray-500">
+                    Belum ada mahasiswa PKL di tempat ini
+                </td>
+            </tr>
+        @endforelse
+        </tbody>
+
+    </table>
+</div>
+
+
+<!-- MOBILE CARD -->
+<div class="space-y-4 md:hidden">
+
+    @forelse($mahasiswa as $mhs)
+        <div class="p-4 bg-white border rounded-lg shadow-sm">
+
+            <div class="mb-2">
+                <p class="text-sm text-gray-500">NIM</p>
+                <p class="font-medium">{{ $mhs->nim }}</p>
+            </div>
+
+            <div class="mb-2">
+                <p class="text-sm text-gray-500">Nama</p>
+                <p>{{ $mhs->nama }}</p>
+            </div>
+
+            <div class="mb-2">
+                <p class="text-sm text-gray-500">Angkatan</p>
+                <p>{{ $mhs->angkatan }}</p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">No HP</p>
+                <p class="nomor">{{ $mhs->no_hp }}</p>
+            </div>
+
+        </div>
+    @empty
+        <div class="p-4 text-center text-gray-500 bg-white border rounded">
+            Belum ada mahasiswa PKL di tempat ini
+        </div>
+    @endforelse
+
+</div>
+
+
+<!-- PAGINATION -->
+<div class="mt-4 flex justify-center">
+    {{ $mahasiswa->links() }}
 </div>
 
 </div>
 
-<div class="overflow-x-auto bg-white rounded-lg shadow">
-
-<table class="w-full">
-
-<thead class="bg-green-100 border border-green-200 text-slate-800">
-
-<tr>
-
-<th class="p-3 text-left">NIM</th>
-<th class="p-3 text-left">Nama</th>
-<th class="p-3 text-left">Angkatan</th>
-<th class="p-3 text-left">No HP</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-@forelse($mahasiswa as $mhs)
-
-<tr class="border-t">
-
-<td class="p-3">{{ $mhs->nim }}</td>
-<td class="p-3">{{ $mhs->nama }}</td>
-<td class="p-3">{{ $mhs->angkatan }}</td>
-
-<td class="p-3 nomor">
-{{ $mhs->no_hp }}
-</td>
-
-</tr>
-
-@empty
-
-<tr>
-
-<td colspan="4" class="p-4 text-center text-gray-500">
-Belum ada mahasiswa PKL di tempat ini
-</td>
-
-</tr>
-
-@endforelse
-
-</tbody>
-
-</table>
-
-</div>
-
-<div class="mt-4">
-
-{{ $mahasiswa->links() }}
-
-</div>
-
-</div>
 
 <script>
 
@@ -139,7 +154,6 @@ let no = el.innerText.trim()
 
 if(no !== ""){
 
-// ubah 08 -> 628
 if(no.startsWith("0")){
 no = "62" + no.substring(1)
 }

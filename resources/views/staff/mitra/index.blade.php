@@ -16,69 +16,126 @@
 
 
         <div class="overflow-hidden bg-white border border-green-200 rounded-lg shadow">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-green-100">
+
+    {{-- DESKTOP TABLE --}}
+    <div class="hidden md:block overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-green-100">
+                <tr>
+                    <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Tempat PKL</th>
+                    <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Jumlah Mahasiswa</th>
+                    <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Status Mitra</th>
+                    <th class="px-6 py-3 text-sm font-semibold text-center text-gray-700">Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody class="bg-white divide-y divide-gray-200">
+                @foreach($tempatPkls as $tempat)
                     <tr>
-                        <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Tempat PKL</th>
-                        <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Jumlah Mahasiswa</th>
-                        <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Status Mitra</th>
-                        <th class="px-6 py-3 text-sm font-semibold text-center text-gray-700">Aksi</th>
+                        <td class="px-6 py-4 text-sm font-semibold text-gray-900">
+                            {{ $tempat->nama_tempat }}
+                        </td>
+
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                            {{ $tempat->jumlah_mahasiswa }}
+                        </td>
+
+                        <td class="px-6 py-4 text-sm">
+                            @if($tempat->mitra)
+                                <span class="px-2 py-1 text-xs text-green-700 bg-green-100 rounded">
+                                    Sudah Ada Mitra
+                                </span>
+                            @else
+                                <span class="px-2 py-1 text-xs text-red-700 bg-red-100 rounded">
+                                    Belum Ada Mitra
+                                </span>
+                            @endif
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            @if(!$tempat->mitra)
+                                <button onclick="document.getElementById('form-{{ $tempat->id }}').classList.toggle('hidden')"
+                                    class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
+                                    Buat Mitra
+                                </button>
+                            @else
+                                -
+                            @endif
+                        </td>
                     </tr>
-                </thead>
 
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($tempatPkls as $tempat)
-                        <tr>
-                            <td class="px-6 py-4 text-sm font-semibold text-gray-900">
-                                {{ $tempat->nama_tempat }}
-                            </td>
+                    @if(!$tempat->mitra)
+                    <tr id="form-{{ $tempat->id }}" class="hidden bg-gray-50">
+                        <td colspan="4" class="px-6 py-4">
+                            <form method="POST" action="{{ route('staff.mitra.store', $tempat->id) }}">
+                                @csrf
+                                <button type="submit"
+                                    class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
+                                    Buat Akun Mitra Otomatis
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endif
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 
-                            <td class="px-6 py-4 text-sm text-gray-700">
-                                {{ $tempat->jumlah_mahasiswa }}
-                            </td>
+    {{-- MOBILE CARD --}}
+    <div class="md:hidden space-y-4 p-4">
+        @foreach($tempatPkls as $tempat)
+            <div class="p-4 border rounded-lg shadow-sm bg-white">
+                <div class="mb-2">
+                    <p class="text-sm text-gray-500">Tempat PKL</p>
+                    <p class="font-semibold text-gray-900">{{ $tempat->nama_tempat }}</p>
+                </div>
 
-                            <td class="px-6 py-4 text-sm">
-                                @if($tempat->mitra)
-                                    <span class="px-2 py-1 text-xs text-green-700 bg-green-100 rounded">
-                                        Sudah Ada Mitra
-                                    </span>
-                                @else
-                                    <span class="px-2 py-1 text-xs text-red-700 bg-red-100 rounded">
-                                        Belum Ada Mitra
-                                    </span>
-                                @endif
-                            </td>
+                <div class="mb-2">
+                    <p class="text-sm text-gray-500">Jumlah Mahasiswa</p>
+                    <p class="text-gray-700">{{ $tempat->jumlah_mahasiswa }}</p>
+                </div>
 
-                            <td class="px-6 py-4 text-center">
-                                @if(!$tempat->mitra)
-                                    <button onclick="document.getElementById('form-{{ $tempat->id }}').classList.toggle('hidden')"
-                                        class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
-                                        Buat Mitra
-                                    </button>
-                                @else
-                                    -
-                                @endif
-                            </td>
-                        </tr>
-                        @if(!$tempat->mitra)
-                        <tr id="form-{{ $tempat->id }}" class="hidden bg-gray-50">
-                            <td colspan="4" class="px-6 py-4">
-                                <form method="POST" action="{{ route('staff.mitra.store', $tempat->id) }}">
-                                    @csrf
-                                    <button type="submit"
-                                        class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
-                                        Buat Akun Mitra Otomatis
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        @endif
-                    @endforeach
-                </tbody>
-            </table>
-            <div class="flex justify-center pt-6 mt-auto">
-                {{ $tempatPkls->links() }}
+                <div class="mb-3">
+                    <p class="text-sm text-gray-500">Status</p>
+                    @if($tempat->mitra)
+                        <span class="px-2 py-1 text-xs text-green-700 bg-green-100 rounded">
+                            Sudah Ada Mitra
+                        </span>
+                    @else
+                        <span class="px-2 py-1 text-xs text-red-700 bg-red-100 rounded">
+                            Belum Ada Mitra
+                        </span>
+                    @endif
+                </div>
+
+                <div>
+                    @if(!$tempat->mitra)
+                        <button onclick="document.getElementById('form-mobile-{{ $tempat->id }}').classList.toggle('hidden')"
+                            class="w-full px-3 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
+                            Buat Mitra
+                        </button>
+
+                        <div id="form-mobile-{{ $tempat->id }}" class="hidden mt-3">
+                            <form method="POST" action="{{ route('staff.mitra.store', $tempat->id) }}">
+                                @csrf
+                                <button type="submit"
+                                    class="w-full px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
+                                    Buat Akun Mitra Otomatis
+                                </button>
+                            </form>
+                        </div>
+                    @else
+                        <p class="text-center text-gray-500">-</p>
+                    @endif
+                </div>
             </div>
-        </div>
+        @endforeach
+    </div>
+
+    <div class="flex justify-center p-4">
+        {{ $tempatPkls->links() }}
+    </div>
+</div>
     </div>
 </x-app-layout>
