@@ -32,7 +32,7 @@ class ReviewLogbookController extends Controller
             'pkl.pengajuanPkl.mahasiswa:id,nama'
         ])
         ->orderByDesc('tgl')
-        ->paginate(20);
+        ->paginate(15);
 
     // hitung logbook yang belum disetujui
     $belumApprove = $query

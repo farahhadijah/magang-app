@@ -64,7 +64,7 @@
                             <label class="block mb-2 text-sm font-semibold text-gray-700">Nama Instansi <span class="text-red-500">*</span></label>
                             <input type="text" id="nama_tempat" name="nama_tempat" value="{{ old('nama_tempat') }}" required autocomplete="off" 
                                 class="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
-                            <div id="warningTempat" class="flex items-center hidden gap-1 mt-2 text-sm text-amber-600">
+                            <div id="warningTempat" class="flex items-center hidden gap-1 mt-2 md:text-sm text-xs text-amber-600">
                                 <i class="fa-solid fa-triangle-exclamation"></i>
                                 <span></span>
                             </div>

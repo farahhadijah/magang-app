@@ -2,10 +2,10 @@
     <x-slot name="title">
         Laporan Akhir - MagangApp
     </x-slot>
-    <div class="max-w-4xl py-10 mx-auto">
+    <div class="max-w-4xl px-4 py-6 mx-auto sm:px-6 lg:px-8">
 
         <!-- Header -->
-        <div class="flex items-center gap-3 mb-8">
+        <div class="flex flex-col gap-2 mb-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="text-2xl font-bold text-green-900">
                     Laporan Akhir PKL
@@ -43,7 +43,7 @@
                 Progres Logbook
             </h3>
 
-            <div class="grid grid-cols-2 gap-6 text-sm">
+            <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                 <div>
                     <p class="text-gray-600">Total Logbook</p>
                     <p class="text-2xl font-bold text-green-700">

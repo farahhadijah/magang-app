@@ -48,7 +48,7 @@
                 </div>
 
                 {{-- Table --}}
-                <div class="overflow-x-auto">
+                <div class="hidden overflow-x-auto md:block">
                     <table class="w-full text-sm">
                         <thead class="bg-green-100 text-slate-800">
                             <tr>
@@ -134,10 +134,93 @@
                     </table>
                 </div>
 
-                {{-- Pagination --}}
-                <div class="p-4 border-t">
+                <div class="p-4 border-b md:hidden">
                     {{ $logbooks->links() }}
                 </div>
+                <div class="flex items-center gap-2 px-4 pt-4 md:hidden">
+                    <input type="checkbox" id="select-all-mobile">
+                    <label for="select-all-mobile" class="text-sm text-gray-700">
+                        Pilih Semua
+                    </label>
+                </div>
+                    <div class="p-4 space-y-3 md:hidden">
+                        @forelse ($logbooks as $log)
+                            <div class="p-4 border rounded-xl shadow-sm bg-gray-50">
+
+                                {{-- Header --}}
+                                <div class="flex items-start justify-between mb-2">
+                                    <div>
+                                        <p class="text-xs text-gray-500">
+                                            {{ $log->tgl->format('d-m-Y') }}
+                                        </p>
+                                        <p class="text-sm font-semibold text-gray-800">
+                                            {{ $log->pkl->pengajuanPkl->mahasiswa->nama }}
+                                        </p>
+                                    </div>
+
+                                    {{-- Checkbox --}}
+                                    @if($log->status_approve === 'pending')
+                                        <input type="checkbox"
+                                            name="logbook_ids[]"
+                                            value="{{ $log->id }}"
+                                            class="mt-1 logbook-checkbox">
+                                    @endif
+                                </div>
+
+                                {{-- Kegiatan --}}
+                                <p class="mb-2 text-sm text-gray-700 line-clamp-2">
+                                    {{ $log->kegiatan }}
+                                </p>
+
+                                {{-- Status + Action --}}
+                                <div class="flex items-center justify-between mt-2">
+
+                                    {{-- Status --}}
+                                    <div id="status-{{ $log->id }}">
+                                        @if ($log->status_approve === 'approved')
+                                            <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
+                                                Disetujui
+                                            </span>
+                                        @elseif ($log->status_approve === 'revisi')
+                                            <span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">
+                                                Revisi
+                                            </span>
+                                        @else
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full text-amber-800 bg-amber-100">
+                                                Pending
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    {{-- Aksi --}}
+                                    @if ($log->status_approve === 'pending')
+                                        <button type="button"
+                                            onclick="openModal({{ $log->id }})"
+                                            class="text-xs text-green-700 hover:text-green-900">
+                                            Review →
+                                        </button>
+                                    @else
+                                        <span class="text-xs text-gray-400">Terkunci</span>
+                                    @endif
+
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-sm text-center text-gray-500">
+                                Belum ada logbook mahasiswa
+                            </p>
+                        @endforelse
+                    </div>
+
+                    <div class="p-4 border-b md:hidden">
+                        {{ $logbooks->links() }}
+                    </div>
+                {{-- Pagination --}}
+                <div class="hidden p-4 border-t md:block">
+                    {{ $logbooks->links() }}
+                </div>
+
+
 
             </form>
 
@@ -222,18 +305,30 @@
     </div>
 
 
-    {{-- Select All Script --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const selectAll = document.getElementById('select-all');
+document.addEventListener('DOMContentLoaded', function () {
+    const selectAll = document.getElementById('select-all');
+    const selectAllMobile = document.getElementById('select-all-mobile');
 
-            if (selectAll) {
-                selectAll.addEventListener('change', function () {
-                    document.querySelectorAll('.logbook-checkbox')
-                        .forEach(cb => cb.checked = this.checked);
-                });
-            }
+    function toggleAll(checked) {
+        document.querySelectorAll('.logbook-checkbox')
+            .forEach(cb => cb.checked = checked);
+    }
+
+    // Desktop
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            toggleAll(this.checked);
         });
-    </script>
+    }
+
+    // Mobile
+    if (selectAllMobile) {
+        selectAllMobile.addEventListener('change', function () {
+            toggleAll(this.checked);
+        });
+    }
+});
+</script>
 
 </x-app-layout>

@@ -3,7 +3,7 @@
         Dashboard Dosen - MagangApp
     </x-slot>
 
-    <div class="min-h-screen px-4 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 via-white to-emerald-50">
+    <div class="min-h-screen px-0 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 via-white to-emerald-50">
         <div class="mx-auto space-y-8 max-w-7xl">
 
         {{-- ================= HEADER ================= --}}

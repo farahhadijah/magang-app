@@ -1,15 +1,16 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-bold text-gray-800">Daftar Mahasiswa (Sudah Mengisi Logbook)</h2>
+    <x-slot name="title">
+        Logbook List - MagangApp
     </x-slot>
 
-    <div class="px-4 py-6 mx-auto max-w-7xl">
+    <div class="px-0 py-6 mx-auto max-w-7xl">
         @if($pkls->isEmpty())
             <div class="p-6 text-center text-gray-600 bg-white rounded-lg shadow">
                 Belum ada mahasiswa yang mengisi logbook di tempat ini.
             </div>
         @else
-            <div class="overflow-hidden bg-white rounded-lg shadow">
+            {{-- DESKTOP TABLE --}}
+            <div class="hidden overflow-hidden bg-white rounded-lg shadow md:block">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-green-100">
                         <tr>
@@ -40,6 +41,59 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            {{-- MOBILE CARD - RESPONSIVE VERSION --}}
+            <div class="space-y-3 md:hidden">
+                @foreach($pkls as $index => $pkl)
+                    <div class="p-4 bg-white border border-gray-100 rounded-lg shadow">
+
+                        {{-- Header: Nomor dan Nama --}}
+                        <div class="pb-2 mb-3 border-b border-gray-100">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h3 class="text-base font-semibold text-gray-900">
+                                        {{ $pkl->mahasiswa->nama ?? $pkl->mahasiswa->user->getNama() ?? '-' }}
+                                    </h3>
+                                    <p class="text-xs text-gray-500 mt-0.5">
+                                        NIM: {{ $pkl->mahasiswa->nim ?? '-' }}
+                                    </p>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded">
+                                    #{{ $index + 1 }}
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Body: Informasi Logbook --}}
+                        <div class="mb-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Terakhir Mengisi</span>
+                                <span class="text-sm font-medium text-gray-700">
+                                    @php $last = $pkl->logbooks->first(); @endphp
+                                    {{ $last?->tgl ? \Carbon\Carbon::parse($last->tgl, 'Asia/Jakarta')->format('d M Y') : 'Belum pernah mengisi' }}
+                                </span>
+                            </div>
+
+                            {{-- Optional: Tambahan informasi jika ada logbook --}}
+                            @if($last && $last->tgl)
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500">Waktu</span>
+                                    <span class="text-xs text-gray-600">
+                                        {{ \Carbon\Carbon::parse($last->tgl, 'Asia/Jakarta')->format('H:i') }} WIB
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Action Button --}}
+                        <a href="{{ route('mitra.logbook', $pkl->id) }}"
+                           class="block w-full py-2 text-sm font-medium text-center text-white transition bg-green-600 rounded hover:bg-green-700">
+                            Lihat Logbook
+                        </a>
+
+                    </div>
+                @endforeach
             </div>
         @endif
     </div>

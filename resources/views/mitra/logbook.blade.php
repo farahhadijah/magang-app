@@ -1,8 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-green-900">
-            Logbook Mahasiswa
-        </h2>
+    <x-slot name="title">
+        Logbook - MagangApp
     </x-slot>
 
     <div class="max-w-6xl py-5 mx-auto space-y-4">
