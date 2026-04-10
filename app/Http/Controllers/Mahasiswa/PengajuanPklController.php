@@ -59,16 +59,12 @@ class PengajuanPklController extends Controller
         ],
         'alamat_asal' => 'required|string|max:500',
 
-        // 🔥 KHS sekarang multiple
         'dokumen_khs'     => 'required|array|min:1',
         'dokumen_khs.*'   => 'file|mimes:pdf,doc,docx|max:2048',
-
-        // 🔥 Dokumen lama tetap ada
         'dokumen_pembayaran' => 'required|file|mimes:pdf,jpg,png|max:2048',
         'dokumen_studi_tour' => 'required|file|mimes:pdf,doc,docx|max:2048',
-
-        // 🔥 Dokumen baru (ditambahkan, bukan mengganti)
         'dokumen_form_pkn'     => 'required|file|mimes:pdf|max:2048',
+        'dokumen_krs' => 'required|file|mimes:pdf|max:2048',
     ]);
 
     $mahasiswa = Auth::user()->mahasiswa;
@@ -198,28 +194,27 @@ class PengajuanPklController extends Controller
             'path_file'        => $formPknPath,
             'status_verifikasi'=> 'pending',
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | 5️⃣ KRS (BARU - SINGLE FILE)
+        |--------------------------------------------------------------------------
+        */
+        $krsPath = $request->file('dokumen_krs')
+            ->store($basePath, 'public');
+
+        DokumenPengajuan::create([
+            'id_pengajuan_pkl' => $pengajuan->id,
+            'jenis_dokumen'    => DokumenPengajuan::JENIS_KRS,
+            'path_file'        => $krsPath,
+            'status_verifikasi'=> 'pending',
+        ]);
     });
 
     return redirect()
         ->route('mahasiswa.pengajuan.status')
         ->with('success', 'Pengajuan PKL berhasil dikirim dan menunggu verifikasi TU.');
 }
-
-// hitung semester
-    private function hitungSemester($angkatan)
-    {
-        $tahunSekarang = now()->year;
-
-        // selisih tahun × 2 semester
-        $semester = ($tahunSekarang - $angkatan) * 2;
-
-        // asumsi: kalau sudah lewat tengah tahun → +1 semester
-        if (now()->month >= 7) {
-            $semester += 1;
-        }
-
-        return max(1, $semester);
-    }
 
     /**
      * Upload ulang dokumen invalid
@@ -267,6 +262,22 @@ class PengajuanPklController extends Controller
         });
 
         return back()->with('success', 'Dokumen berhasil diupload ulang dan menunggu verifikasi TU.');
+    }
+
+    // hitung semester
+    private function hitungSemester($angkatan)
+    {
+        $tahunSekarang = now()->year;
+
+        // selisih tahun × 2 semester
+        $semester = ($tahunSekarang - $angkatan) * 2;
+
+        // asumsi: kalau sudah lewat tengah tahun → +1 semester
+        if (now()->month >= 7) {
+            $semester += 1;
+        }
+
+        return max(1, $semester);
     }
     public function downloadSuratPengantar($id)
 {

@@ -197,9 +197,8 @@
                         <div class="flex items-start gap-3">
                             <i class="fa-solid fa-circle-info text-blue-600 text-lg mt-0.5"></i>
                             <div class="text-sm text-gray-700">
-                                <p>• Upload KHS dari semester 1 sampai semester terakhir.</p>
-                                <p>• Semua dokumen wajib dalam format PDF (kecuali pembayaran boleh gambar).</p>
-                                <p class="mt-1 text-xs text-blue-600">• Maksimal ukuran file: 2MB per file</p>
+                                <p>• Kamu saat ini semester {{ $semesterAktif }}, wajib upload {{ $jumlahWajibKhs }} KHS</p>
+                                <p>• Upload KRS semester berjalan.</p>
                             </div>
                         </div>
                     </div>
@@ -211,18 +210,9 @@
                             'dokumen_pembayaran' => ['label' => 'Bukti Pembayaran PKL', 'accept' => '.pdf,.jpg,.png', 'multiple' => false, 'icon' => 'fa-receipt', 'required' => true, 'color' => 'blue'],
                             'dokumen_studi_tour' => ['label' => 'Sertifikat Studi Tour', 'accept' => '.pdf,.doc,.docx', 'multiple' => false, 'icon' => 'fa-ticket', 'required' => true, 'color' => 'purple'],
                             'dokumen_form_pkn' => ['label' => 'Form Pengajuan PKN', 'accept' => '.pdf', 'multiple' => false, 'icon' => 'fa-file-alt', 'required' => true, 'color' => 'orange'],
+                            'dokumen_krs' => [ 'label' => 'Kartu Rencana Studi (KRS)', 'accept' => '.pdf', 'multiple' => false, 'icon' => 'fa-file-lines', 'required' => true, 'color' => 'teal' ],
                         ];
                     @endphp
-
-                    <div class="p-4 mb-4 border border-yellow-200 bg-yellow-50 rounded-xl">
-                        <div class="flex items-center gap-2 text-yellow-800">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                            <span class="font-semibold">
-                                Kamu saat ini semester {{ $semesterAktif }},
-                                wajib upload {{ $jumlahWajibKhs }} KHS
-                            </span>
-                        </div>
-                    </div>
 
                     @foreach ($dokumenFields as $name => $field)
                         <div class="mb-6 group">
@@ -357,6 +347,7 @@
             setupFilePreview('dokumen_pembayaran', 'dokumen_pembayaran-list', false);
             setupFilePreview('dokumen_studi_tour', 'dokumen_studi_tour-list', false);
             setupFilePreview('dokumen_form_pkn', 'dokumen_form_pkn-list', false);
+            setupFilePreview('dokumen_krs', 'dokumen_krs-list', false);
             
             // ========== SCRIPT ORIGINAL (TIDAK DIUBAH) ==========
             const inputNama = document.getElementById("nama_tempat");

@@ -12,6 +12,7 @@
             </h3>
             <p><strong>Nama:</strong> {{ $pengajuan->mahasiswa->nama }}</p>
             <p><strong>NIM:</strong> {{ $pengajuan->mahasiswa->nim }}</p>
+            <p><strong>Semester:</strong> {{ $pengajuan->semester }}</p>
             <p><strong>Instansi:</strong> {{ $pengajuan->tempatPkl->nama_tempat }}</p>
             <p><strong>Jenis Instansi:</strong> {{ $pengajuan->tempatPkl->jenis_tempat }}</p>
             <p><strong>No HP:</strong> {{ $pengajuan->tempatPkl->no_hp }}</p>
