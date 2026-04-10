@@ -37,8 +37,10 @@ class PengajuanPklController extends Controller
                 ->route('mahasiswa.dashboard')
                 ->with('error', 'Kamu sudah memiliki pengajuan PKL yang sedang diproses.');
         }
+        $semesterAktif = $this->hitungSemester($mahasiswa->angkatan);
+        $jumlahWajibKhs = $semesterAktif - 1;
 
-        return view('mahasiswa.pengajuan-pkl');
+        return view('mahasiswa.pengajuan-pkl', compact('semesterAktif', 'jumlahWajibKhs'));
     }
 
     /**
@@ -72,6 +74,25 @@ class PengajuanPklController extends Controller
     $mahasiswa = Auth::user()->mahasiswa;
     abort_if(!$mahasiswa, 403);
 
+    // 🔥 hitung semester otomatis
+    $semesterAktif = $this->hitungSemester($mahasiswa->angkatan);
+
+    // 🔥 jumlah KHS wajib = semester - 1
+    $jumlahWajibKhs = $semesterAktif - 1;
+
+    // 🔥 jumlah file yang dikirim user
+    $jumlahUploadKhs = count($request->file('dokumen_khs'));
+
+    // 🔥 VALIDASI KERAS
+    if ($jumlahUploadKhs !== $jumlahWajibKhs) {
+        return back()
+            ->withInput()
+            ->with('error', "Jumlah KHS tidak sesuai! Semester kamu saat ini: {$semesterAktif}, maka wajib upload {$jumlahWajibKhs} KHS.");
+    }
+
+    $mahasiswa = Auth::user()->mahasiswa;
+    abort_if(!$mahasiswa, 403);
+
     $pengajuanAktif = PengajuanPkl::where('id_mhs', $mahasiswa->id)
     ->whereIn('status', [
         'pending_tu',
@@ -80,11 +101,11 @@ class PengajuanPklController extends Controller
     ])
     ->exists();
 
-if ($pengajuanAktif) {
-    return redirect()
-        ->route('mahasiswa.dashboard')
-        ->with('error', 'Kamu sudah memiliki pengajuan PKL yang sedang diproses.');
-}
+    if ($pengajuanAktif) {
+        return redirect()
+            ->route('mahasiswa.dashboard')
+            ->with('error', 'Kamu sudah memiliki pengajuan PKL yang sedang diproses.');
+    }
 
     $namaNormalized = $this->normalizeNamaTempat($request->nama_tempat);
 
@@ -183,7 +204,89 @@ if ($pengajuanAktif) {
         ->route('mahasiswa.pengajuan.status')
         ->with('success', 'Pengajuan PKL berhasil dikirim dan menunggu verifikasi TU.');
 }
-    private function normalizeGoogleMapsLink($url)
+
+// hitung semester
+    private function hitungSemester($angkatan)
+    {
+        $tahunSekarang = now()->year;
+
+        // selisih tahun × 2 semester
+        $semester = ($tahunSekarang - $angkatan) * 2;
+
+        // asumsi: kalau sudah lewat tengah tahun → +1 semester
+        if (now()->month >= 7) {
+            $semester += 1;
+        }
+
+        return max(1, $semester);
+    }
+
+    /**
+     * Upload ulang dokumen invalid
+     */
+    public function uploadUlangDokumen(Request $request, $id)
+    {
+        $request->validate([
+            'dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,png|max:2048',
+        ]);
+
+        $mahasiswa = Auth::user()->mahasiswa;
+        abort_if(!$mahasiswa, 403);
+
+        $dokumen = DokumenPengajuan::with('pengajuan')->findOrFail($id);
+        $pengajuan = $dokumen->pengajuan;
+
+        abort_if(
+            $pengajuan->id_mhs !== $mahasiswa->id ||
+            $pengajuan->status !== 'ditolak_tu' ||
+            $dokumen->status_verifikasi !== 'invalid',
+            403
+        );
+
+        DB::transaction(function () use ($request, $dokumen, $pengajuan, $mahasiswa) {
+
+            $path = $request->file('dokumen')
+                ->store("dokumen_pengajuan_pkl/{$mahasiswa->nim}", 'public');
+
+            $dokumen->update([
+                'path_file'        => $path,
+                'status_verifikasi'=> 'pending',
+                'catatan'          => null,
+            ]);
+
+            $hasInvalid = $pengajuan->dokumenPengajuan()
+                ->where('status_verifikasi', 'invalid')
+                ->exists();
+
+            if (!$hasInvalid) {
+                $pengajuan->update([
+                    'status'     => 'pending_tu',
+                    'catatan_tu' => null,
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Dokumen berhasil diupload ulang dan menunggu verifikasi TU.');
+    }
+    public function downloadSuratPengantar($id)
+{
+    $mahasiswa = Auth::user()->mahasiswa;
+    abort_if(!$mahasiswa, 403);
+
+    $surat = SuratPengantar::findOrFail($id);
+
+    $path = $surat->path_file;
+
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404, 'File tidak ditemukan.');
+    }
+
+    return Storage::disk('public')->download(
+        $path,
+        'Surat_Pengantar_PKL.pdf'
+    );
+}
+        private function normalizeGoogleMapsLink($url)
 {
     // jika shortlink → resolve dulu
     if (str_contains($url, 'maps.app.goo.gl') || str_contains($url, 'goo.gl')) {
@@ -340,72 +443,6 @@ if ($pengajuanAktif) {
         'pengajuan',
         'jumlahInvalid'
     ));
-}
-
-    /**
-     * Upload ulang dokumen invalid
-     */
-    public function uploadUlangDokumen(Request $request, $id)
-    {
-        $request->validate([
-            'dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,png|max:2048',
-        ]);
-
-        $mahasiswa = Auth::user()->mahasiswa;
-        abort_if(!$mahasiswa, 403);
-
-        $dokumen = DokumenPengajuan::with('pengajuan')->findOrFail($id);
-        $pengajuan = $dokumen->pengajuan;
-
-        abort_if(
-            $pengajuan->id_mhs !== $mahasiswa->id ||
-            $pengajuan->status !== 'ditolak_tu' ||
-            $dokumen->status_verifikasi !== 'invalid',
-            403
-        );
-
-        DB::transaction(function () use ($request, $dokumen, $pengajuan, $mahasiswa) {
-
-            $path = $request->file('dokumen')
-                ->store("dokumen_pengajuan_pkl/{$mahasiswa->nim}", 'public');
-
-            $dokumen->update([
-                'path_file'        => $path,
-                'status_verifikasi'=> 'pending',
-                'catatan'          => null,
-            ]);
-
-            $hasInvalid = $pengajuan->dokumenPengajuan()
-                ->where('status_verifikasi', 'invalid')
-                ->exists();
-
-            if (!$hasInvalid) {
-                $pengajuan->update([
-                    'status'     => 'pending_tu',
-                    'catatan_tu' => null,
-                ]);
-            }
-        });
-
-        return back()->with('success', 'Dokumen berhasil diupload ulang dan menunggu verifikasi TU.');
-    }
-    public function downloadSuratPengantar($id)
-{
-    $mahasiswa = Auth::user()->mahasiswa;
-    abort_if(!$mahasiswa, 403);
-
-    $surat = SuratPengantar::findOrFail($id);
-
-    $path = $surat->path_file;
-
-    if (!Storage::disk('public')->exists($path)) {
-        abort(404, 'File tidak ditemukan.');
-    }
-
-    return Storage::disk('public')->download(
-        $path,
-        'Surat_Pengantar_PKL.pdf'
-    );
 }
 
 }

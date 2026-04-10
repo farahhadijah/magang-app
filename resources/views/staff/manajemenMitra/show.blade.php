@@ -4,7 +4,7 @@
 Detail Mitra - MagangApp
 </x-slot>
 
-<div class="px-4 py-6 md:px-6">
+<div class="px-0 py-6 md:px-6">
 
 <h1 class="mb-6 text-xl font-bold md:text-2xl text-slate-900">
 Detail Mitra

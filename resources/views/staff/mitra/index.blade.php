@@ -3,7 +3,7 @@
         Manajemen Mitra - MagangApp
     </x-slot>
 
-    <div class="px-4 py-6 mx-auto max-w-7xl min-h-[70vh] flex flex-col">
+    <div class="px-0 py-6 mx-auto max-w-7xl min-h-[70vh] flex flex-col">
         @if(session('success'))
             <div class="p-4 mb-4 border-l-4 border-green-600 bg-green-50">
                 <strong>Akun Berhasil Dibuat</strong><br>

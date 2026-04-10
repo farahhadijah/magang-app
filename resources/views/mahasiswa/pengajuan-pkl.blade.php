@@ -161,15 +161,16 @@
 
                     <div class="grid gap-5 md:grid-cols-2">
                         <div>
-                            <label class="block mb-2 text-sm font-semibold text-gray-700">Semester (Angka Romawi) <span class="text-red-500">*</span></label>
-                            <input type="text" name="semester" value="{{ old('semester') }}" required pattern="^(I|II|III|IV|V|VI|VII|VIII|IX|X)$" 
-                                title="Gunakan angka romawi, contoh: V" 
-                                class="w-full px-4 py-3 uppercase border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white" 
-                                style="text-transform: uppercase;" placeholder="Contoh: V">
-                            <p class="flex items-center gap-1 mt-1 text-xs text-gray-500">
-                                <i class="fa-solid fa-graduation-cap"></i>
-                                Gunakan angka romawi (I, II, III, IV, V, dst)
-                            </p>
+                            <label class="block mb-2 text-sm font-semibold text-gray-700">Semester Saat Ini</label>
+                            <input type="text" value="{{ $semesterAktif }}" disabled
+                                class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl">
+                            {{-- kirim semester sebagai field tersembunyi supaya validasi server terpenuhi
+                                 format dikirim dalam angka Romawi (I..X) sesuai aturan validasi di controller --}}
+                            @php
+                                $romawi = [1=>'I',2=>'II',3=>'III',4=>'IV',5=>'V',6=>'VI',7=>'VII',8=>'VIII',9=>'IX',10=>'X'];
+                                $semesterValue = $romawi[$semesterAktif] ?? $semesterAktif;
+                            @endphp
+                            <input type="hidden" name="semester" value="{{ $semesterValue }}">
                         </div>
 
                         <div>
@@ -212,6 +213,16 @@
                             'dokumen_form_pkn' => ['label' => 'Form Pengajuan PKN', 'accept' => '.pdf', 'multiple' => false, 'icon' => 'fa-file-alt', 'required' => true, 'color' => 'orange'],
                         ];
                     @endphp
+
+                    <div class="p-4 mb-4 border border-yellow-200 bg-yellow-50 rounded-xl">
+                        <div class="flex items-center gap-2 text-yellow-800">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span class="font-semibold">
+                                Kamu saat ini semester {{ $semesterAktif }},
+                                wajib upload {{ $jumlahWajibKhs }} KHS
+                            </span>
+                        </div>
+                    </div>
 
                     @foreach ($dokumenFields as $name => $field)
                         <div class="mb-6 group">
@@ -357,6 +368,18 @@
                 this.dataset.auto = "false";
             });
             const form = document.getElementById("formPengajuan");
+
+            const jumlahWajib = {{ $jumlahWajibKhs }};
+
+            form.addEventListener("submit", function (e) {
+                const khsFiles = document.getElementById('dokumen_khs').files;
+
+                if (khsFiles.length !== jumlahWajib) {
+                    alert(`Jumlah KHS harus ${jumlahWajib} file!`);
+                    e.preventDefault();
+                    return;
+                }
+            });
             let timeout = null;
             // CEK KEMIRIPAN NAMA TEMPAT
             inputNama.addEventListener('input', function () {
@@ -387,6 +410,19 @@
                         }
                     });
                 }, 600);
+            });
+
+            const khsInput = document.getElementById('dokumen_khs');
+
+            khsInput.addEventListener('change', function () {
+                const files = this.files;
+
+                if (files.length !== jumlahWajib) {
+                    alert(`Jumlah KHS harus ${jumlahWajib} file!`);
+
+                    this.value = ""; // reset
+                    document.getElementById('dokumen_khs-list').innerHTML = '';
+                }
             });
             // AUTO UPPERCASE SEMESTER
             const semesterInput = document.querySelector('input[name="semester"]');

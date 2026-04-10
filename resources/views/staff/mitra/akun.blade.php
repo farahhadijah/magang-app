@@ -3,7 +3,7 @@
     Akun Mitra - MagangApp
 </x-slot>
 
-<div class="max-w-4xl px-4 py-6 mx-auto md:py-8">
+<div class="max-w-4xl px-0 py-6 mx-auto md:py-8">
 
     <div class="overflow-hidden bg-white border border-green-200 shadow-lg rounded-2xl">
 
