@@ -88,20 +88,18 @@ class Pkl extends Model
             ->where('status_approve', 'approved')
             ->count();
     }
-    public function semuaLogbookApproved()
-    {
-        return $this->totalLogbook() > 0 &&
-               $this->totalLogbook() === $this->totalLogbookApproved();
-    }
     public function isSiapUploadLaporan()
     {
         if ($this->status !== 'aktif') {
             return false;
         }
-        if ($this->totalLogbook() < 30) {
+
+        // 🔥 minimal 30 logbook APPROVED
+        if ($this->totalLogbookApproved() < 30) {
             return false;
         }
-        return $this->semuaLogbookApproved();
+
+        return true;
     }
     public function ajukanLaporan()
     {
