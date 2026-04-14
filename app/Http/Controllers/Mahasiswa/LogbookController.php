@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\Pkl;
 use App\Models\Logbook;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 class LogbookController extends Controller
 {
     /**
@@ -29,11 +30,6 @@ class LogbookController extends Controller
     public function index()
     {
         $pkl = $this->getActivePkl();
-<<<<<<< HEAD
-        $logbooks = $pkl
-            ? $pkl->logbooks()->orderBy('tgl', 'desc')->get()
-            : collect();
-=======
 
         if (!$pkl) {
             abort(403, 'PKL sudah selesai atau belum dimulai.');
@@ -42,7 +38,6 @@ class LogbookController extends Controller
     // paginate the logbooks so the mahasiswa gets a paged list
     // keep ordering by date desc. 10 items per page by default.
     $logbooks = $pkl->logbooks()->orderBy('tgl', 'desc')->paginate(10);
->>>>>>> Revisi-logbook-dan-pengajuanPKL
         $hasToday = false;
         if ($pkl) {
             $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
@@ -50,7 +45,37 @@ class LogbookController extends Controller
                 ->whereDate('tgl', $todayJakarta)
                 ->exists();
         }
-        return view('mahasiswa.logbook.index', compact('logbooks', 'hasToday', 'pkl'));
+        $tanggalKosong = collect();
+
+        if ($pkl) {
+
+            $mulai = Carbon::parse($pkl->tgl_mulai)->startOfDay();
+            $today = Carbon::now('Asia/Jakarta')->startOfDay();
+
+            // semua tanggal PKL
+            $period = CarbonPeriod::create($mulai, $today);
+
+            // tanggal yang sudah ada logbook
+            $tanggalTerisi = $pkl->logbooks()
+                ->pluck('tgl')
+                ->map(fn($tgl) => Carbon::parse($tgl)->toDateString())
+                ->toArray();
+
+            // cari tanggal yang belum ada logbook
+            foreach ($period as $date) {
+
+                if (!in_array($date->toDateString(), $tanggalTerisi)) {
+                    $tanggalKosong->push($date->copy());
+                }
+
+            }
+        }
+        return view('mahasiswa.logbook.index', compact(
+            'logbooks',
+            'hasToday',
+            'pkl',
+            'tanggalKosong'
+        ));
     }
     /**
      * Form tambah logbook

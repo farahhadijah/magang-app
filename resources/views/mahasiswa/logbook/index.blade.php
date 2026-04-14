@@ -71,28 +71,7 @@
         @endif
 
 
-<<<<<<< HEAD
-    <a href="{{ route('mahasiswa.logbook.create') }}"
-       class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-lg hover:bg-green-700">
-        <i class="fa-solid fa-plus"></i>
-        Tambah Logbook
-    </a>
-
-    <div class="px-4 py-2 bg-white border border-green-100 rounded-xl shadow text-center md:text-left">
-        <p class="text-sm text-gray-500">
-            Total Logbook Dibuat
-            <span class="font-bold text-green-700">
-                {{ $logbooks->count() }}
-            </span>
-        </p>
-    </div>
-
-</div>
-
-        {{-- Table --}}
-=======
         {{-- TABLE --}}
->>>>>>> Revisi-logbook-dan-pengajuanPKL
         <div class="overflow-hidden bg-white border border-green-100 shadow rounded-xl">
 
             {{-- DESKTOP --}}

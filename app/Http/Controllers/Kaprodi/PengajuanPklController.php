@@ -263,11 +263,6 @@ class PengajuanPklController extends Controller
                 ->where('is_active', 1)
                 ->first();
 
-<<<<<<< HEAD
-        $kaprodi = \App\Models\Staff::where('jabatan', 'kaprodi')
-            ->where('is_active', 1)
-            ->first();
-=======
             /* ================= GENERATE PDF ================= */
             $pdf = Pdf::loadView('surat.pengantar', [
                 'pengajuan' => $pengajuan,
@@ -275,7 +270,6 @@ class PengajuanPklController extends Controller
                 'noSurat'   => $noSurat,
                 'kaprodi'   => $kaprodi,
             ])->setPaper('A4', 'portrait');
->>>>>>> Revisi-logbook-dan-pengajuanPKL
 
             $filename = 'surat_pkl_' . $pkl->id . '.pdf';
             $path = 'surat/' . $filename;
@@ -367,13 +361,13 @@ class PengajuanPklController extends Controller
     }
     private function getProdiId()
     {
-        $staff = auth()->user()->staff;
+        $dosen = auth()->user()->dosen;
 
-        if (!$staff || !$staff->prodi_id) {
+        if (!$dosen || !$dosen->prodi_id) {
             abort(403, 'Kaprodi tidak memiliki prodi.');
         }
 
-        return $staff->prodi_id;
+        return $dosen->prodi_id;
     }
 
     private function extractLatLng($url)

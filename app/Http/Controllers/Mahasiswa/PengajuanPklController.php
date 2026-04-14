@@ -10,7 +10,8 @@ use App\Models\PengajuanPkl;
 use App\Models\TempatPkl;
 use App\Models\DokumenPengajuan;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Storage;
+use App\Models\SuratPengantar;
 
 class PengajuanPklController extends Controller
 {
@@ -26,6 +27,7 @@ class PengajuanPklController extends Controller
             ->whereIn('status', [
                 'pending_tu',
                 'diverifikasi_tu',
+                'disetujui',
                 'pending_kaprodi'
             ])
             ->exists();
@@ -68,8 +70,6 @@ class PengajuanPklController extends Controller
     $mahasiswa = Auth::user()->mahasiswa;
     abort_if(!$mahasiswa, 403);
 
-<<<<<<< HEAD
-=======
     // 🔥 hitung semester otomatis
     $semesterAktif = $this->hitungSemester($mahasiswa->angkatan);
 
@@ -103,7 +103,6 @@ class PengajuanPklController extends Controller
             ->with('error', 'Kamu sudah memiliki pengajuan PKL yang sedang diproses.');
     }
 
->>>>>>> Revisi-logbook-dan-pengajuanPKL
     $namaNormalized = $this->normalizeNamaTempat($request->nama_tempat);
 
     DB::transaction(function () use ($request, $mahasiswa, $namaNormalized) {
@@ -429,71 +428,6 @@ class PengajuanPklController extends Controller
      * Status pengajuan mahasiswa
      */
     public function status()
-<<<<<<< HEAD
-    {
-        $mahasiswa = Auth::user()->mahasiswa;
-        abort_if(!$mahasiswa, 403);
-
-        $pengajuan = PengajuanPkl::with([
-                'tempatPkl',
-                'dokumenPengajuan',
-                'pkl.suratPengantar'
-            ])
-            ->where('id_mhs', $mahasiswa->id)
-            ->latest()
-            ->first();
-
-        return view('mahasiswa.status-pengajuan', compact('pengajuan'));
-    }
-
-    /**
-     * Upload ulang dokumen invalid
-     */
-    public function uploadUlangDokumen(Request $request, $id)
-    {
-        $request->validate([
-            'dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,png|max:2048',
-        ]);
-
-        $mahasiswa = Auth::user()->mahasiswa;
-        abort_if(!$mahasiswa, 403);
-
-        $dokumen = DokumenPengajuan::with('pengajuan')->findOrFail($id);
-        $pengajuan = $dokumen->pengajuan;
-
-        abort_if(
-            $pengajuan->id_mhs !== $mahasiswa->id ||
-            $pengajuan->status !== 'ditolak_tu' ||
-            $dokumen->status_verifikasi !== 'invalid',
-            403
-        );
-
-        DB::transaction(function () use ($request, $dokumen, $pengajuan, $mahasiswa) {
-
-            $path = $request->file('dokumen')
-                ->store("dokumen_pengajuan_pkl/{$mahasiswa->nim}", 'public');
-
-            $dokumen->update([
-                'path_file'        => $path,
-                'status_verifikasi'=> 'pending',
-                'catatan'          => null,
-            ]);
-
-            $hasInvalid = $pengajuan->dokumenPengajuan()
-                ->where('status_verifikasi', 'invalid')
-                ->exists();
-
-            if (!$hasInvalid) {
-                $pengajuan->update([
-                    'status'     => 'pending_tu',
-                    'catatan_tu' => null,
-                ]);
-            }
-        });
-
-        return back()->with('success', 'Dokumen berhasil diupload ulang dan menunggu verifikasi TU.');
-    }
-=======
 {
     $mahasiswa = Auth::user()->mahasiswa;
     abort_if(!$mahasiswa, 403);
@@ -521,6 +455,5 @@ class PengajuanPklController extends Controller
         'jumlahInvalid'
     ));
 }
->>>>>>> Revisi-logbook-dan-pengajuanPKL
 
 }
