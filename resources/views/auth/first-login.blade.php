@@ -2,7 +2,7 @@
     <x-slot name="title">
         Frist Login - MagangApp
     </x-slot>
-    <div class="flex flex-col items-center px-4 pt-5 bg-green-50">
+    <div class="flex flex-col items-center px-0 pt-5 bg-green-50">
 
         {{-- Card --}}
         <div class="w-full max-w-md p-8 transition bg-white border border-green-200 shadow-lg rounded-xl hover:shadow-2xl">

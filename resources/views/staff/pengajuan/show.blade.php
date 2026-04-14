@@ -12,6 +12,7 @@
             </h3>
             <p><strong>Nama:</strong> {{ $pengajuan->mahasiswa->nama }}</p>
             <p><strong>NIM:</strong> {{ $pengajuan->mahasiswa->nim }}</p>
+            <p><strong>Semester:</strong> {{ $pengajuan->semester }}</p>
             <p><strong>Instansi:</strong> {{ $pengajuan->tempatPkl->nama_tempat }}</p>
             <p><strong>Jenis Instansi:</strong> {{ $pengajuan->tempatPkl->jenis_tempat }}</p>
             <p><strong>No HP:</strong> {{ $pengajuan->tempatPkl->no_hp }}</p>
@@ -75,30 +76,31 @@
                                 @endif
 
                                 @if ($dokumen->isPending())
-                                    <div class="flex flex-wrap gap-2">
-                                        <form method="POST"
-                                              action="{{ route('staff.dokumen.valid', $dokumen->id) }}">
-                                            @csrf
-                                            <button class="px-3 py-1 text-xs text-white bg-green-600 rounded">
-                                                Valid
-                                            </button>
-                                        </form>
+                                  <div class="flex flex-col gap-2 sm:flex-row sm:gap-2">
+                                      <form method="POST"
+                                            action="{{ route('staff.dokumen.valid', $dokumen->id) }}"
+                                            class="w-full sm:w-auto">
+                                          @csrf
+                                          <button class="w-full px-3 py-2 text-sm text-white bg-green-600 rounded sm:px-3 sm:py-1 sm:text-xs">
+                                              Valid
+                                          </button>
+                                      </form>
 
-                                        <form method="POST"
-                                              action="{{ route('staff.dokumen.invalid', $dokumen->id) }}"
-                                              class="flex gap-1">
-                                            @csrf
-                                            <input type="text"
-                                                   name="catatan"
-                                                   required
-                                                   placeholder="Catatan"
-                                                   class="w-24 px-1 py-1 text-xs border rounded">
-                                            <button class="px-3 py-1 text-xs text-white bg-red-600 rounded">
-                                                Invalid
-                                            </button>
-                                        </form>
-                                    </div>
-                                @endif
+                                      <form method="POST"
+                                            action="{{ route('staff.dokumen.invalid', $dokumen->id) }}"
+                                            class="flex flex-col gap-2 sm:flex-row sm:gap-1 w-full sm:w-auto">
+                                          @csrf
+                                          <input type="text"
+                                                 name="catatan"
+                                                 required
+                                                 placeholder="Catatan"
+                                                 class="w-full px-2 py-2 text-sm border rounded sm:w-24 sm:px-1 sm:py-1 sm:text-xs">
+                                          <button class="w-full px-3 py-2 text-sm text-white bg-red-600 rounded sm:w-auto sm:px-3 sm:py-1 sm:text-xs">
+                                              Invalid
+                                          </button>
+                                      </form>
+                                  </div>
+                              @endif
                             </div>
                         @endforeach
                     </div>
@@ -107,62 +109,63 @@
 
             {{-- ================= DOKUMEN LAIN ================= --}}
             @foreach ($lainnya as $dokumen)
-                <div id="dokumen-{{ $dokumen->id }}" class="p-4 mb-4 border rounded-lg
-                    {{ $dokumen->isValid() ? 'border-green-300 bg-green-50'
-                    : ($dokumen->isInvalid() ? 'border-red-300 bg-red-50'
-                    : 'border-amber-300 bg-amber-50') }}">
+            <div id="dokumen-{{ $dokumen->id }}" class="p-3 mb-3 border rounded-lg sm:p-4 sm:mb-4
+                {{ $dokumen->isValid() ? 'border-green-300 bg-green-50'
+                : ($dokumen->isInvalid() ? 'border-red-300 bg-red-50'
+                : 'border-amber-300 bg-amber-50') }}">
 
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="font-semibold text-gray-800">
-                                {{ $dokumen->jenis_dokumen }}
-                            </p>
-                            <span class="inline-block px-2 py-0.5 text-xs rounded
-                                {{ $dokumen->statusBadge()['class'] }}">
-                                {{ $dokumen->statusBadge()['text'] }}
-                            </span>
-                        </div>
-
-                        <button
-                            onclick="openModal('{{ asset('storage/'.$dokumen->path_file) }}')"
-                            class="text-sm font-medium text-green-700 hover:text-green-900">
-                            Lihat Dokumen
-                        </button>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-gray-800 sm:text-base">
+                            {{ $dokumen->jenis_dokumen }}
+                        </p>
+                        <span class="inline-block px-2 py-0.5 mt-1 text-xs rounded sm:mt-0
+                            {{ $dokumen->statusBadge()['class'] }}">
+                            {{ $dokumen->statusBadge()['text'] }}
+                        </span>
                     </div>
 
-                    @if ($dokumen->isInvalid())
-                        <div class="p-2 mt-2 text-sm text-red-700 bg-red-100 border border-red-200 rounded">
-                            <strong>Catatan:</strong> {{ $dokumen->catatan }}
-                        </div>
-                    @endif
-
-                    @if ($dokumen->isPending())
-                        <div class="flex gap-3 pt-3 mt-3 border-t">
-                            <form method="POST"
-                                  action="{{ route('staff.dokumen.valid', $dokumen->id) }}">
-                                @csrf
-                                <button class="px-4 py-1.5 text-sm text-white bg-green-600 rounded">
-                                    Tandai Valid
-                                </button>
-                            </form>
-
-                            <form method="POST"
-                                  action="{{ route('staff.dokumen.invalid', $dokumen->id) }}"
-                                  class="flex gap-2">
-                                @csrf
-                                <input type="text"
-                                       name="catatan"
-                                       required
-                                       placeholder="Catatan wajib"
-                                       class="px-2 py-1 text-sm border rounded">
-                                <button class="px-4 py-1.5 text-sm text-white bg-red-600 rounded">
-                                    Tandai Invalid
-                                </button>
-                            </form>
-                        </div>
-                    @endif
+                    <button
+                        onclick="openModal('{{ asset('storage/'.$dokumen->path_file) }}')"
+                        class="w-full py-2 text-sm font-medium text-center text-green-700 md:border-none border-green-300 rounded sm:w-auto sm:py-0 sm:border-0 hover:text-green-900">
+                        Lihat Dokumen
+                    </button>
                 </div>
-            @endforeach
+
+                @if ($dokumen->isInvalid())
+                    <div class="p-2 mt-3 text-xs text-red-700 bg-red-100 border border-red-200 rounded sm:text-sm sm:mt-2">
+                        <strong>Catatan:</strong> {{ $dokumen->catatan }}
+                    </div>
+                @endif
+
+                @if ($dokumen->isPending())
+                    <div class="flex flex-col gap-3 pt-3 mt-3 border-t sm:flex-row sm:gap-3">
+                        <form method="POST"
+                              action="{{ route('staff.dokumen.valid', $dokumen->id) }}"
+                              class="w-full sm:w-auto">
+                            @csrf
+                            <button class="w-full px-3 py-2 text-sm text-white bg-green-600 rounded sm:px-4 sm:py-1.5 sm:w-auto">
+                                Tandai Valid
+                            </button>
+                        </form>
+
+                        <form method="POST"
+                              action="{{ route('staff.dokumen.invalid', $dokumen->id) }}"
+                              class="flex flex-col gap-2 w-full sm:flex-row sm:gap-2 sm:w-auto">
+                            @csrf
+                            <input type="text"
+                                   name="catatan"
+                                   required
+                                   placeholder="Catatan wajib"
+                                   class="w-full px-2 py-2 text-sm border rounded sm:px-2 sm:py-1 sm:w-auto">
+                            <button class="w-full px-3 py-2 text-sm text-white bg-red-600 rounded sm:px-4 sm:py-1.5 sm:w-auto">
+                                Tandai Invalid
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            </div>
+        @endforeach
 
         </div>
 

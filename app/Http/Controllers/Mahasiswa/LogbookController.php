@@ -29,9 +29,20 @@ class LogbookController extends Controller
     public function index()
     {
         $pkl = $this->getActivePkl();
+<<<<<<< HEAD
         $logbooks = $pkl
             ? $pkl->logbooks()->orderBy('tgl', 'desc')->get()
             : collect();
+=======
+
+        if (!$pkl) {
+            abort(403, 'PKL sudah selesai atau belum dimulai.');
+        }
+
+    // paginate the logbooks so the mahasiswa gets a paged list
+    // keep ordering by date desc. 10 items per page by default.
+    $logbooks = $pkl->logbooks()->orderBy('tgl', 'desc')->paginate(10);
+>>>>>>> Revisi-logbook-dan-pengajuanPKL
         $hasToday = false;
         if ($pkl) {
             $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();

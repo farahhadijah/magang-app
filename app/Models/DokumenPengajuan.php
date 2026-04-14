@@ -22,7 +22,7 @@ class DokumenPengajuan extends Model
     public const JENIS_PEMBAYARAN = 'Pembayaran';
     public const JENIS_STUDI_TOUR = 'StudiTour';
     public const JENIS_FORM_PKN = 'FormPKN';
-    // public const JENIS_KRS_REMEDIAL = 'KRSRemedial';
+    public const JENIS_KRS = 'KRS';
 
     /* ================= RELATION ================= */
 
@@ -43,10 +43,10 @@ class DokumenPengajuan extends Model
         return $this->jenis_dokumen === self::JENIS_FORM_PKN;
     }
 
-    // public function isKrsRemedial(): bool
-    // {
-    //     return $this->jenis_dokumen === self::JENIS_KRS_REMEDIAL;
-    // }
+    public function isKrs(): bool
+    {
+        return $this->jenis_dokumen === self::JENIS_KRS;
+    }
 
     /* ================= HELPER STATUS ================= */
 
@@ -93,10 +93,10 @@ class DokumenPengajuan extends Model
         return $query->where('jenis_dokumen', self::JENIS_FORM_PKN);
     }
 
-    // public function scopeKrsRemedial($query)
-    // {
-    //     return $query->where('jenis_dokumen', self::JENIS_KRS_REMEDIAL);
-    // }
+    public function scopeKrs($query)
+    {
+        return $query->where('jenis_dokumen', self::JENIS_KRS);
+    }
 
     /* ================= BADGE ================= */
 

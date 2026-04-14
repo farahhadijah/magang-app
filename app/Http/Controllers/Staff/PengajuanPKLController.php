@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-
 class PengajuanPklController extends Controller
 {
     /**
@@ -33,8 +32,7 @@ class PengajuanPklController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->paginate(15);
-
-        return view('staff.pengajuan.index', compact('pengajuans'));
+     return view('staff.pengajuan.index', compact('pengajuans'));
     }
     /**
      * ===============================
@@ -160,9 +158,21 @@ class PengajuanPklController extends Controller
      * HISTORI DITOLAK TU
      * ===============================
      */
-    public function histori()
+public function histori(Request $request)
 {
     $prodiId = $this->getProdiId();
+
+    // gunakan query param bila diberikan
+    $perPage = (int) $request->query('perPage');
+
+    if (! $perPage) {
+        $ua = $request->header('User-Agent', '');
+        $isMobile = stripos($ua, 'Mobile') !== false
+            || stripos($ua, 'Android') !== false
+            || stripos($ua, 'iPhone') !== false;
+
+        $perPage = $isMobile ? 15 : 9;
+    }
 
     $verifikasis = \App\Models\Verifikasi::with([
             'pengajuan.mahasiswa',
@@ -174,7 +184,8 @@ class PengajuanPklController extends Controller
             $q->where('prodi_id', $prodiId);
         })
         ->orderBy('tgl_verifikasi', 'desc')
-        ->paginate(9);
+        ->paginate($perPage)
+        ->withQueryString();
 
     return view('staff.pengajuan.histori', compact('verifikasis'));
 }

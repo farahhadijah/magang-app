@@ -7,7 +7,7 @@
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <!-- Header Card -->
             <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6 border-b border-gray-200">
+                <div class="p-6 border-b md:border-gray-200">
                     <div class="flex items-center">
                         <div class="ml-4">
                             <h1 class="text-2xl font-semibold text-gray-800">
@@ -61,146 +61,134 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
 
-                    <!-- Tabel Tugas -->
-                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                        <table class="min-w-full divide-y divide-green-200">
-                            <thead class="bg-green-100">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                        <div class="flex items-center">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                            Judul Tugas
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                        <div class="flex items-center">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                            </svg>
-                                            Deadline
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                        <div class="flex items-center">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                            Status
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
-                                        Aksi
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($tugas as $t)
-                                    @php
-                                        $submit = $t->submit->where('id_pkl',$t->id_pkl)->first();
-                                        
-                                        // Cek deadline
-                                        $deadline = \Carbon\Carbon::parse($t->deadline);
-                                        $now = \Carbon\Carbon::now();
-                                        $isOverdue = $deadline->isPast() && !$submit;
-                                    @endphp
+                    <!-- Tabel / Card Responsive -->
+                    <div class="border border-gray-200 rounded-lg">
 
-                                    <tr class="hover:bg-gray-50 transition-colors duration-200 {{ $isOverdue ? 'bg-red-50' : '' }}">
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center">
-                                                <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full">
-                                                    <span class="text-sm font-medium text-gray-600">
-                                                        {{ $loop->iteration }}
-                                                    </span>
-                                                </div>
-                                                <div class="ml-3">
-                                                    <p class="text-sm font-medium text-gray-900">
-                                                        {{ $t->judul }}
-                                                    </p>
-                                                    @if($t->deskripsi)
-                                                        <p class="max-w-xs text-xs text-gray-500 truncate">
-                                                            {{ Str::limit($t->deskripsi, 50) }}
-                                                        </p>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </td>
-                                        
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                </svg>
-                                                <span class="text-sm text-gray-900 {{ $isOverdue ? 'font-semibold text-red-600' : '' }}">
-                                                    {{ $deadline->format('d M Y') }}
-                                                    @if($isOverdue)
-                                                        <span class="ml-2 text-xs text-red-600">(Terlewat)</span>
-                                                    @endif
-                                                </span>
-                                            </div>
-                                        </td>
-                                        
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if(!$submit)
-                                                <span class="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-full">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                    </svg>
-                                                    Belum dikumpulkan
-                                                </span>
-                                            @elseif($submit->revisi)
-                                                <span class="inline-flex items-center px-3 py-1 text-xs font-medium text-red-800 bg-red-200 rounded-full">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                                    </svg>
-                                                    Revisi
-                                                </span>
-                                            @elseif($submit->status == 'pending')
-                                                <span class="inline-flex items-center px-3 py-1 text-xs font-medium text-yellow-800 bg-yellow-200 rounded-full">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                    </svg>
-                                                    Pending
-                                                </span>
-                                            @elseif($submit->status == 'selesai')
-                                                <span class="inline-flex items-center px-3 py-1 text-xs font-medium text-green-800 bg-green-200 rounded-full">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                                    </svg>
-                                                    Selesai
-                                                </span>
-                                            @endif
-                                        </td>
-                                        
-                                        <td class="px-6 py-4 text-center whitespace-nowrap">
-                                            <a href="{{ route('mahasiswa.tugas.show',$t->id) }}"
-                                               class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                </svg>
-                                                Detail
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @empty
+                        <!-- ===== DESKTOP (TABLE) ===== -->
+                        <div class="hidden overflow-x-auto md:block">
+                            <table class="min-w-full divide-y divide-green-200">
+                                <thead class="bg-green-100">
                                     <tr>
-                                        <td colspan="4" class="px-6 py-12 text-center">
-                                            <div class="flex flex-col items-center">
-                                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                                </svg>
-                                                <h3 class="mt-4 text-lg font-medium text-gray-900">Belum Ada Tugas</h3>
-                                                <p class="mt-1 text-sm text-gray-500">
-                                                    Saat ini belum ada tugas yang diberikan oleh mitra.
-                                                </p>
-                                            </div>
-                                        </td>
+                                        <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Judul Tugas</th>
+                                        <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Deadline</th>
+                                        <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Status</th>
+                                        <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Aksi</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse($tugas as $t)
+                                        @php
+                                            $submit = $t->submit->where('id_pkl',$t->id_pkl)->first();
+                                            $deadline = \Carbon\Carbon::parse($t->deadline);
+                                            $now = \Carbon\Carbon::now();
+                                            $isOverdue = $deadline->isPast() && !$submit;
+                                        @endphp
+
+                                        <tr class="{{ $isOverdue ? 'bg-red-50' : '' }}">
+                                            <td class="px-6 py-4">
+                                                <p class="text-sm font-medium">{{ $t->judul }}</p>
+                                            </td>
+
+                                            <td class="px-6 py-4">
+                                                <span class="{{ $isOverdue ? 'text-red-600 font-semibold' : '' }}">
+                                                    {{ $deadline->format('d M Y') }}
+                                                </span>
+                                            </td>
+
+                                            <td class="px-6 py-4">
+                                                {{-- STATUS TETAP --}}
+                                                @if(!$submit)
+                                                    <span class="px-3 py-1 text-xs bg-gray-200 rounded-full">Belum</span>
+                                                @elseif($submit->revisi)
+                                                    <span class="px-3 py-1 text-xs bg-red-200 rounded-full">Revisi</span>
+                                                @elseif($submit->status == 'pending')
+                                                    <span class="px-3 py-1 text-xs bg-yellow-200 rounded-full">Pending</span>
+                                                @else
+                                                    <span class="px-3 py-1 text-xs bg-green-200 rounded-full">Selesai</span>
+                                                @endif
+                                            </td>
+
+                                            <td class="px-6 py-4 text-center">
+                                                <a href="{{ route('mahasiswa.tugas.show',$t->id) }}"
+                                                class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg">
+                                                    Detail
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="py-10 text-center">Belum ada tugas</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- ===== MOBILE (CARD) ===== -->
+                        <div class="space-y-4 md:hidden">
+                            @forelse($tugas as $t)
+                                @php
+                                    $submit = $t->submit->where('id_pkl',$t->id_pkl)->first();
+                                    $deadline = \Carbon\Carbon::parse($t->deadline);
+                                    $now = \Carbon\Carbon::now();
+                                    $isOverdue = $deadline->isPast() && !$submit;
+                                @endphp
+
+                                <div class="p-4 bg-white border rounded-lg shadow-sm {{ $isOverdue ? 'border-red-300 bg-red-50' : '' }}">
+                                    
+                                    <!-- Judul -->
+                                    <h3 class="text-sm font-semibold text-gray-800">
+                                        {{ $t->judul }}
+                                    </h3>
+
+                                    <!-- Deskripsi -->
+                                    @if($t->deskripsi)
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            {{ Str::limit($t->deskripsi, 80) }}
+                                        </p>
+                                    @endif
+
+                                    <!-- Info -->
+                                    <div class="flex flex-wrap items-center justify-between mt-3 text-xs">
+                                        
+                                        <!-- Deadline -->
+                                        <div>
+                                            <span class="text-gray-500">Deadline:</span><br>
+                                            <span class="{{ $isOverdue ? 'text-red-600 font-semibold' : 'text-gray-800' }}">
+                                                {{ $deadline->format('d M Y') }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Status -->
+                                        <div class="mt-2 sm:mt-0">
+                                            @if(!$submit)
+                                                <span class="px-3 py-1 bg-gray-200 rounded-full">Belum</span>
+                                            @elseif($submit->revisi)
+                                                <span class="px-3 py-1 bg-red-200 rounded-full">Revisi</span>
+                                            @elseif($submit->status == 'pending')
+                                                <span class="px-3 py-1 bg-yellow-200 rounded-full">Pending</span>
+                                            @else
+                                                <span class="px-3 py-1 bg-green-200 rounded-full">Selesai</span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <!-- Button -->
+                                    <div class="mt-4">
+                                        <a href="{{ route('mahasiswa.tugas.show',$t->id) }}"
+                                        class="block w-full px-4 py-2 text-sm text-center text-white bg-blue-600 rounded-lg">
+                                            Lihat Detail
+                                        </a>
+                                    </div>
+                                </div>
+
+                            @empty
+                                <div class="py-10 text-center text-gray-500">
+                                    Belum ada tugas
+                                </div>
+                            @endforelse
+                        </div>
+
                     </div>
                 </div>
             </div>

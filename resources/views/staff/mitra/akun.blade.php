@@ -1,13 +1,14 @@
 <x-app-layout>
-    <x-slot name="title">
-        Akun Mitra - MagangApp
-    </x-slot>
-<div class="max-w-4xl px-4 py-8 mx-auto">
+<x-slot name="title">
+    Akun Mitra - MagangApp
+</x-slot>
+
+<div class="max-w-4xl px-0 py-6 mx-auto md:py-8">
 
     <div class="overflow-hidden bg-white border border-green-200 shadow-lg rounded-2xl">
 
         {{-- Header --}}
-        <div class="px-6 py-4 bg-green-700">
+        <div class="px-5 py-4 md:px-6 bg-green-700">
             <h3 class="text-lg font-semibold text-white">
                 Detail Akun Mitra
             </h3>
@@ -24,29 +25,29 @@
             </div>
         @endif
 
-        <div class="p-6 space-y-6">
+        <div class="p-4 space-y-6 md:p-6">
 
             @if($akun)
 
                 {{-- Informasi Akun --}}
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 
                     <div class="p-4 border border-green-200 rounded-lg bg-green-50">
-                        <p class="text-sm text-gray-500">Username</p>
-                        <p class="font-semibold text-gray-800">
+                        <p class="text-xs text-gray-500">Username</p>
+                        <p class="font-semibold text-gray-800 break-all">
                             {{ $akun['username'] }}
                         </p>
                     </div>
 
                     <div class="p-4 border border-green-200 rounded-lg bg-green-50">
-                        <p class="text-sm text-gray-500">Password</p>
-                        <p class="font-bold text-red-600">
+                        <p class="text-xs text-gray-500">Password</p>
+                        <p class="font-bold text-red-600 break-all">
                             {{ $akun['password'] }}
                         </p>
                     </div>
 
                     <div class="p-4 border border-green-200 rounded-lg bg-green-50 md:col-span-2">
-                        <p class="text-sm text-gray-500">Nomor HP Mitra</p>
+                        <p class="text-xs text-gray-500">Nomor HP Mitra</p>
                         <p class="font-semibold text-gray-800">
                             {{ $tempat->no_hp }}
                         </p>
@@ -56,7 +57,7 @@
 
                 <div class="border-t"></div>
 
-                {{-- Template Pesan Mitra --}}
+                {{-- Template Pesan --}}
                 @php
                     $pesan = "Yth. {$tempat->nama_tempat},\n\n"
                         . "Berikut akun login Mitra PKL:\n"
@@ -75,19 +76,19 @@
 
                     <textarea
                         id="templatePesan"
-                        class="w-full p-4 text-sm border border-gray-300 rounded-lg bg-green-50"
+                        class="w-full p-3 text-sm border border-gray-300 rounded-lg bg-green-50 focus:outline-none focus:ring focus:ring-green-200"
                         rows="8"
                         readonly>{{ $pesan }}</textarea>
 
                     <button onclick="copyTemplate()"
-                    class="px-4 py-2 mt-3 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                        class="w-full sm:w-auto px-4 py-2 mt-3 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                         Copy Pesan
                     </button>
                 </div>
 
                 <div class="border-t"></div>
 
-                {{-- Daftar Mahasiswa --}}
+                {{-- Mahasiswa --}}
                 <div>
 
                     <h4 class="mb-3 font-semibold text-gray-700">
@@ -106,32 +107,28 @@
                                 . url('/login');
                         @endphp
 
-                        <div class="flex items-center justify-between p-4 mb-3 border border-green-200 rounded-lg bg-green-50">
+                        <div class="flex flex-col gap-3 p-4 mb-3 border border-green-200 rounded-lg bg-green-50 sm:flex-row sm:items-center sm:justify-between">
 
                             <div>
                                 <p class="font-semibold text-gray-800">
                                     {{ $mhs->nama }}
                                 </p>
 
-                                <p class="text-sm text-gray-600">
+                                <p class="text-sm text-gray-600 break-all">
                                     {{ $mhs->no_hp ?? 'Nomor HP tidak tersedia' }}
                                 </p>
                             </div>
 
                             @if($mhs->no_hp)
-
                                 <a href="https://wa.me/{{ preg_replace('/^0/', '62', $mhs->no_hp) }}?text={{ urlencode($pesanMahasiswa) }}"
                                    target="_blank"
-                                   class="px-4 py-2 text-sm text-white rounded-lg bg-amber-500 hover:bg-amber-600">
+                                   class="w-full text-center sm:w-auto px-4 py-2 text-sm text-white rounded-lg bg-amber-500 hover:bg-amber-600">
                                     Kirim Ke Mahasiswa
                                 </a>
-
                             @else
-
                                 <span class="text-sm text-red-500">
                                     Nomor tidak tersedia
                                 </span>
-
                             @endif
 
                         </div>
@@ -149,16 +146,16 @@
                 <div class="border-t"></div>
 
                 {{-- Tombol --}}
-                <div class="flex flex-wrap justify-end gap-3 pt-4">
+                <div class="flex flex-col gap-2 pt-4 sm:flex-row sm:justify-end">
 
                     <a href="https://wa.me/{{ preg_replace('/^0/', '62', $tempat->no_hp) }}?text={{ urlencode($pesan) }}"
                        target="_blank"
-                       class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg shadow hover:bg-green-700">
+                       class="w-full text-center sm:w-auto px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg shadow hover:bg-green-700">
                         Kirim ke Mitra
                     </a>
 
                     <a href="{{ route('staff.mitra.index') }}"
-                       class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-gray-600 rounded-lg shadow hover:bg-gray-700">
+                       class="w-full text-center sm:w-auto px-5 py-2.5 text-sm font-medium text-white bg-gray-600 rounded-lg shadow hover:bg-gray-700">
                         Kembali
                     </a>
 
@@ -187,14 +184,10 @@
 
 <script>
 function copyTemplate() {
-
     const textarea = document.getElementById("templatePesan");
-
     textarea.select();
     textarea.setSelectionRange(0, 99999);
-
     document.execCommand("copy");
-
     alert("Pesan berhasil disalin");
 }
 </script>

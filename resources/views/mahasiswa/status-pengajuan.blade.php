@@ -6,6 +6,30 @@
     <div class="min-h-screen px-4 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 via-white to-emerald-50">
         <div class="max-w-5xl mx-auto space-y-6">
 
+            {{-- JUMLAH DOKUMEN INVALID --}}
+        @if ($jumlahInvalid > 0)
+            <div class="relative overflow-hidden border-l-4 border-red-500 shadow-md bg-gradient-to-r from-red-50 to-rose-50 rounded-xl">
+                <div class="absolute top-0 right-0 w-24 h-24 translate-x-8 -translate-y-8 bg-red-200 rounded-full opacity-20"></div>
+
+                <div class="relative p-5">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full">
+                            <i class="text-xl text-red-600 fa-solid fa-triangle-exclamation"></i>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-red-800">
+                                Ada {{ $jumlahInvalid }} dokumen yang perlu diperbaiki
+                            </p>
+                            <p class="text-sm text-red-700">
+                                Silakan upload ulang dokumen yang ditandai invalid.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- ================= BELUM ADA PENGAJUAN ================= --}}
         @if (!$pengajuan)
             <div class="relative overflow-hidden text-center border shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border-amber-200">

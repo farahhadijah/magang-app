@@ -184,7 +184,7 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
 */
 use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
 use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
-use App\Http\Controllers\Kaprodi\PengajuanPKLController as KaprodiPengajuanController;
+use App\Http\Controllers\Kaprodi\PengajuanPklController as KaprodiPengajuanController;
 Route::middleware(['auth', 'kaprodi'])
     ->prefix('kaprodi')
     ->name('kaprodi.')
@@ -209,7 +209,7 @@ Route::middleware(['auth', 'kaprodi'])
 */
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
-use App\Http\Controllers\Staff\PengajuanPKLController as StaffPengajuanController;
+use App\Http\Controllers\Staff\PengajuanPklController as StaffPengajuanController;
 use App\Http\Controllers\Staff\MitraController as StaffMitraController;
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')

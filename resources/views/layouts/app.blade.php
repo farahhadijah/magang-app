@@ -3,12 +3,27 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Manifest -->
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('img/logounisla.png') }}">
 
     <title>
         {{ $title ?? config('app.name', 'MagangApp') }}
     </title>
-    <link rel="icon" type="image/png" href="{{ asset('img/logounisla.png') }}">
+    <!-- Favicon standard -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/logounisla.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/logounisla.png') }}">
+
+    <!-- WAJIB untuk mobile -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/logounisla.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

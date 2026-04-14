@@ -18,18 +18,21 @@ class ReviewLogbookController extends Controller
 
         $dosen = $user->dosen;
 
-        $logbooks = Logbook::query()
-            ->whereHas('pkl', function ($q) use ($dosen) {
-                $q->where('id_dosen', $dosen->id)
-                ->where('status', 'aktif');
-            })
-            ->with([
-                'pkl:id,id_dosen,status,id_pengajuan_pkl',
-                'pkl.pengajuanPkl.mahasiswa',
-                'pkl.pengajuanPkl.mahasiswa:id,nama'
-            ])
-            ->orderByDesc('tgl')
-            ->paginate(20); 
+    $query = Logbook::query()
+        ->whereHas('pkl', function ($q) use ($dosen) {
+            $q->where('id_dosen', $dosen->id)
+              ->where('status', 'aktif');
+        });
+
+    // ambil data logbook
+    $logbooks = $query
+        ->with([
+            'pkl:id,id_dosen,status,id_pengajuan_pkl',
+            'pkl.pengajuanPkl.mahasiswa',
+            'pkl.pengajuanPkl.mahasiswa:id,nama'
+        ])
+        ->orderByDesc('tgl')
+        ->paginate(20);
 
         return view('dosen.logbook.index', compact('logbooks'));
     }

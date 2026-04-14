@@ -24,13 +24,13 @@
         </div>
     @endif
 
-    {{-- Tabel Tugas --}}
+    {{-- Tabel Tugas (Desktop) --}}
     @if($tugas->isEmpty())
         <div class="p-6 text-center text-gray-600 bg-white rounded-lg shadow">
             Belum ada tugas yang dibuat.
         </div>
     @else
-        <div class="overflow-hidden bg-white rounded-lg shadow">
+        <div class="hidden overflow-hidden bg-white rounded-lg shadow md:block">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-xs divide-y divide-gray-200 sm:text-sm">
 
@@ -154,6 +154,110 @@
 
                 </table>
             </div>
+        </div>
+
+        {{-- MOBILE CARD - RESPONSIVE VERSION --}}
+        <div class="space-y-3 md:hidden">
+            @foreach($tugas as $index => $item)
+                @php
+                    $submit = $item->submit->first();
+                @endphp
+                
+                <div class="p-4 bg-white border border-gray-100 rounded-lg shadow">
+
+                    {{-- Header: Nomor dan Nama Mahasiswa --}}
+                    <div class="pb-2 mb-3 border-b border-gray-100">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="text-base font-semibold text-gray-900">
+                                    {{ $item->judul }}
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    {{ $item->pkl->mahasiswa->nama ?? '-' }}
+                                </p>
+                            </div>
+                            <span class="px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded">
+                                #{{ $index + 1 }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Body: Informasi Tugas --}}
+                    <div class="mb-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">Deadline</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $item->deadline 
+                                    ? \Carbon\Carbon::parse($item->deadline)->format('d M Y') 
+                                    : '-' }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">Status</span>
+                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full
+                                @if(!$submit) text-red-800 bg-red-100
+                                @elseif($submit->status == 'pending' && !$submit->revisi) text-yellow-800 bg-yellow-100
+                                @elseif($submit->revisi) text-red-800 bg-red-100
+                                @elseif($submit->status == 'selesai') text-green-800 bg-green-100
+                                @else text-red-800 bg-red-100
+                                @endif">
+                                @if(!$submit)
+                                    Belum Dikumpulkan
+                                @elseif($submit->status == 'pending' && !$submit->revisi)
+                                    Pending
+                                @elseif($submit->revisi)
+                                    Revisi
+                                @elseif($submit->status == 'selesai')
+                                    Selesai
+                                @else
+                                    Belum Dikumpulkan
+                                @endif
+                            </span>
+                        </div>
+
+                        {{-- Tambahan info jika ada revisi atau pending --}}
+                        @if($submit && $submit->revisi && $submit->catatan_revisi)
+                            <div class="p-2 mt-2 border border-red-100 rounded bg-red-50">
+                                <p class="text-xs font-medium text-red-700">Catatan Revisi:</p>
+                                <p class="text-xs text-red-600 mt-0.5">{{ $submit->catatan_revisi }}</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Action Buttons --}}
+                    <div class="flex gap-2">
+                        <a href="{{ route('mitra.tugas.show', $item->id) }}"
+                           class="flex-1 py-2 text-sm font-medium text-center text-white transition bg-blue-600 rounded hover:bg-blue-700">
+                            Lihat
+                        </a>
+
+                        @if($submit && $submit->status == 'selesai')
+                            <button class="flex-1 py-2 text-sm font-medium text-center text-white bg-gray-400 rounded cursor-not-allowed" disabled>
+                                Edit
+                            </button>
+                        @else
+                            <a href="{{ route('mitra.tugas.edit', $item->id) }}"
+                               class="flex-1 py-2 text-sm font-medium text-center text-white transition bg-yellow-500 rounded hover:bg-yellow-600">
+                                Edit
+                            </a>
+                        @endif
+
+                        <form action="{{ route('mitra.tugas.destroy', $item->id) }}" 
+                              method="POST" 
+                              onsubmit="return confirm('Hapus tugas ini?')" 
+                              class="flex-1">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="w-full py-2 text-sm font-medium text-center text-white transition bg-red-500 rounded hover:bg-red-600">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            @endforeach
         </div>
     @endif
 
