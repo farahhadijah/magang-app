@@ -3,7 +3,7 @@
         Pengajuan PKL - MagangApp
     </x-slot>
 
-    <div class="min-h-screen px-4 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 via-white to-emerald-50">
+    <div class="min-h-screen px-0 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 via-white to-emerald-50">
         <div class="max-w-5xl mx-auto space-y-6">
             {{-- ================= HEADER SECTION ================= --}}
             <div class="mb-8 text-center">

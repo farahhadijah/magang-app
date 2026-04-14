@@ -104,10 +104,27 @@ class PengajuanPklController extends Controller
             ->with('warning', 'Pengajuan sudah diproses.');
     }
 
-    $dosenList = Dosen::where('prodi_id', $prodiId)
+    // ambil prodi + fakultas dari kaprodi
+    $dosenKaprodi = auth()->user()->dosen;
+    $prodiId      = $dosenKaprodi->prodi_id;
+    $fakultasId   = $dosenKaprodi->prodi->fakultas_id;
+
+    // ambil semua dosen 1 fakultas + relasi prodi
+    $dosenAll = Dosen::with('prodi')
+    ->whereHas('prodi', function ($q) use ($fakultasId) {
+        $q->where('fakultas_id', $fakultasId);
+    })
     ->where('is_active', 1)
     ->orderBy('nama')
-    ->get(['id', 'nama']);
+    ->get(['id', 'nama', 'prodi_id', 'keahlian']);
+
+    // grouping berdasarkan prodi
+    $dosenGrouped = $dosenAll->groupBy('prodi_id');
+
+    // urutkan: prodi sendiri di atas
+    $dosenGrouped = $dosenGrouped->sortByDesc(function ($items, $key) use ($prodiId) {
+        return $key == $prodiId ? 1 : 0;
+    });
 
     /* ================= HITUNG JARAK ================= */
     $jarak = null;
@@ -149,15 +166,12 @@ class PengajuanPklController extends Controller
 
     return view('kaprodi.pengajuan.show', compact(
         'pengajuan',
-        'dosenList',
+        'dosenGrouped',
         'jarak',
         'jumlahRiwayat',
         'terakhirDigunakan'
     ));
     }
-
-
-
     /* ================= APPROVE ================= */
 
     public function approve(Request $request, $id)
@@ -186,13 +200,20 @@ class PengajuanPklController extends Controller
         return back()->with('warning', 'PKL sudah dibuat sebelumnya.');
     }
 
-    $dosen = \App\Models\Dosen::where('id', $request->id_dosen)
-        ->where('is_active', 1)
-        ->first();
+    $dosen = \App\Models\Dosen::with('prodi')
+    ->where('id', $request->id_dosen)
+    ->where('is_active', 1)
+    ->first();
 
     // ✅ FIX: cukup cek dosen saja
     if (!$dosen) {
         return back()->with('warning', 'Dosen tidak valid.');
+    }
+
+    $fakultasId = auth()->user()->dosen->prodi->fakultas_id;
+
+    if ($dosen->prodi->fakultas_id != $fakultasId) {
+        return back()->with('warning', 'Dosen harus dari fakultas yang sama.');
     }
 
     try {
@@ -274,7 +295,6 @@ class PengajuanPklController extends Controller
         return back()->with('error', 'Terjadi kesalahan saat approve.');
     }
 }
-
 
     /* ================= REJECT ================= */
 
