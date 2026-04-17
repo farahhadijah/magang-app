@@ -4,7 +4,7 @@
         Akun Mitra - MagangApp
     </x-slot>
 
-    <div class="container px-4 py-6 mx-auto">
+    <div class="container px-0 py-6 mx-auto">
 
     <h1 class="mb-0 text-xl font-bold md:text-2xl text-slate-900">
         Manajemen Akun Mitra

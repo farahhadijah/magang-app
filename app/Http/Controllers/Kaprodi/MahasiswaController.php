@@ -26,7 +26,13 @@ class MahasiswaController extends Controller
             ->whereHas('pengajuanPkl.pkl', function ($q) {
                 $q->where('status', 'aktif');
             })
-            ->with('prodi')
+            ->with([
+                'prodi',
+                'pengajuanPkl.pkl' => function ($q) {
+                    $q->where('status', 'aktif')
+                    ->with('dosen');
+                }
+            ])
             ->orderBy('nama')
             ->paginate(9);
 

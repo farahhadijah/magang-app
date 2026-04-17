@@ -21,6 +21,7 @@
                             <th class="text-left border desktop-padding mobile-padding desktop-text mobile-text">Nama</th>
                             <th class="text-left border desktop-padding mobile-padding desktop-text mobile-text">NIM</th>
                             <th class="text-left border desktop-padding mobile-padding desktop-text mobile-text">Prodi</th>
+                            <th class="text-left border desktop-padding mobile-padding desktop-text mobile-text">Dosen Pembimbing</th>
                         </tr>
                     </thead>
 
@@ -38,6 +39,16 @@
                             </td>
                             <td class="border desktop-padding mobile-padding desktop-text mobile-text">
                                 {{ $mhs->prodi->nama ?? '-' }}
+                            </td>
+                            @php
+                                $pklAktif = $mhs->pengajuanPkl
+                                    ->pluck('pkl')
+                                    ->filter()
+                                    ->first();
+                            @endphp
+
+                            <td class="border desktop-padding mobile-padding desktop-text mobile-text">
+                                {{ $pklAktif->dosen->nama ?? '-' }}
                             </td>
                         </tr>
                         @endforeach

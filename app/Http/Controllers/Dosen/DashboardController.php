@@ -28,61 +28,48 @@ class DashboardController extends Controller
             ->where('status_approve', 'pending')
             ->count();
 
-        $pklSelesaiCount = Pkl::where('id_dosen', $dosenId)
-            ->where('status', 'selesai')
-            ->count();
-
         $laporanAkhirCount = LaporanAkhir::whereHas('pkl', function ($q) use ($dosenId) {
             $q->where('id_dosen', $dosenId);
         })
         ->count();
-        /* ================= CEK KAPRODI ================= */
 
         /* ================= CEK KAPRODI ================= */
 
-$isKaprodi = $dosen && strtolower($dosen->jabatan) === 'kaprodi';
+        $isKaprodi = $dosen && strtolower($dosen->jabatan) === 'kaprodi';
 
-$totalMahasiswa = 0;
-$totalMenunggu = 0;
-$totalAktif = 0;
-$totalSelesai = 0;
+        $totalMenunggu = 0;
+        $totalAktif = 0;
+        $totalSelesai = 0;
 
-if ($isKaprodi) {
+        if ($isKaprodi) {
 
-    $prodiId = $dosen->prodi_id;
+            $prodiId = $dosen->prodi_id;
 
-    // Mahasiswa yang mengajukan PKL
-    $totalMahasiswa = PengajuanPkl::whereHas('mahasiswa', function ($q) use ($prodiId) {
-        $q->where('prodi_id', $prodiId);
-    })
-    ->distinct('id_mhs')
-    ->count('id_mhs');
+            // Menunggu verifikasi kaprodi
+            $totalMenunggu = PengajuanPkl::where('status', 'pending_kaprodi')
+                ->whereHas('mahasiswa', function ($q) use ($prodiId) {
+                    $q->where('prodi_id', $prodiId);
+                })
+                ->count();
 
-    // Menunggu verifikasi kaprodi
-    $totalMenunggu = PengajuanPkl::where('status', 'pending_kaprodi')
-        ->whereHas('mahasiswa', function ($q) use ($prodiId) {
-            $q->where('prodi_id', $prodiId);
-        })
-        ->count();
+            // PKL aktif
+            $totalAktif = Pkl::where('status', 'aktif')
+                ->whereHas('pengajuan', function ($q) use ($prodiId) {
+                    $q->whereHas('mahasiswa', function ($q2) use ($prodiId) {
+                        $q2->where('prodi_id', $prodiId);
+                    });
+                })
+                ->count();
 
-    // PKL aktif
-    $totalAktif = Pkl::where('status', 'aktif')
-        ->whereHas('pengajuan', function ($q) use ($prodiId) {
-            $q->whereHas('mahasiswa', function ($q2) use ($prodiId) {
-                $q2->where('prodi_id', $prodiId);
-            });
-        })
-        ->count();
-
-    // PKL selesai
-    $totalSelesai = Pkl::where('status', 'selesai')
-        ->whereHas('pengajuan', function ($q) use ($prodiId) {
-            $q->whereHas('mahasiswa', function ($q2) use ($prodiId) {
-                $q2->where('prodi_id', $prodiId);
-            });
-        })
-        ->count();
-}
+            // PKL selesai
+            $totalSelesai = Pkl::where('status', 'selesai')
+                ->whereHas('pengajuan', function ($q) use ($prodiId) {
+                    $q->whereHas('mahasiswa', function ($q2) use ($prodiId) {
+                        $q2->where('prodi_id', $prodiId);
+                    });
+                })
+                ->count();
+        }
 
         return view('dosen.dashboard', compact(
             'isKaprodi',
@@ -90,11 +77,9 @@ if ($isKaprodi) {
             // statistik dosen
             'mahasiswaCount',
             'logbookPendingCount',
-            'pklSelesaiCount',
             'laporanAkhirCount',
 
             // statistik kaprodi
-            'totalMahasiswa',
             'totalMenunggu',
             'totalAktif',
             'totalSelesai'

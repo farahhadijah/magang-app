@@ -15,50 +15,6 @@ use Illuminate\Support\Facades\Storage;
 
 class PengajuanPklController extends Controller
 {
-    /* ================= DASHBOARD ================= */
-    public function dashboard()
-{
-    $prodiId = $this->getProdiId();
-
-    $totalMahasiswa = PengajuanPkl::whereIn('status', [
-        'pending_tu',
-        'pending_kaprodi'
-    ])
-    ->whereHas('mahasiswa', function ($q) use ($prodiId) {
-        $q->where('prodi_id', $prodiId);
-    })
-    ->distinct('id_mhs')
-    ->count('id_mhs');
-
-    $totalMenunggu = PengajuanPkl::where('status', 'pending_kaprodi')
-        ->whereHas('mahasiswa', function ($q) use ($prodiId) {
-            $q->where('prodi_id', $prodiId);
-        })
-        ->whereHas('verifikasi', function ($q) {
-            $q->where('level', 'tu')
-              ->where('status', 'approved');
-        })
-        ->count();
-
-    $totalAktif = Pkl::where('status', 'aktif')
-        ->whereHas('pengajuan.mahasiswa', function ($q) use ($prodiId) {
-            $q->where('prodi_id', $prodiId);
-        })
-        ->count();
-
-    $totalSelesai = Pkl::where('status', 'selesai')
-        ->whereHas('pengajuan.mahasiswa', function ($q) use ($prodiId) {
-            $q->where('prodi_id', $prodiId);
-        })
-        ->count();
-
-    return view('kaprodi.dashboard', compact(
-        'totalMahasiswa',
-        'totalMenunggu',
-        'totalAktif',
-        'totalSelesai'
-    ));
-}
     /* ================= LIST PENGAJUAN ================= */
     public function index()
 {

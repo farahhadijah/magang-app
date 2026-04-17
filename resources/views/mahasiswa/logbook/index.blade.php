@@ -3,7 +3,7 @@
         Logbook - MagangApp
     </x-slot>
 
-    <div class="max-w-6xl px-4 py-6 mx-auto space-y-4">
+    <div class="max-w-6xl px-0 py-6 mx-auto space-y-4">
 
         {{-- NOTIFIKASI (DIRINGKAS) --}}
         @if (session('success') || session('warning'))

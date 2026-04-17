@@ -192,7 +192,6 @@ Route::middleware(['auth', 'kaprodi'])
         // Sertifikat Mahasiswa
          Route::get('/sertifikat', [SertifikatController::class, 'indexKaprodi'])
             ->name('sertifikat.index');
-        Route::get('/dashboard', [KaprodiPengajuanController::class, 'dashboard'])->name('dashboard');
         Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
         Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
         Route::get('/nilai-pkl',[KaprodiNilaiController::class, 'index'])->name('nilai.index');

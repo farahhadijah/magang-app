@@ -23,6 +23,7 @@
                             <th class="p-3 text-left border desktop-padding mobile-padding desktop-text mobile-text">Instansi</th>
                             <th class="p-3 text-left border desktop-padding mobile-padding desktop-text mobile-text">Status</th>
                             <th class="p-3 text-left border desktop-padding mobile-padding desktop-text mobile-text">Catatan Kaprodi</th>
+                            <th class="p-3 text-left border desktop-padding mobile-padding desktop-text mobile-text">Tanggal Verifikasi</th>
                         </tr>
                     </thead>
 
@@ -62,6 +63,16 @@
                             </td>
                             <td class="border desktop-padding mobile-padding desktop-text mobile-text">
                                 {{ $verifikasiKaprodi->catatan ?? '-' }}
+                            </td>
+                            @php
+                                $verifikasiKaprodi = $item->verifikasi->first();
+                            @endphp
+
+                            <td class="border desktop-padding mobile-padding desktop-text mobile-text">
+                                {{ $verifikasiKaprodi?->tgl_verifikasi 
+                                    ? \Carbon\Carbon::parse($verifikasiKaprodi->tgl_verifikasi)->format('d-m-Y H:i')
+                                    : '-' 
+                                }}
                             </td>
                         </tr>
                         @endforeach

@@ -147,7 +147,7 @@
                                                         required>
                                                     
                                                     <div class="flex-1">
-                                                        <div class="font-medium text-gray-800"><p class="text-sm">{{ $d->nama }}</p></div>
+                                                        <div class="font-medium text-gray-800"><p class="text-sm ml-1">{{ $d->nama }}</p></div>
                                                         @if($d->keahlian)
                                                             <div class="mt-1 text-xs text-green-600">
                                                                 <span class="font-semibold"></span> {{ Str::limit($d->keahlian, 50) }}

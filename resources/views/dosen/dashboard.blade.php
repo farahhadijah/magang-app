@@ -45,23 +45,7 @@
                     </div>
                     
                     <div class="p-6 pt-2">
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                            {{-- Total Mahasiswa --}}
-                            <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl hover:shadow-lg hover:-translate-y-1">
-                                <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 bg-blue-200 rounded-full opacity-30 group-hover:scale-150"></div>
-                                <div class="relative">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="flex items-center justify-center w-10 h-10 bg-blue-500 shadow-md rounded-xl">
-                                            <i class="text-lg text-white fa-solid fa-users"></i>
-                                        </div>
-                                        <i class="text-sm text-blue-400 fa-solid fa-arrow-trend-up"></i>
-                                    </div>
-                                    <p class="mb-1 text-xs font-semibold tracking-wider text-blue-700 uppercase">Mahasiswa Ajukan PKL</p>
-                                    <p class="text-3xl font-bold text-blue-900">{{ $totalMahasiswa }}</p>
-                                    <p class="mt-2 text-xs text-blue-600">Total pengajuan PKL</p>
-                                </div>
-                            </div>
-
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {{-- Menunggu Verifikasi --}}
                             <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl hover:shadow-lg hover:-translate-y-1">
                                 <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 rounded-full bg-amber-200 opacity-30 group-hover:scale-150"></div>
@@ -142,7 +126,7 @@
                 </div>
                 
                 <div class="p-6 pt-2">
-                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {{-- Mahasiswa Aktif --}}
                         <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl hover:shadow-lg hover:-translate-y-1">
                             <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 bg-green-200 rounded-full opacity-30 group-hover:scale-150"></div>
@@ -188,22 +172,6 @@
                                 <p class="mb-1 text-xs font-semibold tracking-wider text-blue-700 uppercase">Laporan Akhir</p>
                                 <p class="text-3xl font-bold text-blue-900">{{ $laporanAkhirCount ?? 0 }}</p>
                                 <p class="mt-2 text-xs text-blue-600">Mahasiswa Laporan Akhir</p>
-                            </div>
-                        </div>
-
-                        {{-- PKL Selesai --}}
-                        <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl hover:shadow-lg hover:-translate-y-1">
-                            <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 bg-purple-200 rounded-full opacity-30 group-hover:scale-150"></div>
-                            <div class="relative">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
-                                        <i class="text-lg text-white fa-solid fa-check-circle"></i>
-                                    </div>
-                                    <i class="text-sm text-purple-400 fa-solid fa-trophy"></i>
-                                </div>
-                                <p class="mb-1 text-xs font-semibold tracking-wider text-purple-700 uppercase">PKL Selesai</p>
-                                <p class="text-3xl font-bold text-purple-900">{{ $pklSelesaiCount ?? 0 }}</p>
-                                <p class="mt-2 text-xs text-purple-600">Mahasiswa selesai PKL</p>
                             </div>
                         </div>
                     </div>
