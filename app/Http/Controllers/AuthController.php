@@ -1,10 +1,7 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 class AuthController extends Controller
 {
     // tampilkan halaman login
@@ -12,7 +9,6 @@ class AuthController extends Controller
     {
         return view('auth.login');
     }
-
     // proses login
     public function login(Request $request)
     {
@@ -20,20 +16,14 @@ class AuthController extends Controller
     'username' => 'required',
     'password' => 'required',
 ]);
-
-
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
             return redirect()->intended('/dashboard');
         }
-
         return back()->withErrors([
     'username' => 'Username atau password salah',
 ]);
-
     }
-
     // logout
     public function logout(Request $request)
     {

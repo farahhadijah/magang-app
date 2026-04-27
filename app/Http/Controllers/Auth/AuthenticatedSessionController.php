@@ -29,30 +29,21 @@ public function store(Request $request): RedirectResponse
         'username' => ['required', 'string'],
         'password' => ['required'],
     ]);
-
     $credentials = $request->only('username', 'password');
-
     if (!Auth::attempt($credentials)) {
         throw ValidationException::withMessages([
             'username' => __('Username / password salah.'),
         ]);
     }
-
     $request->session()->regenerate();
-
     $user = Auth::user();
-
-    // ⛔ akun nonaktif
     if (!$user->is_active) {
         Auth::logout();
         abort(403, 'Akun tidak aktif');
     }
-
-    // 🔐 first login
     if ($user->first_login) {
         return redirect()->route('password.first');
     }
-
     return redirect()->route('dashboard');
 }
 

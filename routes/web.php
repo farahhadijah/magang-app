@@ -183,7 +183,6 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
 |--------------------------------------------------------------------------
 */
 use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
-use App\Http\Controllers\Kaprodi\NilaiController as KaprodiNilaiController;
 use App\Http\Controllers\Kaprodi\PengajuanPklController as KaprodiPengajuanController;
 Route::middleware(['auth', 'kaprodi'])
     ->prefix('kaprodi')
@@ -192,9 +191,8 @@ Route::middleware(['auth', 'kaprodi'])
         // Sertifikat Mahasiswa
          Route::get('/sertifikat', [SertifikatController::class, 'indexKaprodi'])
             ->name('sertifikat.index');
-        Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
-        Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
-        Route::get('/nilai-pkl',[KaprodiNilaiController::class, 'index'])->name('nilai.index');
+    Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
+    Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
         Route::get('/pengajuan/{id}', [KaprodiPengajuanController::class, 'show'])->name('pengajuan.show');
         Route::post('/pengajuan/{id}/approve', [KaprodiPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [KaprodiPengajuanController::class, 'reject'])->name('pengajuan.reject');
