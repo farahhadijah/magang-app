@@ -293,6 +293,19 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
         )->name('fakultas.import');
     });
 
+use App\Http\Controllers\Pimpinan\PimpinanController;
+
+Route::prefix('pimpinan')->middleware('auth')->group(function () {
+
+    Route::get('/', [PimpinanController::class, 'index']);
+
+    Route::get('/fakultas/{id}', [PimpinanController::class, 'prodi'])
+        ->name('pimpinan.prodi');
+
+    Route::get('/prodi/{prodi_id}/angkatan/{angkatan}', [PimpinanController::class, 'mahasiswa'])
+        ->name('pimpinan.mahasiswa');
+});
+
 /*
 |--------------------------------------------------------------------------
 | MITRA AREA

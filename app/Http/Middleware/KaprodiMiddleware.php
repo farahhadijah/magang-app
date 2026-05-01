@@ -16,8 +16,8 @@ class KaprodiMiddleware
             abort(403);
         }
 
-        // cek apakah dosen dan jabatan kaprodi
-        if ($user->role === 'dosen' && $user->dosen && $user->dosen->jabatan === 'kaprodi') {
+        // cek apakah dosen dan jabatan kaprodi (pakai helper model yang case-insensitive)
+        if ($user->role === 'dosen' && $user->isKaprodi()) {
             return $next($request);
         }
 

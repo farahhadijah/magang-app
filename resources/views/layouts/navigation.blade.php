@@ -51,6 +51,9 @@
 
         @elseif(auth()->user()->role === 'mitra')
             @include('layouts.navbar.mitra')
+        
+        @elseif(auth()->user()->role === 'pimpinan')
+            @include('layouts.navbar.pimpinan')
 
         @endif
 
