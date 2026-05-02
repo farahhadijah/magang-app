@@ -104,68 +104,57 @@
                                 Pilih Dosen Pembimbing
                             </label>
 
-                            {{-- SEARCH BOX --}}
+                            {{-- SEARCH --}}
                             <div class="mb-4">
                                 <input type="text" 
-                                       id="searchDosenInput" 
-                                       placeholder="Cari dosen (nama, keahlian, atau prodi)..." 
-                                       class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                    id="searchDosenInput" 
+                                    placeholder="Cari dosen (nama atau keahlian)..."
+                                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
                             </div>
 
-                            {{-- PILIHAN PRODI (TABS) --}}
-                            <div class="mb-4 border-b border-gray-200">
-                                <nav class="flex flex-wrap gap-1 -mb-px">
-                                    @foreach($dosenGrouped as $prodiId => $dosens)
-                                        <button type="button"
-                                            onclick="showDosen({{ $prodiId }})"
-                                            class="tab-prodi px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200
-                                                   {{ $loop->first ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-green-600 hover:text-white' }}"
-                                            data-prodi="{{ $prodiId }}">
-                                            {{ $dosens->first()->prodi->nama }}
-                                            @if($prodiId == auth()->user()->dosen->prodi_id)
-                                                <span class="ml-1 text-xs">(Anda)</span>
-                                            @endif
-                                            <span class="ml-1 text-xs bg-white bg-opacity-30 rounded-full px-1.5 py-0.5">
-                                                {{ $dosens->count() }}
-                                            </span>
-                                        </button>
-                                    @endforeach
-                                </nav>
-                            </div>
+                            {{-- LIST DOSEN --}}
+                            <div id="dosenContainer" class="overflow-y-auto max-h-96">
+                                <div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
 
-                            {{-- LIST DOSEN PER PRODI --}}
-                            <div id="dosenContainer" class="max-h-96 overflow-y-auto">
-                                @foreach($dosenGrouped as $prodiId => $dosens)
-                                    <div id="prodi-{{ $prodiId }}" class="space-y-3 {{ $loop->first ? '' : 'hidden' }}">
-                                        <div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
-                                            @foreach($dosens as $d)
-                                                <label class="flex items-start p-3 transition border rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300">
-                                                    <input type="radio"
-                                                        name="id_dosen"
-                                                        value="{{ $d->id }}"
-                                                        class="mt-1 mr-3"
-                                                        required>
-                                                    
-                                                    <div class="flex-1">
-                                                        <div class="font-medium text-gray-800"><p class="text-sm ml-1">{{ $d->nama }}</p></div>
-                                                        @if($d->keahlian)
-                                                            <div class="mt-1 text-xs text-green-600">
-                                                                <span class="font-semibold"></span> {{ Str::limit($d->keahlian, 50) }}
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                </label>
-                                            @endforeach
+                                    @forelse($dosenList as $d)
+                                        <label class="flex items-start p-3 transition border rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300">
+                                            
+                                            <input type="radio"
+                                                name="id_dosen"
+                                                value="{{ $d->id }}"
+                                                class="mt-1 mr-3"
+                                                required>
+                                            
+                                            <div class="flex-1">
+                                                {{-- NAMA --}}
+                                                <p class="text-sm font-semibold text-gray-800 dosen-nama">
+                                                    {{ $d->nama }}
+                                                </p>
+
+                                                {{-- KEAHLIAN --}}
+                                                @if($d->keahlian)
+                                                    <p class="text-xs text-green-600 dosen-keahlian">
+                                                        {{ Str::limit($d->keahlian, 50) }}
+                                                    </p>
+                                                @endif
+
+                                                {{-- JUMLAH BIMBINGAN --}}
+                                                <p class="mt-1 text-xs text-blue-600">
+                                                    {{ $d->total_bimbingan }} mahasiswa aktif
+                                                </p>
+                                            </div>
+                                        </label>
+                                    @empty
+                                        <div class="p-6 text-center text-gray-500">
+                                            Tidak ada dosen tersedia
                                         </div>
-                                    </div>
-                                @endforeach
-                                
-                                {{-- EMPTY STATE --}}
-                                <div id="emptyState" class="hidden p-8 text-center text-gray-500">
-                                    <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <p class="mt-2">Tidak ada dosen yang sesuai dengan pencarian</p>
+                                    @endforelse
+
+                                </div>
+
+                                {{-- EMPTY SEARCH --}}
+                                <div id="emptyState" class="hidden p-6 text-center text-gray-500">
+                                    Tidak ditemukan dosen
                                 </div>
                             </div>
 
@@ -230,71 +219,25 @@
             }
         }
 
-        // Fungsi untuk menampilkan dosen berdasarkan prodi yang dipilih
-        function showDosen(prodiId) {
-            // Update class tabs
-            document.querySelectorAll('.tab-prodi').forEach(tab => {
-                tab.classList.remove('bg-green-600', 'text-white');
-                tab.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            
-            const activeTab = document.querySelector(`.tab-prodi[data-prodi="${prodiId}"]`);
-            if (activeTab) {
-                activeTab.classList.remove('bg-gray-100', 'text-gray-600');
-                activeTab.classList.add('bg-green-600', 'text-white');
-            }
-            
-            // Sembunyikan semua container dosen
-            document.querySelectorAll('[id^="prodi-"]').forEach(el => {
-                el.classList.add('hidden');
-            });
-            
-            // Tampilkan yang dipilih
-            const selectedProdi = document.getElementById('prodi-' + prodiId);
-            if (selectedProdi) {
-                selectedProdi.classList.remove('hidden');
-            }
-            
-            // Reset search input
-            const searchInput = document.getElementById('searchDosenInput');
-            if (searchInput) {
-                searchInput.value = '';
-                filterDosen('');
-            }
-        }
-
         // Fungsi filter dosen berdasarkan pencarian
         function filterDosen(keyword) {
-            const allDosenLabels = document.querySelectorAll('#dosenContainer label');
-            let hasVisible = false;
-            
-            allDosenLabels.forEach(label => {
-                const dosenName = label.querySelector('.font-medium')?.innerText.toLowerCase() || '';
-                const dosenKeahlian = label.querySelector('.text-green-600')?.innerText.toLowerCase() || '';
-                const dosenProdi = label.querySelector('.text-gray-500')?.innerText.toLowerCase() || '';
-                const searchLower = keyword.toLowerCase();
-                
-                const isMatch = dosenName.includes(searchLower) || 
-                               dosenKeahlian.includes(searchLower) || 
-                               dosenProdi.includes(searchLower);
-                
-                if (isMatch) {
-                    label.style.display = '';
-                    hasVisible = true;
-                } else {
-                    label.style.display = 'none';
-                }
+            const items = document.querySelectorAll('#dosenContainer label');
+            let found = false;
+
+            items.forEach(item => {
+                const nama = item.querySelector('.dosen-nama')?.innerText.toLowerCase() || '';
+                const keahlian = item.querySelector('.dosen-keahlian')?.innerText.toLowerCase() || '';
+                const search = keyword.toLowerCase();
+
+                const match = nama.includes(search) || keahlian.includes(search);
+
+                item.style.display = match ? '' : 'none';
+
+                if (match) found = true;
             });
-            
-            // Show/hide empty state
-            const emptyState = document.getElementById('emptyState');
-            if (emptyState) {
-                if (!hasVisible && keyword.length > 0) {
-                    emptyState.classList.remove('hidden');
-                } else {
-                    emptyState.classList.add('hidden');
-                }
-            }
+
+            document.getElementById('emptyState')
+                ?.classList.toggle('hidden', found || keyword.length === 0);
         }
 
         // Event listener untuk search

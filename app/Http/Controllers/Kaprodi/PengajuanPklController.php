@@ -33,7 +33,9 @@ class PengajuanPklController extends Controller
     /* ================= DETAIL ================= */
     public function show($id)
 {
-    $prodiId = $this->getProdiId();
+    // ambil prodi kaprodi dulu (🔥 WAJIB DI ATAS)
+    $dosenKaprodi = auth()->user()->dosen;
+    $prodiId      = $dosenKaprodi->prodi_id;
 
     $pengajuan = PengajuanPkl::query()
         ->whereKey($id)
@@ -60,27 +62,22 @@ class PengajuanPklController extends Controller
             ->with('warning', 'Pengajuan sudah diproses.');
     }
 
-    // ambil prodi + fakultas dari kaprodi
-    $dosenKaprodi = auth()->user()->dosen;
-    $prodiId      = $dosenKaprodi->prodi_id;
-    $fakultasId   = $dosenKaprodi->prodi->fakultas_id;
-
-    // ambil semua dosen 1 fakultas + relasi prodi
-    $dosenAll = Dosen::with('prodi')
-    ->whereHas('prodi', function ($q) use ($fakultasId) {
-        $q->where('fakultas_id', $fakultasId);
+    $dosenList = Dosen::query()
+    ->leftJoin('pkl', function ($join) {
+        $join->on('dosen.id', '=', 'pkl.id_dosen')
+             ->where('pkl.status', 'aktif');
     })
-    ->where('is_active', 1)
-    ->orderBy('nama')
-    ->get(['id', 'nama', 'prodi_id', 'keahlian']);
-
-    // grouping berdasarkan prodi
-    $dosenGrouped = $dosenAll->groupBy('prodi_id');
-
-    // urutkan: prodi sendiri di atas
-    $dosenGrouped = $dosenGrouped->sortByDesc(function ($items, $key) use ($prodiId) {
-        return $key == $prodiId ? 1 : 0;
-    });
+    ->where('dosen.prodi_id', $prodiId)
+    ->where('dosen.is_active', 1)
+    ->select(
+        'dosen.id',
+        'dosen.nama',
+        'dosen.keahlian',
+        DB::raw('COUNT(pkl.id) as total_bimbingan')
+    )
+    ->groupBy('dosen.id', 'dosen.nama', 'dosen.keahlian')
+    ->orderBy('dosen.nama')
+    ->get();
 
     /* ================= HITUNG JARAK ================= */
     $jarak = null;
@@ -100,6 +97,7 @@ class PengajuanPklController extends Controller
             $coords['lng']
         );
     }
+
     /* ================= RIWAYAT TEMPAT PKL ================= */
     $tempatId = $pengajuan->tempatPkl->id ?? null;
 
@@ -107,7 +105,6 @@ class PengajuanPklController extends Controller
     $terakhirDigunakan = null;
 
     if ($tempatId) {
-
         $riwayat = PengajuanPkl::where('id_tempat_pkl', $tempatId)
             ->where('id', '!=', $pengajuan->id)
             ->selectRaw('COUNT(*) as total, MAX(created_at) as terakhir')
@@ -116,18 +113,18 @@ class PengajuanPklController extends Controller
         $jumlahRiwayat = $riwayat->total ?? 0;
 
         if ($riwayat->terakhir) {
-            $terakhirDigunakan = Carbon::parse($riwayat->terakhir);
+            $terakhirDigunakan = \Carbon\Carbon::parse($riwayat->terakhir);
         }
     }
 
     return view('kaprodi.pengajuan.show', compact(
         'pengajuan',
-        'dosenGrouped',
+        'dosenList',
         'jarak',
         'jumlahRiwayat',
         'terakhirDigunakan'
     ));
-    }
+}
     /* ================= APPROVE ================= */
 
     public function approve(Request $request, $id)
@@ -156,33 +153,27 @@ class PengajuanPklController extends Controller
         return back()->with('warning', 'PKL sudah dibuat sebelumnya.');
     }
 
-    $dosen = \App\Models\Dosen::with('prodi')
-    ->where('id', $request->id_dosen)
-    ->where('is_active', 1)
-    ->first();
+    $dosen = Dosen::where('id', $request->id_dosen)
+        ->where('is_active', 1)
+        ->first();
 
-    // ✅ FIX: cukup cek dosen saja
     if (!$dosen) {
         return back()->with('warning', 'Dosen tidak valid.');
     }
 
-    $fakultasId = auth()->user()->dosen->prodi->fakultas_id;
-
-    if ($dosen->prodi->fakultas_id != $fakultasId) {
-        return back()->with('warning', 'Dosen harus dari fakultas yang sama.');
+    // 🔥 WAJIB SATU PRODI
+    if ($dosen->prodi_id != $prodiId) {
+        return back()->with('warning', 'Dosen harus dari prodi yang sama.');
     }
 
     try {
+        DB::transaction(function () use ($pengajuan, $dosen, $prodiId) {
 
-        DB::transaction(function () use ($pengajuan, $dosen) {
-
-            /* ================= VERIFIKASI ================= */
             Verifikasi::create([
                 'id_pengajuan_pkl' => $pengajuan->id,
                 'id_user'          => auth()->user()->getKey(),
                 'level'            => 'kaprodi',
                 'status'           => 'approved',
-                'catatan'          => null,
                 'tgl_verifikasi'   => now(),
             ]);
 
@@ -190,36 +181,33 @@ class PengajuanPklController extends Controller
                 'status' => 'disetujui',
             ]);
 
-            /* ================= BUAT PKL ================= */
             $pkl = Pkl::create([
                 'id_pengajuan_pkl' => $pengajuan->id,
-                'id_dosen'         => $dosen->id, // ✅ FIX: pakai dosen.id
+                'id_dosen'         => $dosen->id,
                 'tgl_mulai'        => now(),
-                'tgl_selesai'      => null, // ✅ sesuai konsep baru
+                'tgl_selesai'      => null,
                 'status'           => 'aktif',
             ]);
 
-            /* ================= GENERATE NOMOR SURAT ================= */
+            // nomor surat
             $bulanRomawi = [
                 1 => 'I','II','III','IV','V','VI',
                 'VII','VIII','IX','X','XI','XII'
             ];
 
-            $urutan = SuratPengantar::count() + 1;
-
             $noSurat = sprintf(
                 "%03d/UNISLA/PKL/%s/%s",
-                $urutan,
+                SuratPengantar::count() + 1,
                 $bulanRomawi[now()->month],
                 now()->year
             );
 
-            /* ================= AMBIL DATA KAPRODI ================= */
-            $kaprodi = \App\Models\Dosen::where('jabatan', 'kaprodi')
+            // 🔥 ambil kaprodi dari prodi yg sama
+            $kaprodi = Dosen::where('jabatan', 'Kaprodi')
+                ->where('prodi_id', $prodiId)
                 ->where('is_active', 1)
                 ->first();
 
-            /* ================= GENERATE PDF ================= */
             $pdf = Pdf::loadView('surat.pengantar', [
                 'pengajuan' => $pengajuan,
                 'pkl'       => $pkl,
@@ -227,12 +215,9 @@ class PengajuanPklController extends Controller
                 'kaprodi'   => $kaprodi,
             ])->setPaper('A4', 'portrait');
 
-            $filename = 'surat_pkl_' . $pkl->id . '.pdf';
-            $path = 'surat/' . $filename;
-
+            $path = 'surat/surat_pkl_' . $pkl->id . '.pdf';
             Storage::disk('public')->put($path, $pdf->output());
 
-            /* ================= SIMPAN KE DATABASE ================= */
             SuratPengantar::create([
                 'id_pkl'     => $pkl->id,
                 'no_surat'   => $noSurat,
@@ -242,13 +227,11 @@ class PengajuanPklController extends Controller
         });
 
         return redirect()->route('kaprodi.pengajuan.index')
-            ->with('success', 'Pengajuan disetujui, PKL aktif, dan Surat berhasil dibuat.');
+            ->with('success', 'Pengajuan disetujui & surat berhasil dibuat.');
 
     } catch (\Exception $e) {
-
-        \Log::error($e); // 🔥 biar bisa cek di log
-
-        return back()->with('error', 'Terjadi kesalahan saat approve.');
+        \Log::error($e);
+        return back()->with('error', 'Terjadi kesalahan.');
     }
 }
 
