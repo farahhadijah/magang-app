@@ -51,16 +51,16 @@
                             @if($f->is_active)
                                 <span class="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
                                     Aktif
-                                </span>
+                                            Manajemen Formulir Dinonaktifkan
                             @else
-                                <span class="px-3 py-1 text-sm font-semibold text-red-600 bg-red-100 rounded-full">
-                                    Nonaktif
+                                        <p class="mt-1 text-sm text-gray-500">
+                                            Fitur manajemen formulir telah dinonaktifkan oleh administrator.
                                 </span>
                             @endif
                         </td>
                         <td class="p-4 space-x-2 text-center">
                             <a href="{{ route('admin.formulir.edit',$f->id) }}"
-                               class="px-3 py-1 text-sm text-white transition bg-yellow-500 rounded-lg shadow hover:bg-yellow-600">
+                                    {{-- Manajemen formulir dinonaktifkan --}}
                                 Edit
                             </a>
 
@@ -76,14 +76,6 @@
                             </form>
                         </td>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="p-6 text-center text-gray-500">
-                            Belum ada data formulir.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</x-app-layout>
+                                            <tr>
+                                                <td colspan="5" class="p-6 text-center text-gray-500">Manajemen formulir telah dinonaktifkan.</td>
+                                            </tr>

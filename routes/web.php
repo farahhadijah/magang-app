@@ -72,14 +72,7 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->name('mahasiswa.')
     ->group(function () {
         Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
-        // formulir
-        Route::get('/formulir', 
-            [\App\Http\Controllers\Mahasiswa\FormulirController::class,'index']
-        )->name('formulir.index');
-
-        Route::get('/formulir/download/{id}', 
-            [\App\Http\Controllers\Mahasiswa\FormulirController::class,'download']
-        )->name('formulir.download');
+        // formulir (DIHAPUS: fitur download formulir dinonaktifkan)
         // Pengajuan PKL
         Route::get('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
         Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
@@ -250,7 +243,6 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
 */
 use App\Http\Controllers\Admin\DosenController;
 use App\Http\Controllers\Admin\FakultasController;
-use App\Http\Controllers\Admin\FormulirController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\StaffController;
@@ -267,7 +259,7 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
 
         Route::resource('users', UserController::class)->only(['create', 'store']);
 
-        Route::resource('formulir', FormulirController::class);
+    // Route::resource('formulir', FormulirController::class); // DIHAPUS: manajemen formulir dinonaktifkan
 
         Route::resource('prodi', ProdiController::class);
         Route::post('prodi/import', [ProdiController::class, 'import'])->name('prodi.import');
