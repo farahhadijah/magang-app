@@ -63,7 +63,7 @@
 
                                 <td class="px-6 py-4">
                                     <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                                        {{ $pkl->nilaiPkl->nilai }}
+                                        {{ $pkl->nilaiPkl->nilai_huruf }}
                                     </span>
                                 </td>
 
@@ -109,7 +109,7 @@
                             <p>
                                 <span class="text-gray-500">Nilai:</span>
                                 <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded">
-                                    {{ $pkl->nilaiPkl->nilai }}
+                                    {{ $pkl->nilaiPkl->nilai_huruf }}
                                 </span>
                             </p>
                             <p>

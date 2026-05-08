@@ -26,20 +26,22 @@
                 {{-- Nilai --}}
                 <div>
                     <label class="block mb-2 text-sm font-semibold text-gray-700">
-                        Nilai (0 - 100)
+                        Nilai Angka (0 - 100)
                     </label>
 
-                    <select name="nilai"
-                            required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
-                        <option value="">-- Pilih Nilai --</option>
+                    <input type="number"
+                        name="nilai"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        required
+                        value="{{ old('nilai') }}"
+                        placeholder="Contoh: 87"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
 
-                        @for($i = 0; $i <= 100; $i+=5)
-                            <option value="{{ $i }}">
-                                {{ $i }}
-                            </option>
-                        @endfor
-                    </select>
+                    <p class="mt-1 text-xs text-gray-400">
+                        Sistem otomatis mengubah ke nilai huruf
+                    </p>
 
                     @error('nilai')
                         <p class="mt-2 text-sm text-red-600">

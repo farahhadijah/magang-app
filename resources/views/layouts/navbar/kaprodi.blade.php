@@ -29,13 +29,5 @@
         <i class="w-5 fa-solid fa-user-clock"></i>
         Mahasiswa Belum Mengajukan
     </a>
-
-    {{-- ================= SERTIFIKAT PKL ================= --}}
-    <a href="{{ route('kaprodi.sertifikat.index') }}"
-    class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800
-    {{ request()->routeIs('kaprodi.sertifikat.*') ? 'bg-green-800 text-amber-300' : '' }}">
-        <i class="w-5 fa-solid fa-certificate"></i>
-        Sertifikat PKL
-    </a>
     
 </div>

@@ -44,7 +44,7 @@
                     </p>
 
                     <div class="mt-2 text-5xl font-extrabold text-white">
-                        {{ $pkl->nilaiPkl->nilai }}
+                        {{ $pkl->nilaiPkl->nilai_huruf }}
                     </div>
 
                 </div>
