@@ -29,10 +29,30 @@ class DashboardController extends Controller
             })
             ->count();
 
+        // SURAT PENGANTAR BELUM DIVALIDASI
+        $totalSuratBelumValidasi = PengajuanPkl::where('status', 'disetujui')
+
+            ->where(function ($q) {
+                $q->whereNull('status_surat')
+                  ->orWhere('status_surat', '!=', 'siap_diambil');
+            })
+
+            ->whereHas('mahasiswa', function ($q) use ($prodiId) {
+                $q->where('prodi_id', $prodiId);
+            })
+
+            // PKL BELUM SELESAI
+            ->whereDoesntHave('pkl', function ($q) {
+                $q->where('status', 'selesai');
+            })
+
+            ->count();
+
         return view('staff.dashboard', compact(
             'totalMenunggu',
             'totalSelesaiTu',
-            'totalDitolak'
+            'totalDitolak',
+            'totalSuratBelumValidasi'
         ));
     }
 

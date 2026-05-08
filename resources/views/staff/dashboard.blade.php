@@ -3,75 +3,143 @@
         Dashboard Staff Tu - MagangApp
     </x-slot>
 
-    <div class="px-0 py-8 sm:px-6 lg:px-8">
+    <div class="min-h-screen px-4 py-6 sm:px-6 lg:px-8 bg-gray-50">
         {{-- Header Section --}}
         <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-            <p class="mt-1 text-sm text-gray-500">Ringkasan status verifikasi pengajuan PKL</p>
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+            <p class="mt-2 text-sm text-gray-500">Ringkasan status verifikasi pengajuan PKL</p>
         </div>
 
         {{-- Statistik Cards --}}
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-            <!-- Menunggu -->
-            <div class="relative overflow-hidden transition-all duration-300 bg-white border border-gray-100 shadow-md group rounded-2xl hover:shadow-xl">
-                <div class="absolute top-0 left-0 w-2 h-full bg-amber-400 rounded-l-2xl"></div>
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="p-3 bg-amber-100 rounded-xl">
-                            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <span class="text-xs font-medium text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">Pending</span>
-                    </div>
-                    <h3 class="text-sm font-medium tracking-wider text-gray-500 uppercase">Menunggu Verifikasi</h3>
-                    <p class="mt-2 text-4xl font-bold text-gray-800">{{ $totalMenunggu }}</p>
-                    <div class="mt-4 text-xs text-gray-400">Perlu segera diproses</div>
-                </div>
-            </div>
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
 
-            <!-- Disetujui (Final) / Menunggu Verifikasi Kaprodi -->
-            <div class="relative overflow-hidden transition-all duration-300 bg-white border border-gray-100 shadow-md group rounded-2xl hover:shadow-xl">
-                <div class="absolute top-0 left-0 w-2 h-full bg-emerald-400 rounded-l-2xl"></div>
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="p-3 bg-emerald-100 rounded-xl">
-                            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+            <!-- Menunggu -->
+            <a href="{{ route('staff.pengajuan.index') }}"
+            class="block transition-transform duration-200 hover:scale-[1.02]">
+                <div class="transition-shadow duration-200 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 truncate">Menunggu Verifikasi</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-900">{{ $totalMenunggu }}</p>
+                            </div>
+                            <div class="p-3 rounded-lg bg-amber-100">
+                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
                         </div>
-                        <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">In Progress</span>
+
+                        <div class="mt-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                Pending
+                            </span>
+                            <span class="ml-2 text-xs text-gray-400">Perlu segera diproses</span>
+                        </div>
                     </div>
-                    <h3 class="text-sm font-medium tracking-wider text-gray-500 uppercase">Menunggu Verifikasi Kaprodi</h3>
-                    <p class="mt-2 text-4xl font-bold text-gray-800">{{ $totalSelesaiTu }}</p>
-                    <div class="mt-4 text-xs text-gray-400">Telah diverifikasi oleh TU</div>
                 </div>
-            </div>
+            </a>
+
+
+            <!-- Menunggu Verifikasi Kaprodi -->
+            <a href="{{ route('staff.pengajuan.histori') }}"
+            class="block transition-transform duration-200 hover:scale-[1.02]">
+                <div class="transition-shadow duration-200 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 truncate">Menunggu Verifikasi Kaprodi</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-900">{{ $totalSelesaiTu }}</p>
+                            </div>
+
+                            <div class="p-3 rounded-lg bg-emerald-100">
+                                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                In Progress
+                            </span>
+                            <span class="ml-2 text-xs text-gray-400">Telah diverifikasi TU</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
 
             <!-- Ditolak TU -->
-            <div class="relative overflow-hidden transition-all duration-300 bg-white border border-gray-100 shadow-md group rounded-2xl hover:shadow-xl">
-                <div class="absolute top-0 left-0 w-2 h-full bg-rose-400 rounded-l-2xl"></div>
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="p-3 bg-rose-100 rounded-xl">
-                            <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+            <a href="{{ route('staff.pengajuan.histori') }}"
+            class="block transition-transform duration-200 hover:scale-[1.02]">
+                <div class="transition-shadow duration-200 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 truncate">Ditolak TU</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-900">{{ $totalDitolak }}</p>
+                            </div>
+
+                            <div class="p-3 rounded-lg bg-rose-100">
+                                <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
                         </div>
-                        <span class="text-xs font-medium text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full">Rejected</span>
+
+                        <div class="mt-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+                                Rejected
+                            </span>
+                            <span class="ml-2 text-xs text-gray-400">Pengajuan tidak memenuhi syarat</span>
+                        </div>
                     </div>
-                    <h3 class="text-sm font-medium tracking-wider text-gray-500 uppercase">Ditolak TU</h3>
-                    <p class="mt-2 text-4xl font-bold text-gray-800">{{ $totalDitolak }}</p>
-                    <div class="mt-4 text-xs text-gray-400">Pengajuan tidak memenuhi syarat</div>
                 </div>
-            </div>
+            </a>
+
+
+            <!-- Surat Pengantar Baru -->
+            <a href="{{ route('staff.surat.index') }}"
+            class="block transition-transform duration-200 hover:scale-[1.02]">
+                <div class="transition-shadow duration-200 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 truncate">Surat Pengantar Baru</p>
+                                <p class="mt-2 text-3xl font-bold text-blue-600">{{ $totalSuratBelumValidasi }}</p>
+                            </div>
+
+                            <div class="p-3 bg-blue-100 rounded-lg">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Pending
+                            </span>
+                            <span class="ml-2 text-xs text-gray-400">Belum divalidasi staff</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
         </div>
 
         {{-- Tombol Aksi --}}
         <div class="flex justify-end mt-8">
             <a href="{{ route('staff.pengajuan.index') }}"
-               class="inline-flex items-center gap-2 px-5 py-2.5 text-white bg-green-700 rounded-lg shadow hover:bg-green-800 transition">
-                <i class="fa-solid fa-circle-check"></i>
+               class="inline-flex items-center gap-2 px-6 py-3 font-medium text-white transition-colors duration-200 bg-green-600 rounded-lg shadow-sm hover:bg-green-700 hover:shadow-md">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
                 Verifikasi Pengajuan PKL
             </a>
         </div>

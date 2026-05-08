@@ -79,7 +79,6 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::get('/status-pengajuan', [MahasiswaPengajuanController::class, 'status'])->name('pengajuan.status');
         Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen'])
             ->name('pengajuan.dokumen.upload-ulang');
-        Route::get('/surat-pengantar/{id}/download',[MahasiswaPengajuanController::class, 'downloadSuratPengantar'])->name('surat-pengantar.download');
         
         Route::get('/sertifikat', [PengajuanSertifikatController::class,'index'])
         ->name('sertifikat.index');
@@ -201,6 +200,7 @@ use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
 use App\Http\Controllers\Staff\PengajuanPklController as StaffPengajuanController;
 use App\Http\Controllers\Staff\MitraController as StaffMitraController;
+use App\Http\Controllers\Staff\StaffSuratController;
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
     ->name('staff.')
@@ -208,32 +208,36 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
         Route::get('/pengajuan/histori', [StaffPengajuanController::class, 'histori']
         )->name('pengajuan.histori');
-
         Route::post('/dokumen/{id}/valid', [StaffDokumenController::class, 'valid'])->name('dokumen.valid');
         Route::post('/dokumen/{id}/invalid', [StaffDokumenController::class, 'invalid'])->name('dokumen.invalid');
-
         Route::get('/pengajuan', [StaffPengajuanController::class, 'index'])->name('pengajuan.index');
         Route::get('/pengajuan/{id}', [StaffPengajuanController::class, 'show'])->name('pengajuan.show');
         Route::post('/pengajuan/{id}/approve', [StaffPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [StaffPengajuanController::class, 'reject'])->name('pengajuan.reject');
-        
         Route::get('/mitra', 
         [StaffPengajuanController::class, 'manajemenMitra']
         )->name('mitra.index');
-        
         Route::get('/mitra/{id}/akun',
             [StaffPengajuanController::class, 'showAkunMitra']
         )->name('mitra.akun');
-
         Route::post('/mitra/{id}',
             [StaffPengajuanController::class, 'storeMitra']
         )->name('mitra.store');
-
         Route::get('/manajemen-mitra', [StaffMitraController::class, 'index']
         )->name('manajemen-mitra.index');
         Route::get('/manajemen-mitra/{id}', [StaffMitraController::class, 'show']
         )->name('manajemen-mitra.show');
         Route::post('/mitra/{id}/regenerate', [StaffMitraController::class, 'regenerate'])->name('mitra.regenerate');
+        Route::get('/surat-pengantar', [StaffSuratController::class, 'index'])
+            ->name('surat.index');
+        Route::get('/surat-pengantar/{id}/cetak', [StaffSuratController::class, 'cetak'])
+            ->name('surat.cetak');
+        Route::post('/surat-pengantar/{id}/validasi', [StaffSuratController::class, 'validasi'])
+            ->name('surat.validasi');
+        Route::get('/surat-pengantar/{id}/preview', [StaffSuratController::class, 'preview'])->name('surat.preview');
+        Route::post('/surat-pengantar/bulk-print', [StaffSuratController::class, 'bulkPrint'])->name('surat.bulk');
+        Route::post('/surat-pengantar/bulk-preview',[StaffSuratController::class, 'bulkPreview'])->name('surat.bulk-preview');
+        Route::post('/surat-pengantar/bulk-validasi',[StaffSuratController::class, 'bulkValidasi'])->name('surat.bulk-validasi');
     });
 
 /*

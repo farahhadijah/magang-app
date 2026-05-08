@@ -279,24 +279,6 @@ class PengajuanPklController extends Controller
 
         return max(1, $semester);
     }
-    public function downloadSuratPengantar($id)
-{
-    $mahasiswa = Auth::user()->mahasiswa;
-    abort_if(!$mahasiswa, 403);
-
-    $surat = SuratPengantar::findOrFail($id);
-
-    $path = $surat->path_file;
-
-    if (!Storage::disk('public')->exists($path)) {
-        abort(404, 'File tidak ditemukan.');
-    }
-
-    return Storage::disk('public')->download(
-        $path,
-        'Surat_Pengantar_PKL.pdf'
-    );
-}
         private function normalizeGoogleMapsLink($url)
 {
     // jika shortlink → resolve dulu

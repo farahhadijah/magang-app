@@ -13,6 +13,9 @@ class PengajuanPkl extends Model
         'alamat_asal',
         'catatan_tu',
         'catatan_kaprodi',
+        'status_surat',
+        'status_surat',
+        'pesan_surat',
     ];
     /* ================= RELATION ================= */
     public function mahasiswa()
@@ -188,5 +191,36 @@ public function scopeMunculUntukKaprodi($query)
                 'class' => 'text-gray-800 bg-gray-100',
             ],
         };
+    }
+
+    public function statusSuratLabel(): array
+    {
+        return match ($this->status_surat) {
+            null => [
+                'text' => 'Belum Diproses',
+                'class' => 'text-gray-700 bg-gray-100',
+            ],
+            'diproses' => [
+                'text' => 'Sedang Diproses TU',
+                'class' => 'text-blue-800 bg-blue-100',
+            ],
+            'siap_diambil' => [
+                'text' => 'Siap Diambil',
+                'class' => 'text-green-800 bg-green-100',
+            ],
+            default => [
+                'text' => ucfirst($this->status_surat),
+                'class' => 'text-gray-800 bg-gray-100',
+            ],
+        };
+    }
+    public function bisaDicetak(): bool
+    {
+        return $this->status === 'disetujui';
+    }
+    public function bisaDivalidasi(): bool
+    {
+        return $this->status === 'disetujui'
+            && $this->status_surat !== 'siap_diambil';
     }
 }

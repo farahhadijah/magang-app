@@ -57,6 +57,23 @@
                     </div>
                 </div>
             </div>
+            @if($pengajuan && $pengajuan->pesan_surat)
+                <div class="p-4 mb-4 border border-green-200 bg-green-50 rounded-xl">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1 text-green-600">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-green-700">
+                                Informasi Surat Pengantar
+                            </h3>
+                            <p class="mt-1 text-sm text-green-700">
+                                {{ $pengajuan->pesan_surat }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
         @if ($notifikasiPenolakan)
             <div class="relative overflow-hidden backdrop-blur-sm bg-white/50 border border-red-200 shadow-lg rounded-2xl mb-6 transition-all duration-300 hover:shadow-red-100/50">
