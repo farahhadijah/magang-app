@@ -112,6 +112,7 @@ use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirContro
 use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
 use App\Http\Controllers\Dosen\NilaiPklController as DosenNilaiPklController;
 use App\Http\Controllers\Dosen\ReviewLogbookController;
+use App\Http\Controllers\Dosen\ResumePklController;
 Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->prefix('dosen')
     ->name('dosen.')
@@ -154,7 +155,9 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         Route::post('/laporan/{pkl}/reject',[DosenLaporanAkhirController::class, 'reject']
         )->name('laporan.reject');
 
-        
+        Route::get('/resume-pkl', [ResumePklController::class, 'index'])->name('resume.index');
+        Route::get('/resume-pkl/{pkl}', [ResumePklController::class, 'show'])->name('resume.show');
+        Route::get('/resume/{pkl}/logbook', [ResumePklController::class, 'logbook'])->name('resume.logbook');
     });
 
 /*

@@ -38,4 +38,10 @@
         <span>Daftar Nilai PKL</span>
     </a>
 
+    <a href="{{ route('dosen.resume.index') }}"
+    class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+    {{ request()->routeIs('dosen.resume.*') ? 'bg-green-800 text-amber-300' : '' }}">
+        <i class="fa-solid fa-folder-open"></i>
+        <span>Resume PKL Mahasiswa</span>
+    </a>
 </div>
