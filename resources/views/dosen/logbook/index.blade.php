@@ -3,7 +3,14 @@
         Logbook Mahasiswa Bimbingan - MagangApp
     </x-slot>
 
-    <div class="max-w-6xl py-1 mx-auto space-y-6">
+    @php
+        $logbookStatuses = collect($logbooks->items())->pluck('status_approve', 'id')->all();
+    @endphp
+
+    <div
+        x-data="logbookPage(@js($logbookStatuses))"
+        class="max-w-6xl py-1 mx-auto space-y-6"
+    >
 
         {{-- Flash Message --}}
         @if (session('success'))
@@ -39,7 +46,7 @@
                         <thead class="bg-green-100 text-slate-800">
                             <tr>
                                 <th class="px-4 py-3 text-center">
-                                    <input type="checkbox" id="select-all">
+                                    <input type="checkbox" x-model="selectAll" @change="toggleSelectAll()">
                                 </th>
                                 <th class="px-4 py-3 text-left">Tanggal</th>
                                 <th class="px-4 py-3 text-left">Mahasiswa</th>
@@ -75,27 +82,17 @@
                                         {{ $log->kegiatan }}
                                     </td>
 
-                                   <td class="px-4 py-3" id="status-{{ $log->id }}">
-                                        @if ($log->status_approve === 'approved')
-                                            <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                                                Disetujui
-                                            </span>
-                                        @elseif ($log->status_approve === 'revisi')
-                                            <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">
-                                                Perlu Revisi
-                                            </span>
-                                        @else
-                                            <span class="px-3 py-1 text-xs font-semibold rounded-full text-amber-800 bg-amber-100">
-                                                Pending
-                                            </span>
-                                        @endif
+                                    <td class="px-4 py-3">
+                                        <span x-show="statuses[{{ $log->id }}] === 'approved'" class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Disetujui</span>
+                                        <span x-show="statuses[{{ $log->id }}] === 'revisi'" class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Perlu Revisi</span>
+                                        <span x-show="statuses[{{ $log->id }}] === 'pending'" class="px-3 py-1 text-xs font-semibold rounded-full text-amber-800 bg-amber-100">Pending</span>
                                     </td>
 
                                     {{-- Aksi Manual --}}
                                     <td class="px-4 py-3">
                                         @if ($log->status_approve === 'pending')
                                             <button type="button"
-                                                onclick="openModal({{ $log->id }})"
+                                                @click="openModal({{ $log->id }}, @js($log->kegiatan))"
                                                 class="text-green-700 hover:text-green-900">
                                                 <i class="fa-solid fa-eye"></i> Review
                                             </button>
@@ -120,7 +117,7 @@
                     {{ $logbooks->links() }}
                 </div>
                 <div class="flex items-center gap-2 px-4 pt-4 md:hidden">
-                    <input type="checkbox" id="select-all-mobile">
+                    <input type="checkbox" x-model="selectAll" @change="toggleSelectAll()">
                     <label for="select-all-mobile" class="text-sm text-gray-700">
                         Pilih Semua
                     </label>
@@ -158,26 +155,16 @@
                                 <div class="flex items-center justify-between mt-2">
 
                                     {{-- Status --}}
-                                    <div id="status-{{ $log->id }}">
-                                        @if ($log->status_approve === 'approved')
-                                            <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                                                Disetujui
-                                            </span>
-                                        @elseif ($log->status_approve === 'revisi')
-                                            <span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">
-                                                Revisi
-                                            </span>
-                                        @else
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full text-amber-800 bg-amber-100">
-                                                Pending
-                                            </span>
-                                        @endif
+                                    <div>
+                                        <span x-show="statuses[{{ $log->id }}] === 'approved'" class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Disetujui</span>
+                                        <span x-show="statuses[{{ $log->id }}] === 'revisi'" class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Revisi</span>
+                                        <span x-show="statuses[{{ $log->id }}] === 'pending'" class="px-2 py-1 text-xs font-semibold rounded-full text-amber-800 bg-amber-100">Pending</span>
                                     </div>
 
                                     {{-- Aksi --}}
                                     @if ($log->status_approve === 'pending')
                                         <button type="button"
-                                            onclick="openModal({{ $log->id }})"
+                                            @click="openModal({{ $log->id }}, @js($log->kegiatan))"
                                             class="text-xs text-green-700 hover:text-green-900">
                                             Review →
                                         </button>
@@ -208,109 +195,50 @@
 
         </div>
 
-        {{-- MODALS --}}
-@foreach ($logbooks as $log)
-    @if ($log->status_approve === 'pending')
-        <div id="modal-{{ $log->id }}"
-            class="fixed inset-0 z-50 items-center justify-center hidden bg-black bg-opacity-50">
-
-            <div class="w-full max-w-md p-6 bg-white border shadow-lg rounded-xl">
-
-                <h3 class="mb-4 text-lg font-semibold text-green-800">
-                    Review Logbook
-                </h3>
+        {{-- MODAL REVIEW (satu modal Alpine) --}}
+        <div
+            x-cloak
+            x-show="openId !== null"
+            x-transition.opacity
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            @keydown.escape.window="closeModal()"
+        >
+            <div class="w-full max-w-md p-6 mx-4 bg-white border shadow-lg rounded-xl" @click.outside="closeModal()">
+                <h3 class="mb-4 text-lg font-semibold text-green-800">Review Logbook</h3>
 
                 <div class="mb-4 text-sm">
                     <strong>Kegiatan:</strong>
-                    <div class="p-3 mt-1 border rounded-lg bg-gray-50">
-                        {{ $log->kegiatan }}
-                    </div>
+                    <div class="p-3 mt-1 border rounded-lg bg-gray-50" x-text="currentKegiatan"></div>
                 </div>
 
-                <form onsubmit="submitReview(event, {{ $log->id }})">
-                    @csrf
-
-                    {{-- STATUS --}}
+                <form @submit.prevent="submitReview(openId)">
                     <div class="mb-4">
-                        <label class="block mb-1 text-sm font-medium">
-                            Status
-                        </label>
-                        <select
-                            name="status"
-                            id="status-select-{{ $log->id }}"
-                            onchange="toggleCatatan({{ $log->id }})"
-                            class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-400">
-
+                        <label class="block mb-1 text-sm font-medium">Status</label>
+                        <select x-model="review.status" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-400">
                             <option value="approved">Disetujui</option>
                             <option value="revisi">Perlu Revisi</option>
                         </select>
                     </div>
 
-                    {{-- CATATAN (default hidden) --}}
-                    <div class="hidden mb-4"
-                         id="catatan-wrapper-{{ $log->id }}">
-
-                        <label class="block mb-1 text-sm font-medium">
-                            Catatan Dosen
-                        </label>
-
+                    <div class="mb-4" x-show="showCatatan" x-cloak>
+                        <label class="block mb-1 text-sm font-medium">Catatan Dosen</label>
                         <textarea
-                            name="catatan"
-                            id="catatan-{{ $log->id }}"
+                            x-model="review.catatan"
                             rows="3"
                             class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-400"
-                            placeholder="Isi jika perlu perbaikan..."></textarea>
+                            :class="catatanError ? 'border-red-500' : ''"
+                            placeholder="Isi jika perlu perbaikan..."
+                        ></textarea>
                     </div>
 
-                    {{-- ACTION BUTTONS --}}
                     <div class="flex justify-end gap-2">
-                        <button type="button"
-                            onclick="closeModal({{ $log->id }})"
-                            class="px-4 py-2 border rounded-lg">
-                            Batal
-                        </button>
-
-                        <button type="submit"
-                            class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">
-                            Simpan
-                        </button>
+                        <button type="button" @click="closeModal()" class="px-4 py-2 border rounded-lg">Batal</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">Simpan</button>
                     </div>
-
                 </form>
-
             </div>
         </div>
-    @endif
-@endforeach
-
 
     </div>
-
-
-    <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const selectAll = document.getElementById('select-all');
-    const selectAllMobile = document.getElementById('select-all-mobile');
-
-    function toggleAll(checked) {
-        document.querySelectorAll('.logbook-checkbox')
-            .forEach(cb => cb.checked = checked);
-    }
-
-    // Desktop
-    if (selectAll) {
-        selectAll.addEventListener('change', function () {
-            toggleAll(this.checked);
-        });
-    }
-
-    // Mobile
-    if (selectAllMobile) {
-        selectAllMobile.addEventListener('change', function () {
-            toggleAll(this.checked);
-        });
-    }
-});
-</script>
 
 </x-app-layout>

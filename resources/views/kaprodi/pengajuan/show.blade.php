@@ -3,7 +3,18 @@
         Detail Pengajuan - MagangApp
     </x-slot>
     
-    <div x-data="pdfViewer()">
+    @php
+        $lokasi = $pengajuan->tempatPkl->lokasi_maps ?? null;
+        $dosenForSearch = $dosenList->map(fn ($d) => [
+            'nama' => $d->nama,
+            'keahlian' => $d->keahlian ?? '',
+        ])->values();
+    @endphp
+
+    <div
+        x-data="kaprodiPengajuanShow(@js($lokasi), @js($dosenForSearch))"
+        x-init="initMap()"
+    >
         <div class="py-6 space-y-6">
             {{-- Informasi Mahasiswa --}}
             <div class="p-6 space-y-2 border border-green-200 rounded-lg shadow-sm bg-green-50">
@@ -22,6 +33,9 @@
             
             <div class="p-4 mt-4 border border-green-200 rounded-lg bg-green-50">
                 <h4 class="mb-2 font-semibold text-green-800">Riwayat Tempat PKL</h4>
+                <p class="mb-2 text-xs text-gray-600">
+                    Per prodi Anda · angkatan {{ $pengajuan->mahasiswa->angkatan ?? '-' }} · nama tempat sama · hanya PKL status aktif
+                </p>
                 @if($jumlahRiwayat > 0)
                     <p class="text-sm text-green-800">
                         ✔ Tempat ini sudah pernah digunakan oleh
@@ -36,10 +50,6 @@
                 @endif
             </div>
             
-            @php
-                $lokasi = $pengajuan->tempatPkl->lokasi_maps ?? null;
-            @endphp
-
             @if($lokasi)
                 <div class="p-5 mt-6 border border-green-200 shadow-sm bg-green-50 rounded-xl">
                     <div class="flex items-center mb-3 space-x-2">
@@ -107,7 +117,7 @@
                             {{-- SEARCH --}}
                             <div class="mb-4">
                                 <input type="text" 
-                                    id="searchDosenInput" 
+                                    x-model="searchDosen"
                                     placeholder="Cari dosen (nama atau keahlian)..."
                                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
                             </div>
@@ -117,7 +127,10 @@
                                 <div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
 
                                     @forelse($dosenList as $d)
-                                        <label class="flex items-start p-3 transition border rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300">
+                                        <label
+                                            x-show="matchesDosen(@js($d->nama), @js($d->keahlian ?? ''))"
+                                            class="flex items-start p-3 transition border rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300"
+                                        >
                                             
                                             <input type="radio"
                                                 name="id_dosen"
@@ -153,7 +166,7 @@
                                 </div>
 
                                 {{-- EMPTY SEARCH --}}
-                                <div id="emptyState" class="hidden p-6 text-center text-gray-500">
+                                <div x-show="dosenSearchEmpty" x-cloak class="p-6 text-center text-gray-500">
                                     Tidak ditemukan dosen
                                 </div>
                             </div>
@@ -202,97 +215,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function pdfViewer() {
-            return {
-                isOpen: false,
-                fileUrl: '',
-                openModal(url) {
-                    this.fileUrl = url;
-                    this.isOpen = true;
-                },
-                closeModal() {
-                    this.fileUrl = '';
-                    this.isOpen = false;
-                }
-            }
-        }
-
-        // Fungsi filter dosen berdasarkan pencarian
-        function filterDosen(keyword) {
-            const items = document.querySelectorAll('#dosenContainer label');
-            let found = false;
-
-            items.forEach(item => {
-                const nama = item.querySelector('.dosen-nama')?.innerText.toLowerCase() || '';
-                const keahlian = item.querySelector('.dosen-keahlian')?.innerText.toLowerCase() || '';
-                const search = keyword.toLowerCase();
-
-                const match = nama.includes(search) || keahlian.includes(search);
-
-                item.style.display = match ? '' : 'none';
-
-                if (match) found = true;
-            });
-
-            document.getElementById('emptyState')
-                ?.classList.toggle('hidden', found || keyword.length === 0);
-        }
-
-        // Event listener untuk search
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchDosenInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    filterDosen(e.target.value);
-                });
-            }
-            
-            // Inisialisasi map
-            let lokasi = @json($lokasi);
-            if (lokasi) {
-                let lat = null;
-                let lon = null;
-                
-                let qMatch = lokasi.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-                if(qMatch){
-                    lat = parseFloat(qMatch[1]);
-                    lon = parseFloat(qMatch[2]);
-                }
-                
-                if(!lat){
-                    let atMatch = lokasi.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-                    if(atMatch){
-                        lat = parseFloat(atMatch[1]);
-                        lon = parseFloat(atMatch[2]);
-                    }
-                }
-                
-                if(lat && lon){
-                    const kampusLat = -7.1224094;
-                    const kampusLng = 112.4223971;
-                    
-                    let map = L.map('mapKaprodi').setView([lat, lon], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-                    
-                    var greenIcon = new L.Icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-                        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-                        iconSize: [25,41],
-                        iconAnchor: [12,41],
-                        popupAnchor: [1,-34],
-                        shadowSize: [41,41]
-                    });
-                    
-                    L.marker([lat, lon]).addTo(map).bindPopup("Tempat PKL Mahasiswa").openPopup();
-                    L.marker([kampusLat, kampusLng], {icon: greenIcon}).addTo(map).bindPopup("Kampus Universitas Islam Lamongan");
-                    L.polyline([[kampusLat, kampusLng], [lat, lon]], { color: 'blue', weight: 4, opacity: 0.7 }).addTo(map);
-                    
-                    let group = new L.featureGroup([L.marker([lat, lon]), L.marker([kampusLat, kampusLng])]);
-                    map.fitBounds(group.getBounds().pad(0.3));
-                }
-            }
-        });
-    </script>
 </x-app-layout>

@@ -3,7 +3,7 @@
         Detail Pengajuan PKL - MagangApp
     </x-slot>
 
-    <div class="py-6 space-y-6">
+    <div x-data="pdfViewer()" class="py-6 space-y-6">
 
         {{-- ================= INFORMASI MAHASISWA ================= --}}
         <div class="p-6 space-y-2 border border-green-200 rounded-lg bg-green-50">
@@ -64,7 +64,7 @@
                                 </span>
 
                                 <button
-                                    onclick="openModal('{{ asset('storage/'.$dokumen->path_file) }}')"
+                                    @click="openModal(@js(asset('storage/'.$dokumen->path_file)))"
                                     class="block mb-3 text-sm font-medium text-green-700 hover:text-green-900">
                                     Lihat Dokumen
                                 </button>
@@ -126,7 +126,7 @@
                     </div>
 
                     <button
-                        onclick="openModal('{{ asset('storage/'.$dokumen->path_file) }}')"
+                        @click="openModal(@js(asset('storage/'.$dokumen->path_file)))"
                         class="w-full py-2 text-sm font-medium text-center text-green-700 md:border-none border-green-300 rounded sm:w-auto sm:py-0 sm:border-0 hover:text-green-900">
                         Lihat Dokumen
                     </button>
@@ -212,45 +212,22 @@
 
     </div>
 
-    {{-- ================= MODAL PREVIEW PDF ================= --}}
-    <div id="pdfModal"
-         class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-60">
+    {{-- MODAL PREVIEW PDF --}}
+    <div
+        x-cloak
+        x-show="isOpen"
+        x-transition.opacity
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+        @click.self="closeModal()"
+        @keydown.escape.window="closeModal()"
+    >
         <div class="relative w-11/12 h-[90vh] bg-white rounded-lg shadow-lg">
-            <button onclick="closeModal()"
+            <button @click="closeModal()"
                     class="absolute z-10 w-10 h-10 text-2xl text-white bg-red-600 rounded-full -top-4 -right-4">
                 ✕
             </button>
-            <iframe id="pdfFrame"
-                    src=""
-                    class="w-full h-full rounded-lg"
-                    frameborder="0">
-            </iframe>
+            <iframe :src="fileUrl" class="w-full h-full rounded-lg" frameborder="0"></iframe>
         </div>
     </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    window.openModal = function(url) {
-        document.getElementById('pdfFrame').src = url;
-        document.getElementById('pdfModal').classList.remove('hidden');
-    }
-
-    window.closeModal = function() {
-        document.getElementById('pdfFrame').src = "";
-        document.getElementById('pdfModal').classList.add('hidden');
-    }
-
-    document.getElementById('pdfModal')
-        .addEventListener('click', function(e) {
-            if (e.target === this) {
-                window.closeModal();
-            }
-        });
-
-});
-</script>
-@endpush
 
 </x-app-layout>

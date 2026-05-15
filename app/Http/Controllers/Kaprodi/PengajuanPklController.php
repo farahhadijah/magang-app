@@ -43,9 +43,9 @@ class PengajuanPklController extends Controller
             $q->where('prodi_id', $prodiId)
         )
         ->with([
-            'mahasiswa:id,nama,nim,prodi_id',
+            'mahasiswa:id,nama,nim,prodi_id,angkatan',
             'mahasiswa.prodi:id,nama',
-            'tempatPkl:id,nama_tempat,jenis_tempat,lokasi_maps',
+            'tempatPkl:id,nama_tempat,nama_normalized,jenis_tempat,lokasi_maps',
             'dokumenPengajuan:id,id_pengajuan_pkl,jenis_dokumen,path_file',
 
             'verifikasi:id,id_pengajuan_pkl,id_user,level,status,tgl_verifikasi',
@@ -98,22 +98,37 @@ class PengajuanPklController extends Controller
         );
     }
 
-    /* ================= RIWAYAT TEMPAT PKL ================= */
-    $tempatId = $pengajuan->tempatPkl->id ?? null;
+    /* ================= RIWAYAT TEMPAT PKL (nama tempat + prodi + angkatan + PKL masih aktif) ================= */
+    $namaNormalized = $pengajuan->tempatPkl->nama_normalized ?? null;
+    $namaTempat = $pengajuan->tempatPkl->nama_tempat ?? null;
+    $angkatan = $pengajuan->mahasiswa->angkatan ?? null;
 
     $jumlahRiwayat = 0;
     $terakhirDigunakan = null;
 
-    if ($tempatId) {
-        $riwayat = PengajuanPkl::where('id_tempat_pkl', $tempatId)
-            ->where('id', '!=', $pengajuan->id)
+    if (($namaNormalized || $namaTempat) && $angkatan !== null && $angkatan !== '') {
+        $riwayat = PengajuanPkl::where('id', '!=', $pengajuan->id)
+            ->whereHas('tempatPkl', function ($q) use ($namaNormalized, $namaTempat) {
+                if ($namaNormalized) {
+                    $q->where('nama_normalized', $namaNormalized);
+                } else {
+                    $q->where('nama_tempat', $namaTempat);
+                }
+            })
+            ->whereHas('mahasiswa', function ($q) use ($prodiId, $angkatan) {
+                $q->where('prodi_id', $prodiId)
+                    ->where('angkatan', $angkatan);
+            })
+            ->whereHas('pkl', function ($q) {
+                $q->where('status', 'aktif');
+            })
             ->selectRaw('COUNT(*) as total, MAX(created_at) as terakhir')
             ->first();
 
         $jumlahRiwayat = $riwayat->total ?? 0;
 
         if ($riwayat->terakhir) {
-            $terakhirDigunakan = \Carbon\Carbon::parse($riwayat->terakhir);
+            $terakhirDigunakan = Carbon::parse($riwayat->terakhir);
         }
     }
 
@@ -161,7 +176,7 @@ class PengajuanPklController extends Controller
         return back()->with('warning', 'Dosen tidak valid.');
     }
 
-    // 🔥 WAJIB SATU PRODI
+    //  WAJIB SATU PRODI
     if ($dosen->prodi_id != $prodiId) {
         return back()->with('warning', 'Dosen harus dari prodi yang sama.');
     }
@@ -202,7 +217,7 @@ class PengajuanPklController extends Controller
                 now()->year
             );
 
-            // 🔥 ambil kaprodi dari prodi yg sama
+            // ambil kaprodi dari prodi yg sama
             $kaprodi = Dosen::where('jabatan', 'Kaprodi')
                 ->where('prodi_id', $prodiId)
                 ->where('is_active', 1)

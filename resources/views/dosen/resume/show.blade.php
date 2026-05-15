@@ -3,14 +3,7 @@
         Detail Resume PKL
     </x-slot>
 
-    <div class="max-w-5xl px-4 py-6 mx-auto space-y-6"
-         x-data="{
-            isLaporanOpen: false,
-            laporanUrl: null,
-            openLaporan(url) { this.laporanUrl = url; this.isLaporanOpen = true; },
-            closeLaporan() { this.isLaporanOpen = false; this.laporanUrl = null; }
-         }"
-    >
+    <div x-data="pdfViewer()" class="max-w-5xl px-4 py-6 mx-auto space-y-6">
 
         {{-- Header --}}
         <div class="flex items-center justify-between">
@@ -246,7 +239,7 @@
 
                             <button
                                 type="button"
-                                @click="openLaporan(@js(asset('storage/' . $pkl->laporanAkhir->path_file)))"
+                                @click="openModal(@js(asset('storage/' . $pkl->laporanAkhir->path_file)))"
                                 class="inline-flex items-center gap-2 px-3 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                             >
 
@@ -322,12 +315,12 @@
         {{-- MODAL: VIEW LAPORAN AKHIR --}}
         <div
             x-cloak
-            x-show="isLaporanOpen"
+            x-show="isOpen"
             x-transition.opacity
             class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
-            @keydown.escape.window="closeLaporan()"
+            @keydown.escape.window="closeModal()"
         >
             {{-- overlay --}}
             <button
@@ -352,7 +345,7 @@
                     <div class="flex items-center gap-2">
                         @if($pkl->laporanAkhir)
                             <a
-                                :href="laporanUrl"
+                                :href="fileUrl"
                                 download
                                 class="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700"
                             >
@@ -374,8 +367,8 @@
                 <div class="bg-gray-50">
                     <div class="h-[75vh] w-full">
                         <iframe
-                            x-show="laporanUrl"
-                            :src="laporanUrl"
+                            x-show="fileUrl"
+                            :src="fileUrl"
                             class="w-full h-full"
                             title="Preview Laporan Akhir"
                         ></iframe>
