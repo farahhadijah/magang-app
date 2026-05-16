@@ -37,36 +37,6 @@
             </div>
         </div>
 
-        <div class="p-6 transition border border-blue-200 shadow-lg bg-blue-50 rounded-xl hover:shadow-xl">
-            <div class="flex items-center justify-between">
-
-                <div>
-                    <h3 class="text-lg font-semibold text-blue-900">
-                        Pengajuan Sertifikat
-                    </h3>
-
-                    <div class="mt-2 text-4xl font-bold text-blue-600">
-                        {{ $sertifikatPending }}
-                    </div>
-
-                    <p class="mt-1 text-blue-700">
-                        Menunggu persetujuan Anda
-                    </p>
-
-                    <a href="{{ route('mitra.sertifikat.index') }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 mt-4 font-medium text-white transition bg-blue-600 rounded-lg hover:bg-blue-700">
-                        <i class="fa-solid fa-file"></i>
-                        Lihat Pengajuan
-                    </a>
-                </div>
-
-                <div class="flex items-center justify-center w-16 h-16 text-blue-100 bg-blue-500 rounded-full">
-                    <i class="text-2xl fa-solid fa-file-signature"></i>
-                </div>
-
-            </div>
-        </div>
-
         {{-- Statistik Tugas Mahasiswa --}}
         <div class="grid gap-6 md:grid-cols-2">
 
