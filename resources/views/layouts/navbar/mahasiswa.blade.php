@@ -9,6 +9,7 @@
     $pkl = $pengajuan?->pkl;
     // Use the single authoritative check
     $bolehUploadLaporan = $pkl?->isSiapUploadLaporan();
+    $penilaianMitra = $pkl?->penilaianMitra;
 @endphp
 <div class="space-y-1">
     {{-- Download formulir telah dinonaktifkan --}}
@@ -155,10 +156,42 @@
     </div>
 @endif
 
+
+{{-- ================= PENILAIAN MITRA ================= --}}
+@if($penilaianMitra)
+    <a
+        href="{{ route('mahasiswa.penilaianMitra.index') }}"
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            transition
+            hover:bg-green-800
+            {{ request()->routeIs('mahasiswa.penilaianMitra.*') ? 'bg-green-800 text-amber-300' : '' }}
+        "
+    >
+        <i class="w-5 fa-solid fa-star"></i>
+        Penilaian Mitra
+    </a>
+@else
+    <div
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            opacity-60
+            cursor-not-allowed
+        "
+    >
+        <i class="w-5 fa-solid fa-star"></i>
+        Penilaian Mitra
+    </div>
+@endif
+
     {{-- ================= NILAI PKL ================= --}}
 @if($pkl && $pkl->status === 'selesai')
     <a
-        href="{{ route('mahasiswa.nilai.index') }}"
+        href="{{ route('mahasiswa.penilaianMitra.index') }}"
         class="
             flex items-center gap-3
             px-4 py-2.5

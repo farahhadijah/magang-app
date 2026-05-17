@@ -35,6 +35,10 @@ class Pkl extends Model
     {
         return $this->hasMany(Logbook::class, 'id_pkl');
     }
+    public function penilaianMitra()
+    {
+        return $this->hasOne(PenilaianMitra::class, 'id_pkl');
+    }
     public function mahasiswa()
     {
         return $this->hasOneThrough(

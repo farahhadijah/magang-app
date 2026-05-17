@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VerifikasiPenilaianController;
 use App\Http\Controllers\DashboardController;
 
 use App\Http\Controllers\ProfileController;
@@ -23,6 +24,7 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
+Route::get( '/verifikasi/penilaian/{token}', [VerifikasiPenilaianController::class, 'show'] )->name('verifikasi.penilaian');
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +67,7 @@ use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookControll
 use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
 use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
 use App\Http\Controllers\Mahasiswa\TugasController as TugasMahasiswaController;
+use App\Http\Controllers\Mahasiswa\NilaiMitraMahasiswaController;
 Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
@@ -99,6 +102,8 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         ->name('tugas.show');
         Route::post('/tugas/{id}/submit', [TugasMahasiswaController::class,'submit'])
         ->name('tugas.submit');
+        // penilaian mitra
+        Route::get( '/penilaian-mitra', [NilaiMitraMahasiswaController::class, 'index'] )->name('penilaianMitra.index');
 
     });
 
@@ -301,30 +306,27 @@ Route::middleware(['auth', 'first.login', 'role:mitra'])
     ->group(function () {
 
         Route::get('/dashboard', 
-            [App\Http\Controllers\Mitra\MitraController::class, 'dashboard']
-        )->name('dashboard');
+            [App\Http\Controllers\Mitra\MitraController::class, 'dashboard'] )->name('dashboard');
 
-        Route::get('/mahasiswa', [App\Http\Controllers\Mitra\MitraController::class, 'mahasiswa'])
-            ->name('mahasiswa');
+        Route::get('/mahasiswa', [App\Http\Controllers\Mitra\MitraController::class, 'mahasiswa']) ->name('mahasiswa');
 
         // Daftar mahasiswa yang sudah mengisi logbook (index untuk mitra)
-        Route::get('/logbook', [App\Http\Controllers\Mitra\MitraController::class, 'logbookList'])
-            ->name('logbook.index');
+        Route::get('/logbook', [App\Http\Controllers\Mitra\MitraController::class, 'logbookList']) ->name('logbook.index');
 
-        Route::get('/logbook/{pkl}', [App\Http\Controllers\Mitra\MitraController::class, 'logbook'])
-            ->name('logbook');
-        Route::get('/tugas', [App\Http\Controllers\Mitra\TugasMitraController::class, 'index'])
-            ->name('tugas.index');
-        Route::get('/tugas/create', [App\Http\Controllers\Mitra\TugasMitraController::class, 'create'])
-            ->name('tugas.create');
-        Route::post('/tugas', [App\Http\Controllers\Mitra\TugasMitraController::class, 'store'])
-            ->name('tugas.store');
-        Route::get('/tugas/{tugas}', [App\Http\Controllers\Mitra\TugasMitraController::class, 'show'])
-            ->name('tugas.show');
+        Route::get('/logbook/{pkl}', [App\Http\Controllers\Mitra\MitraController::class, 'logbook']) ->name('logbook');
+        Route::get('/tugas', [App\Http\Controllers\Mitra\TugasMitraController::class, 'index']) ->name('tugas.index');
+        Route::get('/tugas/create', [App\Http\Controllers\Mitra\TugasMitraController::class, 'create']) ->name('tugas.create');
+        Route::post('/tugas', [App\Http\Controllers\Mitra\TugasMitraController::class, 'store']) ->name('tugas.store');
+        Route::get('/tugas/{tugas}', [App\Http\Controllers\Mitra\TugasMitraController::class, 'show']) ->name('tugas.show');
         Route::get('/tugas/{tugas}/edit', [App\Http\Controllers\Mitra\TugasMitraController::class, 'edit'])->name('tugas.edit');
         Route::put('/tugas/{tugas}', [App\Http\Controllers\Mitra\TugasMitraController::class, 'update'])->name('tugas.update');
         Route::delete('/tugas/{tugas}', [App\Http\Controllers\Mitra\TugasMitraController::class, 'destroy'])->name('tugas.destroy');
         Route::post('/tugas/verifikasi/{id}',[App\Http\Controllers\Mitra\TugasMitraController::class,'verifikasi'])->name('tugas.verifikasi');
+
+        Route::get('/penilaian', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'index']) ->name('penilaian');
+        Route::get('/penilaian/{id}', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'form']) ->name('penilaian.form');
+        Route::post('/penilaian/{id}', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'store']) ->name('penilaian.store');
+        Route::post( '/penilaian/{id}/upload-scan', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'uploadScan'] )->name('penilaian.upload-scan');
     });
 
 
