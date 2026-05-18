@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="title">
-        Pengajuan PKL - MagangApp
+        Pengajuan PKL - Sibolang
     </x-slot>
 
     <div class="min-h-screen px-0 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 via-white to-emerald-50">
@@ -64,7 +64,7 @@
                             <label class="block mb-2 text-sm font-semibold text-gray-700">Nama Instansi <span class="text-red-500">*</span></label>
                             <input type="text" id="nama_tempat" name="nama_tempat" value="{{ old('nama_tempat') }}" required autocomplete="off" 
                                 class="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
-                            <div id="warningTempat" class="flex items-center hidden gap-1 mt-2 md:text-sm text-xs text-amber-600">
+                            <div id="warningTempat" class="flex items-center hidden gap-1 mt-2 text-xs md:text-sm text-amber-600">
                                 <i class="fa-solid fa-triangle-exclamation"></i>
                                 <span></span>
                             </div>
@@ -164,8 +164,6 @@
                             <label class="block mb-2 text-sm font-semibold text-gray-700">Semester Saat Ini</label>
                             <input type="text" value="{{ $semesterAktif }}" disabled
                                 class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl">
-                            {{-- kirim semester sebagai field tersembunyi supaya validasi server terpenuhi
-                                 format dikirim dalam angka Romawi (I..X) sesuai aturan validasi di controller --}}
                             @php
                                 $romawi = [1=>'I',2=>'II',3=>'III',4=>'IV',5=>'V',6=>'VI',7=>'VII',8=>'VIII',9=>'IX',10=>'X'];
                                 $semesterValue = $romawi[$semesterAktif] ?? $semesterAktif;
@@ -197,20 +195,18 @@
                         <div class="flex items-start gap-3">
                             <i class="fa-solid fa-circle-info text-blue-600 text-lg mt-0.5"></i>
                             <div class="text-sm text-gray-700">
-                                <p>• Kamu saat ini semester {{ $semesterAktif }}, wajib upload {{ $jumlahWajibKhs }} KHS</p>
-                                <p>• Upload KRS semester berjalan.</p>
+                                <p>• Upload dokumen yang diperlukan untuk pengajuan PKL</p>
+                                <p>• Pastikan file dalam format yang benar dan ukuran maksimal 2MB</p>
                             </div>
                         </div>
                     </div>
 
-                    {{-- UPLOAD AREA STYLING DENGAN FILE LIST PREVIEW --}}
+                    {{-- UPLOAD AREA WITH FILE LIST PREVIEW --}}
                     @php
                         $dokumenFields = [
-                            'dokumen_khs' => ['label' => 'KHS Semester 1 - Terakhir', 'accept' => '.pdf,.doc,.docx', 'multiple' => true, 'icon' => 'fa-file-pdf', 'required' => true, 'color' => 'green'],
                             'dokumen_pembayaran' => ['label' => 'Bukti Pembayaran PKL', 'accept' => '.pdf,.jpg,.png', 'multiple' => false, 'icon' => 'fa-receipt', 'required' => true, 'color' => 'blue'],
                             'dokumen_studi_tour' => ['label' => 'Sertifikat Studi Tour', 'accept' => '.pdf,.doc,.docx', 'multiple' => false, 'icon' => 'fa-ticket', 'required' => true, 'color' => 'purple'],
-                            'dokumen_form_pkn' => ['label' => 'Form Pengajuan PKN', 'accept' => '.pdf', 'multiple' => false, 'icon' => 'fa-file-alt', 'required' => true, 'color' => 'orange'],
-                            'dokumen_krs' => [ 'label' => 'Kartu Rencana Studi (KRS)', 'accept' => '.pdf', 'multiple' => false, 'icon' => 'fa-file-lines', 'required' => true, 'color' => 'teal' ],
+                            'dokumen_krs' => ['label' => 'Kartu Rencana Studi (KRS) Semester Berjalan', 'accept' => '.pdf', 'multiple' => false, 'icon' => 'fa-file-lines', 'required' => true, 'color' => 'teal'],
                         ];
                     @endphp
 
@@ -236,7 +232,6 @@
                                     </p>
                                     <p class="mt-1 text-xs text-gray-400">
                                         Format: {{ strtoupper(str_replace('.', ', ', $field['accept'])) }} | Max 2MB
-                                        @if($field['multiple']) (Multiple files allowed) @endif
                                     </p>
                                 </div>
                             </div>
@@ -285,7 +280,6 @@
                     let html = '';
                     
                     if (isMultiple) {
-                        // Untuk multiple files (KHS)
                         html = `
                             <div class="p-3 border border-green-200 bg-green-50 rounded-xl">
                                 <div class="flex items-center gap-2 mb-2">
@@ -310,7 +304,6 @@
                         
                         html += `</div></div>`;
                     } else {
-                        // Untuk single file
                         const file = files[0];
                         const fileSize = (file.size / 1024).toFixed(2);
                         const fileType = file.type;
@@ -336,17 +329,13 @@
                     }
                     
                     listContainer.innerHTML = html;
-                    
-                    // Auto scroll ke file list
                     listContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 });
             }
             
             // Setup preview untuk semua input file
-            setupFilePreview('dokumen_khs', 'dokumen_khs-list', true);
             setupFilePreview('dokumen_pembayaran', 'dokumen_pembayaran-list', false);
             setupFilePreview('dokumen_studi_tour', 'dokumen_studi_tour-list', false);
-            setupFilePreview('dokumen_form_pkn', 'dokumen_form_pkn-list', false);
             setupFilePreview('dokumen_krs', 'dokumen_krs-list', false);
             
             // ========== SCRIPT ORIGINAL (TIDAK DIUBAH) ==========
@@ -354,23 +343,12 @@
             const warningBox = document.getElementById('warningTempat');
             const lokasiInput = document.getElementById("lokasi_maps");
 
-            // jika mahasiswa mulai mengedit lokasi manual
             lokasiInput.addEventListener("focus", function(){
                 this.dataset.auto = "false";
             });
+            
             const form = document.getElementById("formPengajuan");
 
-            const jumlahWajib = {{ $jumlahWajibKhs }};
-
-            form.addEventListener("submit", function (e) {
-                const khsFiles = document.getElementById('dokumen_khs').files;
-
-                if (khsFiles.length !== jumlahWajib) {
-                    alert(`Jumlah KHS harus ${jumlahWajib} file!`);
-                    e.preventDefault();
-                    return;
-                }
-            });
             let timeout = null;
             // CEK KEMIRIPAN NAMA TEMPAT
             inputNama.addEventListener('input', function () {
@@ -403,18 +381,6 @@
                 }, 600);
             });
 
-            const khsInput = document.getElementById('dokumen_khs');
-
-            khsInput.addEventListener('change', function () {
-                const files = this.files;
-
-                if (files.length !== jumlahWajib) {
-                    alert(`Jumlah KHS harus ${jumlahWajib} file!`);
-
-                    this.value = ""; // reset
-                    document.getElementById('dokumen_khs-list').innerHTML = '';
-                }
-            });
             // AUTO UPPERCASE SEMESTER
             const semesterInput = document.querySelector('input[name="semester"]');
             if (semesterInput) {
@@ -422,6 +388,7 @@
                     this.value = this.value.toUpperCase();
                 });
             }
+            
             // MAP PREVIEW
             let map;
             let marker;
@@ -457,6 +424,7 @@
                     lokasiInput.value = "";
                 });
             });
+            
             // FUNGSI MENAMPILKAN MAP
             function showMap(lat, lon) {
                 const mapContainer = document.getElementById("mapPreview");
@@ -475,6 +443,7 @@
                 marker = L.marker([lat, lon]).addTo(map);
                 map.invalidateSize();
             }
+            
             // TOMBOL BUKA GOOGLE MAPS
             let btnMaps = document.getElementById("btnGoogleMaps");
             if (btnMaps) {
@@ -488,9 +457,9 @@
                     document.getElementById("manualGuide")?.classList.remove("hidden");
                 });
             }
+            
             function extractLatLng(url){
                 if(!url) return null;
-                // format ?q=lat,lng
                 let match1 = url.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
                 if(match1){
                     return {
@@ -498,7 +467,6 @@
                         lng: parseFloat(match1[2])
                     };
                 }
-                // format @lat,lng
                 let match2 = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
                 if(match2){
                     return {
@@ -506,7 +474,6 @@
                         lng: parseFloat(match2[2])
                     };
                 }
-                // format /place/.../@lat,lng
                 let match3 = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+),/);
                 if(match3){
                     return {
@@ -516,41 +483,31 @@
                 }
                 return null;
             }
+            
             // VALIDASI LINK GOOGLE MAPS
             form.addEventListener("submit", function (e) {
-
                 let lokasi = lokasiInput.value.trim();
-
-                if(
-                    !lokasi.includes("google.com/maps") &&
-                    !lokasi.includes("maps.app.goo.gl")
-                ){
+                if(!lokasi.includes("google.com/maps") && !lokasi.includes("maps.app.goo.gl")){
                     alert("Lokasi harus berupa link Google Maps.");
                     e.preventDefault();
                     return;
                 }
-
-                // jangan cek koordinat di frontend
-                // server Laravel akan memproses linknya
             });
-            // Improvement
+            
             lokasiInput.addEventListener("change", function(){
-            let coords = extractLatLng(this.value);
-            if(coords){
-                showMap(coords.lat, coords.lng);
-            }
-        });
-        // jika mahasiswa mengganti link manual
-        lokasiInput.addEventListener("input", function(){
-
-            const autoGenerated = this.dataset.auto === "true";
-
-            if(!autoGenerated){
-                document.getElementById("mapPreview").classList.add("hidden");
-                document.getElementById("previewInfo").classList.remove("hidden");
-            }
-
-        });
+                let coords = extractLatLng(this.value);
+                if(coords){
+                    showMap(coords.lat, coords.lng);
+                }
+            });
+            
+            lokasiInput.addEventListener("input", function(){
+                const autoGenerated = this.dataset.auto === "true";
+                if(!autoGenerated){
+                    document.getElementById("mapPreview").classList.add("hidden");
+                    document.getElementById("previewInfo").classList.remove("hidden");
+                }
+            });
         });
     </script>
 </x-app-layout>
