@@ -96,12 +96,9 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         // nilai
         Route::get('/nilai-pkl', [MahasiswaNilaiPklController::class, 'index'])->name('nilai.index');
         // tugas
-        Route::get('/tugas', [TugasMahasiswaController::class, 'index'])
-        ->name('tugas');
-        Route::get('/tugas/{id}', [TugasMahasiswaController::class,'show'])
-        ->name('tugas.show');
-        Route::post('/tugas/{id}/submit', [TugasMahasiswaController::class,'submit'])
-        ->name('tugas.submit');
+        Route::get('/tugas', [TugasMahasiswaController::class, 'index']) ->name('tugas');
+        Route::get('/tugas/{id}', [TugasMahasiswaController::class,'show']) ->name('tugas.show');
+        Route::post('/tugas/{id}/submit', [TugasMahasiswaController::class,'submit']) ->name('tugas.submit');
         // penilaian mitra
         Route::get( '/penilaian-mitra', [NilaiMitraMahasiswaController::class, 'index'] )->name('penilaianMitra.index');
 
@@ -326,7 +323,6 @@ Route::middleware(['auth', 'first.login', 'role:mitra'])
         Route::get('/penilaian', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'index']) ->name('penilaian');
         Route::get('/penilaian/{id}', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'form']) ->name('penilaian.form');
         Route::post('/penilaian/{id}', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'store']) ->name('penilaian.store');
-        Route::post( '/penilaian/{id}/upload-scan', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'uploadScan'] )->name('penilaian.upload-scan');
     });
 
 

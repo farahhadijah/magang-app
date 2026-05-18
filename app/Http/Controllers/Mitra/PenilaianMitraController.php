@@ -146,6 +146,8 @@ class PenilaianMitraController extends Controller
         // SIMPAN / UPDATE
         // =========================
 
+        $existing = PenilaianMitra::where('id_pkl', $pkl->id)->first();
+
         $penilaian = PenilaianMitra::updateOrCreate(
 
             [
@@ -166,10 +168,10 @@ class PenilaianMitraController extends Controller
                 'rata_rata' => round($rataRata, 2),
                 'grade' => $grade,
 
-                'verification_token' => Str::uuid(),
+                'verification_token' =>
+                    $existing?->verification_token ?? Str::uuid(),
 
                 'tgl_input' => now(),
-
             ]
         );
 
