@@ -68,6 +68,7 @@ use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklContro
 use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
 use App\Http\Controllers\Mahasiswa\TugasController as TugasMahasiswaController;
 use App\Http\Controllers\Mahasiswa\NilaiMitraMahasiswaController;
+use App\Http\Controllers\Mahasiswa\RemedialController;
 Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
@@ -101,6 +102,8 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::post('/tugas/{id}/submit', [TugasMahasiswaController::class,'submit']) ->name('tugas.submit');
         // penilaian mitra
         Route::get( '/penilaian-mitra', [NilaiMitraMahasiswaController::class, 'index'] )->name('penilaianMitra.index');
+        // remedial
+        Route::get('/remedial', [RemedialController::class, 'index']) ->name('remedial.index');
 
     });
 
@@ -191,6 +194,7 @@ use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenControl
 use App\Http\Controllers\Staff\PengajuanPklController as StaffPengajuanController;
 use App\Http\Controllers\Staff\MitraController as StaffMitraController;
 use App\Http\Controllers\Staff\StaffSuratController;
+use App\Http\Controllers\Staff\FormulirRemedialController;
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
     ->name('staff.')
@@ -228,6 +232,11 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::post('/surat-pengantar/bulk-print', [StaffSuratController::class, 'bulkPrint'])->name('surat.bulk');
         Route::post('/surat-pengantar/bulk-preview',[StaffSuratController::class, 'bulkPreview'])->name('surat.bulk-preview');
         Route::post('/surat-pengantar/bulk-validasi',[StaffSuratController::class, 'bulkValidasi'])->name('surat.bulk-validasi');
+        // ================= FORMULIR REMEDIAL =================
+        Route::get( '/formulir-remedial', [FormulirRemedialController::class, 'index'] )->name('formulir-remedial.index');
+        Route::post( '/formulir-remedial', [FormulirRemedialController::class, 'store'] )->name('formulir-remedial.store');
+        Route::put( '/formulir-remedial/{formulirRemedial}', [FormulirRemedialController::class, 'update'] )->name('formulir-remedial.update');
+        Route::delete( '/formulir-remedial/{formulirRemedial}', [FormulirRemedialController::class, 'destroy'] )->name('formulir-remedial.destroy');
     });
 
 /*
