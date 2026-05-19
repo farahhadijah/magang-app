@@ -13,10 +13,21 @@
     |
     */
 
-    $nilaiRemedial = app(\App\Services\SimulasiSiakadService::class)
-        ->getNilaiRemedial(auth()->user()->mahasiswa);
+    $mahasiswa = auth()->user()->mahasiswa;
 
-    $punyaNilaiDE = count($nilaiRemedial) > 0;
+    $siakadService = app(\App\Services\SiakadService::class);
+
+    /**
+     * Ambil nilai D/E dari API SIAKAD
+     */
+    $nilaiRemedial = $siakadService
+        ->getNilaiBermasalah($mahasiswa->nim);
+
+    /**
+     * Apakah mahasiswa punya nilai D/E
+     */
+    $punyaNilaiDE = $siakadService
+        ->hasNilaiDE($mahasiswa->nim);
 @endphp
 
 @php
@@ -107,7 +118,7 @@
         >
             <i class="w-5 fa-solid fa-lock"></i>
 
-            Ajukan PKL Terkunci
+            Ajukan PKL
         </div>
 
     @endif

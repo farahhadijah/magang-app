@@ -11,7 +11,6 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | ROOT & AUTH
@@ -79,9 +78,12 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::get('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
         Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
         Route::get('/status-pengajuan', [MahasiswaPengajuanController::class, 'status'])->name('pengajuan.status');
-        Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen'])
-            ->name('pengajuan.dokumen.upload-ulang');
-
+        Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen']) ->name('pengajuan.dokumen.upload-ulang');
+        Route::middleware('bebas.nilai.de')->group(function () {
+        Route::get('/pengajuan-pkl', [ MahasiswaPengajuanController::class, 'create' ])->name('pengajuan.create');
+        Route::post('/pengajuan-pkl', [ MahasiswaPengajuanController::class, 'store' ])->name('pengajuan.store');
+        Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [ MahasiswaPengajuanController::class, 'uploadUlangDokumen' ])->name('pengajuan.dokumen.upload-ulang');
+        });
         // Logbook
         Route::get('/logbook', [MahasiswaLogbookController::class, 'index'])->name('logbook.index');
         Route::get('/logbook/create', [MahasiswaLogbookController::class, 'create'])->name('logbook.create');

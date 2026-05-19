@@ -2,51 +2,70 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 class SiakadService
 {
     /**
-     * Simulasi ambil nilai mahasiswa dari API SIAKAD.
+     * Ambil data nilai mahasiswa dari API SIAKAD.
      */
     public function getNilaiMahasiswa(string $nim): array
     {
+        try {
 
-        $dummy = [
+            $response = Http::withHeaders([
+                'x-api-key' => env('SIAKAD_API_KEY'),
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])->send('GET',
 
-            // mahasiswa punya nilai D/E
-            '112310090' => [
+                env('SIAKAD_BASE_URL') . '/nilai',
+
                 [
-                    'kode_mk' => 'IF202',
-                    'nama_mk' => 'Basis Data',
-                    'sks'      => 3,
-                    'nilai'    => 'D',
-                    'jenis'    => 'Teori',
-                ],
-                [
-                    'kode_mk' => 'IF404',
-                    'nama_mk' => 'Pemrograman Web',
-                    'sks'      => 1,
-                    'nilai'    => 'E',
-                    'jenis'    => 'Praktikum',
-                ],
-            ],
+                    'json' => [
+                        'nim' => $nim,
 
-            // mahasiswa aman
-            '112310067' => [
-                [
-                    'kode_mk' => 'IF101',
-                    'nama_mk' => 'Algoritma',
-                    'sks'      => 3,
-                    'nilai'    => 'B',
-                    'jenis'    => 'Teori',
-                ],
-            ],
-        ];
+                        /**
+                         * semester aktif
+                         * bisa kamu ubah nanti menjadi dinamis
+                         */
+                        'tahunsms' => '20252',
+                    ]
+                ]
+            );
 
-        return $dummy[$nim] ?? [];
+            /**
+             * Jika request gagal
+             */
+            if (!$response->successful()) {
+
+                Log::error('Gagal ambil nilai SIAKAD', [
+                    'nim' => $nim,
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+
+                return [];
+            }
+
+            /**
+             * Ambil array data
+             */
+            return $response->json('data', []);
+
+        } catch (\Exception $e) {
+
+            Log::error('Error koneksi SIAKAD', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
     }
 
     /**
-     * Ambil hanya nilai D/E.
+     * Ambil matakuliah nilai D/E.
      */
     public function getNilaiBermasalah(string $nim): array
     {
@@ -54,7 +73,12 @@ class SiakadService
             $this->getNilaiMahasiswa($nim)
         )
         ->filter(function ($item) {
-            return in_array($item['nilai'], ['D', 'E']);
+
+            return in_array(
+                strtoupper($item['NILAI'] ?? ''),
+                ['D', 'E']
+            );
+
         })
         ->values()
         ->toArray();
@@ -79,7 +103,7 @@ class SiakadService
     }
 
     /**
-     * Hitung biaya remedial.
+     * Hitung total biaya remedial.
      */
     public function hitungBiayaRemedial(string $nim): int
     {
@@ -87,7 +111,15 @@ class SiakadService
 
         foreach ($this->getNilaiBermasalah($nim) as $mk) {
 
-            if ($mk['jenis'] === 'praktikum') {
+            /**
+             * Deteksi praktikum dari nama MK
+             */
+            $isPraktikum = str_contains(
+                strtolower($mk['NAMAMK'] ?? ''),
+                'praktikum'
+            );
+
+            if ($isPraktikum) {
                 $total += 500000;
             } else {
                 $total += 300000;
