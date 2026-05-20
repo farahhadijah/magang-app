@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Dosen;
-use App\Models\Staff;
 use App\Models\Mahasiswa;
+use App\Models\Pimpinan;
+use App\Models\Staff;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class UserAutoCreateService
@@ -31,9 +32,8 @@ class UserAutoCreateService
             ['dosen_id' => $dosen->id],
             [
                 'username'     => $dosen->nidn,
-                // plain password: model mutator will hash it
-                'password'    => Hash::make( $dosen->nidn),
-                'role'         => 'dosen',
+                'password'     => Hash::make($dosen->nidn),
+                'role'         => 'dosen', 
                 'is_active'    => $dosen->is_active ?? true,
                 'first_login'  => true
             ]
@@ -42,22 +42,27 @@ class UserAutoCreateService
 
     public static function fromStaff(Staff $staff)
     {
-        $role = match ($staff->jabatan) {
-            'Kaprodi'  => 'kaprodi',
-            'Staff TU' => 'staff_tu',
-            default    => throw new \LogicException(
-                'Jabatan staff tidak valid untuk auto-create user'
-            ),
-        };
-
         return User::updateOrCreate(
             ['staff_id' => $staff->id],
             [
                 'username'     => $staff->nip,
-                // plain password: model mutator will hash it
-                'password'    => Hash::make($staff->nip),
-                'role'         => $role, // staff_tu / kaprodi
+                'password'     => Hash::make($staff->nip),
+                'role'         => 'staff_tu',
                 'is_active'    => $staff->is_active ?? true,
+                'first_login'  => true
+            ]
+        );
+    }
+
+    public static function fromPimpinan(Pimpinan $pimpinan)
+    {
+        return User::updateOrCreate(
+            ['pimpinan_id' => $pimpinan->id],
+            [
+                'username'     => $pimpinan->nip,
+                'password'     => Hash::make($pimpinan->nip),
+                'role'         => 'pimpinan',
+                'is_active'    => $pimpinan->is_active ?? true,
                 'first_login'  => true
             ]
         );

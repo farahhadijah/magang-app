@@ -1,4 +1,4 @@
-<nav class="relative z-[999] flex flex-col w-64 h-screen text-green-100">
+<nav x-data="navScrollActive()" class="relative z-[999] flex flex-col w-64 h-screen text-green-100">
 
     <!-- ================= LOGO ================= -->
     <div class="flex items-center justify-center h-16 border-b border-green-800 shrink-0">
@@ -35,11 +35,8 @@
             {{-- TAMBAHAN NAVBAR KAPRODI --}}
             @if(auth()->user()->isKaprodi())
                 @include('layouts.navbar.kaprodi')
-                @endif
+            @endif
                 
-                <div class="px-4 pt-4 mt-6 text-xs text-gray-300 uppercase border-t border-green-700">
-                    Menu Dosen
-                </div>
             {{-- NAVBAR DOSEN --}}
             @include('layouts.navbar.dosen')
 
@@ -51,6 +48,9 @@
 
         @elseif(auth()->user()->role === 'mitra')
             @include('layouts.navbar.mitra')
+        
+        @elseif(auth()->user()->role === 'pimpinan')
+            @include('layouts.navbar.pimpinan')
 
         @endif
 
@@ -75,16 +75,3 @@
     </div>
 
 </nav>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const activeMenu = document.querySelector(".bg-green-800");
-
-    if(activeMenu){
-        activeMenu.scrollIntoView({
-            block: "center"
-        });
-    }
-
-});
-</script>

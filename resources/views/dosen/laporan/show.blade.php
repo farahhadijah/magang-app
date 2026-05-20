@@ -2,7 +2,8 @@
     <x-slot name="title">
         Detail Laporan - MagangApp
     </x-slot>
-    <div class="max-w-5xl py-6 mx-auto space-y-6">
+    @php $pdfSrc = isset($laporan) ? asset('storage/'.$laporan->path_file) : ''; @endphp
+    <div x-data="togglePdf(@js($pdfSrc))" class="max-w-5xl py-6 mx-auto space-y-6">
         {{-- Flash Message --}}
         @if(session('success'))
             <div class="flex items-center gap-2 p-4 text-green-800 border border-green-200 bg-green-50 rounded-xl">
@@ -77,18 +78,13 @@
             </h3>
 
             <button type="button"
-                    id="toggleBtn"
-                    onclick="togglePdf()"
-                    class="inline-flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-800 hover:underline">
-                Lihat File PDF
+                    @click="toggle()"
+                    class="inline-flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-800 hover:underline"
+                    x-text="visible ? 'Sembunyikan File PDF' : 'Lihat File PDF'">
             </button>
 
-            {{-- Container PDF (hidden default) --}}
-            <div id="pdfContainer" class="hidden mt-4">
-                <iframe id="pdfFrame"
-                        data-src="{{ asset('storage/'.$laporan->path_file) }}"
-                        class="w-full h-[600px] border rounded-xl">
-                </iframe>
+            <div x-show="visible" x-cloak class="mt-4">
+                <iframe :src="src" class="w-full h-[600px] border rounded-xl"></iframe>
             </div>
 
         </div>
@@ -147,30 +143,4 @@
         @endif
 
     </div>
-    <script>
-    function togglePdf() {
-        const container = document.getElementById('pdfContainer');
-        const frame = document.getElementById('pdfFrame');
-        const btn = document.getElementById('toggleBtn');
-
-        if (container.classList.contains('hidden')) {
-            // Tampilkan
-            container.classList.remove('hidden');
-
-            // Selalu set ulang src
-            frame.src = frame.dataset.src;
-
-            btn.innerText = "Sembunyikan File PDF";
-
-        } else {
-            // Sembunyikan
-            container.classList.add('hidden');
-
-            // Reset supaya benar-benar close
-            frame.src = "";
-
-            btn.innerText = "Lihat File PDF";
-        }
-    }
-    </script>
 </x-app-layout>

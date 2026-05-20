@@ -26,6 +26,10 @@ class DashboardController extends Controller
         case 'kaprodi':
             return redirect()->route('kaprodi.dashboard');
 
+        case 'pimpinan':
+            // pimpinan area does not have a named dashboard route; send to the pimpinan prefix
+            return redirect('/pimpinan');
+
         case 'mitra': // 🔥 TAMBAHKAN INI
             return redirect()->route('mitra.dashboard');
 

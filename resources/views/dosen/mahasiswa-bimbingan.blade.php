@@ -6,94 +6,94 @@
     <div class="px-4 py-6 mx-auto space-y-6 max-w-7xl">
 
         {{-- CONTAINER --}}
-        <div class="overflow-hidden bg-white border border-green-100 shadow rounded-xl">
+        <div class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl">
 
             @if($pkls->count())
 
             {{-- DESKTOP TABLE --}}
             <div class="hidden md:block overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-green-100 text-slate-800">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50 border-b-2 border-gray-200">
                         <tr>
-                            <th class="px-4 py-3 text-center">NIM</th>
-                            <th class="px-4 py-3 text-center">Nama Mahasiswa</th>
-                            <th class="px-4 py-3 text-center">Program Studi</th>
-                            <th class="px-4 py-3 text-center">Tempat PKL</th>
-                            <th class="px-4 py-3 text-center">Status</th>
-                            <th class="px-4 py-3 text-center">Aksi</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">NIM</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Mahasiswa</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Program Studi</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tempat PKL</th>
+                            <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
 
-                    <tbody class="divide-y divide-green-100">
+                    <tbody class="divide-y divide-gray-100 bg-white">
                         @foreach($pkls as $pkl)
-                        <tr class="text-center transition hover:bg-green-50">
-
-                            <td class="px-4 py-3">
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {{ optional($pkl->pengajuan->mahasiswa)->nim }}
                             </td>
-
-                            <td class="px-4 py-3 font-medium text-green-800">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {{ optional($pkl->pengajuan->mahasiswa)->nama }}
                             </td>
-
-                            <td class="px-4 py-3">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {{ optional($pkl->pengajuan->mahasiswa->prodi)->nama }}
                             </td>
-
-                            <td class="px-4 py-3">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {{ optional($pkl->pengajuan->tempatPkl)->nama_tempat }}
                             </td>
-
-                            <td class="px-4 py-3">
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
                                 @if($pkl->status == 'aktif')
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full text-amber-800 bg-amber-100">
-                                        <i class="fa-solid fa-spinner fa-spin"></i> Berjalan
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full text-amber-700 bg-amber-100">
+                                        <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Berjalan
                                     </span>
                                 @else
-                                    <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                                        <i class="fa-solid fa-check-circle"></i> Selesai
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full text-green-700 bg-green-100">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        Selesai
                                     </span>
                                 @endif
                             </td>
-
-                            <td class="px-4 py-3 space-x-2">
-
-                                {{-- LOGBOOK --}}
-                                @if($pkl->status === 'aktif')
-                                    <a href="{{ route('dosen.logbook.index') }}"
-                                    class="px-3 py-1 text-xs text-green-900 bg-green-200 rounded hover:bg-green-300">
-                                        Logbook
-                                    </a>
-                                @else
-                                    <span class="px-3 py-1 text-xs text-gray-400 bg-gray-100 rounded">
-                                        Terkunci
-                                    </span>
-                                @endif
-
-                                {{-- NILAI --}}
-                                @if(
-                                    $pkl->status === 'aktif' &&
-                                    $pkl->laporanAkhir &&
-                                    $pkl->laporanAkhir->status_approve === 'approved'
-                                )
-                                    @if(!$pkl->nilaiPkl)
-                                        <a href="{{ route('dosen.nilai.create', $pkl->id) }}"
-                                        class="px-3 py-1 text-xs text-white bg-green-600 rounded hover:bg-green-700">
-                                            Input Nilai
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    {{-- LOGBOOK --}}
+                                    @if($pkl->status === 'aktif')
+                                        <a href="{{ route('dosen.logbook.index') }}"
+                                           class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition-colors duration-150">
+                                            Logbook
                                         </a>
                                     @else
-                                        <span class="px-3 py-1 text-xs text-white bg-gray-500 rounded">
-                                            Sudah Dinilai
+                                        <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+                                            Terkunci
                                         </span>
                                     @endif
-                                @else
-                                    <span class="px-3 py-1 text-xs text-gray-400 bg-gray-100 rounded">
-                                        Disable
-                                    </span>
-                                @endif
 
+                                    {{-- NILAI --}}
+                                    @if(
+                                        $pkl->status === 'aktif' &&
+                                        $pkl->laporanAkhir &&
+                                        $pkl->laporanAkhir->status_approve === 'approved'
+                                    )
+                                        @if(!$pkl->nilaiPkl)
+                                            <a href="{{ route('dosen.nilai.create', $pkl->id) }}"
+                                               class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors duration-150">
+                                                Input Nilai
+                                            </a>
+                                        @else
+                                            <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gray-500 rounded-lg cursor-not-allowed">
+                                                Sudah Dinilai
+                                            </span>
+                                        @endif
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+                                            Disable
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
-
                         </tr>
                         @endforeach
                     </tbody>
@@ -104,55 +104,56 @@
             {{-- MOBILE CARD --}}
             <div class="p-4 space-y-4 md:hidden">
                 @foreach($pkls as $pkl)
-
-                <div class="p-4 border border-green-100 rounded-lg shadow-sm bg-white">
-
-                    <div class="mb-2">
-                        <p class="text-xs text-gray-500">Nama</p>
-                        <p class="font-semibold text-green-800">
-                            {{ optional($pkl->pengajuan->mahasiswa)->nama }}
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <p class="text-xs text-gray-500">NIM</p>
-                            <p>{{ optional($pkl->pengajuan->mahasiswa)->nim }}</p>
+                <div class="p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
+                            <h3 class="text-base font-semibold text-gray-900">
+                                {{ optional($pkl->pengajuan->mahasiswa)->nama }}
+                            </h3>
+                            <p class="text-xs text-gray-500 mt-1">
+                                NIM: {{ optional($pkl->pengajuan->mahasiswa)->nim }}
+                            </p>
                         </div>
-
                         <div>
-                            <p class="text-xs text-gray-500">Prodi</p>
-                            <p>{{ optional($pkl->pengajuan->mahasiswa->prodi)->nama }}</p>
+                            @if($pkl->status == 'aktif')
+                                <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-amber-700 bg-amber-100">
+                                    <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Berjalan
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-green-700 bg-green-100">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Selesai
+                                </span>
+                            @endif
                         </div>
                     </div>
 
-                    <div class="mt-2">
-                        <p class="text-xs text-gray-500">Tempat PKL</p>
-                        <p>{{ optional($pkl->pengajuan->tempatPkl)->nama_tempat }}</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex">
+                            <span class="text-xs text-gray-500 w-24">Program Studi</span>
+                            <span class="text-gray-700 flex-1">{{ optional($pkl->pengajuan->mahasiswa->prodi)->nama }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-xs text-gray-500 w-24">Tempat PKL</span>
+                            <span class="text-gray-700 flex-1">{{ optional($pkl->pengajuan->tempatPkl)->nama_tempat }}</span>
+                        </div>
                     </div>
 
-                    <div class="mt-3">
-                        @if($pkl->status == 'aktif')
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full text-amber-800 bg-amber-100">
-                                <i class="fa-solid fa-spinner fa-spin"></i> Berjalan
-                            </span>
-                        @else
-                            <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                                <i class="fa-solid fa-check-circle"></i> Selesai
-                            </span>
-                        @endif
-                    </div>
-
-                    <div class="flex flex-col gap-2 mt-4">
-
+                    <div class="flex gap-2 mt-4 pt-3 border-t border-gray-100">
                         {{-- LOGBOOK --}}
                         @if($pkl->status === 'aktif')
                             <a href="{{ route('dosen.logbook.index') }}"
-                            class="w-full px-3 py-2 text-xs text-center text-green-900 bg-green-200 rounded hover:bg-green-300">
+                               class="flex-1 text-center px-3 py-2 text-xs font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition-colors duration-150">
                                 Logbook
                             </a>
                         @else
-                            <span class="w-full px-3 py-2 text-xs text-center text-gray-400 bg-gray-100 rounded">
+                            <span class="flex-1 text-center px-3 py-2 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
                                 Terkunci
                             </span>
                         @endif
@@ -165,35 +166,39 @@
                         )
                             @if(!$pkl->nilaiPkl)
                                 <a href="{{ route('dosen.nilai.create', $pkl->id) }}"
-                                class="w-full px-3 py-2 text-xs text-center text-white bg-green-600 rounded hover:bg-green-700">
+                                   class="flex-1 text-center px-3 py-2 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors duration-150">
                                     Input Nilai
                                 </a>
                             @else
-                                <span class="w-full px-3 py-2 text-xs text-center text-white bg-gray-500 rounded">
+                                <span class="flex-1 text-center px-3 py-2 text-xs font-medium text-white bg-gray-500 rounded-lg cursor-not-allowed">
                                     Sudah Dinilai
                                 </span>
                             @endif
                         @else
-                            <span class="w-full px-3 py-2 text-xs text-center text-gray-400 bg-gray-100 rounded">
+                            <span class="flex-1 text-center px-3 py-2 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
                                 Disable
                             </span>
                         @endif
-
                     </div>
-
                 </div>
-
                 @endforeach
             </div>
 
 
             @else
 
-            <div class="p-10 text-center">
-                <i class="mb-4 text-5xl text-green-600 fa-solid fa-user-graduate"></i>
-                <h2 class="text-lg font-semibold text-gray-700">
+            <div class="p-12 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">
                     Belum Ada Mahasiswa Bimbingan
-                </h2>
+                </h3>
+                <p class="text-sm text-gray-500">
+                    Mahasiswa yang Anda bimbing akan muncul di sini
+                </p>
             </div>
 
             @endif
@@ -201,9 +206,11 @@
         </div>
 
         {{-- Pagination --}}
+        @if($pkls->hasPages())
         <div class="flex justify-center">
             {{ $pkls->links() }}
         </div>
+        @endif
 
     </div>
 </x-app-layout>

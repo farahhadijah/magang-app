@@ -3,7 +3,7 @@
     Akun Mitra - MagangApp
 </x-slot>
 
-<div class="max-w-4xl px-0 py-6 mx-auto md:py-8">
+<div x-data="copyTextarea()" class="max-w-4xl px-0 py-6 mx-auto md:py-8">
 
     <div class="overflow-hidden bg-white border border-green-200 shadow-lg rounded-2xl">
 
@@ -80,7 +80,7 @@
                         rows="8"
                         readonly>{{ $pesan }}</textarea>
 
-                    <button onclick="copyTemplate()"
+                    <button type="button" @click="copy('templatePesan')"
                         class="w-full sm:w-auto px-4 py-2 mt-3 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                         Copy Pesan
                     </button>
@@ -181,15 +181,5 @@
         </div>
     </div>
 </div>
-
-<script>
-function copyTemplate() {
-    const textarea = document.getElementById("templatePesan");
-    textarea.select();
-    textarea.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    alert("Pesan berhasil disalin");
-}
-</script>
 
 </x-app-layout>

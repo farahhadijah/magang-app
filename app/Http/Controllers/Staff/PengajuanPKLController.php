@@ -242,12 +242,26 @@ public function histori(Request $request)
             ->with('warning', 'Akun hanya dapat dilihat setelah dibuat.');
     }
 
+    $prodiId = $this->getProdiId();
     $tempat = TempatPkl::with('mitra.user')->findOrFail($id);
+
+    $mahasiswas = DB::table('pengajuan_pkl')
+        ->join('mahasiswa', 'pengajuan_pkl.id_mhs', '=', 'mahasiswa.id')
+        ->where('pengajuan_pkl.id_tempat_pkl', $tempat->id)
+        ->where('pengajuan_pkl.status', 'disetujui')
+        ->where('mahasiswa.prodi_id', $prodiId)
+        ->select(
+            'mahasiswa.nim',
+            'mahasiswa.nama',
+            'mahasiswa.no_hp'
+        )
+        ->get();
 
     return view('staff.mitra.akun', [
         'tempat' => $tempat,
         'akun' => $akun,
         'account_notice' => true,
+        'mahasiswas' => $mahasiswas,
     ]);
 } 
     public function manajemenMitra()

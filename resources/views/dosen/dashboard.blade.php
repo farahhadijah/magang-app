@@ -47,36 +47,42 @@
                     <div class="p-6 pt-2">
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {{-- Menunggu Verifikasi --}}
-                            <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl hover:shadow-lg hover:-translate-y-1">
-                                <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 rounded-full bg-amber-200 opacity-30 group-hover:scale-150"></div>
-                                <div class="relative">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="flex items-center justify-center w-10 h-10 shadow-md bg-amber-500 rounded-xl">
-                                            <i class="text-lg text-white fa-solid fa-hourglass-half"></i>
+                            <a href="{{ route('kaprodi.pengajuan.index') }}"
+                            class="block">
+                                <div class="relative p-6 overflow-hidden transition-all duration-300 cursor-pointer group bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
+                                    <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 rounded-full bg-amber-200 opacity-30 group-hover:scale-150"></div>
+                                    <div class="relative">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center justify-center w-10 h-10 shadow-md bg-amber-500 rounded-xl">
+                                                <i class="text-lg text-white fa-solid fa-hourglass-half"></i>
+                                            </div>
+                                            <i class="text-sm fa-solid fa-clock text-amber-400"></i>
                                         </div>
-                                        <i class="text-sm fa-solid fa-clock text-amber-400"></i>
+                                        <p class="mb-1 text-xs font-semibold tracking-wider uppercase text-amber-700">Menunggu Verifikasi</p>
+                                        <p class="text-3xl font-bold text-amber-900">{{ $totalMenunggu }}</p>
+                                        <p class="mt-2 text-xs text-amber-600">Perlu verifikasi segera</p>
                                     </div>
-                                    <p class="mb-1 text-xs font-semibold tracking-wider uppercase text-amber-700">Menunggu Verifikasi</p>
-                                    <p class="text-3xl font-bold text-amber-900">{{ $totalMenunggu }}</p>
-                                    <p class="mt-2 text-xs text-amber-600">Perlu verifikasi segera</p>
                                 </div>
-                            </div>
+                            </a>
 
                             {{-- PKL Aktif --}}
-                            <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-green-50 to-green-100 rounded-2xl hover:shadow-lg hover:-translate-y-1">
-                                <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 bg-green-200 rounded-full opacity-30 group-hover:scale-150"></div>
-                                <div class="relative">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="flex items-center justify-center w-10 h-10 bg-green-500 shadow-md rounded-xl">
-                                            <i class="text-lg text-white fa-solid fa-play"></i>
+                            <a href="{{ route('kaprodi.mahasiswa.index') }}"
+                            class="block">
+                                <div class="relative p-6 overflow-hidden transition-all duration-300 cursor-pointer group bg-gradient-to-br from-green-50 to-green-100 rounded-2xl hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
+                                    <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 bg-green-200 rounded-full opacity-30 group-hover:scale-150"></div>
+                                    <div class="relative">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center justify-center w-10 h-10 bg-green-500 shadow-md rounded-xl">
+                                                <i class="text-lg text-white fa-solid fa-play"></i>
+                                            </div>
+                                            <i class="text-sm text-green-400 fa-solid fa-chart-simple"></i>
                                         </div>
-                                        <i class="text-sm text-green-400 fa-solid fa-chart-simple"></i>
+                                        <p class="mb-1 text-xs font-semibold tracking-wider text-green-700 uppercase">PKL Aktif</p>
+                                        <p class="text-3xl font-bold text-green-900">{{ $totalAktif }}</p>
+                                        <p class="mt-2 text-xs text-green-600">Sedang berlangsung</p>
                                     </div>
-                                    <p class="mb-1 text-xs font-semibold tracking-wider text-green-700 uppercase">PKL Aktif</p>
-                                    <p class="text-3xl font-bold text-green-900">{{ $totalAktif }}</p>
-                                    <p class="mt-2 text-xs text-green-600">Sedang berlangsung</p>
                                 </div>
-                            </div>
+                            </a>
 
                             {{-- PKL Selesai --}}
                             <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl hover:shadow-lg hover:-translate-y-1">
@@ -128,52 +134,58 @@
                 <div class="p-6 pt-2">
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {{-- Mahasiswa Aktif --}}
-                        <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl hover:shadow-lg hover:-translate-y-1">
-                            <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 bg-green-200 rounded-full opacity-30 group-hover:scale-150"></div>
-                            <div class="relative">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
-                                        <i class="text-lg text-white fa-solid fa-user-graduate"></i>
+                        <a href="{{ route('dosen.mahasiswa.bimbingan') }}" class="block">
+                            <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl hover:shadow-lg hover:-translate-y-1">
+                                <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 bg-green-200 rounded-full opacity-30 group-hover:scale-150"></div>
+                                <div class="relative">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
+                                            <i class="text-lg text-white fa-solid fa-user-graduate"></i>
+                                        </div>
+                                        <i class="text-sm text-green-400 fa-solid fa-users-viewfinder"></i>
                                     </div>
-                                    <i class="text-sm text-green-400 fa-solid fa-users-viewfinder"></i>
+                                    <p class="mb-1 text-xs font-semibold tracking-wider text-green-700 uppercase">Mahasiswa Aktif</p>
+                                    <p class="text-3xl font-bold text-green-900">{{ $mahasiswaCount ?? 0 }}</p>
+                                    <p class="mt-2 text-xs text-green-600">Mahasiswa bimbingan aktif</p>
                                 </div>
-                                <p class="mb-1 text-xs font-semibold tracking-wider text-green-700 uppercase">Mahasiswa Aktif</p>
-                                <p class="text-3xl font-bold text-green-900">{{ $mahasiswaCount ?? 0 }}</p>
-                                <p class="mt-2 text-xs text-green-600">Mahasiswa bimbingan aktif</p>
                             </div>
-                        </div>
+                        </a>
 
                         {{-- Logbook Pending --}}
-                        <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl hover:shadow-lg hover:-translate-y-1">
-                            <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 rounded-full bg-amber-200 opacity-30 group-hover:scale-150"></div>
-                            <div class="relative">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl">
-                                        <i class="text-lg text-white fa-solid fa-clock"></i>
+                        <a href="{{ route('dosen.logbook.index') }}" class="block">
+                            <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl hover:shadow-lg hover:-translate-y-1">
+                                <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 rounded-full bg-amber-200 opacity-30 group-hover:scale-150"></div>
+                                <div class="relative">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl">
+                                            <i class="text-lg text-white fa-solid fa-clock"></i>
+                                        </div>
+                                        <i class="text-sm fa-solid fa-hourglass-half text-amber-400"></i>
                                     </div>
-                                    <i class="text-sm fa-solid fa-hourglass-half text-amber-400"></i>
+                                    <p class="mb-1 text-xs font-semibold tracking-wider uppercase text-amber-700">Logbook Pending</p>
+                                    <p class="text-3xl font-bold text-amber-900">{{ $logbookPendingCount ?? 0 }}</p>
+                                    <p class="mt-2 text-xs text-amber-600">Menunggu persetujuan</p>
                                 </div>
-                                <p class="mb-1 text-xs font-semibold tracking-wider uppercase text-amber-700">Logbook Pending</p>
-                                <p class="text-3xl font-bold text-amber-900">{{ $logbookPendingCount ?? 0 }}</p>
-                                <p class="mt-2 text-xs text-amber-600">Menunggu persetujuan</p>
                             </div>
-                        </div>
+                        </a>
 
                         {{-- Laporan Akhir --}}
-                        <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl hover:shadow-lg hover:-translate-y-1">
-                            <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 bg-blue-200 rounded-full opacity-30 group-hover:scale-150"></div>
-                            <div class="relative">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
-                                        <i class="text-lg text-white fa-solid fa-file-pdf"></i>
+                        <a href="{{ route('dosen.laporan.index') }}" class="block">
+                            <div class="relative p-6 overflow-hidden transition-all duration-300 group bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl hover:shadow-lg hover:-translate-y-1">
+                                <div class="absolute top-0 right-0 w-20 h-20 transition-transform duration-300 translate-x-8 -translate-y-8 bg-blue-200 rounded-full opacity-30 group-hover:scale-150"></div>
+                                <div class="relative">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
+                                            <i class="text-lg text-white fa-solid fa-file-pdf"></i>
+                                        </div>
+                                        <i class="text-sm text-blue-400 fa-solid fa-file-lines"></i>
                                     </div>
-                                    <i class="text-sm text-blue-400 fa-solid fa-file-lines"></i>
+                                    <p class="mb-1 text-xs font-semibold tracking-wider text-blue-700 uppercase">Laporan Akhir</p>
+                                    <p class="text-3xl font-bold text-blue-900">{{ $laporanAkhirCount ?? 0 }}</p>
+                                    <p class="mt-2 text-xs text-blue-600">Mahasiswa Laporan Akhir</p>
                                 </div>
-                                <p class="mb-1 text-xs font-semibold tracking-wider text-blue-700 uppercase">Laporan Akhir</p>
-                                <p class="text-3xl font-bold text-blue-900">{{ $laporanAkhirCount ?? 0 }}</p>
-                                <p class="mt-2 text-xs text-blue-600">Mahasiswa Laporan Akhir</p>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>

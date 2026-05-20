@@ -18,10 +18,8 @@ class DokumenPengajuan extends Model
 
     /* ================= KONSTANTA JENIS ================= */
 
-    public const JENIS_KHS = 'KHS';
     public const JENIS_PEMBAYARAN = 'Pembayaran';
     public const JENIS_STUDI_TOUR = 'StudiTour';
-    public const JENIS_FORM_PKN = 'FormPKN';
     public const JENIS_KRS = 'KRS';
 
     /* ================= RELATION ================= */
@@ -33,19 +31,18 @@ class DokumenPengajuan extends Model
 
     /* ================= HELPER JENIS ================= */
 
-    public function isKhs(): bool
-    {
-        return $this->jenis_dokumen === self::JENIS_KHS;
-    }
-
-    public function isFormPkn(): bool
-    {
-        return $this->jenis_dokumen === self::JENIS_FORM_PKN;
-    }
-
     public function isKrs(): bool
     {
         return $this->jenis_dokumen === self::JENIS_KRS;
+    }
+    public function isPembayaran(): bool
+    {
+        return $this->jenis_dokumen === self::JENIS_PEMBAYARAN;
+    }
+
+    public function isStudiTour(): bool
+    {
+        return $this->jenis_dokumen === self::JENIS_STUDI_TOUR;
     }
 
     /* ================= HELPER STATUS ================= */
@@ -82,16 +79,6 @@ class DokumenPengajuan extends Model
     }
 
     /* ================= SCOPE ================= */
-
-    public function scopeKhs($query)
-    {
-        return $query->where('jenis_dokumen', self::JENIS_KHS);
-    }
-
-    public function scopeFormPkn($query)
-    {
-        return $query->where('jenis_dokumen', self::JENIS_FORM_PKN);
-    }
 
     public function scopeKrs($query)
     {

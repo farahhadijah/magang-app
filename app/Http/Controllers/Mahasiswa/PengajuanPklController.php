@@ -10,9 +10,6 @@ use App\Models\PengajuanPkl;
 use App\Models\TempatPkl;
 use App\Models\DokumenPengajuan;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
-use App\Models\SuratPengantar;
-
 class PengajuanPklController extends Controller
 {
     /**
@@ -38,9 +35,7 @@ class PengajuanPklController extends Controller
                 ->with('error', 'Kamu sudah memiliki pengajuan PKL yang sedang diproses.');
         }
         $semesterAktif = $this->hitungSemester($mahasiswa->angkatan);
-        $jumlahWajibKhs = $semesterAktif - 1;
-
-        return view('mahasiswa.pengajuan-pkl', compact('semesterAktif', 'jumlahWajibKhs'));
+        return view('mahasiswa.pengajuan-pkl', compact('semesterAktif'));
     }
 
     /**
@@ -59,32 +54,16 @@ class PengajuanPklController extends Controller
         ],
         'alamat_asal' => 'required|string|max:500',
 
-        'dokumen_khs'     => 'required|array|min:1',
-        'dokumen_khs.*'   => 'file|mimes:pdf,doc,docx|max:2048',
         'dokumen_pembayaran' => 'required|file|mimes:pdf,jpg,png|max:2048',
         'dokumen_studi_tour' => 'required|file|mimes:pdf,doc,docx|max:2048',
-        'dokumen_form_pkn'     => 'required|file|mimes:pdf|max:2048',
         'dokumen_krs' => 'required|file|mimes:pdf|max:2048',
     ]);
 
     $mahasiswa = Auth::user()->mahasiswa;
     abort_if(!$mahasiswa, 403);
 
-    // 🔥 hitung semester otomatis
+    // hitung semester otomatis
     $semesterAktif = $this->hitungSemester($mahasiswa->angkatan);
-
-    // 🔥 jumlah KHS wajib = semester - 1
-    $jumlahWajibKhs = $semesterAktif - 1;
-
-    // 🔥 jumlah file yang dikirim user
-    $jumlahUploadKhs = count($request->file('dokumen_khs'));
-
-    // 🔥 VALIDASI KERAS
-    if ($jumlahUploadKhs !== $jumlahWajibKhs) {
-        return back()
-            ->withInput()
-            ->with('error', "Jumlah KHS tidak sesuai! Semester kamu saat ini: {$semesterAktif}, maka wajib upload {$jumlahWajibKhs} KHS.");
-    }
 
     $mahasiswa = Auth::user()->mahasiswa;
     abort_if(!$mahasiswa, 403);
@@ -136,23 +115,7 @@ class PengajuanPklController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | 1️⃣ MULTIPLE KHS
-        |--------------------------------------------------------------------------
-        */
-        foreach ($request->file('dokumen_khs') as $file) {
-            $path = $file->store($basePath, 'public');
-
-            DokumenPengajuan::create([
-                'id_pengajuan_pkl' => $pengajuan->id,
-                'jenis_dokumen'    => DokumenPengajuan::JENIS_KHS,
-                'path_file'        => $path,
-                'status_verifikasi'=> 'pending',
-            ]);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | 2️⃣ PEMBAYARAN (LAMA - TETAP)
+        | 2️ PEMBAYARAN (LAMA - TETAP)
         |--------------------------------------------------------------------------
         */
         $pembayaranPath = $request->file('dokumen_pembayaran')
@@ -167,7 +130,7 @@ class PengajuanPklController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | 3️⃣ STUDI TOUR (LAMA - TETAP)
+        | 3 STUDI TOUR (LAMA - TETAP)
         |--------------------------------------------------------------------------
         */
         $studiTourPath = $request->file('dokumen_studi_tour')
@@ -182,22 +145,7 @@ class PengajuanPklController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | 4️⃣ FORM PKN (BARU)
-        |--------------------------------------------------------------------------
-        */
-        $formPknPath = $request->file('dokumen_form_pkn')
-            ->store($basePath, 'public');
-
-        DokumenPengajuan::create([
-            'id_pengajuan_pkl' => $pengajuan->id,
-            'jenis_dokumen'    => DokumenPengajuan::JENIS_FORM_PKN,
-            'path_file'        => $formPknPath,
-            'status_verifikasi'=> 'pending',
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | 5️⃣ KRS (BARU - SINGLE FILE)
+        | 5️ KRS (BARU - SINGLE FILE)
         |--------------------------------------------------------------------------
         */
         $krsPath = $request->file('dokumen_krs')
@@ -263,40 +211,6 @@ class PengajuanPklController extends Controller
 
         return back()->with('success', 'Dokumen berhasil diupload ulang dan menunggu verifikasi TU.');
     }
-
-    // hitung semester
-    private function hitungSemester($angkatan)
-    {
-        $tahunSekarang = now()->year;
-
-        // selisih tahun × 2 semester
-        $semester = ($tahunSekarang - $angkatan) * 2;
-
-        // asumsi: kalau sudah lewat tengah tahun → +1 semester
-        if (now()->month >= 7) {
-            $semester += 1;
-        }
-
-        return max(1, $semester);
-    }
-    public function downloadSuratPengantar($id)
-{
-    $mahasiswa = Auth::user()->mahasiswa;
-    abort_if(!$mahasiswa, 403);
-
-    $surat = SuratPengantar::findOrFail($id);
-
-    $path = $surat->path_file;
-
-    if (!Storage::disk('public')->exists($path)) {
-        abort(404, 'File tidak ditemukan.');
-    }
-
-    return Storage::disk('public')->download(
-        $path,
-        'Surat_Pengantar_PKL.pdf'
-    );
-}
         private function normalizeGoogleMapsLink($url)
 {
     // jika shortlink → resolve dulu
@@ -441,7 +355,6 @@ class PengajuanPklController extends Controller
         ->latest()
         ->first();
 
-    // 🔥 Hitung dokumen invalid (yang belum diperbaiki)
     $jumlahInvalid = 0;
 
     if ($pengajuan) {
@@ -455,5 +368,20 @@ class PengajuanPklController extends Controller
         'jumlahInvalid'
     ));
 }
+
+private function hitungSemester($angkatan)
+    {
+        $tahunSekarang = now()->year;
+
+        // selisih tahun × 2 semester
+        $semester = ($tahunSekarang - $angkatan) * 2;
+
+        // asumsi: kalau sudah lewat tengah tahun → +1 semester
+        if (now()->month >= 7) {
+            $semester += 1;
+        }
+
+        return max(1, $semester);
+    }
 
 }

@@ -70,6 +70,7 @@
                                 <thead class="bg-green-100">
                                     <tr>
                                         <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Judul Tugas</th>
+                                        <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase"> Dibuat </th>
                                         <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Deadline</th>
                                         <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Status</th>
                                         <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Aksi</th>
@@ -87,6 +88,12 @@
                                         <tr class="{{ $isOverdue ? 'bg-red-50' : '' }}">
                                             <td class="px-6 py-4">
                                                 <p class="text-sm font-medium">{{ $t->judul }}</p>
+                                            </td>
+
+                                            <td class="px-6 py-4">
+                                                <span class="text-sm text-gray-700">
+                                                    {{ $t->created_at->format('d M Y') }}
+                                                </span>
                                             </td>
 
                                             <td class="px-6 py-4">
@@ -140,6 +147,13 @@
                                     <h3 class="text-sm font-semibold text-gray-800">
                                         {{ $t->judul }}
                                     </h3>
+
+                                    <div class="mt-2 text-xs">
+                                        <span class="text-gray-500">Dibuat:</span><br>
+                                        <span class="text-gray-800">
+                                            {{ $t->created_at->format('d M Y') }}
+                                        </span>
+                                    </div>
 
                                     <!-- Deskripsi -->
                                     @if($t->deskripsi)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanPkl;
+use App\Models\TempatPkl;
 
 class DashboardController extends Controller
 {
@@ -29,10 +30,42 @@ class DashboardController extends Controller
             })
             ->count();
 
+        // SURAT PENGANTAR BELUM DIVALIDASI
+        $totalSuratBelumValidasi = PengajuanPkl::where('status', 'disetujui')
+
+            ->where(function ($q) {
+                $q->whereNull('status_surat')
+                  ->orWhere('status_surat', '!=', 'siap_diambil');
+            })
+
+            ->whereHas('mahasiswa', function ($q) use ($prodiId) {
+                $q->where('prodi_id', $prodiId);
+            })
+
+            // PKL BELUM SELESAI
+            ->whereDoesntHave('pkl', function ($q) {
+                $q->where('status', 'selesai');
+            })
+
+            ->count();
+
+        // TEMPAT PKL / MITRA BELUM DIGENERATE AKUN OLEH STAFF
+        $totalMitraBelumDigenerate = TempatPkl::whereDoesntHave('mitra')
+            ->whereHas('pengajuans', function ($q) use ($prodiId) {
+                $q->where('status', 'disetujui')
+                    ->whereHas('mahasiswa', function ($q2) use ($prodiId) {
+                        $q2->where('prodi_id', $prodiId);
+                    })
+                    ->whereHas('pkl');
+            })
+            ->count();
+
         return view('staff.dashboard', compact(
             'totalMenunggu',
             'totalSelesaiTu',
-            'totalDitolak'
+            'totalDitolak',
+            'totalSuratBelumValidasi',
+            'totalMitraBelumDigenerate'
         ));
     }
 

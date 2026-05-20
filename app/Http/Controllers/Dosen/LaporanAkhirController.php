@@ -16,8 +16,9 @@ class LaporanAkhirController extends Controller
 public function index()
 {
     $dosenId = $this->getDosenId();
-
+    
     $pkls = Pkl::where('id_dosen', $dosenId)
+        ->where('status', '!=', 'selesai')
         ->whereHas('laporanAkhir')
         ->with([
             'pengajuanPkl.mahasiswa',
@@ -66,11 +67,13 @@ public function index()
 
     DB::transaction(function () use ($laporan, $pkl) {
 
-        // ✅ approve laporan
         $laporan->approve(auth()->user()->dosen->id);
     });
 
-    return back()->with('success', 'Laporan disetujui dan PKL selesai.');
+    return back()->with(
+        'success',
+        'Laporan berhasil disetujui.'
+    );
 }
 
     public function reject(Request $request, Pkl $pkl)

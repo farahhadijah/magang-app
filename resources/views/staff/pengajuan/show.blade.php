@@ -1,256 +1,219 @@
 <x-app-layout>
     <x-slot name="title">
-        Detail Pengajuan PKL - MagangApp
+        Detail Pengajuan PKL - Sibolang
     </x-slot>
 
-    <div class="py-6 space-y-6">
-
+    <div x-data="pdfViewer()" class="py-4 space-y-5 sm:py-6 sm:space-y-6">
+        
         {{-- ================= INFORMASI MAHASISWA ================= --}}
-        <div class="p-6 space-y-2 border border-green-200 rounded-lg bg-green-50">
-            <h3 class="mb-2 text-lg font-semibold text-green-900">
-                Informasi Mahasiswa
-            </h3>
-            <p><strong>Nama:</strong> {{ $pengajuan->mahasiswa->nama }}</p>
-            <p><strong>NIM:</strong> {{ $pengajuan->mahasiswa->nim }}</p>
-            <p><strong>Semester:</strong> {{ $pengajuan->semester }}</p>
-            <p><strong>Instansi:</strong> {{ $pengajuan->tempatPkl->nama_tempat }}</p>
-            <p><strong>Jenis Instansi:</strong> {{ $pengajuan->tempatPkl->jenis_tempat }}</p>
-            <p><strong>No HP:</strong> {{ $pengajuan->tempatPkl->no_hp }}</p>
+        <div class="p-5 overflow-hidden border border-green-200 bg-gradient-to-r from-green-50 to-white rounded-xl sm:p-6">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="w-1 h-6 bg-green-600 rounded-full"></div>
+                <h3 class="text-base font-semibold text-green-900 sm:text-lg">
+                    Informasi Mahasiswa
+                </h3>
+            </div>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                <div>
+                    <p class="text-sm text-gray-500">Nama Lengkap</p>
+                    <p class="font-medium text-gray-800">{{ $pengajuan->mahasiswa->nama }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">NIM</p>
+                    <p class="font-medium text-gray-800">{{ $pengajuan->mahasiswa->nim }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Semester</p>
+                    <p class="font-medium text-gray-800">{{ $pengajuan->semester }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Instansi / Perusahaan</p>
+                    <p class="font-medium text-gray-800">{{ $pengajuan->tempatPkl->nama_tempat }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Jenis Instansi</p>
+                    <p class="font-medium text-gray-800">{{ $pengajuan->tempatPkl->jenis_tempat }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">No. Telepon</p>
+                    <p class="font-medium text-gray-800">{{ $pengajuan->tempatPkl->no_hp }}</p>
+                </div>
+            </div>
         </div>
 
-        {{-- ================= DOKUMEN ================= --}}
+        {{-- ================= DOKUMEN VERIFIKASI ================= --}}
         @php
-            $dokumenTerurut = $pengajuan->dokumenPengajuan->sortBy(function($d) {
-                return match($d->jenis_dokumen) {
-                    'KHS' => 1,
-                    'Pembayaran' => 2,
+            // Only show documents that are not KHS
+            $dokumenNonKHS = $pengajuan->dokumenPengajuan->where('jenis_dokumen', '!=', 'KHS')->sortBy(function ($dokumen) {
+                return match ($dokumen->jenis_dokumen) {
+                    'Pembayaran' => 1,
+                    'KRS' => 2,
                     'StudiTour' => 3,
-                    'FormPKN' => 4,
-                    'KRSRemedial' => 5,
                     default => 99,
                 };
             });
-
-            $khs = $dokumenTerurut->where('jenis_dokumen', 'KHS');
-            $lainnya = $dokumenTerurut->where('jenis_dokumen', '!=', 'KHS');
         @endphp
 
-        <div class="p-6 bg-white border border-green-200 rounded-lg shadow-sm">
-            <h3 class="mb-6 text-lg font-semibold text-green-900">
-                Verifikasi Dokumen Mahasiswa
-            </h3>
+        @if($dokumenNonKHS->count())
+            <div class="p-5 overflow-hidden bg-white border border-green-200 rounded-xl sm:p-6">
+                <div class="flex items-center gap-2 mb-5">
+                    <div class="w-1 h-6 bg-green-600 rounded-full"></div>
+                    <h3 class="text-base font-semibold text-green-900 sm:text-lg">
+                        Verifikasi Dokumen Mahasiswa
+                    </h3>
+                </div>
 
-            {{-- ================= KHS GRID ================= --}}
-            @if ($khs->count())
-                <div class="mb-8">
-                    <h4 class="mb-4 font-semibold text-gray-800">
-                        Kartu Hasil Studi (KHS)
-                    </h4>
-
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        @foreach ($khs as $dokumen)
-                            <div id="dokumen-{{ $dokumen->id }}" class="p-4 border rounded-lg
-                                {{ $dokumen->isValid() ? 'border-green-300 bg-green-50'
-                                : ($dokumen->isInvalid() ? 'border-red-300 bg-red-50'
-                                : 'border-amber-300 bg-amber-50') }}">
-
-                                <p class="mb-2 font-semibold text-gray-800">
-                                    File KHS #{{ $loop->iteration }}
-                                </p>
-
-                                <span class="inline-block px-2 py-0.5 mb-3 text-xs rounded
-                                    {{ $dokumen->statusBadge()['class'] }}">
-                                    {{ $dokumen->statusBadge()['text'] }}
-                                </span>
+                {{-- ================= DOKUMEN PENDUKUNG ================= --}}
+                <div class="space-y-3 sm:space-y-4">
+                    @foreach ($dokumenNonKHS as $dokumen)
+                        <div id="dokumen-{{ $dokumen->id }}" 
+                            class="p-4 transition-all rounded-xl border
+                                {{ $dokumen->isValid() ? 'border-green-200 bg-green-50/50'
+                                : ($dokumen->isInvalid() ? 'border-red-200 bg-red-50/50'
+                                : 'border-amber-200 bg-amber-50/50') }}">
+                            
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="flex-1">
+                                    <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+                                        <p class="text-sm font-semibold text-gray-800 sm:text-base">
+                                            {{ $dokumen->jenis_dokumen }}
+                                        </p>
+                                        <span class="inline-block w-fit px-2 py-0.5 text-xs rounded-full
+                                            {{ $dokumen->statusBadge()['class'] }}">
+                                            {{ $dokumen->statusBadge()['text'] }}
+                                        </span>
+                                    </div>
+                                    @if($dokumen->isInvalid() && $dokumen->catatan)
+                                        <div class="mt-2 text-xs text-red-600 sm:text-sm">
+                                            <span class="font-medium">Catatan:</span> {{ $dokumen->catatan }}
+                                        </div>
+                                    @endif
+                                </div>
 
                                 <button
-                                    onclick="openModal('{{ asset('storage/'.$dokumen->path_file) }}')"
-                                    class="block mb-3 text-sm font-medium text-green-700 hover:text-green-900">
+                                    @click="openModal(@js(asset('storage/'.$dokumen->path_file)))"
+                                    class="inline-flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 sm:w-auto">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
                                     Lihat Dokumen
                                 </button>
-
-                                @if ($dokumen->isInvalid())
-                                    <div class="p-2 mb-3 text-xs text-red-700 bg-red-100 border border-red-200 rounded">
-                                        {{ $dokumen->catatan }}
-                                    </div>
-                                @endif
-
-                                @if ($dokumen->isPending())
-                                  <div class="flex flex-col gap-2 sm:flex-row sm:gap-2">
-                                      <form method="POST"
-                                            action="{{ route('staff.dokumen.valid', $dokumen->id) }}"
-                                            class="w-full sm:w-auto">
-                                          @csrf
-                                          <button class="w-full px-3 py-2 text-sm text-white bg-green-600 rounded sm:px-3 sm:py-1 sm:text-xs">
-                                              Valid
-                                          </button>
-                                      </form>
-
-                                      <form method="POST"
-                                            action="{{ route('staff.dokumen.invalid', $dokumen->id) }}"
-                                            class="flex flex-col gap-2 sm:flex-row sm:gap-1 w-full sm:w-auto">
-                                          @csrf
-                                          <input type="text"
-                                                 name="catatan"
-                                                 required
-                                                 placeholder="Catatan"
-                                                 class="w-full px-2 py-2 text-sm border rounded sm:w-24 sm:px-1 sm:py-1 sm:text-xs">
-                                          <button class="w-full px-3 py-2 text-sm text-white bg-red-600 rounded sm:w-auto sm:px-3 sm:py-1 sm:text-xs">
-                                              Invalid
-                                          </button>
-                                      </form>
-                                  </div>
-                              @endif
                             </div>
-                        @endforeach
-                    </div>
+
+                            {{-- Action Buttons for Pending Documents --}}
+                            @if ($dokumen->isPending())
+                                <div class="flex flex-col gap-3 pt-3 mt-3 border-t sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+                                    <form method="POST" action="{{ route('staff.dokumen.valid', $dokumen->id) }}" class="w-full sm:w-auto">
+                                        @csrf
+                                        <button class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 sm:w-auto sm:px-5">
+                                            ✓ Valid
+                                        </button>
+                                    </form>
+
+                                    <form method="POST" action="{{ route('staff.dokumen.invalid', $dokumen->id) }}" class="flex flex-col w-full gap-2 sm:flex-row sm:gap-2 sm:w-auto">
+                                        @csrf
+                                        <input type="text"
+                                               name="catatan"
+                                               required
+                                               placeholder="Catatan penolakan"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 sm:w-64">
+                                        <button class="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 sm:w-auto sm:px-5">
+                                            ✗ Invalid
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
                 </div>
-            @endif
-
-            {{-- ================= DOKUMEN LAIN ================= --}}
-            @foreach ($lainnya as $dokumen)
-            <div id="dokumen-{{ $dokumen->id }}" class="p-3 mb-3 border rounded-lg sm:p-4 sm:mb-4
-                {{ $dokumen->isValid() ? 'border-green-300 bg-green-50'
-                : ($dokumen->isInvalid() ? 'border-red-300 bg-red-50'
-                : 'border-amber-300 bg-amber-50') }}">
-
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex-1">
-                        <p class="text-sm font-semibold text-gray-800 sm:text-base">
-                            {{ $dokumen->jenis_dokumen }}
-                        </p>
-                        <span class="inline-block px-2 py-0.5 mt-1 text-xs rounded sm:mt-0
-                            {{ $dokumen->statusBadge()['class'] }}">
-                            {{ $dokumen->statusBadge()['text'] }}
-                        </span>
-                    </div>
-
-                    <button
-                        onclick="openModal('{{ asset('storage/'.$dokumen->path_file) }}')"
-                        class="w-full py-2 text-sm font-medium text-center text-green-700 md:border-none border-green-300 rounded sm:w-auto sm:py-0 sm:border-0 hover:text-green-900">
-                        Lihat Dokumen
-                    </button>
-                </div>
-
-                @if ($dokumen->isInvalid())
-                    <div class="p-2 mt-3 text-xs text-red-700 bg-red-100 border border-red-200 rounded sm:text-sm sm:mt-2">
-                        <strong>Catatan:</strong> {{ $dokumen->catatan }}
-                    </div>
-                @endif
-
-                @if ($dokumen->isPending())
-                    <div class="flex flex-col gap-3 pt-3 mt-3 border-t sm:flex-row sm:gap-3">
-                        <form method="POST"
-                              action="{{ route('staff.dokumen.valid', $dokumen->id) }}"
-                              class="w-full sm:w-auto">
-                            @csrf
-                            <button class="w-full px-3 py-2 text-sm text-white bg-green-600 rounded sm:px-4 sm:py-1.5 sm:w-auto">
-                                Tandai Valid
-                            </button>
-                        </form>
-
-                        <form method="POST"
-                              action="{{ route('staff.dokumen.invalid', $dokumen->id) }}"
-                              class="flex flex-col gap-2 w-full sm:flex-row sm:gap-2 sm:w-auto">
-                            @csrf
-                            <input type="text"
-                                   name="catatan"
-                                   required
-                                   placeholder="Catatan wajib"
-                                   class="w-full px-2 py-2 text-sm border rounded sm:px-2 sm:py-1 sm:w-auto">
-                            <button class="w-full px-3 py-2 text-sm text-white bg-red-600 rounded sm:px-4 sm:py-1.5 sm:w-auto">
-                                Tandai Invalid
-                            </button>
-                        </form>
-                    </div>
-                @endif
             </div>
-        @endforeach
+        @else
+            <div class="p-8 text-center bg-white border border-gray-200 rounded-xl">
+                <svg class="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p class="mt-2 text-sm text-gray-500">Belum ada dokumen yang diunggah.</p>
+            </div>
+        @endif
 
-        </div>
-
-        {{-- ================= KEPUTUSAN FINAL TU ================= --}}
-        <div class="p-6 bg-white border border-gray-200 rounded-lg">
-            <h4 class="mb-3 font-semibold text-gray-800">
-                Keputusan Verifikasi Administrasi
-            </h4>
+        {{-- ================= KEPUTUSAN FINAL ================= --}}
+        <div class="p-5 overflow-hidden bg-white border border-gray-200 rounded-xl sm:p-6">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-1 h-6 bg-blue-600 rounded-full"></div>
+                <h4 class="text-base font-semibold text-gray-800 sm:text-lg">
+                    Keputusan Verifikasi Administrasi
+                </h4>
+            </div>
 
             @if ($pengajuan->bisaDisetujuiTu())
+                <div class="p-4 mb-4 text-sm text-green-800 bg-green-100 rounded-lg">
+                    <strong>✓ Semua dokumen telah valid.</strong> Silakan selesaikan verifikasi dan kirim ke Kaprodi.
+                </div>
                 <form method="POST" action="{{ route('staff.pengajuan.approve', $pengajuan->id) }}">
                     @csrf
-                    <button class="px-4 py-2 text-white bg-green-700 rounded">
+                    <button class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-green-700 rounded-lg hover:bg-green-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         Selesaikan & Kirim ke Kaprodi
                     </button>
                 </form>
 
             @elseif ($pengajuan->bisaDikembalikanKeMahasiswa())
-                <form method="POST"
-                      action="{{ route('staff.pengajuan.reject', $pengajuan->id) }}"
-                      class="space-y-3">
+                <div class="p-4 mb-4 text-sm rounded-lg text-amber-800 bg-amber-100">
+                    <strong>⚠️ Ada dokumen yang perlu diperbaiki.</strong> Berikan catatan untuk mahasiswa.
+                </div>
+                <form method="POST" action="{{ route('staff.pengajuan.reject', $pengajuan->id) }}" class="space-y-3">
                     @csrf
                     <textarea name="catatan"
                               required
                               rows="3"
-                              placeholder="Catatan untuk mahasiswa (wajib)"
-                              class="w-full p-2 text-sm border rounded"></textarea>
-                    <button class="px-6 py-2 text-white bg-red-600 rounded">
+                              placeholder="Catatan untuk mahasiswa (wajib diisi)&#10;Contoh: File pembayaran kurang jelas, silakan upload ulang dengan kualitas yang lebih baik."
+                              class="w-full p-3 text-sm border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"></textarea>
+                    <button class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         Kembalikan ke Mahasiswa
                     </button>
                 </form>
 
             @elseif ($pengajuan->sudahDiverifikasiTu())
-                <p class="text-sm italic text-gray-500">
-                    ✔ Verifikasi administrasi telah selesai.
-                </p>
+                <div class="flex items-center gap-3 p-4 text-green-800 bg-green-100 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm">✔ Verifikasi administrasi telah selesai. Pengajuan telah diteruskan ke Kaprodi.</span>
+                </div>
 
             @else
-                <p class="text-sm text-amber-700">
-                    Selesaikan verifikasi seluruh dokumen terlebih dahulu.
-                </p>
+                <div class="flex items-center gap-3 p-4 rounded-lg text-amber-800 bg-amber-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span class="text-sm">Selesaikan verifikasi seluruh dokumen terlebih dahulu sebelum melanjutkan.</span>
+                </div>
             @endif
         </div>
 
-    </div>
-
-    {{-- ================= MODAL PREVIEW PDF ================= --}}
-    <div id="pdfModal"
-         class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-60">
-        <div class="relative w-11/12 h-[90vh] bg-white rounded-lg shadow-lg">
-            <button onclick="closeModal()"
-                    class="absolute z-10 w-10 h-10 text-2xl text-white bg-red-600 rounded-full -top-4 -right-4">
-                ✕
-            </button>
-            <iframe id="pdfFrame"
-                    src=""
-                    class="w-full h-full rounded-lg"
-                    frameborder="0">
-            </iframe>
+        {{-- MODAL PREVIEW PDF --}}
+        <div
+            x-cloak
+            x-show="isOpen"
+            x-transition.opacity
+            class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            @click.self="closeModal()"
+            @keydown.escape.window="closeModal()"
+        >
+            <div class="relative w-11/12 h-[90vh] bg-white rounded-2xl shadow-2xl">
+                <button @click="closeModal()"
+                        class="absolute z-10 flex items-center justify-center w-8 h-8 text-white bg-red-600 rounded-full -top-3 -right-3 hover:bg-red-700 focus:ring-2 focus:ring-red-500">
+                    ✕
+                </button>
+                <iframe :src="fileUrl" class="w-full h-full rounded-2xl" frameborder="0"></iframe>
+            </div>
         </div>
     </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    window.openModal = function(url) {
-        document.getElementById('pdfFrame').src = url;
-        document.getElementById('pdfModal').classList.remove('hidden');
-    }
-
-    window.closeModal = function() {
-        document.getElementById('pdfFrame').src = "";
-        document.getElementById('pdfModal').classList.add('hidden');
-    }
-
-    document.getElementById('pdfModal')
-        .addEventListener('click', function(e) {
-            if (e.target === this) {
-                window.closeModal();
-            }
-        });
-
-});
-</script>
-@endpush
 
 </x-app-layout>

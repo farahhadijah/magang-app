@@ -67,4 +67,35 @@
         Data Mitra
     </a>
 
+    {{-- SURAT PENGANTAR PKL (BARU) --}}
+    <a
+        href="{{ route('staff.surat.index') }}"
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            transition
+            hover:bg-green-800
+            {{ request()->routeIs('staff.surat.*') ? 'bg-green-800 text-amber-300' : '' }}
+        "
+    >
+        <i class="w-5 fa-solid fa-file-signature"></i>
+        Surat Pengantar PKL
+    </a>
+
+    {{-- FORMULIR REMEDIAL --}}
+    <a
+        href="{{ route('staff.formulir-remedial.index') }}"
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            transition
+            hover:bg-green-800
+            {{ request()->routeIs('staff.formulir-remedial.*') ? 'bg-green-800 text-amber-300' : '' }}
+        "
+    >
+        <i class="w-5 fa-solid fa-file-pdf"></i>
+        Formulir Remedial
+    </a>
 </div>

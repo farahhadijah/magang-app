@@ -25,4 +25,8 @@ class Mahasiswa extends Model
     {
         return $this->hasMany(PengajuanPkl::class, 'id_mhs');
     }
+    public function dosenWali()
+    {
+        return $this->belongsTo(Dosen::class, 'dosen_wali_id');
+    }
 }

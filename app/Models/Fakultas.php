@@ -19,4 +19,8 @@ class Fakultas extends Model
     {
         return $this->hasMany(Prodi::class);
     }
+    public function formulirRemedial()
+    {
+        return $this->hasMany(FormulirRemedial::class);
+    }
 }

@@ -3,15 +3,14 @@
 
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VerifikasiPenilaianController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Monitoring\SertifikatController;
 
 use App\Http\Controllers\ProfileController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | ROOT & AUTH
@@ -24,6 +23,7 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
+Route::get( '/verifikasi/penilaian/{token}', [VerifikasiPenilaianController::class, 'show'] )->name('verifikasi.penilaian');
 
 /*
 |--------------------------------------------------------------------------
@@ -66,34 +66,24 @@ use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookControll
 use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
 use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
 use App\Http\Controllers\Mahasiswa\TugasController as TugasMahasiswaController;
-use App\Http\Controllers\Mahasiswa\PengajuanSertifikatController;
+use App\Http\Controllers\Mahasiswa\NilaiMitraMahasiswaController;
+use App\Http\Controllers\Mahasiswa\RemedialController;
 Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
     ->group(function () {
         Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
-        // formulir
-        Route::get('/formulir', 
-            [\App\Http\Controllers\Mahasiswa\FormulirController::class,'index']
-        )->name('formulir.index');
-
-        Route::get('/formulir/download/{id}', 
-            [\App\Http\Controllers\Mahasiswa\FormulirController::class,'download']
-        )->name('formulir.download');
+        // formulir (DIHAPUS: fitur download formulir dinonaktifkan)
         // Pengajuan PKL
         Route::get('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
         Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
         Route::get('/status-pengajuan', [MahasiswaPengajuanController::class, 'status'])->name('pengajuan.status');
-        Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen'])
-            ->name('pengajuan.dokumen.upload-ulang');
-        Route::get('/surat-pengantar/{id}/download',[MahasiswaPengajuanController::class, 'downloadSuratPengantar'])->name('surat-pengantar.download');
-        
-        Route::get('/sertifikat', [PengajuanSertifikatController::class,'index'])
-        ->name('sertifikat.index');
-
-        Route::post('/sertifikat', [PengajuanSertifikatController::class,'store'])
-        ->name('sertifikat.store');
-
+        Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen']) ->name('pengajuan.dokumen.upload-ulang');
+        Route::middleware('bebas.nilai.de')->group(function () {
+        Route::get('/pengajuan-pkl', [ MahasiswaPengajuanController::class, 'create' ])->name('pengajuan.create');
+        Route::post('/pengajuan-pkl', [ MahasiswaPengajuanController::class, 'store' ])->name('pengajuan.store');
+        Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [ MahasiswaPengajuanController::class, 'uploadUlangDokumen' ])->name('pengajuan.dokumen.upload-ulang');
+        });
         // Logbook
         Route::get('/logbook', [MahasiswaLogbookController::class, 'index'])->name('logbook.index');
         Route::get('/logbook/create', [MahasiswaLogbookController::class, 'create'])->name('logbook.create');
@@ -108,14 +98,14 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::post('/cek-kemiripan-tempat', [MahasiswaPengajuanController::class, 'cekKemiripanAjax'] )->name('pengajuan.cek-kemiripan');
         // nilai
         Route::get('/nilai-pkl', [MahasiswaNilaiPklController::class, 'index'])->name('nilai.index');
-        Route::get('/sertifikat/{pkl}', function ($pklId) {return view('mahasiswa.nilai.sertifikat-dummy'); })->name('sertifikat.dummy');
         // tugas
-        Route::get('/tugas', [TugasMahasiswaController::class, 'index'])
-        ->name('tugas');
-        Route::get('/tugas/{id}', [TugasMahasiswaController::class,'show'])
-        ->name('tugas.show');
-        Route::post('/tugas/{id}/submit', [TugasMahasiswaController::class,'submit'])
-        ->name('tugas.submit');
+        Route::get('/tugas', [TugasMahasiswaController::class, 'index']) ->name('tugas');
+        Route::get('/tugas/{id}', [TugasMahasiswaController::class,'show']) ->name('tugas.show');
+        Route::post('/tugas/{id}/submit', [TugasMahasiswaController::class,'submit']) ->name('tugas.submit');
+        // penilaian mitra
+        Route::get( '/penilaian-mitra', [NilaiMitraMahasiswaController::class, 'index'] )->name('penilaianMitra.index');
+        // remedial
+        Route::get('/remedial', [RemedialController::class, 'index']) ->name('remedial.index');
 
     });
 
@@ -129,13 +119,11 @@ use App\Http\Controllers\Dosen\LaporanAkhirController as DosenLaporanAkhirContro
 use App\Http\Controllers\Dosen\MahasiswaBimbinganController;
 use App\Http\Controllers\Dosen\NilaiPklController as DosenNilaiPklController;
 use App\Http\Controllers\Dosen\ReviewLogbookController;
+use App\Http\Controllers\Dosen\ResumePklController;
 Route::middleware(['auth', 'first.login', 'role:dosen'])
     ->prefix('dosen')
     ->name('dosen.')
     ->group(function () {
-        // Sertifikat Mahasiswa
-        Route::get('/sertifikat', [SertifikatController::class, 'indexDosen'])
-            ->name('sertifikat.index');
 
         Route::get('/dashboard', [DosenDashboardController::class, 'index'])
         ->name('dashboard');
@@ -174,7 +162,9 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         Route::post('/laporan/{pkl}/reject',[DosenLaporanAkhirController::class, 'reject']
         )->name('laporan.reject');
 
-        
+        Route::get('/resume-pkl', [ResumePklController::class, 'index'])->name('resume.index');
+        Route::get('/resume-pkl/{pkl}', [ResumePklController::class, 'show'])->name('resume.show');
+        Route::get('/resume/{pkl}/logbook', [ResumePklController::class, 'logbook'])->name('resume.logbook');
     });
 
 /*
@@ -188,9 +178,6 @@ Route::middleware(['auth', 'kaprodi'])
     ->prefix('kaprodi')
     ->name('kaprodi.')
     ->group(function () {
-        // Sertifikat Mahasiswa
-         Route::get('/sertifikat', [SertifikatController::class, 'indexKaprodi'])
-            ->name('sertifikat.index');
     Route::get('/mahasiswa', [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
     Route::get('/pengajuan', [KaprodiPengajuanController::class, 'index'])->name('pengajuan.index');
         Route::get('/pengajuan/{id}', [KaprodiPengajuanController::class, 'show'])->name('pengajuan.show');
@@ -208,6 +195,8 @@ use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
 use App\Http\Controllers\Staff\PengajuanPklController as StaffPengajuanController;
 use App\Http\Controllers\Staff\MitraController as StaffMitraController;
+use App\Http\Controllers\Staff\StaffSuratController;
+use App\Http\Controllers\Staff\FormulirRemedialController;
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
     ->name('staff.')
@@ -215,32 +204,41 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
         Route::get('/pengajuan/histori', [StaffPengajuanController::class, 'histori']
         )->name('pengajuan.histori');
-
         Route::post('/dokumen/{id}/valid', [StaffDokumenController::class, 'valid'])->name('dokumen.valid');
         Route::post('/dokumen/{id}/invalid', [StaffDokumenController::class, 'invalid'])->name('dokumen.invalid');
-
         Route::get('/pengajuan', [StaffPengajuanController::class, 'index'])->name('pengajuan.index');
         Route::get('/pengajuan/{id}', [StaffPengajuanController::class, 'show'])->name('pengajuan.show');
         Route::post('/pengajuan/{id}/approve', [StaffPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [StaffPengajuanController::class, 'reject'])->name('pengajuan.reject');
-        
         Route::get('/mitra', 
         [StaffPengajuanController::class, 'manajemenMitra']
         )->name('mitra.index');
-        
         Route::get('/mitra/{id}/akun',
             [StaffPengajuanController::class, 'showAkunMitra']
         )->name('mitra.akun');
-
         Route::post('/mitra/{id}',
             [StaffPengajuanController::class, 'storeMitra']
         )->name('mitra.store');
-
         Route::get('/manajemen-mitra', [StaffMitraController::class, 'index']
         )->name('manajemen-mitra.index');
         Route::get('/manajemen-mitra/{id}', [StaffMitraController::class, 'show']
         )->name('manajemen-mitra.show');
         Route::post('/mitra/{id}/regenerate', [StaffMitraController::class, 'regenerate'])->name('mitra.regenerate');
+        Route::get('/surat-pengantar', [StaffSuratController::class, 'index'])
+            ->name('surat.index');
+        Route::get('/surat-pengantar/{id}/cetak', [StaffSuratController::class, 'cetak'])
+            ->name('surat.cetak');
+        Route::post('/surat-pengantar/{id}/validasi', [StaffSuratController::class, 'validasi'])
+            ->name('surat.validasi');
+        Route::get('/surat-pengantar/{id}/preview', [StaffSuratController::class, 'preview'])->name('surat.preview');
+        Route::post('/surat-pengantar/bulk-print', [StaffSuratController::class, 'bulkPrint'])->name('surat.bulk');
+        Route::post('/surat-pengantar/bulk-preview',[StaffSuratController::class, 'bulkPreview'])->name('surat.bulk-preview');
+        Route::post('/surat-pengantar/bulk-validasi',[StaffSuratController::class, 'bulkValidasi'])->name('surat.bulk-validasi');
+        // ================= FORMULIR REMEDIAL =================
+        Route::get( '/formulir-remedial', [FormulirRemedialController::class, 'index'] )->name('formulir-remedial.index');
+        Route::post( '/formulir-remedial', [FormulirRemedialController::class, 'store'] )->name('formulir-remedial.store');
+        Route::put( '/formulir-remedial/{formulirRemedial}', [FormulirRemedialController::class, 'update'] )->name('formulir-remedial.update');
+        Route::delete( '/formulir-remedial/{formulirRemedial}', [FormulirRemedialController::class, 'destroy'] )->name('formulir-remedial.destroy');
     });
 
 /*
@@ -250,7 +248,6 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
 */
 use App\Http\Controllers\Admin\DosenController;
 use App\Http\Controllers\Admin\FakultasController;
-use App\Http\Controllers\Admin\FormulirController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\StaffController;
@@ -267,7 +264,7 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
 
         Route::resource('users', UserController::class)->only(['create', 'store']);
 
-        Route::resource('formulir', FormulirController::class);
+    // Route::resource('formulir', FormulirController::class); // DIHAPUS: manajemen formulir dinonaktifkan
 
         Route::resource('prodi', ProdiController::class);
         Route::post('prodi/import', [ProdiController::class, 'import'])->name('prodi.import');
@@ -293,6 +290,19 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
         )->name('fakultas.import');
     });
 
+use App\Http\Controllers\Pimpinan\PimpinanController;
+
+Route::prefix('pimpinan')->middleware('auth')->group(function () {
+
+    Route::get('/', [PimpinanController::class, 'index']);
+
+    Route::get('/fakultas/{id}', [PimpinanController::class, 'prodi'])
+        ->name('pimpinan.prodi');
+
+    Route::get('/prodi/{prodi_id}/angkatan/{angkatan}', [PimpinanController::class, 'mahasiswa'])
+        ->name('pimpinan.mahasiswa');
+});
+
 /*
 |--------------------------------------------------------------------------
 | MITRA AREA
@@ -304,36 +314,26 @@ Route::middleware(['auth', 'first.login', 'role:mitra'])
     ->group(function () {
 
         Route::get('/dashboard', 
-            [App\Http\Controllers\Mitra\MitraController::class, 'dashboard']
-        )->name('dashboard');
+            [App\Http\Controllers\Mitra\MitraController::class, 'dashboard'] )->name('dashboard');
 
-        Route::get('/mahasiswa', [App\Http\Controllers\Mitra\MitraController::class, 'mahasiswa'])
-            ->name('mahasiswa');
+        Route::get('/mahasiswa', [App\Http\Controllers\Mitra\MitraController::class, 'mahasiswa']) ->name('mahasiswa');
 
         // Daftar mahasiswa yang sudah mengisi logbook (index untuk mitra)
-        Route::get('/logbook', [App\Http\Controllers\Mitra\MitraController::class, 'logbookList'])
-            ->name('logbook.index');
+        Route::get('/logbook', [App\Http\Controllers\Mitra\MitraController::class, 'logbookList']) ->name('logbook.index');
 
-        Route::get('/logbook/{pkl}', [App\Http\Controllers\Mitra\MitraController::class, 'logbook'])
-            ->name('logbook');
-        
-        Route::get('/sertifikat', [App\Http\Controllers\Mitra\PengajuanSertifikatController::class,'index'])
-        ->name('sertifikat.index');
-
-        Route::post('/sertifikat/upload/{id}', [App\Http\Controllers\Mitra\PengajuanSertifikatController::class,'upload'])
-        ->name('sertifikat.upload');
-        Route::get('/tugas', [App\Http\Controllers\Mitra\TugasMitraController::class, 'index'])
-            ->name('tugas.index');
-        Route::get('/tugas/create', [App\Http\Controllers\Mitra\TugasMitraController::class, 'create'])
-            ->name('tugas.create');
-        Route::post('/tugas', [App\Http\Controllers\Mitra\TugasMitraController::class, 'store'])
-            ->name('tugas.store');
-        Route::get('/tugas/{tugas}', [App\Http\Controllers\Mitra\TugasMitraController::class, 'show'])
-            ->name('tugas.show');
+        Route::get('/logbook/{pkl}', [App\Http\Controllers\Mitra\MitraController::class, 'logbook']) ->name('logbook');
+        Route::get('/tugas', [App\Http\Controllers\Mitra\TugasMitraController::class, 'index']) ->name('tugas.index');
+        Route::get('/tugas/create', [App\Http\Controllers\Mitra\TugasMitraController::class, 'create']) ->name('tugas.create');
+        Route::post('/tugas', [App\Http\Controllers\Mitra\TugasMitraController::class, 'store']) ->name('tugas.store');
+        Route::get('/tugas/{tugas}', [App\Http\Controllers\Mitra\TugasMitraController::class, 'show']) ->name('tugas.show');
         Route::get('/tugas/{tugas}/edit', [App\Http\Controllers\Mitra\TugasMitraController::class, 'edit'])->name('tugas.edit');
         Route::put('/tugas/{tugas}', [App\Http\Controllers\Mitra\TugasMitraController::class, 'update'])->name('tugas.update');
         Route::delete('/tugas/{tugas}', [App\Http\Controllers\Mitra\TugasMitraController::class, 'destroy'])->name('tugas.destroy');
         Route::post('/tugas/verifikasi/{id}',[App\Http\Controllers\Mitra\TugasMitraController::class,'verifikasi'])->name('tugas.verifikasi');
+
+        Route::get('/penilaian', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'index']) ->name('penilaian');
+        Route::get('/penilaian/{id}', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'form']) ->name('penilaian.form');
+        Route::post('/penilaian/{id}', [App\Http\Controllers\Mitra\PenilaianMitraController::class, 'store']) ->name('penilaian.store');
     });
 
 

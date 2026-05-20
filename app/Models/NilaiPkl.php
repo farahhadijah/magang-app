@@ -6,11 +6,12 @@ class NilaiPkl extends Model
 {
     public $timestamps = true;
     protected $fillable = [
-    'id_pkl',
-    'nilai',
-    'keterangan',
-    'tgl_input',
-];
+        'id_pkl',
+        'nilai_angka',
+        'nilai_huruf',
+        'keterangan',
+        'tgl_input',
+    ];
     protected $table = 'nilai_pkl';
     public function pkl()
     {
