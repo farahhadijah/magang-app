@@ -40,7 +40,7 @@ class NilaiPklController extends Controller
             ->whereHas('laporanAkhir', function ($q) {
                 $q->where('status_approve', 'approved');
             })
-            ->with(['pengajuanPkl.mahasiswa', 'laporanAkhir', 'nilaiPkl'])
+            ->with(['pengajuanPkl.mahasiswa', 'laporanAkhir', 'nilaiPkl', 'penilaianMitra'])
             ->paginate(15); 
 
         return view('dosen.nilai.index', compact('pkls'));
@@ -63,6 +63,7 @@ class NilaiPklController extends Controller
             return redirect()->route('dosen.nilai.index')
                 ->with('warning', 'Nilai sudah diinput.');
         }
+        $pkl->load('penilaianMitra');
         return view('dosen.nilai.create', compact('pkl'));
     }
     /**

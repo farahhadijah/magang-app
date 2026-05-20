@@ -176,11 +176,10 @@
             </div>
         </div>
 
-        {{-- MODAL VIEWER (menggunakan komponen pdfViewer yang sudah ada) --}}
         <div 
             x-show="isOpen" 
             x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+            class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black bg-opacity-50"
             @click.away="closeModal()"
         >
             <div class="relative w-full max-w-5xl bg-white rounded-xl shadow-2xl">

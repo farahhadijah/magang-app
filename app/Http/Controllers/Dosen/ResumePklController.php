@@ -23,6 +23,7 @@ class ResumePklController extends Controller
             'nilaiPkl',
             'laporanAkhir',
             'logbooks',
+            'penilaianMitra',
         ])
         ->where('status', 'selesai');
 
@@ -89,6 +90,7 @@ class ResumePklController extends Controller
             'nilaiPkl',
             'laporanAkhir',
             'logbooks',
+            'penilaianMitra',
         ]);
 
         return view('dosen.resume.show', compact(

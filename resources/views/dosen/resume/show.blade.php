@@ -126,6 +126,91 @@
         {{-- RINGKASAN PKL --}}
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
+            {{-- CARD PENILAIAN MITRA --}}
+            <div class="p-6 bg-white border shadow rounded-2xl">
+
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">
+                        Penilaian Mitra
+                    </h2>
+                </div>
+
+                @if($pkl->penilaianMitra)
+
+                    <div class="space-y-4">
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Grade
+                            </p>
+
+                            <span class="inline-flex px-3 py-1 mt-1 text-sm font-bold text-blue-700 bg-blue-100 rounded-full">
+                                {{ $pkl->penilaianMitra->grade }}
+                            </span>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Rata-rata Nilai
+                            </p>
+
+                            <p class="font-semibold text-gray-800">
+                                {{ number_format($pkl->penilaianMitra->rata_rata, 2) }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Tanggal Input
+                            </p>
+
+                            <p class="font-semibold text-gray-800">
+                                {{ \Carbon\Carbon::parse($pkl->penilaianMitra->tgl_input)->format('d M Y') }}
+                            </p>
+                        </div>
+
+                        @if($pkl->penilaianMitra->file_pdf)
+
+                            <div class="flex gap-2 pt-2">
+
+                                <button
+                                    type="button"
+                                    @click="openModal(@js(asset('storage/' . $pkl->penilaianMitra->file_pdf)))"
+                                    class="inline-flex items-center gap-2 px-3 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                                >
+
+                                    <i class="fa-solid fa-eye"></i>
+                                    View PDF
+
+                                </button>
+
+                                <a
+                                    href="{{ asset('storage/' . $pkl->penilaianMitra->file_pdf) }}"
+                                    download
+                                    class="inline-flex items-center gap-2 px-3 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700"
+                                >
+
+                                    <i class="fa-solid fa-download"></i>
+                                    Download
+
+                                </a>
+
+                            </div>
+
+                        @endif
+
+                    </div>
+
+                @else
+
+                    <p class="text-sm text-gray-500">
+                        Penilaian mitra belum tersedia.
+                    </p>
+
+                @endif
+
+            </div>
+
             {{-- CARD NILAI --}}
             <div class="p-6 bg-white border shadow rounded-2xl">
 
@@ -133,10 +218,6 @@
                     <h2 class="text-lg font-bold text-gray-800">
                         Nilai PKL
                     </h2>
-
-                    <div class="p-2 text-green-600 bg-green-100 rounded-lg">
-                        <i class="fa-solid fa-award"></i>
-                    </div>
                 </div>
 
                 @if($pkl->nilaiPkl)
@@ -145,7 +226,7 @@
 
                         <div>
                             <p class="text-sm text-gray-500">
-                                Nilai Huruf
+                                Grade
                             </p>
 
                             <span class="inline-flex px-3 py-1 mt-1 text-sm font-bold text-green-700 bg-green-100 rounded-full">
@@ -202,10 +283,6 @@
                     <h2 class="text-lg font-bold text-gray-800">
                         Laporan Akhir
                     </h2>
-
-                    <div class="p-2 text-blue-600 bg-blue-100 rounded-lg">
-                        <i class="fa-solid fa-file-pdf"></i>
-                    </div>
                 </div>
 
                 @if($pkl->laporanAkhir)
@@ -276,10 +353,6 @@
                     <h2 class="text-lg font-bold text-gray-800">
                         Logbook
                     </h2>
-
-                    <div class="p-2 rounded-lg bg-amber-100 text-amber-600">
-                        <i class="fa-solid fa-book"></i>
-                    </div>
                 </div>
 
                 <div class="space-y-4">
@@ -326,7 +399,7 @@
             <button
                 type="button"
                 class="absolute inset-0 bg-black/50"
-                @click="closeLaporan()"
+                @click="closeModal()"
                 aria-label="Tutup"
             ></button>
 
@@ -334,9 +407,6 @@
             <div class="relative w-full max-w-5xl overflow-hidden bg-white shadow-2xl rounded-2xl">
                 <div class="flex items-center justify-between gap-3 px-4 py-3 border-b sm:px-5">
                     <div class="min-w-0">
-                        <p class="text-sm font-semibold text-gray-900 truncate">
-                            Laporan Akhir (Preview)
-                        </p>
                         <p class="text-xs text-gray-500 truncate">
                             {{ $pkl->pengajuanPkl->mahasiswa->nim }} • {{ $pkl->pengajuanPkl->mahasiswa->nama }}
                         </p>
@@ -356,7 +426,7 @@
                         <button
                             type="button"
                             class="inline-flex items-center justify-center w-10 h-10 text-gray-600 rounded-lg hover:bg-gray-100"
-                            @click="closeLaporan()"
+                            @click="closeModal()"
                             aria-label="Tutup"
                         >
                             ✕
