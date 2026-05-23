@@ -53,6 +53,9 @@
                                 <th scope="col" class="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-500 uppercase">
                                     Status
                                 </th>
+                                <th scope="col" class="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-500 uppercase">
+                                    Grade
+                                </th>
                                 <th scope="col" class="px-6 py-4 text-xs font-semibold tracking-wider text-center text-gray-500 uppercase">
                                     Aksi
                                 </th>
@@ -104,11 +107,26 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-700">
+                                            {{ $pkl->nilaiPkl->nilai_huruf ?? '-' }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
                                         <div class="flex items-center justify-center gap-2">
-                                            <a href="{{ route('mitra.penilaian.form', $pkl->id) }}"
-                                               class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                                {{ $nilai ? 'Edit Nilai' : 'Input Nilai' }}
-                                            </a>
+                                            @if($pkl->status === 'selesai')
+                                                <button
+                                                    type="button"
+                                                    disabled
+                                                    class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-white bg-gray-400 rounded-lg cursor-not-allowed"
+                                                >
+                                                    Selesai
+                                                </button>
+                                            @else
+                                                <a href="{{ route('mitra.penilaian.form', $pkl->id) }}"
+                                                   class="inline-flex items-center px-3.5 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                                    {{ $nilai ? 'Edit Nilai' : 'Input Nilai' }}
+                                                </a>
+                                            @endif
 
                                             <div x-data="{ openPdf: false }" class="inline-block">
                                                 @if($nilai && $nilai->file_pdf)
@@ -222,11 +240,17 @@
                                 </div>
                             @endif
 
-                            <div class="flex flex-col gap-2 mt-4">
-                                <a href="{{ route('mitra.penilaian.form', $pkl->id) }}"
-                                   class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 rounded-xl hover:bg-blue-700">
-                                    {{ $nilai ? 'Edit Nilai' : 'Input Nilai' }}
-                                </a>
+                                <div class="flex flex-col gap-2 mt-4">
+                                @if($pkl->status === 'selesai')
+                                    <button class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-white bg-gray-400 rounded-xl cursor-not-allowed" disabled>
+                                        Selesai
+                                    </button>
+                                @else
+                                    <a href="{{ route('mitra.penilaian.form', $pkl->id) }}"
+                                       class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 rounded-xl hover:bg-blue-700">
+                                        {{ $nilai ? 'Edit Nilai' : 'Input Nilai' }}
+                                    </a>
+                                @endif
 
                                 <div x-data="{ openPdf: false }" class="w-full">
                                     @if($nilai && $nilai->file_pdf)

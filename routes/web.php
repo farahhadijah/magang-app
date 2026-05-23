@@ -3,7 +3,6 @@
 
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\VerifikasiPenilaianController;
 use App\Http\Controllers\DashboardController;
 
 use App\Http\Controllers\ProfileController;
@@ -23,7 +22,8 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
-Route::get( '/verifikasi/penilaian/{token}', [VerifikasiPenilaianController::class, 'show'] )->name('verifikasi.penilaian');
+// Verification via QR/barcode has been disabled. Route kept as comment for reference.
+// Route::get( '/verifikasi/penilaian/{token}', [VerifikasiPenilaianController::class, 'show'] )->name('verifikasi.penilaian');
 
 /*
 |--------------------------------------------------------------------------

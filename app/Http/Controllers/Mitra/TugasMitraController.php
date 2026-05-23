@@ -32,9 +32,11 @@ class TugasMitraController extends Controller
     {
         $mitra = Auth::user()->mitra;
 
-        $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
-            $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
-        })->with('mahasiswa')->get();
+        // only include PKL that are not finished
+        $pkls = Pkl::where('status', '!=', 'selesai')
+            ->whereHas('pengajuanPkl', function ($q) use ($mitra) {
+                $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
+            })->with('mahasiswa')->get();
 
         return view('mitra.tugas.create', compact('pkls'));
     }
@@ -56,6 +58,16 @@ class TugasMitraController extends Controller
         'deskripsi',
         'deadline'
     ]);
+
+    // server-side: prevent creating tugas for finished PKL
+    $targetPkl = Pkl::find($request->id_pkl);
+    if (! $targetPkl || $targetPkl->status === 'selesai') {
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Tidak dapat membuat tugas untuk PKL yang sudah selesai.'], 403);
+        }
+
+        return redirect()->back()->with('error', 'Tidak dapat membuat tugas untuk PKL yang sudah selesai.');
+    }
 
     if ($request->hasFile('file')) {
 
@@ -86,9 +98,11 @@ class TugasMitraController extends Controller
 
         $mitra = Auth::user()->mitra;
 
-        $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
-            $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
-        })->with('mahasiswa')->get();
+        // only include PKL that are not finished when choosing a new student
+        $pkls = Pkl::where('status', '!=', 'selesai')
+            ->whereHas('pengajuanPkl', function ($q) use ($mitra) {
+                $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
+            })->with('mahasiswa')->get();
 
         return view('mitra.tugas.edit', compact('tugas', 'pkls'));
     }
@@ -103,6 +117,25 @@ class TugasMitraController extends Controller
 
         $tugas = TugasMitra::findOrFail($id);
 
+        // server-side: prevent updating tugas if original related PKL is finished
+        if ($tugas->pkl && $tugas->pkl->status === 'selesai') {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Tidak dapat mengubah tugas untuk PKL yang sudah selesai.'], 403);
+            }
+
+            return redirect()->back()->with('error', 'Tidak dapat mengubah tugas untuk PKL yang sudah selesai.');
+        }
+
+        // server-side: prevent moving tugas to a PKL that is finished
+        $targetPkl = Pkl::find($request->id_pkl);
+        if (! $targetPkl || $targetPkl->status === 'selesai') {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Tidak dapat mengaitkan tugas ke PKL yang sudah selesai.'], 403);
+            }
+
+            return redirect()->back()->with('error', 'Tidak dapat mengaitkan tugas ke PKL yang sudah selesai.');
+        }
+
         $tugas->update([
             'id_pkl' => $request->id_pkl,
             'judul' => $request->judul,
@@ -114,9 +147,18 @@ class TugasMitraController extends Controller
             ->route('mitra.tugas.index')
             ->with('success', 'Tugas berhasil diperbarui');
     }
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $tugas = TugasMitra::findOrFail($id);
+
+        // server-side: prevent deleting tugas for finished PKL
+        if ($tugas->pkl && $tugas->pkl->status === 'selesai') {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Tidak dapat menghapus tugas untuk PKL yang sudah selesai.'], 403);
+            }
+
+            return redirect()->back()->with('error', 'Tidak dapat menghapus tugas untuk PKL yang sudah selesai.');
+        }
 
         $tugas->delete();
 

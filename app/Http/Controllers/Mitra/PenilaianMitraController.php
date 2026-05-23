@@ -33,7 +33,8 @@ class PenilaianMitraController extends Controller
             ->with([
                 'mahasiswa.user',
                 'mahasiswa.prodi',
-                'penilaianMitra'
+                'penilaianMitra',
+                'nilaiPkl'
             ])
 
             ->get();
@@ -176,8 +177,19 @@ class PenilaianMitraController extends Controller
         );
 
         // =========================
-        // GENERATE PDF
+        // GENERATE PDF (delete old file and create new one)
         // =========================
+
+        // If there was an existing record with a saved PDF, delete the old file
+        if ($existing && ! empty($existing->file_pdf)) {
+            try {
+                if (Storage::disk('public')->exists($existing->file_pdf)) {
+                    Storage::disk('public')->delete($existing->file_pdf);
+                }
+            } catch (\Throwable $e) {
+                // ignore deletion errors but log if you use a logger
+            }
+        }
 
         $pdf = Pdf::loadView(
             'mitra.penilaian.pdf',
@@ -187,19 +199,14 @@ class PenilaianMitraController extends Controller
             ]
         );
 
-        // nama file
-        $filename = 'penilaian-' . $pkl->id . '.pdf';
-
-        // lokasi file
+        // create a timestamped filename to avoid caching issues
+        $filename = 'penilaian-' . $pkl->id . '-' . now()->format('YmdHis') . '.pdf';
         $path = 'penilaian/' . $filename;
 
-        // simpan pdf
-        Storage::disk('public')->put(
-            $path,
-            $pdf->output()
-        );
+        // store the generated PDF (will overwrite if same name exists)
+        Storage::disk('public')->put($path, $pdf->output());
 
-        // update path file
+        // update model with new path
         $penilaian->update([
             'file_pdf' => $path
         ]);

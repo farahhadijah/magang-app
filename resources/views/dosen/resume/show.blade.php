@@ -168,43 +168,12 @@
                                 {{ \Carbon\Carbon::parse($pkl->penilaianMitra->tgl_input)->format('d M Y') }}
                             </p>
                         </div>
-
-                        @if($pkl->penilaianMitra->file_pdf)
-
-                            <div class="flex gap-2 pt-2">
-
-                                <button
-                                    type="button"
-                                    @click="openModal(@js(asset('storage/' . $pkl->penilaianMitra->file_pdf)))"
-                                    class="inline-flex items-center gap-2 px-3 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                                >
-
-                                    <i class="fa-solid fa-eye"></i>
-                                    View PDF
-
-                                </button>
-
-                                <a
-                                    href="{{ asset('storage/' . $pkl->penilaianMitra->file_pdf) }}"
-                                    download
-                                    class="inline-flex items-center gap-2 px-3 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700"
-                                >
-
-                                    <i class="fa-solid fa-download"></i>
-                                    Download
-
-                                </a>
-
-                            </div>
-
-                        @endif
-
                     </div>
 
                 @else
 
                     <p class="text-sm text-gray-500">
-                        Penilaian mitra belum tersedia.
+                        Penilaian mitra  tersedia.
                     </p>
 
                 @endif

@@ -21,6 +21,7 @@
                             <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">NIM</th>
                             <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">Tanggal Mulai</th>
                             <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">Tanggal Selesai</th>
+                            <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">Grade</th>
                             <th class="px-6 py-3 text-sm font-medium text-center text-gray-700">Aksi</th>
                         </tr>
                     </thead>
@@ -46,6 +47,14 @@
 
                                 <td class="px-6 py-4 text-sm text-gray-700">
                                     {{ $pkl->tgl_selesai ? \Carbon\Carbon::parse($pkl->tgl_selesai, 'Asia/Jakarta')->format('d M Y') : '-' }}
+                                </td>
+
+                                <td class="px-6 py-4 text-sm text-gray-700">
+                                    @if($pkl->status === 'selesai' && $pkl->penilaianMitra)
+                                        {{ $pkl->penilaianMitra->grade ?? $pkl->penilaianMitra->rata_rata ?? '-' }}
+                                    @else
+                                        -
+                                    @endif
                                 </td>
 
                                 <td class="px-6 py-4 text-center">
@@ -95,6 +104,17 @@
                                 <span class="text-xs text-gray-500">Tanggal Selesai</span>
                                 <span class="text-sm font-medium text-gray-700">
                                     {{ $pkl->tgl_selesai ? \Carbon\Carbon::parse($pkl->tgl_selesai, 'Asia/Jakarta')->format('d M Y') : '-' }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Grade</span>
+                                <span class="text-sm font-medium text-gray-700">
+                                    @if($pkl->status === 'selesai' && $pkl->penilaianMitra)
+                                        {{ $pkl->penilaianMitra->grade ?? $pkl->penilaianMitra->rata_rata ?? '-' }}
+                                    @else
+                                        -
+                                    @endif
                                 </span>
                             </div>
                         </div>
