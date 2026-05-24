@@ -149,8 +149,11 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         )->name('nilai.create');
         Route::post('/nilai/{pkl}',[DosenNilaiPklController::class, 'store']
         )->name('nilai.store');
-        Route::get('/nilai/daftar',[DosenNilaiPklController::class, 'daftar']
-        )->name('nilai.daftar');
+        // Route '/nilai/daftar' disabled because resume page is used instead.
+        // Keep a safe GET route that redirects to the resume page so old links won't 500.
+        Route::get('/nilai/daftar', function() {
+            return redirect()->route('dosen.resume.index');
+        })->name('nilai.daftar');
 
         // Laporan Akhir
         Route::get('/laporan',[DosenLaporanAkhirController::class, 'index']

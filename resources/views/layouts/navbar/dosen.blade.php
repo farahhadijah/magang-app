@@ -30,13 +30,7 @@
         <span>Penilaian PKL</span>
     </a>
     {{-- ================= DAFTAR NILAI PKL ================= --}}
-    <a href="{{ route('dosen.nilai.daftar') }}"
-    class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
-    {{ request()->routeIs('dosen.nilai.daftar') 
-            ? 'bg-green-800 text-amber-300' : '' }}">
-        <i class="fa-solid fa-list-check"></i>
-        <span>Daftar Nilai PKL</span>
-    </a>
+    {{-- Daftar Nilai PKL link removed — resume page replaces this functionality. --}}
 
     <a href="{{ route('dosen.resume.index') }}"
     class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800

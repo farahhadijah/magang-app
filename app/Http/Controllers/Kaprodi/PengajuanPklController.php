@@ -5,7 +5,7 @@ use App\Models\Dosen;
 use App\Models\PengajuanPkl;
 use App\Models\Pkl;
 use App\Models\SuratPengantar;
-use App\Models\User;
+// use App\Models\User;
 use App\Models\Verifikasi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -308,6 +308,10 @@ class PengajuanPklController extends Controller
             })
             ->whereHas('verifikasi', function ($q) {
                 $q->where('level', 'kaprodi');
+            })
+            // exclude pengajuans that already have a related PKL with status 'selesai'
+            ->whereDoesntHave('pkl', function ($q) {
+                $q->where('status', 'selesai');
             })
             ->orderByDesc('updated_at')
             ->paginate(15);
