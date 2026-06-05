@@ -18,25 +18,19 @@ class SiakadService
                 'x-api-key' => env('SIAKAD_API_KEY'),
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
-            ])->send('GET',
-
+            ])->send(
+                'GET',
                 env('SIAKAD_BASE_URL') . '/nilai',
-
                 [
                     'json' => [
                         'nim' => $nim,
-
-                        /**
-                         * semester aktif
-                         * bisa kamu ubah nanti menjadi dinamis
-                         */
                         'tahunsms' => '20252',
                     ]
                 ]
             );
 
             /**
-             * Jika request gagal
+             * Request gagal
              */
             if (!$response->successful()) {
 
@@ -46,13 +40,18 @@ class SiakadService
                     'response' => $response->body(),
                 ]);
 
-                return [];
+                return [
+                    'success' => false,
+                    'message' => 'Gagal mengambil data dari SIAKAD',
+                    'data' => [],
+                ];
             }
 
-            /**
-             * Ambil array data
-             */
-            return $response->json('data', []);
+            return [
+                'success' => true,
+                'message' => 'Berhasil ambil data',
+                'data' => $response->json('data', []),
+            ];
 
         } catch (\Exception $e) {
 
@@ -60,72 +59,85 @@ class SiakadService
                 'message' => $e->getMessage(),
             ]);
 
-            return [];
+            return [
+                'success' => false,
+                'message' => 'Server SIAKAD sedang bermasalah',
+                'data' => [],
+            ];
         }
     }
 
     /**
-     * Ambil matakuliah nilai D/E.
+     * Ambil nilai D/E.
      */
     public function getNilaiBermasalah(string $nim): array
-    {
-        return collect(
-            $this->getNilaiMahasiswa($nim)
-        )
-        ->filter(function ($item) {
+{
+    $resp = $this->getNilaiMahasiswa($nim);
 
-            return in_array(
-                strtoupper($item['NILAI'] ?? ''),
-                ['D', 'E']
-            );
-
-        })
-        ->values()
-        ->toArray();
+    if (
+        !is_array($resp) ||
+        !isset($resp['success']) ||
+        $resp['success'] === false
+    ) {
+        return [];
     }
 
+    $items = $resp['data'] ?? [];
+
+    return collect($items)
+        ->filter(fn($item) => is_array($item))
+        ->filter(fn($item) =>
+            in_array(
+                strtoupper($item['NILAI'] ?? ''),
+                ['D', 'E']
+            )
+        )
+        ->values()
+        ->toArray();
+}
+
     /**
-     * Cek apakah mahasiswa punya nilai D/E.
+     * Apakah mahasiswa punya nilai D/E.
      */
     public function hasNilaiDE(string $nim): bool
     {
-        return count(
-            $this->getNilaiBermasalah($nim)
-        ) > 0;
+        // gunakan getNilaiMahasiswa untuk mengecek status koneksi/response
+        $resp = $this->getNilaiMahasiswa($nim);
+
+        if (!is_array($resp)) {
+            return true;
+        }
+
+        if (isset($resp['success']) && $resp['success'] === false) {
+            // jika API gagal, anggap masih punya masalah sehingga tidak boleh ajukan
+            return true;
+        }
+
+        // ambil daftar matakuliah bermasalah
+        $items = $this->getNilaiBermasalah($nim);
+        return count($items) > 0;
     }
 
     /**
-     * Apakah mahasiswa boleh ajukan PKL.
+     * Apakah boleh ajukan PKL.
      */
     public function canAjukanPKL(string $nim): bool
     {
-        return ! $this->hasNilaiDE($nim);
+        /**
+         * Hanya boleh jika benar-benar aman.
+         */
+        return !$this->hasNilaiDE($nim);
     }
 
     /**
-     * Hitung total biaya remedial.
-     */
-    public function hitungBiayaRemedial(string $nim): int
-    {
-        $total = 0;
+ * Cek apakah API SIAKAD sedang aktif.
+ */
+public function isApiAvailable(string $nim): bool
+{
+    $resp = $this->getNilaiMahasiswa($nim);
 
-        foreach ($this->getNilaiBermasalah($nim) as $mk) {
-
-            /**
-             * Deteksi praktikum dari nama MK
-             */
-            $isPraktikum = str_contains(
-                strtolower($mk['NAMAMK'] ?? ''),
-                'praktikum'
-            );
-
-            if ($isPraktikum) {
-                $total += 500000;
-            } else {
-                $total += 300000;
-            }
-        }
-
-        return $total;
-    }
+    return is_array($resp)
+        && isset($resp['success'])
+        && $resp['success'] === true;
+}
 }

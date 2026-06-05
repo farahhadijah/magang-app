@@ -18,16 +18,23 @@
     $siakadService = app(\App\Services\SiakadService::class);
 
     /**
-     * Ambil nilai D/E dari API SIAKAD
+     * Cek apakah API SIAKAD aktif
      */
-    $nilaiRemedial = $siakadService
-        ->getNilaiBermasalah($mahasiswa->nim);
+    $siakadAktif = $siakadService
+        ->isApiAvailable($mahasiswa->nim);
 
     /**
-     * Apakah mahasiswa punya nilai D/E
+     * Default aman
      */
-    $punyaNilaiDE = $siakadService
-        ->hasNilaiDE($mahasiswa->nim);
+    $punyaNilaiDE = false;
+
+    /**
+     * Hanya cek nilai jika API aktif
+     */
+    if ($siakadAktif) {
+        $punyaNilaiDE = $siakadService
+            ->hasNilaiDE($mahasiswa->nim);
+    }
 @endphp
 
 @php
@@ -41,69 +48,68 @@
 
 <div class="space-y-1">
 
-    {{-- ================= REMEDIAL ================= --}}
-    @if($punyaNilaiDE)
+{{-- ================= MENU UTAMA PKL ================= --}}
+
+{{-- API SIAKAD DOWN --}}
+@if(!$siakadAktif)
+
+    <div
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            opacity-60
+            cursor-not-allowed
+        "
+    >
+        <i class="w-5 fa-solid fa-server"></i>
+
+        SIAKAD Bermasalah
+    </div>
+
+{{-- ADA NILAI D / E --}}
+@elseif($punyaNilaiDE)
+
+    <a
+        href="{{ route('mahasiswa.remedial.index') }}"
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            transition
+            hover:bg-green-800
+            {{ request()->routeIs('mahasiswa.remedial.*')
+                ? 'bg-green-800 text-amber-300'
+                : '' }}
+        "
+    >
+        <i class="w-5 fa-solid fa-triangle-exclamation"></i>
+
+        Remedial
+    </a>
+
+{{-- AMAN, BOLEH AJUKAN PKL --}}
+@else
+
+    @if(!$pengajuan)
 
         <a
-            href="{{ route('mahasiswa.remedial.index') }}"
+            href="{{ route('mahasiswa.pengajuan.create') }}"
             class="
                 flex items-center gap-3
                 px-4 py-2.5
                 rounded-lg
                 transition
                 hover:bg-green-800
-                {{ request()->routeIs('mahasiswa.remedial.*')
+                {{ request()->routeIs('mahasiswa.pengajuan.create')
                     ? 'bg-green-800 text-amber-300'
                     : '' }}
             "
         >
-            <i class="w-5 fa-solid fa-triangle-exclamation"></i>
+            <i class="w-5 fa-solid fa-file-circle-plus"></i>
 
-            Remedial
+            Ajukan PKL
         </a>
-
-    @endif
-
-    {{-- ================= AJUKAN PKL ================= --}}
-    @if(!$punyaNilaiDE)
-
-        @if(!$pengajuan)
-
-            <a
-                href="{{ route('mahasiswa.pengajuan.create') }}"
-                class="
-                    flex items-center gap-3
-                    px-4 py-2.5
-                    rounded-lg
-                    transition
-                    hover:bg-green-800
-                    {{ request()->routeIs('mahasiswa.pengajuan.create')
-                        ? 'bg-green-800 text-amber-300'
-                        : '' }}
-                "
-            >
-                <i class="w-5 fa-solid fa-file-circle-plus"></i>
-
-                Ajukan PKL
-            </a>
-
-        @else
-
-            <div
-                class="
-                    flex items-center gap-3
-                    px-4 py-2.5
-                    rounded-lg
-                    opacity-60
-                    cursor-not-allowed
-                "
-            >
-                <i class="w-5 fa-solid fa-file-circle-plus"></i>
-
-                PKL Sudah Diajukan
-            </div>
-
-        @endif
 
     @else
 
@@ -116,12 +122,14 @@
                 cursor-not-allowed
             "
         >
-            <i class="w-5 fa-solid fa-lock"></i>
+            <i class="w-5 fa-solid fa-file-circle-plus"></i>
 
-            Ajukan PKL
+            PKL Sudah Diajukan
         </div>
 
     @endif
+
+@endif
 
     {{-- ================= STATUS PKL ================= --}}
     @if($pengajuan)
