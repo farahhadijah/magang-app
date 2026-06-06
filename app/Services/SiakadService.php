@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Cache;
 class SiakadService
 {
     /**
@@ -12,20 +12,31 @@ class SiakadService
      */
     public function getNilaiMahasiswa(string $nim): array
     {
+        $cacheKey = "siakad_nilai_{$nim}";
+
+        /**
+         * Ambil dari cache jika tersedia
+         */
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
         try {
 
             $response = Http::withHeaders([
                 'x-api-key' => env('SIAKAD_API_KEY'),
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
-            ])->send(
+            ])
+            ->timeout(15)
+            ->send(
                 'GET',
                 env('SIAKAD_BASE_URL') . '/nilai',
                 [
                     'json' => [
                         'nim' => $nim,
                         'tahunsms' => '20252',
-                    ]
+                    ],
                 ]
             );
 
@@ -47,11 +58,22 @@ class SiakadService
                 ];
             }
 
-            return [
+            $data = [
                 'success' => true,
                 'message' => 'Berhasil ambil data',
                 'data' => $response->json('data', []),
             ];
+
+            /**
+             * Cache hanya jika sukses
+             */
+            Cache::put(
+                $cacheKey,
+                $data,
+                now()->addMinutes(10)
+            );
+
+            return $data;
 
         } catch (\Exception $e) {
 
@@ -130,14 +152,18 @@ class SiakadService
     }
 
     /**
- * Cek apakah API SIAKAD sedang aktif.
- */
-public function isApiAvailable(string $nim): bool
-{
-    $resp = $this->getNilaiMahasiswa($nim);
+     * Cek apakah API SIAKAD sedang aktif.
+     */
+    public function isApiAvailable(string $nim): bool
+    {
+        $resp = $this->getNilaiMahasiswa($nim);
 
-    return is_array($resp)
-        && isset($resp['success'])
-        && $resp['success'] === true;
-}
+        return is_array($resp)
+            && isset($resp['success'])
+            && $resp['success'] === true;
+    }
+    public function clearCache(string $nim): void
+    {
+        Cache::forget("siakad_nilai_{$nim}");
+    }
 }

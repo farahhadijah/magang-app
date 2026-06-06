@@ -5,14 +5,18 @@ namespace App\Providers;
 use App\Models\Dosen;
 use App\Models\Staff;
 use App\Models\Mahasiswa;
+use App\Models\Pimpinan;
+
 use App\Observers\DosenObserver;
 use App\Observers\StaffObserver;
 use App\Observers\MahasiswaObserver;
-use App\Models\Pimpinan;
 use App\Observers\PimpinanObserver;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
+
+use App\View\Composers\MahasiswaNavbarComposer;
+
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,13 +33,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Observer
         Mahasiswa::observe(MahasiswaObserver::class);
         Dosen::observe(DosenObserver::class);
         Staff::observe(StaffObserver::class);
         Pimpinan::observe(PimpinanObserver::class);
+
         View::composer('layouts.navigation', function ($view) {
-        $fakultas = DB::table('fakultas')->get();
-        $view->with('fakultas', $fakultas);
-    });
+            $view->with(
+                'fakultas',
+                DB::table('fakultas')->get()
+            );
+        });
+
+        // Navbar Mahasiswa
+        View::composer(
+            'layouts.navbar.mahasiswa',
+            MahasiswaNavbarComposer::class
+        );
     }
 }

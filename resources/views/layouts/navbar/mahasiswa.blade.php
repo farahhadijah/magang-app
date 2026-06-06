@@ -1,57 +1,22 @@
-@php
-    $pengajuan = auth()->user()
-        ->mahasiswa
-        ?->pengajuanPkl()
-        ->latest()
-        ->first();
-
-    /*
-    |--------------------------------------------------------------------------
-    | SIMULASI CEK NILAI D / E
-    |--------------------------------------------------------------------------
-    | Nanti diganti dari API SIAKAD asli
-    |
-    */
-
-    $mahasiswa = auth()->user()->mahasiswa;
-
-    $siakadService = app(\App\Services\SiakadService::class);
-
-    /**
-     * Cek apakah API SIAKAD aktif
-     */
-    $siakadAktif = $siakadService
-        ->isApiAvailable($mahasiswa->nim);
-
-    /**
-     * Default aman
-     */
-    $punyaNilaiDE = false;
-
-    /**
-     * Hanya cek nilai jika API aktif
-     */
-    if ($siakadAktif) {
-        $punyaNilaiDE = $siakadService
-            ->hasNilaiDE($mahasiswa->nim);
-    }
-@endphp
-
-@php
-    $pkl = $pengajuan?->pkl;
-
-    // Use the single authoritative check
-    $bolehUploadLaporan = $pkl?->isSiapUploadLaporan();
-
-    $penilaianMitra = $pkl?->penilaianMitra;
-@endphp
+{{-- 
+|--------------------------------------------------------------------------
+| DATA DARI MAHASISWANAVBARCOMPOSER
+|--------------------------------------------------------------------------
+| navbarPengajuan
+| navbarPkl
+| navbarSiakadAktif
+| navbarPunyaNilaiDE
+| navbarBolehUploadLaporan
+| navbarPenilaianMitra
+|--------------------------------------------------------------------------
+--}}
 
 <div class="space-y-1">
 
 {{-- ================= MENU UTAMA PKL ================= --}}
 
 {{-- API SIAKAD DOWN --}}
-@if(!$siakadAktif)
+@if(!$navbarSiakadAktif)
 
     <div
         class="
@@ -68,7 +33,7 @@
     </div>
 
 {{-- ADA NILAI D / E --}}
-@elseif($punyaNilaiDE)
+@elseif($navbarPunyaNilaiDE)
 
     <a
         href="{{ route('mahasiswa.remedial.index') }}"
@@ -91,7 +56,7 @@
 {{-- AMAN, BOLEH AJUKAN PKL --}}
 @else
 
-    @if(!$pengajuan)
+    @if(!$navbarPengajuan)
 
         <a
             href="{{ route('mahasiswa.pengajuan.create') }}"
@@ -132,7 +97,7 @@
 @endif
 
     {{-- ================= STATUS PKL ================= --}}
-    @if($pengajuan)
+    @if($navbarPengajuan)
 
         <a
             href="{{ route('mahasiswa.pengajuan.status') }}"
@@ -155,7 +120,7 @@
     @endif
 
     {{-- ================= LOGBOOK ================= --}}
-    @if($pkl && $pkl->status !== 'selesai')
+    @if($navbarPkl && $navbarPkl->status !== 'selesai')
 
         <a
             href="{{ route('mahasiswa.logbook.index') }}"
@@ -194,7 +159,7 @@
     @endif
 
     {{-- ================= TUGAS DARI MITRA ================= --}}
-    @if($pkl && $pkl->status !== 'selesai')
+    @if($navbarPkl && $navbarPkl->status !== 'selesai')
 
         <a
             href="{{ route('mahasiswa.tugas') }}"
@@ -233,9 +198,9 @@
     @endif
 
     {{-- ================= LAPORAN AKHIR ================= --}}
-    @if($pkl)
+    @if($navbarPkl)
 
-        @if($bolehUploadLaporan)
+        @if($navbarBolehUploadLaporan)
 
             <a
                 href="{{ route('mahasiswa.laporan.index') }}"
@@ -276,7 +241,7 @@
     @endif
 
     {{-- ================= PENILAIAN MITRA ================= --}}
-    @if($penilaianMitra)
+    @if($navbarPenilaianMitra)
 
         <a
             href="{{ route('mahasiswa.penilaianMitra.index') }}"
@@ -315,7 +280,7 @@
     @endif
 
     {{-- ================= NILAI PKL ================= --}}
-    @if($pkl && $pkl->status === 'selesai')
+    @if($navbarPkl && $navbarPkl->status === 'selesai')
 
         <a
             href="{{ route('mahasiswa.penilaianMitra.index') }}"
