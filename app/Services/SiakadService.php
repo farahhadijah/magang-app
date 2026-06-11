@@ -5,6 +5,8 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use App\Models\Fakultas;
+use App\Models\Prodi;
 class SiakadService
 {
     /**
@@ -165,5 +167,182 @@ class SiakadService
     public function clearCache(string $nim): void
     {
         Cache::forget("siakad_nilai_{$nim}");
+    }
+    public function findMahasiswaByNim(string $nim): ?array
+    {
+        try {
+
+            $response = Http::withHeaders([
+                'x-api-key' => env('SIAKAD_API_KEY'),
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])
+            ->timeout(30)
+            ->get(
+                env('SIAKAD_BASE_URL') . '/daftarmhs'
+            );
+
+            if (!$response->successful()) {
+
+                Log::error('Gagal ambil daftar mahasiswa SIAKAD', [
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+
+                return null;
+            }
+
+            // Ambil isi array mahasiswa dari key data
+            $data = $response->json('data', []);
+
+            $mahasiswa = collect($data)
+                ->firstWhere('NIM', $nim);
+
+            if (!$mahasiswa) {
+                return null;
+            }
+
+            return [
+                'nim'            => $mahasiswa['NIM'],
+                'nama'           => $mahasiswa['NAMAMHS'],
+                'angkatan'       => (int) substr($mahasiswa['KELASMHS'], 0, 4),
+                'jenis_kelamin'  => $mahasiswa['JENISKELAMIN'] ?? null,
+                'kelas'          => $mahasiswa['KELASMHS'] ?? null,
+            ];
+
+        } catch (\Exception $e) {
+
+            Log::error('Error cek mahasiswa SIAKAD', [
+                'nim' => $nim,
+                'message' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    public function findDosenByNidn(string $nidn): ?array
+    {
+        try {
+
+            $response = Http::withHeaders([
+                'x-api-key' => env('SIAKAD_API_KEY'),
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])
+            ->timeout(30)
+            ->get(
+                env('SIAKAD_BASE_URL') . '/daftardosen'
+            );
+
+            if (!$response->successful()) {
+
+                Log::error('Gagal ambil daftar dosen SIAKAD', [
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+
+                return null;
+            }
+
+            $data = $response->json('data', []);
+
+            $dosen = collect($data)
+                ->firstWhere('NIDN', $nidn);
+
+            if (!$dosen) {
+                return null;
+            }
+
+            return [
+                'nidn' => $dosen['NIDN'],
+                'nama' => $dosen['NAMA'],
+            ];
+
+        } catch (\Exception $e) {
+
+            Log::error('Error cek dosen SIAKAD', [
+                'nidn' => $nidn,
+                'message' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    public function syncProdiDanFakultas(): void
+    {
+        try {
+
+            $response = Http::withHeaders([
+                'x-api-key' => env('SIAKAD_API_KEY'),
+                'Accept' => 'application/json',
+            ])->timeout(30)
+            ->get(
+                env('SIAKAD_BASE_URL') . '/daftarprodi'
+            );
+
+            if (!$response->successful()) {
+
+                Log::error('Gagal sinkronisasi prodi', [
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+
+                return;
+            }
+
+            $items = $response->json('data', []);
+
+            foreach ($items as $item) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Fakultas
+                |--------------------------------------------------------------------------
+                */
+
+                $fakultas = Fakultas::firstOrCreate(
+                    [
+                        'nama' => trim(
+                            $item['NAMAFAKULTAS']
+                        )
+                    ],
+                    [
+                        'is_active' => true
+                    ]
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Prodi
+                |--------------------------------------------------------------------------
+                */
+
+                Prodi::updateOrCreate(
+                    [
+                        'kode' => trim(
+                            $item['KODEPRODI']
+                        )
+                    ],
+                    [
+                        'nama' => trim(
+                            $item['NAMAPRODI']
+                        ),
+                        'fakultas_id' => $fakultas->id,
+                        'is_active' => true,
+                    ]
+                );
+            }
+
+        } catch (\Exception $e) {
+
+            Log::error(
+                'Error sinkronisasi prodi/fakultas',
+                [
+                    'message' => $e->getMessage(),
+                ]
+            );
+        }
     }
 }

@@ -1,15 +1,13 @@
 <?php
-
-
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-
 use App\Http\Controllers\ProfileController;
-
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\SiakadFirstLoginController;
+use App\Http\Controllers\Auth\SiakadDosenFirstLoginController;
 /*
 |--------------------------------------------------------------------------
 | ROOT & AUTH
@@ -22,24 +20,19 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
-// Verification via QR/barcode has been disabled. Route kept as comment for reference.
-// Route::get( '/verifikasi/penilaian/{token}', [VerifikasiPenilaianController::class, 'show'] )->name('verifikasi.penilaian');
 
-/*
-|--------------------------------------------------------------------------
-| DB TEST (OPTIONAL)
-|--------------------------------------------------------------------------
-*/
-Route::get('/db-test', function () {
-    return DB::select('SELECT DATABASE() as db');
+Route::middleware('guest')->group(function () {
+    Route::get( '/siakad/first-login', [SiakadFirstLoginController::class, 'show'] )->name('siakad.first-login');
+    Route::post( '/siakad/first-login', [SiakadFirstLoginController::class, 'store'] )->name('siakad.first-login.store');
+    Route::get( '/siakad/dosen/first-login', [SiakadDosenFirstLoginController::class, 'show'] )->name('siakad.dosen.first-login');
+    Route::post( '/siakad/dosen/first-login', [SiakadDosenFirstLoginController::class, 'store'] )->name('siakad.dosen.first-login.store');
 });
-
 /*
 |--------------------------------------------------------------------------
 | AUTHENTICATED (GLOBAL)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
+Route::middleware([ 'auth'])->group(function () {
     // First login flow
     Route::get('/first-login', [FirstLoginController::class, 'show'])->name('password.first');
     Route::post('/first-login', [FirstLoginController::class, 'update'])->name('password.first.update');
