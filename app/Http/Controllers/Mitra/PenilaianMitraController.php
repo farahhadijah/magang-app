@@ -24,7 +24,7 @@ class PenilaianMitraController extends Controller
             abort(403, 'Data mitra tidak ditemukan.');
         }
 
-        $pkls = Pkl::where('status', 'aktif')
+    $pkls = Pkl::where('status', 'aktif')
 
             ->whereHas('pengajuanPkl', function ($q) use ($mitra) {
                 $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
@@ -37,7 +37,7 @@ class PenilaianMitraController extends Controller
                 'nilaiPkl'
             ])
 
-            ->get();
+            ->paginate(10);
 
         return view('mitra.penilaian.index', compact('pkls'));
     }

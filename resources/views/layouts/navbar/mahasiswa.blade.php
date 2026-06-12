@@ -283,7 +283,7 @@
     @if($navbarPkl && $navbarPkl->status === 'selesai')
 
         <a
-            href="{{ route('mahasiswa.penilaianMitra.index') }}"
+            href="{{ route('mahasiswa.nilai.index') }}"
             class="
                 flex items-center gap-3
                 px-4 py-2.5

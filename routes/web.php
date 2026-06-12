@@ -262,20 +262,27 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
 
     // Route::resource('formulir', FormulirController::class); // DIHAPUS: manajemen formulir dinonaktifkan
 
-        Route::resource('prodi', ProdiController::class);
+    Route::resource('prodi', ProdiController::class);
+    // Manajemen Pimpinan (Admin)
+    Route::resource('pimpinan', \App\Http\Controllers\Admin\PimpinanController::class);
+    Route::post('pimpinan/{id}/reset', [\App\Http\Controllers\Admin\PimpinanController::class, 'reset'])->name('pimpinan.reset');
+    Route::post('pimpinan/{id}/activate', [\App\Http\Controllers\Admin\PimpinanController::class, 'activate'])->name('pimpinan.activate');
         Route::post('prodi/import', [ProdiController::class, 'import'])->name('prodi.import');
 
         Route::resource('mahasiswa', MahasiswaController::class);
         Route::post('mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
         Route::post('mahasiswa/{mahasiswa}/reset-password',[MahasiswaController::class, 'resetPassword'])->name('mahasiswa.reset-password');
+    Route::post('mahasiswa/{id}/activate',[MahasiswaController::class, 'activate'])->name('mahasiswa.activate');
 
         Route::resource('dosen', DosenController::class);
         Route::post('dosen/{dosen}/reset-password',[DosenController::class,'resetPassword'])->name('dosen.reset-password');
         Route::post('dosen/import',[DosenController::class,'import'])->name('dosen.import');
+    Route::post('dosen/{id}/activate',[DosenController::class,'activate'])->name('dosen.activate');
 
         Route::resource('staff', StaffController::class);
         Route::post('staff/{id}/reset', [StaffController::class,'reset'])->name('staff.reset');
         Route::post('staff/import',[StaffController::class, 'import'])->name('staff.import');
+    Route::post('staff/{id}/activate', [StaffController::class,'activate'])->name('staff.activate');
 
         Route::delete('fakultas/bulk-delete',[ FakultasController::class, 'bulkDelete'])
         ->name('fakultas.bulkDelete');

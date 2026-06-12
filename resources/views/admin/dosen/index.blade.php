@@ -47,7 +47,7 @@
                         <td class="px-3 py-2 border">Machine Learning</td>
                         <td class="px-3 py-2 border">kaprodi</td>
                         <td class="px-3 py-2 border">08123456789</td>
-                        <td class="px-3 py-2 border">TI</td>
+                        <td class="px-3 py-2 border">55201</td>
                     </tr>
                 </tbody>
 
@@ -197,22 +197,18 @@
 
                             </form>
 
-                            <!-- Nonaktif -->
+                            <!-- Nonaktif / Aktifkan -->
                             @if($d->is_active)
-
-                            <form method="POST"
-                                  action="{{ route('admin.dosen.destroy', $d) }}">
-
-                                @csrf
-                                @method('DELETE')
-
-                                <button type="submit"
-                                        class="w-full px-3 py-1 text-xs text-white bg-red-600 rounded hover:bg-red-700">
-                                    Nonaktifkan
-                                </button>
-
-                            </form>
-
+                                <form method="POST" action="{{ route('admin.dosen.destroy', $d) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="w-full px-3 py-1 text-xs text-white bg-red-600 rounded hover:bg-red-700">Nonaktifkan</button>
+                                </form>
+                            @else
+                                <form method="POST" action="{{ route('admin.dosen.activate', $d->id) }}">
+                                    @csrf
+                                    <button type="submit" class="w-full px-3 py-1 text-xs text-white bg-green-600 rounded hover:bg-green-700">Aktifkan</button>
+                                </form>
                             @endif
 
                         </div>

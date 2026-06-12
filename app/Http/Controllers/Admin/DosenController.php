@@ -163,6 +163,19 @@ public function resetPassword(Dosen $dosen)
     return back()->with('success','Password berhasil direset.');
 }
 
+public function activate($id)
+{
+    $dosen = Dosen::findOrFail($id);
+
+    $dosen->update(['is_active' => 1]);
+
+    if ($dosen->user) {
+        $dosen->user->update(['is_active' => 1]);
+    }
+
+    return back()->with('success','Dosen berhasil diaktifkan.');
+}
+
 
 public function import(Request $request)
 {

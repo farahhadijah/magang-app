@@ -24,7 +24,7 @@ class TugasMitraController extends Controller
         }
     ])
     ->latest()
-    ->get();
+    ->paginate(10);
 
     return view('mitra.tugas.index', compact('tugas'));
 }

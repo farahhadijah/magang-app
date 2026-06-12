@@ -103,6 +103,19 @@ class StaffController extends Controller
         return back()->with('success','Password berhasil direset.');
     }
 
+    public function activate($id)
+    {
+        $staff = Staff::findOrFail($id);
+
+        $staff->update(['is_active' => 1]);
+
+        if ($staff->user) {
+            $staff->user->update(['is_active' => 1]);
+        }
+
+        return back()->with('success','Staff berhasil diaktifkan.');
+    }
+
 
     public function import(Request $request)
     {

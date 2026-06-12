@@ -50,7 +50,7 @@
                             <tr class="hover:bg-gray-50">
 
                                 <td class="px-3 py-3 text-[0.6rem] md:text-xs text-gray-700 sm:px-6">
-                                    {{ $index + 1 }}
+                                    {{ ($tugas->firstItem() ?? 0) + $index }}
                                 </td>
 
                                 <td class="px-3 py-3 text-[0.6rem] md:text-xs font-semibold text-gray-900 sm:px-6">
@@ -268,7 +268,14 @@
                     </div>
 
                 </div>
-            @endforeach
+                    @endforeach
+                </tbody>
+
+                </table>
+
+                <div class="px-6 py-4 bg-white">
+                    {{ $tugas->links() }}
+                </div>
         </div>
     @endif
 

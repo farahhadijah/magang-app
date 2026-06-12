@@ -178,6 +178,19 @@ public function resetPassword(Mahasiswa $mahasiswa)
     return back()->with('success', 'Password berhasil direset ke NIM.');
 }
 
+public function activate($id)
+{
+    $mahasiswa = Mahasiswa::findOrFail($id);
+
+    $mahasiswa->update(['is_active' => 1]);
+
+    if ($mahasiswa->user) {
+        $mahasiswa->user->update(['is_active' => 1]);
+    }
+
+    return back()->with('success', 'Mahasiswa berhasil diaktifkan.');
+}
+
 
 public function import(Request $request)
 {

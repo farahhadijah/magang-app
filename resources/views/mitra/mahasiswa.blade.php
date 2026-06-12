@@ -30,7 +30,7 @@
                         @foreach($pkls as $index => $pkl)
                             <tr>
                                 <td class="px-6 py-4 text-sm text-gray-700">
-                                    {{ $index + 1 }}
+                                    {{ ($pkls->firstItem() ?? 0) + $index }}
                                 </td>
 
                                 <td class="px-6 py-4 text-sm font-semibold text-gray-900">
@@ -67,6 +67,9 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div class="px-6 py-4 bg-white">
+                    {{ $pkls->links() }}
+                </div>
             </div>
 
             {{-- MOBILE CARD - RESPONSIVE VERSION --}}
@@ -86,7 +89,7 @@
                                     </p>
                                 </div>
                                 <span class="px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded">
-                                    #{{ $index + 1 }}
+                                    #{{ ($pkls->firstItem() ?? 0) + $index }}
                                 </span>
                             </div>
                         </div>
@@ -127,6 +130,9 @@
 
                     </div>
                 @endforeach
+                <div class="px-4 py-4">
+                    {{ $pkls->links() }}
+                </div>
             </div>
 
         @endif

@@ -88,7 +88,11 @@ public function regenerate($id)
     $passwordBaru = Str::random(8);
 
     $user->password = Hash::make($passwordBaru);
-    $user->save();
+        // mark as first_login so the mitra will be prompted to change password
+        $user->first_login = true;
+        // ensure account is active
+        $user->is_active = true;
+        $user->save();
 
     return redirect()->back()->with([
         'username' => $user->username,

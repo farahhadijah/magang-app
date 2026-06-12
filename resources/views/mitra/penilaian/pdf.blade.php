@@ -34,7 +34,7 @@
 </head>
 @php
     // QR verification removed per new requirements
-endphp
+@endphp
 <body>
 
     <h2 class="center">

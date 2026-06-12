@@ -33,7 +33,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="px-3 py-2 border">TI</td>
+                            <td class="px-3 py-2 border">55201</td>
                             <td class="px-3 py-2 border">Teknik Informatika</td>
                             <td class="px-3 py-2 border">1</td>
                         </tr>
