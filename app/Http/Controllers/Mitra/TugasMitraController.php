@@ -49,7 +49,7 @@ class TugasMitraController extends Controller
         'deadline' => 'nullable|date',
 
         // file optional
-        'file' => 'nullable|file|max:10240'
+        'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240'
     ]);
 
     $data = $request->only([

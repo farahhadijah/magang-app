@@ -5,29 +5,22 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Prodi;
 use Illuminate\Http\Request;
-use App\Services\SiakadService;
-use App\Models\Mahasiswa;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 class SiakadFirstLoginController extends Controller
 {
-    public function show(SiakadService $siakadService)
+    public function show()
     {
-        $mahasiswa = session('siakad_first_login');
+        $user = Auth::user();
 
-        if (!$mahasiswa) {
-            return redirect()->route('login');
+        if (!$user || !$user->mahasiswa) {
+            abort(403);
         }
-        $existingMahasiswa = Mahasiswa::where(
-            'nim',
-            $mahasiswa['nim']
-        )->first();
 
-        if (
-            $existingMahasiswa &&
-            !$existingMahasiswa->is_active
-        ) {
-            session()->forget('siakad_first_login');
+        $mahasiswa = $user->mahasiswa;
+
+        if (!$mahasiswa->is_active) {
+            Auth::logout();
 
             return redirect()
                 ->route('login')
@@ -35,30 +28,26 @@ class SiakadFirstLoginController extends Controller
                     'username' => 'Akun mahasiswa dinonaktifkan.'
                 ]);
         }
-        if (Prodi::count() === 0) {
 
-            $siakadService
-                ->syncProdiDanFakultas();
-        }
         $prodi = Prodi::orderBy('nama')->get();
 
-        return view('auth.siakad-first-login', compact(
-            'mahasiswa',
-            'prodi'
-        ));
+        return view(
+            'auth.siakad-first-login',
+            compact('mahasiswa', 'prodi')
+        );
     }
     public function store(Request $request)
     {
-        $sessionData = session('siakad_first_login');
+        $user = Auth::user();
 
-        if (!$sessionData) {
-            return redirect()->route('login');
+        if (!$user || !$user->mahasiswa) {
+            abort(403);
         }
 
         $request->validate(
             [
                 'prodi_id' => ['required', 'exists:prodi,id'],
-                'no_hp' => [ 'required', 'regex:/^08[0-9]{8,13}$/' ],
+                'no_hp' => ['required', 'regex:/^08[0-9]{8,13}$/'],
                 'password' => ['required', 'confirmed', 'min:8'],
             ],
             [
@@ -71,85 +60,15 @@ class SiakadFirstLoginController extends Controller
             ]
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Cegah Duplikasi Mahasiswa
-        |--------------------------------------------------------------------------
-        */
-
-        $existingMahasiswa = Mahasiswa::where(
-            'nim',
-            $sessionData['nim']
-        )->first();
-
-        if ($existingMahasiswa) {
-
-            session()->forget('siakad_first_login');
-
-            return redirect()
-                ->route('login')
-                ->withErrors([
-                    'username' => 'Mahasiswa sudah terdaftar. Silakan login menggunakan password yang telah dibuat.'
-                ]);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Simpan Mahasiswa
-        |--------------------------------------------------------------------------
-        */
-
-        $mahasiswa = Mahasiswa::create([
-            'nim' => $sessionData['nim'],
-            'nama' => $sessionData['nama'],
-            'angkatan' => $sessionData['angkatan'],
+        $user->mahasiswa->update([
             'prodi_id' => $request->prodi_id,
-            'no_hp' => $request->no_hp,
-            'is_active' => true,
+            'no_hp'    => $request->no_hp,
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Observer otomatis membuat User
-        |--------------------------------------------------------------------------
-        */
-
-        $user = $mahasiswa->user;
-
-        if (!$user) {
-            return back()->withErrors([
-                'username' => 'User gagal dibuat otomatis.'
-            ]);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Password baru
-        |--------------------------------------------------------------------------
-        */
 
         $user->update([
-            'password' => Hash::make($request->password),
+            'password'    => Hash::make($request->password),
             'first_login' => false,
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Hapus session sementara
-        |--------------------------------------------------------------------------
-        */
-
-        session()->forget('siakad_first_login');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Login otomatis
-        |--------------------------------------------------------------------------
-        */
-
-        Auth::login($user);
-
-        $request->session()->regenerate();
 
         return redirect()->route('dashboard');
     }

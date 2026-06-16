@@ -12,9 +12,39 @@ class FirstLoginGuard
     {
         if (Auth::check() && Auth::user()->first_login) {
 
-            // Boleh akses halaman first-login saja
-            if (!$request->routeIs('password.first')) {
-                return redirect()->route('password.first');
+            $user = Auth::user();
+
+            // Mahasiswa → halaman lengkapi profil
+            if ($user->role === 'mahasiswa') {
+
+                if (
+                    !$request->routeIs('siakad.first-login') &&
+                    !$request->routeIs('siakad.first-login.store')
+                ) {
+                    return redirect()->route('siakad.first-login');
+                }
+            }
+
+            // Dosen → halaman lengkapi profil
+            elseif ($user->role === 'dosen') {
+
+                if (
+                    !$request->routeIs('siakad.dosen.first-login') &&
+                    !$request->routeIs('siakad.dosen.first-login.store')
+                ) {
+                    return redirect()->route('siakad.dosen.first-login');
+                }
+            }
+
+            // Admin / Staff / Pimpinan
+            else {
+
+                if (
+                    !$request->routeIs('password.first') &&
+                    !$request->routeIs('password.first.update')
+                ) {
+                    return redirect()->route('password.first');
+                }
             }
         }
 

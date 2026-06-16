@@ -13,15 +13,10 @@ class MahasiswaObserver
     {
         UserAutoCreateService::fromMahasiswa($mahasiswa);
     }
-
-    /**
-     * Handle the Mahasiswa "updated" event.
-     */
     public function updated(Mahasiswa $mahasiswa): void
     {
-        //
+        UserAutoCreateService::fromMahasiswa($mahasiswa);
     }
-
     /**
      * Handle the Mahasiswa "deleted" event.
      */

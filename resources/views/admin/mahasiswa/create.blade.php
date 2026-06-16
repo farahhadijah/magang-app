@@ -53,7 +53,6 @@
             <div>
                 <label class="block mb-1 font-medium">Prodi</label>
                 <select name="prodi_id"
-                        required
                         class="w-full px-3 py-2 border rounded focus:ring focus:ring-blue-200">
                     <option value="">-- Pilih Prodi --</option>
                     @foreach($prodi as $p)

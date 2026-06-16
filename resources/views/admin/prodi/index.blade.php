@@ -66,6 +66,17 @@
             </a>
         </form>
 
+        <form action="{{ route('admin.prodi.sync') }}"
+            method="POST">
+            @csrf
+
+            <button
+                type="submit"
+                class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                Sinkronisasi SIAKAD
+            </button>
+        </form>
+
         {{-- Table --}}
         <div class="overflow-x-auto rounded-lg shadow-sm">
             <table class="w-full text-sm border border-gray-200">

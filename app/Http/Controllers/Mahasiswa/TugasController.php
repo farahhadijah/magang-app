@@ -77,7 +77,7 @@ class TugasController extends MahasiswaBaseController
 
         $request->validate([
             'laporan' => 'required',
-            'file' => 'nullable|file|max:2048'
+            'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048'
         ]);
 
         $pengajuan = $mahasiswa->pengajuanPkl()

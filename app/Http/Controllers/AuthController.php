@@ -1,49 +1,66 @@
 <?php
+
 namespace App\Http\Controllers;
+
+use App\Services\SiakadService;
+use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\SiakadService;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+
 class AuthController extends Controller
 {
-    // tampilkan halaman login
     public function showLogin()
     {
         return view('auth.login');
     }
-    // proses login
-    public function login(
-        Request $request,
-        SiakadService $siakadService
-    )
+
+    public function login(Request $request, SiakadService $siakadService)
     {
-        $credentials = $request->validate([
+        $request->validate([
             'username' => 'required',
             'password' => 'required',
         ]);
 
-        /**
-         * Login normal (user sudah ada)
-         */
-        if (Auth::attempt($credentials)) {
+        $this->ensureIsNotRateLimited($request);
 
+        if (Auth::attempt($request->only('username', 'password'))) {
             $request->session()->regenerate();
+            RateLimiter::clear($this->throttleKey($request));
 
-            return redirect()->intended('/dashboard');
+            $user = Auth::user();
+
+            if (!$user->is_active) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                throw ValidationException::withMessages([
+                    'username' => 'Akun tidak aktif.',
+                ]);
+            }
+
+            if ($user->first_login) {
+                if ($user->role === 'mahasiswa') {
+                    return redirect()->route('siakad.first-login');
+                }
+                if ($user->role === 'dosen') {
+                    return redirect()->route('siakad.dosen.first-login');
+                }
+
+                return redirect()->route('password.first');
+            }
+
+            return redirect()->intended(route('dashboard'));
         }
 
-        /**
-         * Khusus mahasiswa SIAKAD:
-         * username = NIM
-         * password = NIM
-         */
-        if (
-            $request->username === $request->password
-        ) {
-
-            $mahasiswa = $siakadService
-                ->findMahasiswaByNim($request->username);
+        if ($request->username === $request->password) {
+            $mahasiswa = $siakadService->findMahasiswaByNim($request->username);
 
             if ($mahasiswa) {
+                RateLimiter::clear($this->throttleKey($request));
 
                 session([
                     'siakad_first_login' => [
@@ -52,19 +69,20 @@ class AuthController extends Controller
                         'angkatan' => $mahasiswa['angkatan'],
                         'jenis_kelamin' => $mahasiswa['jenis_kelamin'],
                         'kelas' => $mahasiswa['kelas'],
-                    ]
+                    ],
                 ]);
 
-                return redirect()
-                    ->route('siakad.first-login');
+                return redirect()->route('siakad.first-login');
             }
         }
 
-        return back()->withErrors([
+        RateLimiter::hit($this->throttleKey($request));
+
+        throw ValidationException::withMessages([
             'username' => 'Username atau password salah',
         ]);
     }
-    // logout
+
     public function logout(Request $request)
     {
         Auth::logout();
@@ -73,5 +91,30 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/login');
+    }
+
+    protected function ensureIsNotRateLimited(Request $request): void
+    {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey($request), 5)) {
+            return;
+        }
+
+        event(new Lockout($request));
+
+        $seconds = RateLimiter::availableIn($this->throttleKey($request));
+
+        throw ValidationException::withMessages([
+            'username' => trans('auth.throttle', [
+                'seconds' => $seconds,
+                'minutes' => ceil($seconds / 60),
+            ]),
+        ]);
+    }
+
+    protected function throttleKey(Request $request): string
+    {
+        return Str::transliterate(
+            Str::lower($request->input('username')).'|'.$request->ip()
+        );
     }
 }
