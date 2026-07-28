@@ -15,12 +15,9 @@ class DosenObserver
         UserAutoCreateService::fromDosen($dosen);
     }
 
-    /**
-     * Handle the Dosen "updated" event.
-     */
     public function updated(Dosen $dosen): void
     {
-        //
+        UserAutoCreateService::fromDosen($dosen);
     }
 
     /**

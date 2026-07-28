@@ -18,11 +18,11 @@ class MitraController extends Controller
             abort(403, 'Data mitra tidak ditemukan.');
         }
 
-        $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
+            $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
                 $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
             })
-            ->with(['mahasiswa.user'])
-            ->get();
+                ->with(['mahasiswa.user', 'penilaianMitra'])
+                ->paginate(10);
 
         return view('mitra.mahasiswa', compact('pkls'));
     }
@@ -69,7 +69,7 @@ class MitraController extends Controller
             ->with(['mahasiswa', 'logbooks' => function ($q) {
                 $q->orderBy('tgl', 'desc');
             }])
-            ->get();
+            ->paginate(10);
 
         return view('mitra.logbook_list', compact('pkls'));
     }

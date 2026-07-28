@@ -12,21 +12,20 @@ class NilaiPklController extends Controller
     }
     private function konversiNilaiHuruf($nilai)
     {
-        if ($nilai >= 85) {
+        // Use same thresholds as PenilaianMitra:
+        // >= 86 -> A
+        // >= 71 -> B
+        // >= 56 -> C
+        // else -> D
+        if ($nilai >= 86) {
             return 'A';
-        } elseif ($nilai >= 80) {
-            return 'AB';
-        } elseif ($nilai >= 70) {
+        } elseif ($nilai >= 71) {
             return 'B';
-        } elseif ($nilai >= 65) {
-            return 'BC';
-        } elseif ($nilai >= 55) {
+        } elseif ($nilai >= 56) {
             return 'C';
-        } elseif ($nilai >= 40) {
-            return 'D';
         }
 
-        return 'E';
+        return 'D';
     }
     /**
      * List mahasiswa siap dinilai

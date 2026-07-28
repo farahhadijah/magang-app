@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="py-4 sm:py-8">
-        <div class="max-w-5xl px-4 mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-5xl px-0 mx-auto sm:px-6 lg:px-8">
             
             <!-- Main Card -->
             <div class="overflow-hidden bg-white shadow-md rounded-2xl">

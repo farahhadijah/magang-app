@@ -50,7 +50,7 @@
                             <tr class="hover:bg-gray-50">
 
                                 <td class="px-3 py-3 text-[0.6rem] md:text-xs text-gray-700 sm:px-6">
-                                    {{ $index + 1 }}
+                                    {{ ($tugas->firstItem() ?? 0) + $index }}
                                 </td>
 
                                 <td class="px-3 py-3 text-[0.6rem] md:text-xs font-semibold text-gray-900 sm:px-6">
@@ -108,41 +108,46 @@
 
                                     <div class="flex items-center justify-center gap-2">
 
+                                        @php $isFinished = optional($item->pkl)->status === 'selesai'; @endphp
+
                                         <a href="{{ route('mitra.tugas.show', $item->id) }}"
-                                        class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 text-[0.6rem] md:text-xs">
+                                        class="px-3 py-1 text-xs text-white {{ $isFinished ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600' }} rounded text-[0.6rem] md:text-xs"
+                                        {{ $isFinished ? 'aria-disabled=true tabindex=-1' : '' }}>
                                             Lihat
                                         </a>
 
-                                        @if($submit && $submit->status == 'selesai')
-
+                                        @if($isFinished)
                                             <button
-                                            class="px-3 py-1 text-xs text-white bg-gray-400 rounded cursor-not-allowed text-[0.6rem] md:text-xs"
-                                            disabled>
+                                                class="px-3 py-1 text-xs text-white bg-gray-400 rounded cursor-not-allowed text-[0.6rem] md:text-xs"
+                                                disabled>
                                                 Edit
                                             </button>
 
-                                            @else
-
+                                            <button
+                                                class="px-3 py-1 text-xs text-white bg-gray-400 rounded cursor-not-allowed text-[0.6rem] md:text-xs"
+                                                disabled>
+                                                Hapus
+                                            </button>
+                                        @else
                                             <a href="{{ route('mitra.tugas.edit', $item->id) }}"
                                             class="px-3 py-1 text-xs text-white bg-yellow-500 rounded hover:bg-yellow-600 text-[0.6rem] md:text-xs">
                                                 Edit
                                             </a>
 
-                                            @endif
+                                            <form action="{{ route('mitra.tugas.destroy', $item->id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Hapus tugas ini?')">
 
-                                        <form action="{{ route('mitra.tugas.destroy', $item->id) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('Hapus tugas ini?')">
+                                                @csrf
+                                                @method('DELETE')
 
-                                            @csrf
-                                            @method('DELETE')
+                                                <button type="submit"
+                                                        class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 text-[0.6rem] md:text-xs">
+                                                    Hapus
+                                                </button>
 
-                                            <button type="submit"
-                                                    class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 text-[0.6rem] md:text-xs">
-                                                Hapus
-                                            </button>
-
-                                        </form>
+                                            </form>
+                                        @endif
 
                                     </div>
 
@@ -161,6 +166,18 @@
             @foreach($tugas as $index => $item)
                 @php
                     $submit = $item->submit->first();
+
+                    if (!$submit) {
+                        $statusClass = 'text-red-800 bg-red-100';
+                    } elseif ($submit->status == 'pending' && ! $submit->revisi) {
+                        $statusClass = 'text-yellow-800 bg-yellow-100';
+                    } elseif ($submit->revisi) {
+                        $statusClass = 'text-red-800 bg-red-100';
+                    } elseif ($submit->status == 'selesai') {
+                        $statusClass = 'text-green-800 bg-green-100';
+                    } else {
+                        $statusClass = 'text-red-800 bg-red-100';
+                    }
                 @endphp
                 
                 <div class="p-4 bg-white border border-gray-100 rounded-lg shadow">
@@ -195,13 +212,7 @@
 
                         <div class="flex items-center justify-between">
                             <span class="text-xs text-gray-500">Status</span>
-                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full
-                                @if(!$submit) text-red-800 bg-red-100
-                                @elseif($submit->status == 'pending' && !$submit->revisi) text-yellow-800 bg-yellow-100
-                                @elseif($submit->revisi) text-red-800 bg-red-100
-                                @elseif($submit->status == 'selesai') text-green-800 bg-green-100
-                                @else text-red-800 bg-red-100
-                                @endif">
+                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $statusClass }}">
                                 @if(!$submit)
                                     Belum Dikumpulkan
                                 @elseif($submit->status == 'pending' && !$submit->revisi)
@@ -257,7 +268,14 @@
                     </div>
 
                 </div>
-            @endforeach
+                    @endforeach
+                </tbody>
+
+                </table>
+
+                <div class="px-6 py-4 bg-white">
+                    {{ $tugas->links() }}
+                </div>
         </div>
     @endif
 

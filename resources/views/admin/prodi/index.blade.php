@@ -33,7 +33,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="px-3 py-2 border">TI</td>
+                            <td class="px-3 py-2 border">55201</td>
                             <td class="px-3 py-2 border">Teknik Informatika</td>
                             <td class="px-3 py-2 border">1</td>
                         </tr>
@@ -64,6 +64,17 @@
                class="inline-flex items-center justify-center px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700">
                 + Tambah Prodi
             </a>
+        </form>
+
+        <form action="{{ route('admin.prodi.sync') }}"
+            method="POST">
+            @csrf
+
+            <button
+                type="submit"
+                class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                Sinkronisasi SIAKAD
+            </button>
         </form>
 
         {{-- Table --}}

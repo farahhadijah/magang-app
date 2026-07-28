@@ -21,6 +21,7 @@
                             <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">NIM</th>
                             <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">Tanggal Mulai</th>
                             <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">Tanggal Selesai</th>
+                            <th class="px-6 py-3 text-sm font-medium text-left text-gray-700">Grade</th>
                             <th class="px-6 py-3 text-sm font-medium text-center text-gray-700">Aksi</th>
                         </tr>
                     </thead>
@@ -29,7 +30,7 @@
                         @foreach($pkls as $index => $pkl)
                             <tr>
                                 <td class="px-6 py-4 text-sm text-gray-700">
-                                    {{ $index + 1 }}
+                                    {{ ($pkls->firstItem() ?? 0) + $index }}
                                 </td>
 
                                 <td class="px-6 py-4 text-sm font-semibold text-gray-900">
@@ -48,6 +49,14 @@
                                     {{ $pkl->tgl_selesai ? \Carbon\Carbon::parse($pkl->tgl_selesai, 'Asia/Jakarta')->format('d M Y') : '-' }}
                                 </td>
 
+                                <td class="px-6 py-4 text-sm text-gray-700">
+                                    @if($pkl->status === 'selesai' && $pkl->penilaianMitra)
+                                        {{ $pkl->penilaianMitra->grade ?? $pkl->penilaianMitra->rata_rata ?? '-' }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+
                                 <td class="px-6 py-4 text-center">
                                     <a href="{{ route('mitra.logbook', $pkl->id) }}"
                                        class="px-3 py-1 text-sm text-white bg-green-500 rounded hover:bg-green-600">
@@ -58,6 +67,9 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div class="px-6 py-4 bg-white">
+                    {{ $pkls->links() }}
+                </div>
             </div>
 
             {{-- MOBILE CARD - RESPONSIVE VERSION --}}
@@ -77,7 +89,7 @@
                                     </p>
                                 </div>
                                 <span class="px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded">
-                                    #{{ $index + 1 }}
+                                    #{{ ($pkls->firstItem() ?? 0) + $index }}
                                 </span>
                             </div>
                         </div>
@@ -97,6 +109,17 @@
                                     {{ $pkl->tgl_selesai ? \Carbon\Carbon::parse($pkl->tgl_selesai, 'Asia/Jakarta')->format('d M Y') : '-' }}
                                 </span>
                             </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Grade</span>
+                                <span class="text-sm font-medium text-gray-700">
+                                    @if($pkl->status === 'selesai' && $pkl->penilaianMitra)
+                                        {{ $pkl->penilaianMitra->grade ?? $pkl->penilaianMitra->rata_rata ?? '-' }}
+                                    @else
+                                        -
+                                    @endif
+                                </span>
+                            </div>
                         </div>
 
                         {{-- Action Button --}}
@@ -107,6 +130,9 @@
 
                     </div>
                 @endforeach
+                <div class="px-4 py-4">
+                    {{ $pkls->links() }}
+                </div>
             </div>
 
         @endif

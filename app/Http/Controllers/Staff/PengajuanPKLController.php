@@ -174,7 +174,7 @@ public function histori(Request $request)
         $perPage = $isMobile ? 15 : 9;
     }
 
-    $verifikasis = \App\Models\Verifikasi::with([
+        $verifikasis = \App\Models\Verifikasi::with([
             'pengajuan.mahasiswa',
             'pengajuan.tempatPkl',
             'user'
@@ -182,6 +182,12 @@ public function histori(Request $request)
         ->where('level', 'tu')
         ->whereHas('pengajuan.mahasiswa', function ($q) use ($prodiId) {
             $q->where('prodi_id', $prodiId);
+        })
+        // exclude verifications for pengajuan whose PKL has already been completed (status = 'selesai')
+        ->whereDoesntHave('pengajuan', function ($q) {
+            $q->whereHas('pkl', function ($q2) {
+                $q2->where('status', 'selesai');
+            });
         })
         ->orderBy('tgl_verifikasi', 'desc')
         ->paginate($perPage)

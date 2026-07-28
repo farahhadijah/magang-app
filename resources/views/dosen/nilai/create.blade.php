@@ -80,16 +80,7 @@
                                 Gunakan Nilai Ini
                             </button>
 
-                            {{-- Lihat PDF --}}
-                            @if($nilaiMitra->file_pdf)
-                                <button
-                                    type="button"
-                                    @click="openPdf = true"
-                                    class="px-3 py-1.5 text-xs sm:text-sm font-medium text-white transition-colors bg-green-600 rounded-md hover:bg-green-700 sm:px-4 sm:py-2"
-                                >
-                                    Lihat PDF
-                                </button>
-                            @endif
+                            {{-- PDF preview removed per new requirement --}}
 
                         </div>
 
@@ -174,76 +165,7 @@
 
                 </div>
 
-                {{-- MODAL PDF --}}
-                @if($pkl->penilaianMitra && $pkl->penilaianMitra->file_pdf)
-
-                    <div
-                        x-show="openPdf"
-                        x-transition.opacity
-                        x-cloak
-                        class="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-black/50 sm:p-4"
-                        @keydown.escape.window="openPdf = false"
-                    >
-
-                        <div
-                            @click.away="openPdf = false"
-                            x-transition.scale
-                            class="relative w-full max-w-5xl bg-white shadow-xl rounded-xl"
-                        >
-
-                            {{-- Header --}}
-                            <div class="flex items-center justify-between p-3 border-b sm:p-4">
-
-                                <h2 class="text-sm font-semibold text-gray-800 sm:text-base">
-                                    Preview PDF Penilaian Mitra
-                                </h2>
-
-                                <button
-                                    type="button"
-                                    @click="openPdf = false"
-                                    class="text-xl text-gray-400 transition-colors hover:text-red-600 sm:text-2xl"
-                                >
-                                    &times;
-                                </button>
-
-                            </div>
-
-                            {{-- Body --}}
-                            <div class="p-2 sm:p-4">
-
-                                <iframe
-                                    src="{{ asset('storage/' . $nilaiMitra->file_pdf) }}"
-                                    class="w-full border rounded-lg h-[55vh] sm:h-[75vh]"
-                                ></iframe>
-
-                            </div>
-
-                            {{-- Footer --}}
-                            <div class="flex justify-end gap-2 p-3 border-t sm:p-4">
-
-                                <a
-                                    href="{{ asset('storage/' . $nilaiMitra->file_pdf) }}"
-                                    download
-                                    class="px-3 py-1.5 text-xs sm:text-sm text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 sm:px-4"
-                                >
-                                    Download
-                                </a>
-
-                                <button
-                                    type="button"
-                                    @click="openPdf = false"
-                                    class="px-3 py-1.5 text-xs sm:text-sm text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 sm:px-4"
-                                >
-                                    Tutup
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                @endif
+                {{-- PDF preview removed per new requirement --}}
 
             </form>
 

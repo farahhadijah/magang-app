@@ -1,60 +1,4 @@
 <?php
-
-
-use App\Http\Controllers\Auth\FirstLoginController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\VerifikasiPenilaianController;
-use App\Http\Controllers\DashboardController;
-
-use App\Http\Controllers\ProfileController;
-
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
-/*
-|--------------------------------------------------------------------------
-| ROOT & AUTH
-|--------------------------------------------------------------------------
-*/
-Route::get('/', function () {
-    return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
-});
-
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
-Route::get( '/verifikasi/penilaian/{token}', [VerifikasiPenilaianController::class, 'show'] )->name('verifikasi.penilaian');
-
-/*
-|--------------------------------------------------------------------------
-| DB TEST (OPTIONAL)
-|--------------------------------------------------------------------------
-*/
-Route::get('/db-test', function () {
-    return DB::select('SELECT DATABASE() as db');
-});
-
-/*
-|--------------------------------------------------------------------------
-| AUTHENTICATED (GLOBAL)
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth'])->group(function () {
-    // First login flow
-    Route::get('/first-login', [FirstLoginController::class, 'show'])->name('password.first');
-    Route::post('/first-login', [FirstLoginController::class, 'update'])->name('password.first.update');
-
-    // Dashboard (single entry)
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('first.login')
-        ->name('dashboard');
-
-    // Profile (all roles)
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
 /*
 |--------------------------------------------------------------------------
 | MAHASISWA AREA
@@ -68,6 +12,42 @@ use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanC
 use App\Http\Controllers\Mahasiswa\TugasController as TugasMahasiswaController;
 use App\Http\Controllers\Mahasiswa\NilaiMitraMahasiswaController;
 use App\Http\Controllers\Mahasiswa\RemedialController;
+
+
+use App\Http\Controllers\Auth\FirstLoginController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\SiakadFirstLoginController;
+use App\Http\Controllers\Auth\SiakadDosenFirstLoginController;
+/*
+|--------------------------------------------------------------------------
+| ROOT & AUTH
+|--------------------------------------------------------------------------
+*/
+Route::get('/', function () {
+    return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
+
+Route::middleware(['auth', 'first.login'])->group(function () {
+    Route::get( '/siakad/first-login', [SiakadFirstLoginController::class, 'show'] )->name('siakad.first-login');
+    Route::post( '/siakad/first-login', [SiakadFirstLoginController::class, 'store'] )->name('siakad.first-login.store');
+    Route::get( '/siakad/dosen/first-login', [SiakadDosenFirstLoginController::class, 'show'] )->name('siakad.dosen.first-login');
+    Route::post( '/siakad/dosen/first-login', [SiakadDosenFirstLoginController::class, 'store'] )->name('siakad.dosen.first-login.store');
+});
+
 Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
@@ -109,6 +89,26 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
 
     });
 
+    /*
+|--------------------------------------------------------------------------
+| AUTHENTICATED (GLOBAL)
+|--------------------------------------------------------------------------
+*/
+Route::middleware([ 'auth'])->group(function () {
+    // First login flow
+    Route::get('/first-login', [FirstLoginController::class, 'show'])->name('password.first');
+    Route::post('/first-login', [FirstLoginController::class, 'update'])->name('password.first.update');
+
+    // Dashboard (single entry)
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('first.login')
+        ->name('dashboard');
+
+    // Profile (all roles)
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 /*
 |--------------------------------------------------------------------------
 | DOSEN AREA
@@ -149,8 +149,11 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         )->name('nilai.create');
         Route::post('/nilai/{pkl}',[DosenNilaiPklController::class, 'store']
         )->name('nilai.store');
-        Route::get('/nilai/daftar',[DosenNilaiPklController::class, 'daftar']
-        )->name('nilai.daftar');
+        // Route '/nilai/daftar' disabled because resume page is used instead.
+        // Keep a safe GET route that redirects to the resume page so old links won't 500.
+        Route::get('/nilai/daftar', function() {
+            return redirect()->route('dosen.resume.index');
+        })->name('nilai.daftar');
 
         // Laporan Akhir
         Route::get('/laporan',[DosenLaporanAkhirController::class, 'index']
@@ -254,32 +257,34 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
-Route::middleware(['auth', 'first.login', 'role:admin'])
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-
-        Route::get('/dashboard',[AdminDashboardController::class,'index'])
-            ->name('dashboard');
-
-        Route::resource('users', UserController::class)->only(['create', 'store']);
-
-    // Route::resource('formulir', FormulirController::class); // DIHAPUS: manajemen formulir dinonaktifkan
-
-        Route::resource('prodi', ProdiController::class);
-        Route::post('prodi/import', [ProdiController::class, 'import'])->name('prodi.import');
-
+Route::middleware(['auth', 'first.login', 'role:admin']) ->prefix('admin') ->name('admin.') ->group(function () {
         Route::resource('mahasiswa', MahasiswaController::class);
         Route::post('mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
         Route::post('mahasiswa/{mahasiswa}/reset-password',[MahasiswaController::class, 'resetPassword'])->name('mahasiswa.reset-password');
+        Route::post('mahasiswa/{id}/activate',[MahasiswaController::class, 'activate'])->name('mahasiswa.activate');
 
         Route::resource('dosen', DosenController::class);
         Route::post('dosen/{dosen}/reset-password',[DosenController::class,'resetPassword'])->name('dosen.reset-password');
         Route::post('dosen/import',[DosenController::class,'import'])->name('dosen.import');
+        Route::post('dosen/{id}/activate',[DosenController::class,'activate'])->name('dosen.activate');
+
+        Route::post( 'mahasiswa/sync', [MahasiswaController::class, 'syncSiakad'] )->name('mahasiswa.sync');
+        Route::post( 'dosen/sync', [DosenController::class, 'syncSiakad'] )->name('dosen.sync');
+        
+        Route::get('/dashboard',[AdminDashboardController::class,'index']) ->name('dashboard');
+        Route::resource('users', UserController::class)->only(['create', 'store']);
+        Route::resource('prodi', ProdiController::class);
+        // Manajemen Pimpinan (Admin)
+        Route::resource('pimpinan', \App\Http\Controllers\Admin\PimpinanController::class);
+        Route::post('pimpinan/{id}/reset', [\App\Http\Controllers\Admin\PimpinanController::class, 'reset'])->name('pimpinan.reset');
+        Route::post('pimpinan/{id}/activate', [\App\Http\Controllers\Admin\PimpinanController::class, 'activate'])->name('pimpinan.activate');
+        Route::post('prodi/import', [ProdiController::class, 'import'])->name('prodi.import');
+        Route::post('prodi/sync', [ProdiController::class, 'syncSiakad'])->name('prodi.sync');
 
         Route::resource('staff', StaffController::class);
         Route::post('staff/{id}/reset', [StaffController::class,'reset'])->name('staff.reset');
         Route::post('staff/import',[StaffController::class, 'import'])->name('staff.import');
+        Route::post('staff/{id}/activate', [StaffController::class,'activate'])->name('staff.activate');
 
         Route::delete('fakultas/bulk-delete',[ FakultasController::class, 'bulkDelete'])
         ->name('fakultas.bulkDelete');
@@ -288,11 +293,12 @@ Route::middleware(['auth', 'first.login', 'role:admin'])
 
         Route::post('fakultas/import',[FakultasController::class, 'import']
         )->name('fakultas.import');
+        Route::post('fakultas/sync', [FakultasController::class, 'syncSiakad'])->name('fakultas.sync');
     });
 
 use App\Http\Controllers\Pimpinan\PimpinanController;
 
-Route::prefix('pimpinan')->middleware('auth')->group(function () {
+Route::prefix('pimpinan')->middleware(['auth', 'first.login', 'role:pimpinan'])->group(function () {
 
     Route::get('/', [PimpinanController::class, 'index']);
 

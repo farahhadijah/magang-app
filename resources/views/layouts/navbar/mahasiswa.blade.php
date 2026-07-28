@@ -1,109 +1,80 @@
-@php
-    $pengajuan = auth()->user()
-        ->mahasiswa
-        ?->pengajuanPkl()
-        ->latest()
-        ->first();
-
-    /*
-    |--------------------------------------------------------------------------
-    | SIMULASI CEK NILAI D / E
-    |--------------------------------------------------------------------------
-    | Nanti diganti dari API SIAKAD asli
-    |
-    */
-
-    $mahasiswa = auth()->user()->mahasiswa;
-
-    $siakadService = app(\App\Services\SiakadService::class);
-
-    /**
-     * Ambil nilai D/E dari API SIAKAD
-     */
-    $nilaiRemedial = $siakadService
-        ->getNilaiBermasalah($mahasiswa->nim);
-
-    /**
-     * Apakah mahasiswa punya nilai D/E
-     */
-    $punyaNilaiDE = $siakadService
-        ->hasNilaiDE($mahasiswa->nim);
-@endphp
-
-@php
-    $pkl = $pengajuan?->pkl;
-
-    // Use the single authoritative check
-    $bolehUploadLaporan = $pkl?->isSiapUploadLaporan();
-
-    $penilaianMitra = $pkl?->penilaianMitra;
-@endphp
+{{-- 
+|--------------------------------------------------------------------------
+| DATA DARI MAHASISWANAVBARCOMPOSER
+|--------------------------------------------------------------------------
+| navbarPengajuan
+| navbarPkl
+| navbarSiakadAktif
+| navbarPunyaNilaiDE
+| navbarBolehUploadLaporan
+| navbarPenilaianMitra
+|--------------------------------------------------------------------------
+--}}
 
 <div class="space-y-1">
 
-    {{-- ================= REMEDIAL ================= --}}
-    @if($punyaNilaiDE)
+{{-- ================= MENU UTAMA PKL ================= --}}
+
+{{-- API SIAKAD DOWN --}}
+@if(!$navbarSiakadAktif)
+
+    <div
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            opacity-60
+            cursor-not-allowed
+        "
+    >
+        <i class="w-5 fa-solid fa-server"></i>
+
+        SIAKAD Bermasalah
+    </div>
+
+{{-- ADA NILAI D / E --}}
+@elseif($navbarPunyaNilaiDE)
+
+    <a
+        href="{{ route('mahasiswa.remedial.index') }}"
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            transition
+            hover:bg-green-800
+            {{ request()->routeIs('mahasiswa.remedial.*')
+                ? 'bg-green-800 text-amber-300'
+                : '' }}
+        "
+    >
+        <i class="w-5 fa-solid fa-triangle-exclamation"></i>
+
+        Remedial
+    </a>
+
+{{-- AMAN, BOLEH AJUKAN PKL --}}
+@else
+
+    @if(!$navbarPengajuan)
 
         <a
-            href="{{ route('mahasiswa.remedial.index') }}"
+            href="{{ route('mahasiswa.pengajuan.create') }}"
             class="
                 flex items-center gap-3
                 px-4 py-2.5
                 rounded-lg
                 transition
                 hover:bg-green-800
-                {{ request()->routeIs('mahasiswa.remedial.*')
+                {{ request()->routeIs('mahasiswa.pengajuan.create')
                     ? 'bg-green-800 text-amber-300'
                     : '' }}
             "
         >
-            <i class="w-5 fa-solid fa-triangle-exclamation"></i>
+            <i class="w-5 fa-solid fa-file-circle-plus"></i>
 
-            Remedial
+            Ajukan PKL
         </a>
-
-    @endif
-
-    {{-- ================= AJUKAN PKL ================= --}}
-    @if(!$punyaNilaiDE)
-
-        @if(!$pengajuan)
-
-            <a
-                href="{{ route('mahasiswa.pengajuan.create') }}"
-                class="
-                    flex items-center gap-3
-                    px-4 py-2.5
-                    rounded-lg
-                    transition
-                    hover:bg-green-800
-                    {{ request()->routeIs('mahasiswa.pengajuan.create')
-                        ? 'bg-green-800 text-amber-300'
-                        : '' }}
-                "
-            >
-                <i class="w-5 fa-solid fa-file-circle-plus"></i>
-
-                Ajukan PKL
-            </a>
-
-        @else
-
-            <div
-                class="
-                    flex items-center gap-3
-                    px-4 py-2.5
-                    rounded-lg
-                    opacity-60
-                    cursor-not-allowed
-                "
-            >
-                <i class="w-5 fa-solid fa-file-circle-plus"></i>
-
-                PKL Sudah Diajukan
-            </div>
-
-        @endif
 
     @else
 
@@ -116,15 +87,17 @@
                 cursor-not-allowed
             "
         >
-            <i class="w-5 fa-solid fa-lock"></i>
+            <i class="w-5 fa-solid fa-file-circle-plus"></i>
 
-            Ajukan PKL
+            PKL Sudah Diajukan
         </div>
 
     @endif
 
+@endif
+
     {{-- ================= STATUS PKL ================= --}}
-    @if($pengajuan)
+    @if($navbarPengajuan)
 
         <a
             href="{{ route('mahasiswa.pengajuan.status') }}"
@@ -147,7 +120,7 @@
     @endif
 
     {{-- ================= LOGBOOK ================= --}}
-    @if($pkl && $pkl->status !== 'selesai')
+    @if($navbarPkl && $navbarPkl->status !== 'selesai')
 
         <a
             href="{{ route('mahasiswa.logbook.index') }}"
@@ -186,7 +159,7 @@
     @endif
 
     {{-- ================= TUGAS DARI MITRA ================= --}}
-    @if($pkl && $pkl->status !== 'selesai')
+    @if($navbarPkl && $navbarPkl->status !== 'selesai')
 
         <a
             href="{{ route('mahasiswa.tugas') }}"
@@ -225,9 +198,9 @@
     @endif
 
     {{-- ================= LAPORAN AKHIR ================= --}}
-    @if($pkl)
+    @if($navbarPkl)
 
-        @if($bolehUploadLaporan)
+        @if($navbarBolehUploadLaporan)
 
             <a
                 href="{{ route('mahasiswa.laporan.index') }}"
@@ -268,7 +241,7 @@
     @endif
 
     {{-- ================= PENILAIAN MITRA ================= --}}
-    @if($penilaianMitra)
+    @if($navbarPenilaianMitra)
 
         <a
             href="{{ route('mahasiswa.penilaianMitra.index') }}"
@@ -307,10 +280,10 @@
     @endif
 
     {{-- ================= NILAI PKL ================= --}}
-    @if($pkl && $pkl->status === 'selesai')
+    @if($navbarPkl && $navbarPkl->status === 'selesai')
 
         <a
-            href="{{ route('mahasiswa.penilaianMitra.index') }}"
+            href="{{ route('mahasiswa.nilai.index') }}"
             class="
                 flex items-center gap-3
                 px-4 py-2.5

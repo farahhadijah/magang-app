@@ -17,46 +17,46 @@
             </div>
 
             <div class="space-y-4">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <tbody>
+                            <tr class="bg-gray-50">
+                                <th class="py-2 px-3 font-medium">Nama Mahasiswa</th>
+                                <td class="py-2 px-3">{{ $penilaian->pkl->mahasiswa->nama ?? '-' }}</td>
+                            </tr>
 
-                <div>
-                    <span class="font-semibold">
-                        Nama Mahasiswa:
-                    </span>
+                            <tr>
+                                <th class="py-2 px-3 font-medium">NIM</th>
+                                <td class="py-2 px-3">{{ $penilaian->pkl->mahasiswa->nim ?? '-' }}</td>
+                            </tr>
 
-                    {{ $penilaian->pkl->mahasiswa->nama }}
-                </div>
+                            <tr class="bg-gray-50">
+                                <th class="py-2 px-3 font-medium">Program Studi</th>
+                                <td class="py-2 px-3">{{ $penilaian->pkl->mahasiswa->prodi->nama ?? '-' }}</td>
+                            </tr>
 
-                <div>
-                    <span class="font-semibold">
-                        NIM:
-                    </span>
+                            <tr>
+                                <th class="py-2 px-3 font-medium">Instansi (Tempat PKL)</th>
+                                <td class="py-2 px-3">{{ $penilaian->pkl->pengajuanPkl->tempatPkl->nama_tempat ?? '-' }}</td>
+                            </tr>
 
-                    {{ $penilaian->pkl->mahasiswa->nim }}
-                </div>
+                            <tr class="bg-gray-50">
+                                <th class="py-2 px-3 font-medium">Rata-rata</th>
+                                <td class="py-2 px-3">{{ $penilaian->rata_rata }}</td>
+                            </tr>
 
-                <div>
-                    <span class="font-semibold">
-                        Program Studi:
-                    </span>
+                            <tr>
+                                <th class="py-2 px-3 font-medium">Grade</th>
+                                <td class="py-2 px-3">{{ $penilaian->grade }}</td>
+                            </tr>
 
-                    {{ $penilaian->pkl->mahasiswa->prodi->nama }}
-                </div>
+                            <tr class="bg-gray-50">
+                                <th class="py-2 px-3 font-medium">Tanggal Input</th>
+                                <td class="py-2 px-3">{{ \Carbon\Carbon::parse($penilaian->tgl_input)->translatedFormat('d F Y') }}</td>
+                            </tr>
 
-                <div>
-                    <span class="font-semibold">
-                        Nilai:
-                    </span>
-
-                    {{ $penilaian->rata_rata }}
-                    ({{ $penilaian->grade }})
-                </div>
-
-                <div>
-                    <span class="font-semibold">
-                        Tanggal Input:
-                    </span>
-
-                    {{ \Carbon\Carbon::parse($penilaian->tgl_input)->translatedFormat('d F Y') }}
+                        </tbody>
+                    </table>
                 </div>
 
             </div>

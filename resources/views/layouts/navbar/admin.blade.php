@@ -41,4 +41,12 @@
         <span>Manajemen Staff</span>
     </a>
 
+    {{-- ================= MANAJEMEN PIMPINAN ================= --}}
+    <a href="{{ route('admin.pimpinan.index') }}"
+       class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+       {{ request()->routeIs('admin.pimpinan.*') ? 'bg-green-800 text-amber-300' : '' }}">
+        <i class="w-5 fa-solid fa-user-shield"></i>
+        <span>Manajemen Pimpinan</span>
+    </a>
+
 </div>

@@ -33,7 +33,7 @@
 
 </head>
 @php
-    use SimpleSoftwareIO\QrCode\Facades\QrCode;
+    // QR verification removed per new requirements
 @endphp
 <body>
 
@@ -154,29 +154,10 @@
 
         <br><br>
 
-        <img
-            src="data:image/svg+xml;base64,{{ base64_encode(
-                QrCode::format('svg')
-                    ->size(120)
-                    ->generate(
-                        route(
-                            'verifikasi.penilaian',
-                            $penilaian->verification_token
-                        )
-                    )
-            ) }}"
-            width="120"
-        >
-
+        {{-- Signature intentionally left blank; QR code verification removed --}}
         <br><br>
-
-        <div style="font-size:12px;">
-            Scan QR untuk verifikasi dokumen
-        </div>
-
-        <br><br>
-
-        __________________
+        <div style="height: 100px;"></div>
+        <div style="font-size:12px; color: #666;">Tanda tangan pembimbing lapangan</div>
 
     </div>
 

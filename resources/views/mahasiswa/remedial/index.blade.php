@@ -78,14 +78,12 @@
                             <th class="px-4 py-3 text-left font-semibold text-gray-600 sm:px-6">SKS</th>
                             <th class="px-4 py-3 text-left font-semibold text-gray-600 sm:px-6">Jenis</th>
                             <th class="px-4 py-3 text-left font-semibold text-gray-600 sm:px-6">Nilai</th>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-600 sm:px-6">Biaya</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach ($matakuliahRemedial as $index => $mk)
                             @php
                                 $isPraktikum = str_contains(strtolower($mk['NAMAMK']), 'praktikum');
-                                $biayaMk = $isPraktikum ? 500000 : 300000;
                             @endphp
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-4 sm:px-6">{{ $index + 1 }}</td>
@@ -102,20 +100,10 @@
                                         {{ $mk['NILAI'] }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 font-medium text-gray-800 sm:px-6">Rp {{ number_format($biayaMk, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
-                    <tfoot class="bg-gray-50">
-                        <tr>
-                            <td colspan="6" class="px-4 py-4 text-sm font-semibold text-right text-gray-700 sm:px-6">
-                                Total Biaya Remedial
-                            </td>
-                            <td class="px-4 py-4 text-base font-bold text-red-600 sm:px-6">
-                                Rp {{ number_format($totalBiaya, 0, ',', '.') }}
-                            </td>
-                        </tr>
-                    </tfoot>
+                    {{-- totalBiaya removed: not used anymore --}}
                 </table>
             </div>
         </div>

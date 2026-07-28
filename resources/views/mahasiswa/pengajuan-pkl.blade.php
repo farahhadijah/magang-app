@@ -106,7 +106,7 @@
                             
                             <p class="flex items-center gap-1 mt-2 text-xs text-gray-500">
                                 <i class="fa-solid fa-info-circle"></i>
-                                Lokasi akan terisi otomatis setelah nama instansi dimasukkan. Jika tidak ditemukan, Anda dapat mengisinya secara manual.
+                                Lokasi akan terisi otomatis setelah nama instansi dimasukkan. Jika tidak sesuai, Anda dapat mengisinya secara manual.
                             </p>
                             
                             {{-- MAP PREVIEW --}}

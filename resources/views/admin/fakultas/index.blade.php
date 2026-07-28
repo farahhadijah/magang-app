@@ -72,6 +72,17 @@ class="inline-flex items-center justify-center px-4 py-2 text-sm text-white bg-g
 
 </div>
 
+<form action="{{ route('admin.fakultas.sync') }}"
+    method="POST">
+    @csrf
+
+    <button
+        type="submit"
+        class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+        Sinkronisasi SIAKAD
+    </button>
+</form>
+
 {{-- BULK DELETE --}}
 <form id="bulkDeleteForm"
 action="{{ route('admin.fakultas.bulkDelete') }}"
