@@ -15,7 +15,7 @@ class AdminSeeder extends Seeder
             ['username' => 'admin'],
             [
                 // assign plain password; the model's setPasswordAttribute will hash it
-                'password' => Hash::make('admin123'),
+                'password' => Hash::make('admin1234567'),
                 'role' => 'admin',
                 'is_active' => true,
                 'first_login' => true,

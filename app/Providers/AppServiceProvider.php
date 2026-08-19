@@ -6,12 +6,13 @@ use App\Models\Dosen;
 use App\Models\Staff;
 use App\Models\Mahasiswa;
 use App\Models\Pimpinan;
+use App\Models\DokumenPengajuan;
 
 use App\Observers\DosenObserver;
 use App\Observers\StaffObserver;
 use App\Observers\MahasiswaObserver;
 use App\Observers\PimpinanObserver;
-
+use App\Observers\DokumenPengajuanObserver;
 use App\View\Composers\MahasiswaNavbarComposer;
 
 use Illuminate\Support\Facades\DB;
@@ -38,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
         Dosen::observe(DosenObserver::class);
         Staff::observe(StaffObserver::class);
         Pimpinan::observe(PimpinanObserver::class);
-
+DokumenPengajuan::observe(DokumenPengajuanObserver::class);
         View::composer('layouts.navigation', function ($view) {
             $view->with(
                 'fakultas',
