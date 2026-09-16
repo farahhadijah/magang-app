@@ -82,21 +82,34 @@
                                 </div>
                             </div>
                             
+                            {{-- LOCATION STATUS --}}
+                            <div id="locationStatus" class="hidden p-3 mt-2 border rounded-lg">
+                                <div class="flex items-center gap-2" id="statusContent">
+                                    <i class="fa-solid fa-spinner fa-spin" id="locationSpinner"></i>
+                                    <span id="locationMessage">Sedang mencari lokasi...</span>
+                                </div>
+                            </div>
+
                             <div class="flex flex-wrap gap-3 mt-3">
+                                <button type="button" id="btnCariLokasi"
+                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 shadow-sm bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl hover:from-green-700 hover:to-emerald-700">
+                                    <i class="fa-solid fa-magnifying-glass-location"></i>
+                                    Cari Lokasi Otomatis
+                                </button>
                                 <button type="button" id="btnGoogleMaps"
                                     class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 shadow-sm bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl hover:from-blue-700 hover:to-blue-800">
                                     <i class="fa-solid fa-map"></i>
-                                    Cari Lokasi di Google Maps
+                                    Buka Google Maps
                                 </button>
                             </div>
                             
                             <div id="manualGuide" class="hidden p-4 mt-3 text-sm text-gray-700 border border-blue-200 bg-blue-50 rounded-xl">
                                 <p class="flex items-center gap-2 mb-2 font-semibold text-blue-800">
                                     <i class="fa-solid fa-lightbulb"></i>
-                                    Jika lokasi tidak ditemukan otomatis:
+                                    Cara mendapatkan link Google Maps:
                                 </p>
                                 <ol class="pl-5 space-y-1 text-gray-600 list-decimal">
-                                    <li>Klik tombol <b>"Cari Lokasi di Google Maps"</b></li>
+                                    <li>Klik tombol <b>"Buka Google Maps"</b></li>
                                     <li>Cari nama instansi Anda</li>
                                     <li>Klik tombol <b>Bagikan (Share)</b></li>
                                     <li>Pilih <b>Salin Link</b></li>
@@ -106,27 +119,21 @@
                             
                             <p class="flex items-center gap-1 mt-2 text-xs text-gray-500">
                                 <i class="fa-solid fa-info-circle"></i>
-                                Lokasi akan terisi otomatis setelah nama instansi dimasukkan. Jika tidak sesuai, Anda dapat mengisinya secara manual.
+                                Masukkan nama instansi, lalu klik "Cari Lokasi Otomatis" untuk mengisi link Google Maps secara otomatis.
                             </p>
                             
                             {{-- MAP PREVIEW --}}
-                            <div id="mapPreview" class="hidden mt-4 transition-all duration-300">
+                            <div id="mapPreview" class="hidden mt-4">
                                 <div class="p-4 border border-green-200 shadow-sm bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
                                     <div class="flex items-center justify-between mb-3">
                                         <h5 class="flex items-center gap-2 text-sm font-semibold text-green-800">
                                             <i class="fa-solid fa-map"></i>
                                             Preview Lokasi
                                         </h5>
-                                        <span class="text-xs text-gray-500">
-                                            <i class="fa-solid fa-arrows-up-down-left-right"></i> Drag untuk melihat area sekitar
-                                        </span>
                                     </div>
-                                    <div id="map" class="rounded-lg shadow-md" style="height:320px;"></div>
+                                    <div id="map" style="height:300px; width:100%;" class="rounded-lg"></div>
                                 </div>
                             </div>
-                            <p id="previewInfo" class="hidden mt-2 text-xs text-gray-500">
-                                <i class="fa-solid fa-eye-slash"></i> Preview hanya tersedia untuk lokasi yang ditemukan otomatis.
-                            </p>
                         </div>
 
                         <div>
@@ -259,10 +266,13 @@
         </div>
     </div>
 
+    {{-- Load Leaflet CSS & JS --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
-        // Script untuk menampilkan file list preview
         document.addEventListener('DOMContentLoaded', function () {
-            // Fungsi untuk menampilkan daftar file yang dipilih
+            // ========== FILE PREVIEW ==========
             function setupFilePreview(inputId, listId, isMultiple = false) {
                 const input = document.getElementById(inputId);
                 const listContainer = document.getElementById(listId);
@@ -333,106 +343,67 @@
                 });
             }
             
-            // Setup preview untuk semua input file
             setupFilePreview('dokumen_pembayaran', 'dokumen_pembayaran-list', false);
             setupFilePreview('dokumen_studi_tour', 'dokumen_studi_tour-list', false);
             setupFilePreview('dokumen_krs', 'dokumen_krs-list', false);
             
-            // ========== SCRIPT ORIGINAL (TIDAK DIUBAH) ==========
+            // ========== MAIN VARIABLES ==========
             const inputNama = document.getElementById("nama_tempat");
             const warningBox = document.getElementById('warningTempat');
             const lokasiInput = document.getElementById("lokasi_maps");
-
-            lokasiInput.addEventListener("focus", function(){
-                this.dataset.auto = "false";
-            });
-            
             const form = document.getElementById("formPengajuan");
+            const locationStatus = document.getElementById('locationStatus');
+            const statusContent = document.getElementById('statusContent');
+            const locationMessage = document.getElementById('locationMessage');
+            const locationSpinner = document.getElementById('locationSpinner');
+            const manualGuide = document.getElementById('manualGuide');
+            const mapPreview = document.getElementById('mapPreview');
+            const btnCari = document.getElementById('btnCariLokasi');
 
-            let timeout = null;
-            // CEK KEMIRIPAN NAMA TEMPAT
-            inputNama.addEventListener('input', function () {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    if (inputNama.value.length < 4) {
-                        warningBox.classList.add('hidden');
-                        return;
-                    }
-                    fetch("{{ route('mahasiswa.pengajuan.cek-kemiripan') }}", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                        },
-                        body: JSON.stringify({
-                            nama_tempat: inputNama.value
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.mirip) {
-                            warningBox.innerHTML =
-                                `⚠️ Nama ini mirip dengan <b>${data.nama_mirip}</b>. Pastikan ini memang tempat yang berbeda, jika ya abaikan pesan ini`;
-                            warningBox.classList.remove('hidden');
-                        } else {
-                            warningBox.classList.add('hidden');
-                        }
-                    });
-                }, 600);
-            });
+            let map = null;
+            let marker = null;
+            let isLocating = false;
 
-            // AUTO UPPERCASE SEMESTER
-            const semesterInput = document.querySelector('input[name="semester"]');
-            if (semesterInput) {
-                semesterInput.addEventListener('input', function () {
-                    this.value = this.value.toUpperCase();
-                });
+            // ========== UPDATE LOCATION STATUS ==========
+            function updateLocationStatus(message, type = 'loading') {
+                locationStatus.classList.remove('hidden');
+                locationMessage.textContent = message;
+                
+                // Reset classes
+                locationStatus.className = 'mt-2 p-3 rounded-lg border';
+                
+                if (type === 'loading') {
+                    locationStatus.classList.add('bg-yellow-50', 'border-yellow-200');
+                    locationSpinner.classList.remove('hidden');
+                    statusContent.className = 'flex items-center gap-2 text-yellow-700';
+                } else if (type === 'success') {
+                    locationStatus.classList.add('bg-green-50', 'border-green-200');
+                    locationSpinner.classList.add('hidden');
+                    statusContent.className = 'flex items-center gap-2 text-green-700';
+                } else if (type === 'error') {
+                    locationStatus.classList.add('bg-red-50', 'border-red-200');
+                    locationSpinner.classList.add('hidden');
+                    statusContent.className = 'flex items-center gap-2 text-red-700';
+                } else if (type === 'warning') {
+                    locationStatus.classList.add('bg-yellow-50', 'border-yellow-200');
+                    locationSpinner.classList.add('hidden');
+                    statusContent.className = 'flex items-center gap-2 text-yellow-700';
+                }
             }
-            
-            // MAP PREVIEW
-            let map;
-            let marker;
-            inputNama.addEventListener("blur", function () {
-                let tempat = this.value.trim();
-                if (!tempat || tempat.length < 3) return;
-                lokasiInput.value = "Mencari lokasi...";
-                let query = `${tempat} Indonesia`;
-                fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`)
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.features || data.features.length === 0) {
-                        alert("Lokasi tidak ditemukan otomatis. Silakan cari melalui Google Maps.");
-                        lokasiInput.value = "";
-                        document.getElementById("manualGuide")?.classList.remove("hidden");
-                        document.getElementById("mapPreview").classList.add("hidden");
-                        document.getElementById("previewInfo").classList.remove("hidden");
-                        return;
-                    }
-                    let coords = data.features[0].geometry.coordinates;
-                    let lon = coords[0];
-                    let lat = coords[1];
-                    let mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
-                    lokasiInput.value = mapsLink;
-                    lokasiInput.dataset.auto = "true";
-                    showMap(lat, lon);
-                    document.getElementById("previewInfo").classList.add("hidden");
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Gagal mencari lokasi otomatis. Silakan isi manual.");
-                    lokasiInput.readOnly = false;
-                    lokasiInput.value = "";
-                });
-            });
-            
-            // FUNGSI MENAMPILKAN MAP
+
+            function hideLocationStatus() {
+                locationStatus.classList.add('hidden');
+            }
+
+            // ========== SHOW MAP ==========
             function showMap(lat, lon) {
-                const mapContainer = document.getElementById("mapPreview");
-                mapContainer.classList.remove("hidden");
+                mapPreview.classList.remove("hidden");
+                
                 if (!map) {
                     map = L.map('map').setView([lat, lon], 16);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
                     }).addTo(map);
                 } else {
                     map.setView([lat, lon], 16);
@@ -440,74 +411,214 @@
                         map.removeLayer(marker);
                     }
                 }
+                
                 marker = L.marker([lat, lon]).addTo(map);
-                map.invalidateSize();
+                
+                setTimeout(() => {
+                    if (map) map.invalidateSize();
+                }, 300);
             }
-            
-            // TOMBOL BUKA GOOGLE MAPS
-            let btnMaps = document.getElementById("btnGoogleMaps");
-            if (btnMaps) {
-                btnMaps.addEventListener("click", function () {
-                    let tempat = inputNama.value.trim();
-                    let url = "https://www.google.com/maps";
-                    if (tempat) {
-                        url = `https://www.google.com/maps/search/${encodeURIComponent(tempat)}`;
+
+            // ========== SEARCH LOCATION WITH PHOTON API ==========
+            function searchLocation(tempat) {
+                if (isLocating) return;
+                if (!tempat || tempat.length < 3) {
+                    updateLocationStatus('Masukkan minimal 3 karakter untuk mencari lokasi', 'warning');
+                    return;
+                }
+
+                isLocating = true;
+                lokasiInput.value = "Mencari lokasi...";
+                lokasiInput.readOnly = true;
+                manualGuide.classList.add('hidden');
+                mapPreview.classList.add('hidden');
+                warningBox.classList.add('hidden');
+                hideLocationStatus();
+                
+                updateLocationStatus(`Mencari lokasi untuk "${tempat}"...`, 'loading');
+
+                // Gunakan Photon API (sudah terbukti berhasil untuk Lamongan)
+                const query = encodeURIComponent(tempat);
+                const url = `https://photon.komoot.io/api/?q=${query}&limit=5&lang=id`;
+
+                fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'User-Agent': 'Sibolang-PKL-App/1.0'
                     }
-                    window.open(url, "_blank");
-                    document.getElementById("manualGuide")?.classList.remove("hidden");
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('Photon Response:', data);
+                    
+                    if (!data.features || data.features.length === 0) {
+                        // Coba dengan "Indonesia"
+                        const query2 = encodeURIComponent(`${tempat}, Indonesia`);
+                        return fetch(`https://photon.komoot.io/api/?q=${query2}&limit=5&lang=id`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'User-Agent': 'Sibolang-PKL-App/1.0'
+                            }
+                        }).then(res => res.json());
+                    }
+                    return data;
+                })
+                .then(data => {
+                    console.log('Photon Response (2nd try):', data);
+                    
+                    if (!data.features || data.features.length === 0) {
+                        throw new Error('Lokasi tidak ditemukan di database Photon');
+                    }
+
+                    const result = data.features[0];
+                    const coords = result.geometry.coordinates;
+                    const lon = coords[0];
+                    const lat = coords[1];
+                    
+                    const name = result.properties?.name || result.properties?.street || tempat;
+                    const city = result.properties?.city || result.properties?.state || '';
+                    const displayName = `${name}${city ? ', ' + city : ''}`;
+
+                    const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                    lokasiInput.value = mapsLink;
+                    
+                    showMap(lat, lon);
+                    updateLocationStatus(`✓ Lokasi ditemukan: ${displayName.substring(0, 80)}`, 'success');
+                    manualGuide.classList.add('hidden');
+                    warningBox.classList.add('hidden');
+                })
+                .catch(err => {
+                    console.error('Error searching location with Photon:', err);
+                    
+                    manualGuide.classList.remove('hidden');
+                    warningBox.classList.remove('hidden');
+                    warningBox.innerHTML = `
+                        <i class="text-blue-600 fa-solid fa-info-circle"></i>
+                        <span>💡 Lokasi tidak ditemukan otomatis. Klik "Buka Google Maps" untuk mencari manual, lalu salin link-nya.</span>
+                    `;
+                    
+                    lokasiInput.value = "";
+                    lokasiInput.placeholder = `Contoh: https://www.google.com/maps?q=-7.123,112.456`;
+                    
+                    updateLocationStatus('Lokasi tidak ditemukan. Silakan cari manual melalui Google Maps.', 'error');
+                })
+                .finally(() => {
+                    isLocating = false;
+                    lokasiInput.readOnly = false;
+                    
+                    if (!lokasiInput.value) {
+                        lokasiInput.value = "";
+                    }
                 });
             }
-            
-            function extractLatLng(url){
-                if(!url) return null;
-                let match1 = url.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-                if(match1){
-                    return {
-                        lat: parseFloat(match1[1]),
-                        lng: parseFloat(match1[2])
-                    };
+
+            // ========== EVENT: CEK KEMIRIPAN NAMA TEMPAT ==========
+            let timeout = null;
+            inputNama.addEventListener('input', function () {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    if (this.value.length < 4) {
+                        warningBox.classList.add('hidden');
+                        return;
+                    }
+                    
+                    fetch("{{ route('mahasiswa.pengajuan.cek-kemiripan') }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify({
+                            nama_tempat: this.value
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.mirip) {
+                            warningBox.innerHTML = `
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span>⚠️ Nama ini mirip dengan <b>${data.nama_mirip}</b>. Pastikan ini memang tempat yang berbeda, jika ya abaikan pesan ini</span>
+                            `;
+                            warningBox.classList.remove('hidden');
+                        } else {
+                            warningBox.classList.add('hidden');
+                        }
+                    })
+                    .catch(err => console.error('Error checking similarity:', err));
+                }, 600);
+            });
+
+            // ========== EVENT: CARI LOKASI (Tombol) ==========
+            btnCari.addEventListener('click', function () {
+                const tempat = inputNama.value.trim();
+                if (!tempat || tempat.length < 3) {
+                    updateLocationStatus('Masukkan nama instansi terlebih dahulu (minimal 3 karakter)', 'warning');
+                    inputNama.focus();
+                    return;
                 }
-                let match2 = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-                if(match2){
-                    return {
-                        lat: parseFloat(match2[1]),
-                        lng: parseFloat(match2[2])
-                    };
+                searchLocation(tempat);
+            });
+
+            // ========== EVENT: ENTER KEY ==========
+            inputNama.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    btnCari.click();
                 }
-                let match3 = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+),/);
-                if(match3){
-                    return {
-                        lat: parseFloat(match3[1]),
-                        lng: parseFloat(match3[2])
-                    };
+            });
+
+            // ========== EVENT: GOOGLE MAPS BUTTON ==========
+            document.getElementById("btnGoogleMaps").addEventListener("click", function () {
+                let tempat = inputNama.value.trim();
+                let url = "https://www.google.com/maps";
+                if (tempat) {
+                    url = `https://www.google.com/maps/search/${encodeURIComponent(tempat)}`;
                 }
-                return null;
-            }
-            
-            // VALIDASI LINK GOOGLE MAPS
+                window.open(url, "_blank");
+                manualGuide.classList.remove('hidden');
+            });
+
+            // ========== VALIDASI FORM ==========
             form.addEventListener("submit", function (e) {
                 let lokasi = lokasiInput.value.trim();
-                if(!lokasi.includes("google.com/maps") && !lokasi.includes("maps.app.goo.gl")){
-                    alert("Lokasi harus berupa link Google Maps.");
+                if (!lokasi || (!lokasi.includes("google.com/maps") && !lokasi.includes("maps.app.goo.gl"))) {
+                    alert("⚠️ Lokasi harus berupa link Google Maps yang valid.\n\nContoh: https://www.google.com/maps?q=-7.123,112.456\n\nAtau klik tombol 'Buka Google Maps' untuk mencari manual.");
                     e.preventDefault();
                     return;
                 }
             });
-            
-            lokasiInput.addEventListener("change", function(){
-                let coords = extractLatLng(this.value);
-                if(coords){
-                    showMap(coords.lat, coords.lng);
+
+            // ========== AUTO DETECT LINK ==========
+            lokasiInput.addEventListener("change", function () {
+                const url = this.value.trim();
+                if (!url) return;
+                
+                let match = url.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if (!match) {
+                    match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                }
+                
+                if (match) {
+                    const lat = parseFloat(match[1]);
+                    const lon = parseFloat(match[2]);
+                    showMap(lat, lon);
+                    updateLocationStatus('✓ Lokasi valid dan siap digunakan', 'success');
                 }
             });
-            
-            lokasiInput.addEventListener("input", function(){
-                const autoGenerated = this.dataset.auto === "true";
-                if(!autoGenerated){
-                    document.getElementById("mapPreview").classList.add("hidden");
-                    document.getElementById("previewInfo").classList.remove("hidden");
+
+            // ========== CHECK IF LOCATION ALREADY FILLED ==========
+            if (lokasiInput.value && lokasiInput.value.includes('google.com/maps')) {
+                const match = lokasiInput.value.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if (match) {
+                    showMap(parseFloat(match[1]), parseFloat(match[2]));
+                    updateLocationStatus('✓ Lokasi sudah terisi dan valid', 'success');
                 }
-            });
+            }
+
+            console.log('✅ Pengajuan PKL script loaded successfully!');
         });
     </script>
 </x-app-layout>

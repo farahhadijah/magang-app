@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanPkl;
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class StaffSuratController extends Controller
 {
@@ -14,7 +16,7 @@ class StaffSuratController extends Controller
         $data = PengajuanPkl::with([
             'mahasiswa',
             'tempatPkl',
-            'pkl'
+            'pkl.suratPengantar',
         ])
         ->where('status', 'disetujui')
 
@@ -30,17 +32,7 @@ class StaffSuratController extends Controller
     }
     public function cetak($id)
     {
-        $pengajuan = PengajuanPkl::with([
-            'mahasiswa.prodi.fakultas',
-            'tempatPkl'
-        ])->findOrFail($id);
-
-        $noSurat = '0' . $pengajuan->id . '/UNISLA/PKL/' . date('Y');
-
-        $pdf = Pdf::loadView('surat.pengantar', compact('pengajuan', 'noSurat'))
-            ->setPaper([0,0,595,935], 'portrait');
-
-        return $pdf->stream();
+        return $this->serveSuratPdf((int) $id, inline: false);
     }
     public function validasi($id)
     {

@@ -27,7 +27,7 @@
             cursor-not-allowed
         "
     >
-        <i class="w-5 fa-solid fa-server"></i>
+        <i class="w-5 bi bi-server"></i>
 
         SIAKAD Bermasalah
     </div>
@@ -48,7 +48,7 @@
                 : '' }}
         "
     >
-        <i class="w-5 fa-solid fa-triangle-exclamation"></i>
+        <i class="w-5 bi bi-exclamation-triangle"></i>
 
         Remedial
     </a>
@@ -71,7 +71,7 @@
                     : '' }}
             "
         >
-            <i class="w-5 fa-solid fa-file-circle-plus"></i>
+            <i class="w-5 bi bi-file-earmark-plus"></i>
 
             Ajukan PKL
         </a>
@@ -87,7 +87,7 @@
                 cursor-not-allowed
             "
         >
-            <i class="w-5 fa-solid fa-file-circle-plus"></i>
+            <i class="w-5 bi bi-file-earmark-plus"></i>
 
             PKL Sudah Diajukan
         </div>
@@ -112,7 +112,7 @@
                     : '' }}
             "
         >
-            <i class="w-5 fa-solid fa-circle-info"></i>
+            <i class="w-5 bi bi-info-circle"></i>
 
             Status PKL
         </a>
@@ -135,7 +135,7 @@
                     : '' }}
             "
         >
-            <i class="w-5 fa-solid fa-book"></i>
+            <i class="w-5 bi bi-book"></i>
 
             Logbook
         </a>
@@ -151,7 +151,7 @@
                 cursor-not-allowed
             "
         >
-            <i class="w-5 fa-solid fa-book"></i>
+            <i class="w-5 bi bi-book"></i>
 
             Logbook
         </div>
@@ -174,7 +174,7 @@
                     : '' }}
             "
         >
-            <i class="w-5 fa-solid fa-list-check"></i>
+            <i class="w-5 bi bi-list-check"></i>
 
             Tugas
         </a>
@@ -190,7 +190,7 @@
                 cursor-not-allowed
             "
         >
-            <i class="w-5 fa-solid fa-list-check"></i>
+            <i class="w-5 bi bi-list-check"></i>
 
             Tugas
         </div>
@@ -215,7 +215,7 @@
                         : '' }}
                 "
             >
-                <i class="w-5 fa-solid fa-file-lines"></i>
+                <i class="w-5 bi bi-file-text"></i>
 
                 Laporan Akhir
             </a>
@@ -231,7 +231,7 @@
                     cursor-not-allowed
                 "
             >
-                <i class="w-5 fa-solid fa-file-lines"></i>
+                <i class="w-5 bi bi-file-text"></i>
 
                 Laporan Akhir
             </div>
@@ -256,7 +256,7 @@
                     : '' }}
             "
         >
-            <i class="w-5 fa-solid fa-star"></i>
+            <i class="w-5 bi bi-star"></i>
 
             Penilaian Mitra
         </a>
@@ -272,7 +272,7 @@
                 cursor-not-allowed
             "
         >
-            <i class="w-5 fa-solid fa-star"></i>
+            <i class="w-5 bi bi-star"></i>
 
             Penilaian Mitra
         </div>
@@ -295,7 +295,7 @@
                     : '' }}
             "
         >
-            <i class="w-5 fa-solid fa-clipboard-check"></i>
+            <i class="w-5 bi bi-clipboard-check"></i>
 
             Nilai PKL
         </a>
@@ -311,7 +311,7 @@
                 cursor-not-allowed
             "
         >
-            <i class="w-5 fa-solid fa-clipboard-check"></i>
+            <i class="w-5 bi bi-clipboard-check"></i>
 
             Nilai PKL
         </div>
