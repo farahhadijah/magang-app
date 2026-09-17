@@ -9,10 +9,20 @@ return new class extends Migration {
     {
         Schema::create('pimpinan', function (Blueprint $table) {
             $table->id();
+
             $table->string('nip', 30)->unique();
             $table->string('nama', 100);
             $table->string('no_hp', 15)->nullable();
+
+            // Setiap pimpinan memiliki satu fakultas
+            $table->foreignId('fakultas_id')
+                ->unique()
+                ->constrained('fakultas')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->boolean('is_active')->default(true);
+
             $table->timestamps();
         });
     }

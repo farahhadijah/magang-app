@@ -41,11 +41,20 @@ class AppServiceProvider extends ServiceProvider
         Pimpinan::observe(PimpinanObserver::class);
 DokumenPengajuan::observe(DokumenPengajuanObserver::class);
         View::composer('layouts.navigation', function ($view) {
-            $view->with(
-                'fakultas',
-                DB::table('fakultas')->get()
-            );
-        });
+        $fakultas = null;
+
+        if (auth()->check() && auth()->user()->role === 'pimpinan') {
+            $pimpinan = auth()->user()->pimpinan;
+
+            if ($pimpinan && $pimpinan->fakultas_id) {
+                $fakultas = DB::table('fakultas')
+                    ->where('id', $pimpinan->fakultas_id)
+                    ->first();
+            }
+        }
+
+        $view->with('fakultas', $fakultas);
+    });
 
         // Navbar Mahasiswa
         View::composer(

@@ -12,11 +12,17 @@ class Pimpinan extends Model
         'nip',
         'nama',
         'no_hp',
-        'is_active'
+        'fakultas_id',
+        'is_active',
     ];
 
     public function user()
     {
         return $this->hasOne(User::class);
+    }
+
+    public function fakultas()
+    {
+        return $this->belongsTo(Fakultas::class);
     }
 }
