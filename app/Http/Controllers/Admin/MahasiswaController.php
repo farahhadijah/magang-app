@@ -156,11 +156,18 @@ use App\Services\SiakadService;
 
     public function syncSiakad(SiakadService $siakad)
     {
-        $total = $siakad->syncMahasiswa();
+        // Sinkronisasi fakultas terlebih dahulu
+        $totalFakultas = $siakad->syncFakultas();
+
+        // Setelah fakultas tersedia, sinkronisasi prodi
+        $totalProdi = $siakad->syncProdi();
+
+        // Setelah prodi tersedia, sinkronisasi mahasiswa
+        $totalMahasiswa = $siakad->syncMahasiswa();
 
         return back()->with(
             'success',
-            "{$total} mahasiswa berhasil disinkronkan dari SIAKAD."
+            "{$totalMahasiswa} mahasiswa berhasil disinkronkan dari SIAKAD."
         );
     }
 }

@@ -187,7 +187,8 @@ Route::middleware(['auth', 'kaprodi'])
         Route::post('/pengajuan/{id}/approve', [KaprodiPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [KaprodiPengajuanController::class, 'reject'])->name('pengajuan.reject');
         Route::get('/histori',[KaprodiPengajuanController::class, 'histori'])->name('pengajuan.histori');
-       Route::get('/mahasiswa/belum',[KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
+        Route::get('/mahasiswa/belum',[KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
+        Route::get('/dosen/search', [KaprodiPengajuanController::class, 'searchDosen'])->name('dosen.search');
     });
 /*
 |--------------------------------------------------------------------------

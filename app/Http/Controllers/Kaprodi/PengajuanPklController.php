@@ -33,13 +33,14 @@ class PengajuanPklController extends Controller
     /* ================= DETAIL ================= */
     public function show($id)
 {
-    // ambil prodi kaprodi dulu (🔥 WAJIB DI ATAS)
+    // ================= AMBIL PRODI KAPRODI =================
     $dosenKaprodi = auth()->user()->dosen;
-    $prodiId      = $dosenKaprodi->prodi_id;
+    $prodiId = $dosenKaprodi->prodi_id;
 
+    // ================= DETAIL PENGAJUAN =================
     $pengajuan = PengajuanPkl::query()
         ->whereKey($id)
-        ->whereHas('mahasiswa', fn($q) => 
+        ->whereHas('mahasiswa', fn($q) =>
             $q->where('prodi_id', $prodiId)
         )
         ->with([
@@ -62,24 +63,64 @@ class PengajuanPklController extends Controller
             ->with('warning', 'Pengajuan sudah diproses.');
     }
 
+    // ========================================================
+    // DAFTAR DOSEN RIWAYAT KAPRODI
+    // ========================================================
+    //
+    // Hanya dosen yang PERNAH dipilih oleh Kaprodi ini.
+    //
+    // Relasi:
+    // verifikasi.id_user
+    //      -> users.id
+    //      -> users.dosen_id
+    //
+    // lalu:
+    // verifikasi.id_pengajuan_pkl
+    //      -> pengajuan_pkl.id
+    //      -> pkl.id_pengajuan_pkl
+    //      -> pkl.id_dosen
+    //      -> dosen.id
+    //
     $dosenList = Dosen::query()
-    ->leftJoin('pkl', function ($join) {
-        $join->on('dosen.id', '=', 'pkl.id_dosen')
-             ->where('pkl.status', 'aktif');
-    })
-    ->where('dosen.prodi_id', $prodiId)
-    ->where('dosen.is_active', 1)
-    ->select(
-        'dosen.id',
-        'dosen.nama',
-        'dosen.keahlian',
-        DB::raw('COUNT(pkl.id) as total_bimbingan')
-    )
-    ->groupBy('dosen.id', 'dosen.nama', 'dosen.keahlian')
-    ->orderBy('dosen.nama')
-    ->get();
+        ->join('pkl', 'pkl.id_dosen', '=', 'dosen.id')
+        ->join(
+            'pengajuan_pkl',
+            'pengajuan_pkl.id',
+            '=',
+            'pkl.id_pengajuan_pkl'
+        )
+        ->join(
+            'verifikasi',
+            'verifikasi.id_pengajuan_pkl',
+            '=',
+            'pengajuan_pkl.id'
+        )
+        ->where('verifikasi.id_user', auth()->user()->getKey())
+        ->where('verifikasi.level', 'kaprodi')
+        ->where('verifikasi.status', 'approved')
+        ->where('dosen.is_active', 1)
+        ->select(
+            'dosen.id',
+            'dosen.nama',
+            'dosen.nidn',
+            'dosen.keahlian',
+            DB::raw("
+                (
+                    SELECT COUNT(*)
+                    FROM pkl AS pkl_aktif
+                    WHERE pkl_aktif.id_dosen = dosen.id
+                    AND pkl_aktif.status = 'aktif'
+                ) AS total_bimbingan
+            ")
+        )
+        ->distinct()
+        ->orderBy('dosen.nama')
+        ->get();
 
-    /* ================= HITUNG JARAK ================= */
+    // ========================================================
+    // HITUNG JARAK
+    // ========================================================
+
     $jarak = null;
 
     $mapsUrl = $pengajuan->tempatPkl->lokasi_maps ?? null;
@@ -98,7 +139,10 @@ class PengajuanPklController extends Controller
         );
     }
 
-    /* ================= RIWAYAT TEMPAT PKL (nama tempat + prodi + angkatan + PKL masih aktif) ================= */
+    // ========================================================
+    // RIWAYAT TEMPAT PKL
+    // ========================================================
+
     $namaNormalized = $pengajuan->tempatPkl->nama_normalized ?? null;
     $namaTempat = $pengajuan->tempatPkl->nama_tempat ?? null;
     $angkatan = $pengajuan->mahasiswa->angkatan ?? null;
@@ -107,17 +151,22 @@ class PengajuanPklController extends Controller
     $terakhirDigunakan = null;
 
     if (($namaNormalized || $namaTempat) && $angkatan !== null && $angkatan !== '') {
+
         $riwayat = PengajuanPkl::where('id', '!=', $pengajuan->id)
             ->whereHas('tempatPkl', function ($q) use ($namaNormalized, $namaTempat) {
+
                 if ($namaNormalized) {
                     $q->where('nama_normalized', $namaNormalized);
                 } else {
                     $q->where('nama_tempat', $namaTempat);
                 }
+
             })
             ->whereHas('mahasiswa', function ($q) use ($prodiId, $angkatan) {
+
                 $q->where('prodi_id', $prodiId)
                     ->where('angkatan', $angkatan);
+
             })
             ->whereHas('pkl', function ($q) {
                 $q->where('status', 'aktif');
@@ -140,6 +189,50 @@ class PengajuanPklController extends Controller
         'terakhirDigunakan'
     ));
 }
+
+    /**
+     * AJAX SEARCH DOSEN
+     *
+     * Mencari semua dosen aktif di tabel dosen.
+     * Tidak dibatasi prodi_id.
+     */
+    public function searchDosen(Request $request)
+    {
+        $q = trim($request->input('q', ''));
+
+        // Minimal 2 karakter
+        if (mb_strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $dosen = Dosen::query()
+            ->where('is_active', 1)
+            ->where(function ($query) use ($q) {
+
+                $query->where('nama', 'like', "%{$q}%")
+                    ->orWhere('nidn', 'like', "%{$q}%");
+
+            })
+            ->select(
+                'dosen.id',
+                'dosen.nidn',
+                'dosen.nama',
+                'dosen.keahlian',
+                DB::raw("
+                    (
+                        SELECT COUNT(*)
+                        FROM pkl AS pkl_aktif
+                        WHERE pkl_aktif.id_dosen = dosen.id
+                        AND pkl_aktif.status = 'aktif'
+                    ) AS total_bimbingan
+                ")
+            )
+            ->orderBy('dosen.nama')
+            ->limit(10)
+            ->get();
+
+        return response()->json($dosen);
+    }
     /* ================= APPROVE ================= */
 
     public function approve(Request $request, $id)
@@ -173,12 +266,7 @@ class PengajuanPklController extends Controller
         ->first();
 
     if (!$dosen) {
-        return back()->with('warning', 'Dosen tidak valid.');
-    }
-
-    //  WAJIB SATU PRODI
-    if ($dosen->prodi_id != $prodiId) {
-        return back()->with('warning', 'Dosen harus dari prodi yang sama.');
+        return back()->with('warning', 'Dosen tidak valid atau sudah tidak aktif.');
     }
 
     try {
