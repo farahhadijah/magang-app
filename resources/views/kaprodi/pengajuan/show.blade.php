@@ -5,21 +5,17 @@
 
     @php
         $lokasi = $pengajuan->tempatPkl->lokasi_maps ?? null;
-
-        $dosenForHistory = $dosenList
+        $dosenForSearch = $dosenList
             ->map(
                 fn($d) => [
-                    'id' => $d->id,
-                    'nidn' => $d->nidn ?? '',
                     'nama' => $d->nama,
                     'keahlian' => $d->keahlian ?? '',
-                    'total_bimbingan' => $d->total_bimbingan ?? 0,
                 ],
             )
             ->values();
     @endphp
 
-    <div x-data="kaprodiPengajuanShow(@js($lokasi), @js($dosenForHistory), '{{ route('kaprodi.dosen.search') }}')" x-init="initMap()">
+    <div x-data="kaprodiPengajuanShow(@js($lokasi), @js($dosenForSearch))" x-init="initMap()">
         <div class="py-6 space-y-6">
             {{-- Informasi Mahasiswa --}}
             <div class="p-6 space-y-2 bg-green-50 rounded-lg border border-green-200 shadow-sm">
@@ -125,157 +121,66 @@
                         class="space-y-4">
                         @csrf
 
-                        {{-- ================= PILIH DOSEN PEMBIMBING ================= --}}
                         <div>
-
                             <label class="block mb-2 text-sm font-medium text-gray-700">
                                 Pilih Dosen Pembimbing
                             </label>
 
-                            {{-- ================= SEARCH DOSEN ================= --}}
+                            {{-- SEARCH --}}
                             <div class="mb-4">
-
-                                <input type="text" x-model="searchDosen" @input.debounce.400ms="searchDosenAjax()"
-                                    placeholder="Cari dosen berdasarkan nama atau NIDN..."
+                                <input type="text" x-model="searchDosen"
+                                    placeholder="Cari dosen (nama atau keahlian)..."
                                     class="px-3 py-2 w-full rounded-lg border focus:ring-2 focus:ring-green-500">
-
                             </div>
 
-                            {{-- ================= LOADING ================= --}}
-                            <div x-show="dosenSearching" x-cloak
-                                class="p-4 mb-3 text-sm text-center text-gray-500 bg-gray-50 rounded-lg border">
-                                Mencari dosen...
-                            </div>
-
-                            {{-- ================= HASIL AJAX ================= --}}
-                            <div x-show="dosenSearchResults.length > 0" x-cloak class="overflow-y-auto mb-4 max-h-96">
-
-                                <p class="mb-2 text-xs font-medium text-gray-500">
-                                    Hasil pencarian
-                                </p>
-
+                            {{-- LIST DOSEN --}}
+                            <div id="dosenContainer" class="overflow-y-auto max-h-96">
                                 <div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
 
-                                    <template x-for="dosen in dosenSearchResults" :key="dosen.id">
-
+                                    @forelse($dosenList as $d)
                                         <label
+                                            x-show="matchesDosen(@js($d->nama), @js($d->keahlian ?? ''))"
                                             class="flex items-start p-3 rounded-lg border transition cursor-pointer hover:bg-green-50 hover:border-green-300">
 
-                                            <input type="radio" name="id_dosen" :value="dosen.id"
-                                                x-model="selectedDosen" required class="mt-1 mr-3">
+                                            <input type="radio" name="id_dosen" value="{{ $d->id }}"
+                                                class="mt-1 mr-3" required>
 
                                             <div class="flex-1">
-
-                                                <p class="text-sm font-semibold text-gray-800" x-text="dosen.nama"></p>
-
-                                                <p x-show="dosen.nidn" class="text-xs text-gray-500"
-                                                    x-text="'NIDN: ' + dosen.nidn"></p>
-
-                                                <p x-show="dosen.keahlian" class="text-xs text-green-600"
-                                                    x-text="dosen.keahlian"></p>
-
-                                                <p x-show="dosen.total_bimbingan > 0" class="mt-1 text-xs text-blue-600">
-                                                    <span x-text="dosen.total_bimbingan"></span>
-                                                    mahasiswa aktif
+                                                {{-- NAMA --}}
+                                                <p class="text-sm font-semibold text-gray-800 dosen-nama">
+                                                    {{ $d->nama }}
                                                 </p>
 
-                                            </div>
-
-                                        </label>
-
-                                    </template>
-
-                                </div>
-
-                            </div>
-
-                            {{-- ================= RIWAYAT DOSEN ================= --}}
-                            <div>
-
-                                <div class="flex justify-between items-center mb-2">
-
-                                    <p class="text-xs font-medium text-gray-500">
-                                        Dosen yang pernah Anda tunjuk
-                                    </p>
-
-                                    <span class="text-xs text-gray-400" x-show="!searchDosen">
-                                        Riwayat
-                                    </span>
-
-                                </div>
-
-                                @if ($dosenList->count() > 0)
-
-                                    <div x-show="!searchDosen"
-                                        class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-
-                                        @foreach ($dosenList as $d)
-                                            <label
-                                                class="flex items-start p-3 rounded-lg border transition cursor-pointer hover:bg-green-50 hover:border-green-300">
-
-                                                <input type="radio" name="id_dosen" value="{{ $d->id }}"
-                                                    x-model="selectedDosen" required class="mt-1 mr-3">
-
-                                                <div class="flex-1">
-
-                                                    <p class="text-sm font-semibold text-gray-800">
-                                                        {{ $d->nama }}
+                                                {{-- KEAHLIAN --}}
+                                                @if ($d->keahlian)
+                                                    <p class="text-xs text-green-600 dosen-keahlian">
+                                                        {{ Str::limit($d->keahlian, 50) }}
                                                     </p>
+                                                @endif
 
-                                                    @if ($d->nidn)
-                                                        <p class="text-xs text-gray-500">
-                                                            NIDN: {{ $d->nidn }}
-                                                        </p>
-                                                    @endif
+                                                {{-- JUMLAH BIMBINGAN --}}
+                                                <p class="mt-1 text-xs text-blue-600">
+                                                    {{ $d->total_bimbingan }} mahasiswa aktif
+                                                </p>
+                                            </div>
+                                        </label>
+                                    @empty
+                                        <div class="p-6 text-center text-gray-500">
+                                            Tidak ada dosen tersedia
+                                        </div>
+                                    @endforelse
 
-                                                    @if ($d->keahlian)
-                                                        <p class="text-xs text-green-600">
-                                                            {{ Str::limit($d->keahlian, 50) }}
-                                                        </p>
-                                                    @endif
+                                </div>
 
-                                                    @if ($d->total_bimbingan > 0)
-                                                        <p class="mt-1 text-xs text-blue-600">
-                                                            {{ $d->total_bimbingan }}
-                                                            mahasiswa aktif
-                                                        </p>
-                                                    @endif
-
-                                                </div>
-
-                                            </label>
-                                        @endforeach
-
-                                    </div>
-                                @else
-                                    <div x-show="!searchDosen"
-                                        class="p-6 text-center text-gray-500 bg-gray-50 rounded-lg border">
-                                        <p class="text-sm">
-                                            Belum ada riwayat dosen yang pernah Anda tunjuk.
-                                        </p>
-
-                                        <p class="mt-1 text-xs text-gray-400">
-                                            Silakan cari dosen berdasarkan nama atau NIDN.
-                                        </p>
-                                    </div>
-
-                                @endif
-
+                                {{-- EMPTY SEARCH --}}
+                                <div x-show="dosenSearchEmpty" x-cloak class="p-6 text-center text-gray-500">
+                                    Tidak ditemukan dosen
+                                </div>
                             </div>
 
-                            {{-- ================= HASIL PENCARIAN KOSONG ================= --}}
-                            <div x-show="searchDosen.length >= 2 && !dosenSearching && dosenSearchResults.length === 0"
-                                x-cloak class="p-6 mt-2 text-center text-gray-500 bg-gray-50 rounded-lg border">
-                                Tidak ditemukan dosen aktif dengan nama atau NIDN tersebut.
-                            </div>
-
-                            {{-- ================= ERROR VALIDASI ================= --}}
                             @error('id_dosen')
-                                <p class="mt-1 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-
                         </div>
 
                         <button type="submit"

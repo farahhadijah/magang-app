@@ -38,8 +38,8 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
-    ->middleware('auth')
-    ->name('logout');
+     ->middleware('auth')
+     ->name('logout');
 
 Route::middleware(['auth', 'first.login'])->group(function () {
     Route::get('/siakad/first-login', [SiakadFirstLoginController::class, 'show'])->name('siakad.first-login');

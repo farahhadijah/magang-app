@@ -3,25 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Imports\MahasiswaImport;
 use App\Models\Mahasiswa;
 use App\Models\Prodi;
+use App\Services\SiakadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Imports\MahasiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\HeadingRowImport;
-use App\Services\SiakadService;
 
-    class MahasiswaController extends Controller
-    {
-        public function index(Request $request)
+class MahasiswaController extends Controller
+{
+    public function index(Request $request)
     {
         $query = Mahasiswa::with('prodi');
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('nama', 'like', '%'.$request->search.'%')
-                ->orWhere('nim', 'like', '%'.$request->search.'%');
+                    ->orWhere('nim', 'like', '%'.$request->search.'%');
             });
         }
         if ($request->prodi_id) {
@@ -29,14 +29,18 @@ use App\Services\SiakadService;
         }
         $mahasiswa = $query->orderBy('created_at', 'desc')->paginate(10);
         $prodi = Prodi::where('is_active', 1)->get();
-        return view('admin.mahasiswa.index', compact('mahasiswa','prodi'));
+
+        return view('admin.mahasiswa.index', compact('mahasiswa', 'prodi'));
     }
-        public function create()
+
+    public function create()
     {
         $prodi = Prodi::where('is_active', 1)->get();
+
         return view('admin.mahasiswa.create', compact('prodi'));
     }
-        public function store(Request $request)
+
+    public function store(Request $request)
     {
         $request->validate([
             'nim' => 'required|unique:mahasiswa,nim',
@@ -55,22 +59,28 @@ use App\Services\SiakadService;
                 'is_active' => 1,
             ]);
             DB::commit();
+
             return redirect()->route('admin.mahasiswa.index')
                 ->with('success', 'Mahasiswa berhasil ditambahkan.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
+
     public function show(string $id)
     {
         //
     }
+
     public function edit(Mahasiswa $mahasiswa)
     {
         $prodi = Prodi::where('is_active', 1)->get();
-        return view('admin.mahasiswa.edit', compact('mahasiswa','prodi'));
+
+        return view('admin.mahasiswa.edit', compact('mahasiswa', 'prodi'));
     }
+
     public function update(Request $request, Mahasiswa $mahasiswa)
     {
         $request->validate([
@@ -90,17 +100,20 @@ use App\Services\SiakadService;
             ]);
             if ($mahasiswa->user) {
                 $mahasiswa->user->update([
-                    'username' => $request->nim
+                    'username' => $request->nim,
                 ]);
             }
             DB::commit();
+
             return redirect()->route('admin.mahasiswa.index')
                 ->with('success', 'Mahasiswa berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
+
     public function destroy(Mahasiswa $mahasiswa)
     {
         DB::transaction(function () use ($mahasiswa) {
@@ -109,37 +122,45 @@ use App\Services\SiakadService;
                 $mahasiswa->user->update(['is_active' => 0]);
             }
         });
+
         return back()->with('success', 'Mahasiswa dinonaktifkan.');
     }
-    public function resetPassword(Mahasiswa $mahasiswa) {
-        if (!$mahasiswa->user) {
+
+    public function resetPassword(Mahasiswa $mahasiswa)
+    {
+        if (! $mahasiswa->user) {
             return back()->with('error', 'User tidak ditemukan.');
         }
         $mahasiswa->user->update([
             'password' => Hash::make($mahasiswa->nim),
             'first_login' => 1,
         ]);
+
         return back()->with('success', 'Password berhasil direset ke NIM.');
     }
-    public function activate($id) {
+
+    public function activate($id)
+    {
         $mahasiswa = Mahasiswa::findOrFail($id);
         $mahasiswa->update(['is_active' => 1]);
         if ($mahasiswa->user) {
             $mahasiswa->user->update(['is_active' => 1]);
         }
+
         return back()->with('success', 'Mahasiswa berhasil diaktifkan.');
     }
+
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+            'file' => 'required|mimes:xlsx,xls,csv',
         ]);
         $headings = (new HeadingRowImport)->toArray($request->file('file'));
         $header = $headings[0][0] ?? [];
-        $required = ['nim','nama','angkatan','no_hp','kode_prodi'];
-        $header = array_map(fn($h) => strtolower(trim($h)), $header);
+        $required = ['nim', 'nama', 'angkatan', 'no_hp', 'kode_prodi'];
+        $header = array_map(fn ($h) => strtolower(trim($h)), $header);
         foreach ($required as $col) {
-            if (!in_array($col, $header)) {
+            if (! in_array($col, $header)) {
                 return back()->with(
                     'error',
                     'Format file salah. Kolom wajib: nim, nama, angkatan, no_hp, kode_prodi'
@@ -148,26 +169,61 @@ use App\Services\SiakadService;
         }
         try {
             Excel::import(new MahasiswaImport, $request->file('file'));
+
             return back()->with('success', 'Import mahasiswa berhasil.');
         } catch (\Exception $e) {
             return back()->with('error', 'Import gagal: '.$e->getMessage());
         }
     }
 
-    public function syncSiakad(SiakadService $siakad)
+    public function syncSiakad(Request $request, SiakadService $siakad)
     {
-        // Sinkronisasi fakultas terlebih dahulu
-        $totalFakultas = $siakad->syncFakultas();
+        $request->validate([
+            'prodi_id' => 'required|exists:prodi,id',
+            'angkatan' => 'required|digits:4',
+        ]);
 
-        // Setelah fakultas tersedia, sinkronisasi prodi
-        $totalProdi = $siakad->syncProdi();
+        try {
+            /*
+            * Ambil ID Prodi dan angkatan yang dipilih admin.
+            */
+            $prodiId = (int) $request->prodi_id;
+            $angkatan = (int) $request->angkatan;
 
-        // Setelah prodi tersedia, sinkronisasi mahasiswa
-        $totalMahasiswa = $siakad->syncMahasiswa();
+            /*
+            * Pastikan data Fakultas dan Prodi
+            * sudah tersedia/terbarui dari SIAKAD.
+            */
+            $siakad->syncFakultas();
+            $siakad->syncProdi();
 
-        return back()->with(
-            'success',
-            "{$totalMahasiswa} mahasiswa berhasil disinkronkan dari SIAKAD."
-        );
+            /*
+            * Sinkronisasi mahasiswa berdasarkan
+            * Prodi + Angkatan yang dipilih.
+            */
+            $totalMahasiswa = $siakad->syncMahasiswa(
+                $prodiId,
+                $angkatan
+            );
+
+            if ($totalMahasiswa === 0) {
+                return back()->with(
+                    'error',
+                    'Tidak ada mahasiswa yang berhasil disinkronkan dari SIAKAD.'
+                );
+            }
+
+            return back()->with(
+                'success',
+                "{$totalMahasiswa} mahasiswa berhasil disinkronkan dari SIAKAD."
+            );
+
+        } catch (\Exception $e) {
+
+            return back()->with(
+                'error',
+                'Sinkronisasi gagal: '.$e->getMessage()
+            );
+        }
     }
 }

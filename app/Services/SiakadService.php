@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use App\Models\Fakultas;
-use App\Models\Prodi;
-use App\Models\Mahasiswa;
 use App\Models\Dosen;
+use App\Models\Fakultas;
+use App\Models\Mahasiswa;
+use App\Models\Prodi;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SiakadService
 {
@@ -18,7 +18,7 @@ class SiakadService
     {
         try {
             $headers = [
-                'x-api-key: ' . env('SIAKAD_API_KEY'),
+                'x-api-key: '.env('SIAKAD_API_KEY'),
                 'Accept: application/json',
                 'Content-Type: application/json',
             ];
@@ -29,14 +29,14 @@ class SiakadService
                     'header' => implode("\r\n", $headers),
                     'timeout' => $timeout,
                     'ignore_errors' => true,
-                ]
+                ],
             ];
 
             // Jika ada data, jadikan JSON dan masukkan ke body
             if ($data !== null) {
                 $json_data = json_encode($data);
                 $context_options['http']['content'] = $json_data;
-                $context_options['http']['header'] .= "\r\nContent-Length: " . strlen($json_data);
+                $context_options['http']['header'] .= "\r\nContent-Length: ".strlen($json_data);
             }
 
             $context = stream_context_create($context_options);
@@ -55,7 +55,7 @@ class SiakadService
                     'successful' => false,
                     'status' => $status_code,
                     'body' => '',
-                    'json' => []
+                    'json' => [],
                 ];
             }
 
@@ -63,7 +63,7 @@ class SiakadService
                 'successful' => $status_code >= 200 && $status_code < 300,
                 'status' => $status_code,
                 'body' => $response,
-                'json' => json_decode($response, true) ?? []
+                'json' => json_decode($response, true) ?? [],
             ];
 
         } catch (\Exception $e) {
@@ -76,7 +76,7 @@ class SiakadService
                 'successful' => false,
                 'status' => 500,
                 'body' => $e->getMessage(),
-                'json' => []
+                'json' => [],
             ];
         }
     }
@@ -87,6 +87,7 @@ class SiakadService
     private function getJsonValue(array $response, string $key, $default = null)
     {
         $data = $response['json'] ?? [];
+
         return (is_array($data) && isset($data[$key])) ? $data[$key] : $default;
     }
 
@@ -104,17 +105,18 @@ class SiakadService
 
         $response = $this->httpRequest(
             'GET',
-            env('SIAKAD_BASE_URL') . '/nilai',
+            env('SIAKAD_BASE_URL').'/nilai',
             $payload,
             15
         );
 
-        if (!$response['successful']) {
+        if (! $response['successful']) {
             Log::error('Gagal ambil nilai SIAKAD', [
                 'nim' => $nim,
                 'status' => $response['status'],
                 'response' => $response['body'],
             ]);
+
             return [
                 'success' => false,
                 'message' => 'Gagal mengambil data dari SIAKAD',
@@ -141,21 +143,21 @@ class SiakadService
     {
         $resp = $this->getNilaiMahasiswa($nim);
         if (
-            !is_array($resp) ||
-            !isset($resp['success']) ||
+            ! is_array($resp) ||
+            ! isset($resp['success']) ||
             $resp['success'] === false
         ) {
             return [];
         }
 
         $items = $resp['data'] ?? [];
+
         return collect($items)
-            ->filter(fn($item) => is_array($item))
-            ->filter(fn($item) =>
-                in_array(
-                    strtoupper($item['NILAI'] ?? ''),
-                    ['D', 'E']
-                )
+            ->filter(fn ($item) => is_array($item))
+            ->filter(fn ($item) => in_array(
+                strtoupper($item['NILAI'] ?? ''),
+                ['D', 'E']
+            )
             )
             ->values()
             ->toArray();
@@ -164,24 +166,26 @@ class SiakadService
     public function hasNilaiDE(string $nim): bool
     {
         $resp = $this->getNilaiMahasiswa($nim);
-        if (!is_array($resp)) {
+        if (! is_array($resp)) {
             return true;
         }
         if (isset($resp['success']) && $resp['success'] === false) {
             return true;
         }
         $items = $this->getNilaiBermasalah($nim);
+
         return count($items) > 0;
     }
 
     public function canAjukanPKL(string $nim): bool
     {
-        return !$this->hasNilaiDE($nim);
+        return ! $this->hasNilaiDE($nim);
     }
 
     public function isApiAvailable(string $nim): bool
     {
         $resp = $this->getNilaiMahasiswa($nim);
+
         return is_array($resp)
             && isset($resp['success'])
             && $resp['success'] === true;
@@ -197,16 +201,17 @@ class SiakadService
         try {
             $response = $this->httpRequest(
                 'GET',
-                env('SIAKAD_BASE_URL') . '/daftarmhs',
+                env('SIAKAD_BASE_URL').'/daftarmhs',
                 null,
                 30
             );
 
-            if (!$response['successful']) {
+            if (! $response['successful']) {
                 Log::error('Gagal ambil daftar mahasiswa SIAKAD', [
                     'status' => $response['status'],
                     'response' => $response['body'],
                 ]);
+
                 return null;
             }
 
@@ -216,16 +221,16 @@ class SiakadService
             $mahasiswa = collect($data)
                 ->firstWhere('NIM', $nim);
 
-            if (!$mahasiswa) {
+            if (! $mahasiswa) {
                 return null;
             }
 
             return [
-                'nim'            => $mahasiswa['NIM'],
-                'nama'           => $mahasiswa['NAMAMHS'],
-                'angkatan'       => (int) substr($mahasiswa['KELASMHS'], 0, 4),
-                'jenis_kelamin'  => $mahasiswa['JENISKELAMIN'] ?? null,
-                'kelas'          => $mahasiswa['KELASMHS'] ?? null,
+                'nim' => $mahasiswa['NIM'],
+                'nama' => $mahasiswa['NAMAMHS'],
+                'angkatan' => (int) substr($mahasiswa['KELASMHS'], 0, 4),
+                'jenis_kelamin' => $mahasiswa['JENISKELAMIN'] ?? null,
+                'kelas' => $mahasiswa['KELASMHS'] ?? null,
             ];
 
         } catch (\Exception $e) {
@@ -233,6 +238,7 @@ class SiakadService
                 'nim' => $nim,
                 'message' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -242,16 +248,17 @@ class SiakadService
         try {
             $response = $this->httpRequest(
                 'GET',
-                env('SIAKAD_BASE_URL') . '/daftardosen',
+                env('SIAKAD_BASE_URL').'/daftardosen',
                 null,
                 30
             );
 
-            if (!$response['successful']) {
+            if (! $response['successful']) {
                 Log::error('Gagal ambil daftar dosen SIAKAD', [
                     'status' => $response['status'],
                     'response' => $response['body'],
                 ]);
+
                 return null;
             }
 
@@ -260,7 +267,7 @@ class SiakadService
             $dosen = collect($data)
                 ->firstWhere('NIDN', $nidn);
 
-            if (!$dosen) {
+            if (! $dosen) {
                 return null;
             }
 
@@ -274,6 +281,7 @@ class SiakadService
                 'nidn' => $nidn,
                 'message' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -341,16 +349,17 @@ class SiakadService
         try {
             $response = $this->httpRequest(
                 'GET',
-                env('SIAKAD_BASE_URL') . '/daftarprodi',
+                env('SIAKAD_BASE_URL').'/daftarprodi',
                 null,
                 30
             );
 
-            if (!$response['successful']) {
+            if (! $response['successful']) {
                 Log::error('Gagal sinkronisasi prodi/fakultas', [
                     'status' => $response['status'],
                     'response' => $response['body'],
                 ]);
+
                 return null;
             }
 
@@ -360,6 +369,7 @@ class SiakadService
             Log::error('Error sinkronisasi prodi/fakultas', [
                 'message' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -383,37 +393,117 @@ class SiakadService
         ]);
     }
 
-    public function syncMahasiswa(): int
+    public function syncMahasiswa(int $prodiId, int $tahunmasuk): int
     {
         try {
-            $response = $this->httpRequest(
-                'GET',
-                env('SIAKAD_BASE_URL') . '/daftarmhs',
-                null,
-                60
-            );
+            /*
+            * Cari Prodi lokal berdasarkan ID yang dipilih admin.
+            * Kolom kode menyimpan KODEPRODI dari SIAKAD.
+            */
+            $prodi = Prodi::where('id', $prodiId)
+                ->where('is_active', true)
+                ->first();
 
-            if (!$response['successful']) {
-                Log::error('Gagal sinkronisasi mahasiswa', [
-                    'status' => $response['status'],
-                    'response' => $response['body'],
+            if (! $prodi) {
+                Log::error('Prodi tidak ditemukan saat sinkronisasi mahasiswa', [
+                    'prodi_id' => $prodiId,
                 ]);
+
                 return 0;
             }
 
+            /*
+            * Data yang dikirim ke API SIAKAD.
+            *
+            * Contoh:
+            * kodeprodi  = 55201
+            * tahunmasuk = 2024
+            */
+            $payload = [
+                'kodeprodi' => $prodi->kode,
+                'tahunmasuk' => (string) $tahunmasuk,
+            ];
+
+            /*
+            * Endpoint /daftarmhs menggunakan GET
+            * dengan JSON body.
+            */
+            $response = $this->httpRequest(
+                'GET',
+                env('SIAKAD_BASE_URL').'/daftarmhs',
+                $payload,
+                60
+            );
+
+            if (! $response['successful']) {
+                Log::error('Gagal sinkronisasi mahasiswa', [
+                    'prodi_id' => $prodiId,
+                    'kodeprodi' => $prodi->kode,
+                    'tahunmasuk' => $tahunmasuk,
+                    'status' => $response['status'],
+                    'response' => $response['body'],
+                ]);
+
+                return 0;
+            }
+
+            /*
+            * Ambil data mahasiswa dari response API.
+            */
             $items = $this->getJsonValue($response, 'data', []);
+
+            if (! is_array($items)) {
+                Log::error('Format data mahasiswa SIAKAD tidak valid', [
+                    'prodi_id' => $prodiId,
+                    'kodeprodi' => $prodi->kode,
+                    'tahunmasuk' => $tahunmasuk,
+                ]);
+
+                return 0;
+            }
 
             $total = 0;
 
             foreach ($items as $item) {
+                /*
+                * Pastikan data wajib tersedia.
+                */
+                if (
+                    empty($item['NIM']) ||
+                    empty($item['NAMAMHS']) ||
+                    empty($item['KELASMHS'])
+                ) {
+                    continue;
+                }
+
+                $nim = trim($item['NIM']);
+                $nama = trim($item['NAMAMHS']);
+                $kelas = trim($item['KELASMHS']);
+
+                /*
+                * Angkatan tetap diambil dari KELASMHS.
+                *
+                * Contoh:
+                * 2024A → 2024
+                * 2023P → 2023
+                */
+                $angkatan = (int) substr($kelas, 0, 4);
+
+                /*
+                * Simpan/update mahasiswa.
+                *
+                * Yang paling penting:
+                * prodi_id sekarang otomatis diisi dengan
+                * ID Prodi lokal yang dipilih admin.
+                */
                 Mahasiswa::updateOrCreate(
                     [
-                        'nim' => trim($item['NIM'])
+                        'nim' => $nim,
                     ],
                     [
-                        'nama'      => trim($item['NAMAMHS']),
-                        'angkatan' => (int) substr($item['KELASMHS'], 0, 4),
-                        'prodi_id'  => null,
+                        'nama' => $nama,
+                        'angkatan' => $angkatan,
+                        'prodi_id' => $prodi->id,
                         'is_active' => true,
                     ]
                 );
@@ -421,31 +511,57 @@ class SiakadService
                 $total++;
             }
 
+            Log::info('Sinkronisasi mahasiswa berhasil', [
+                'prodi_id' => $prodi->id,
+                'prodi' => $prodi->nama,
+                'kodeprodi' => $prodi->kode,
+                'tahunmasuk' => $tahunmasuk,
+                'jumlah' => $total,
+            ]);
+
             return $total;
 
         } catch (\Exception $e) {
             Log::error('Error sinkronisasi mahasiswa', [
+                'prodi_id' => $prodiId,
+                'tahunmasuk' => $tahunmasuk,
                 'message' => $e->getMessage(),
             ]);
+
             return 0;
         }
     }
 
-    public function syncDosen(): int
+    public function syncDosen(int $prodiId): int
     {
         try {
+            $prodi = Prodi::where('id', $prodiId)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $prodi) {
+                Log::error('Prodi tidak ditemukan saat sinkronisasi dosen', [
+                    'prodi_id' => $prodiId,
+                ]);
+
+                return 0;
+            }
+
             $response = $this->httpRequest(
                 'GET',
-                env('SIAKAD_BASE_URL') . '/daftardosen',
-                null,
+                env('SIAKAD_BASE_URL').'/daftardosen',
+                [
+                    'kodeprodi' => (string) $prodi->kode,
+                ],
                 60
             );
 
-            if (!$response['successful']) {
+            if (! $response['successful']) {
                 Log::error('Gagal sinkronisasi dosen', [
                     'status' => $response['status'],
                     'response' => $response['body'],
                 ]);
+
                 return 0;
             }
 
@@ -456,13 +572,12 @@ class SiakadService
             foreach ($items as $item) {
                 Dosen::updateOrCreate(
                     [
-                        'nidn' => trim($item['NIDN'])
+                        'nidn' => trim($item['NIDN']),
                     ],
                     [
-                        'nama'      => trim($item['NAMA']),
-                        'prodi_id'  => null,
-                        'jabatan'   => null,
-                        'no_hp'     => null,
+                        'nama' => trim($item['NAMA']),
+                        'prodi_id' => $prodi->id,
+                        'jabatan' => 'dosen',
                         'is_active' => true,
                     ]
                 );
@@ -476,6 +591,7 @@ class SiakadService
             Log::error('Error sinkronisasi dosen', [
                 'message' => $e->getMessage(),
             ]);
+
             return 0;
         }
     }
