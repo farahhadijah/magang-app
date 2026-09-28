@@ -156,7 +156,7 @@
         {{-- Footer --}}
         <div class="mt-12 pt-6 text-center border-t border-gray-200">
             <p class="text-xs text-gray-400">
-                &copy; {{ date('Y') }} MagangApp. All rights reserved.
+                &copy; 2026 SIBOLANG. Developed by Nur Faizah | Farah Hadijah. All rights reserved.
             </p>
         </div>
     </div>

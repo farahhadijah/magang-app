@@ -403,7 +403,7 @@
                 Error Reference: MAINT-{{ uniqid() }} | {{ date('Y-m-d H:i:s') }}
             </p>
             <p class="text-xs text-gray-400 mt-1">
-                &copy; {{ date('Y') }} MagangApp. All rights reserved.
+                &copy; 2026 SIBOLANG. Developed by Nur Faizah | Farah Hadijah. All rights reserved.
             </p>
         </div>
     </div>

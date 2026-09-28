@@ -35,7 +35,7 @@
 
         {{-- Footer (opsional) --}}
         <div class="mt-6 text-sm text-center text-green-700">
-            &copy; {{ date('Y') }} MagangApp. All rights reserved.
+            &copy; 2026 SIBOLANG. Developed by Nur Faizah | Farah Hadijah. All rights reserved.
         </div>
 
     </div>

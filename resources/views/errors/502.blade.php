@@ -372,6 +372,9 @@
 
         <div class="error-footer">
             <span>⏱️ Server sedang sibuk | 🔄 Coba lagi nanti</span>
+            <p style="margin-top: 8px;">
+                &copy; 2026 SIBOLANG. Developed by Nur Faizah | Farah Hadijah. All rights reserved.
+            </p>
         </div>
     </div>
 

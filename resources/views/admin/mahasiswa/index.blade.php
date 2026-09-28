@@ -3,92 +3,28 @@
         Mahasiswa - MagangApp
     </x-slot>
 
-    <div class="px-4 py-6 mx-auto space-y-6 max-w-7xl">
+    <div class="px-4 py-6 mx-auto space-y-5 max-w-7xl">
 
         {{-- Notifikasi --}}
         @if (session('success'))
-            <div class="p-3 text-sm text-green-800 bg-green-100 rounded-lg border border-green-200">
-                {{ session('success') }}
+            <div class="p-3 text-sm text-green-800 bg-green-100 border border-green-200 rounded-lg">
+                ✅ {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="p-3 text-sm text-red-800 bg-red-100 rounded-lg border border-red-200">
-                {{ session('error') }}
+            <div class="p-3 text-sm text-red-800 bg-red-100 border border-red-200 rounded-lg">
+                ❌ {{ session('error') }}
             </div>
         @endif
 
 
-        {{-- Panduan Import Excel --}}
-        <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-600">
-            <h3 class="mb-2 text-sm font-semibold text-blue-800">
-                Panduan Format Import Mahasiswa
-            </h3>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm border border-blue-300">
-                    <thead class="bg-blue-200">
-                        <tr>
-                            <th class="px-3 py-2 border">nim</th>
-                            <th class="px-3 py-2 border">nama</th>
-                            <th class="px-3 py-2 border">angkatan</th>
-                            <th class="px-3 py-2 border">no_hp</th>
-                            <th class="px-3 py-2 border">kode_prodi</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr>
-                            <td class="px-3 py-2 border">112310070</td>
-                            <td class="px-3 py-2 border">Nur Faizah</td>
-                            <td class="px-3 py-2 border">2024</td>
-                            <td class="px-3 py-2 border">08123456789</td>
-                            <td class="px-3 py-2 border">55201</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <p class="mt-2 text-xs text-blue-600">
-                * kode_prodi harus sesuai dengan data prodi yang sudah ada.
-            </p>
-        </div>
-
-
-        {{-- Import Excel + Tambah Mahasiswa --}}
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-
-            <form action="{{ route('admin.mahasiswa.import') }}" method="POST" enctype="multipart/form-data"
-                class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                @csrf
-
-                <input type="file" name="file" class="p-2 w-full text-sm rounded-lg border sm:w-auto">
-
-                <button type="submit"
-                    class="px-4 py-2 text-sm text-white bg-purple-600 rounded-lg hover:bg-purple-700">
-                    Import Excel
-                </button>
-            </form>
-
-            <a href="{{ route('admin.mahasiswa.create') }}"
-                class="inline-flex justify-center items-center px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700">
-                + Tambah Mahasiswa
-            </a>
-
-        </div>
-
-
-        {{-- Sinkronisasi SIAKAD --}}
-        <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-
+        {{-- HEADER + SINKRONISASI SIAKAD (FOKUS UTAMA) --}}
+        <div class="p-5 border border-indigo-200 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50">
             <div class="mb-4">
-                <h3 class="text-sm font-semibold text-indigo-800">
-                    Sinkronisasi Mahasiswa dari SIAKAD
-                </h3>
-
-                <p class="mt-1 text-xs text-indigo-600">
-                    Pilih Prodi dan Angkatan yang ingin disinkronkan dari SIAKAD.
-                    Prodi mahasiswa akan otomatis disimpan berdasarkan pilihan tersebut.
+                <h1 class="text-lg font-bold text-gray-800">Manajemen Mahasiswa</h1>
+                <p class="text-sm text-gray-600">
+                    Kelola data mahasiswa atau sinkronkan langsung dari SIAKAD.
                 </p>
             </div>
 
@@ -103,7 +39,7 @@
                     </label>
 
                     <select id="sync_prodi_id" name="prodi_id" required
-                        class="p-2 w-full text-sm rounded-lg border focus:border-indigo-500 focus:ring-indigo-500">
+                        class="w-full p-2 text-sm border rounded-lg focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">
                             -- Pilih Prodi --
                         </option>
@@ -116,7 +52,6 @@
                     </select>
                 </div>
 
-
                 {{-- Angkatan --}}
                 <div class="w-full sm:w-48">
                     <label for="sync_angkatan" class="block mb-1 text-sm font-medium text-gray-700">
@@ -124,7 +59,7 @@
                     </label>
 
                     <select id="sync_angkatan" name="angkatan" required
-                        class="p-2 w-full text-sm rounded-lg border focus:border-indigo-500 focus:ring-indigo-500">
+                        class="w-full p-2 text-sm border rounded-lg focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">
                             -- Pilih Angkatan --
                         </option>
@@ -137,55 +72,64 @@
                     </select>
                 </div>
 
-
                 {{-- Tombol --}}
                 <button type="submit"
-                    class="inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
-                    Sinkronkan SIAKAD
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg shadow-lg animate-pulse hover:bg-indigo-700 hover:animate-none focus:ring-4 focus:ring-indigo-300">
+                    Sinkronisasi SIAKAD
                 </button>
-
             </form>
-
         </div>
 
 
-        {{-- Filter Mahasiswa --}}
-        <form method="GET" class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        {{-- TOOLBAR: Tambah + Filter --}}
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama / NIM"
-                class="p-2 w-full text-sm rounded-lg border sm:w-64">
+                {{-- Filter --}}
+                <form method="GET" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Cari Nama / NIM"
+                        class="w-full p-2 text-sm border rounded-lg sm:w-56">
 
-            <select name="prodi_id" class="p-2 w-full text-sm rounded-lg border sm:w-56">
-                <option value="">
-                    -- Semua Prodi --
-                </option>
+                    <select name="prodi_id" class="w-full p-2 text-sm border rounded-lg sm:w-56">
+                        <option value="">
+                            -- Semua Prodi --
+                        </option>
 
-                @foreach ($prodi as $p)
-                    <option value="{{ $p->id }}" {{ request('prodi_id') == $p->id ? 'selected' : '' }}>
-                        {{ $p->nama }}
-                    </option>
-                @endforeach
-            </select>
+                        @foreach ($prodi as $p)
+                            <option value="{{ $p->id }}" {{ request('prodi_id') == $p->id ? 'selected' : '' }}>
+                                {{ $p->nama }}
+                            </option>
+                        @endforeach
+                    </select>
 
-            <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                Filter
-            </button>
+                    <button type="submit"
+                        class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                        Filter
+                    </button>
+                </form>
 
-        </form>
+                {{-- Tambah --}}
+                <a href="{{ route('admin.mahasiswa.create') }}"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    + Tambah Mahasiswa
+                </a>
+            </div>
+        </div>
 
 
         {{-- Tabel Mahasiswa --}}
-        <div class="overflow-x-auto bg-white rounded-lg shadow-sm">
-            <table class="w-full text-sm border border-gray-200">
+        <div class="overflow-x-auto bg-white border border-gray-200 rounded-lg shadow-sm">
+            <table class="w-full text-xs">
 
                 <thead class="text-white bg-green-700">
                     <tr>
-                        <th class="p-3 text-left border">NIM</th>
-                        <th class="p-3 text-left border">Nama</th>
-                        <th class="p-3 text-left border">Prodi</th>
-                        <th class="p-3 text-left border">Angkatan</th>
-                        <th class="p-3 text-left border">Status</th>
-                        <th class="p-3 text-center border">Aksi</th>
+                        <th class="w-28 px-2 py-1.5 text-left border">NIM</th>
+                        <th class="px-2 py-1.5 text-left border">Nama</th>
+                        <th class="px-2 py-1.5 text-left border">Prodi</th>
+                        <th class="w-20 px-2 py-1.5 text-left border">Angkatan</th>
+                        <th class="w-24 px-2 py-1.5 text-left border">Status</th>
+                        <th class="w-44 px-2 py-1.5 text-center border">Aksi</th>
                     </tr>
                 </thead>
 
@@ -194,36 +138,35 @@
                     @forelse($mahasiswa as $m)
                         <tr class="hover:bg-gray-50">
 
-                            <td class="p-3 border">
+                            <td class="px-2 py-1.5 border">
                                 {{ $m->nim }}
                             </td>
 
-                            <td class="p-3 border">
+                            <td class="px-2 py-1.5 border">
                                 {{ $m->nama }}
                             </td>
 
-                            <td class="p-3 border">
+                            <td class="px-2 py-1.5 border">
                                 {{ $m->prodi->nama ?? '-' }}
                             </td>
 
-                            <td class="p-3 border">
+                            <td class="px-2 py-1.5 border">
                                 {{ $m->angkatan }}
                             </td>
 
-                            <td class="p-3 border">
+                            <td class="px-2 py-1.5 border">
                                 <span
-                                    class="px-2 py-1 text-xs rounded-full
+                                    class="inline-block px-1.5 py-0.5 text-[10px] rounded-full
                                         {{ $m->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                     {{ $m->is_active ? 'Aktif' : 'Nonaktif' }}
                                 </span>
                             </td>
 
-                            <td class="p-3 border">
-
-                                <div class="flex flex-col gap-2 justify-center sm:flex-row">
+                            <td class="px-2 py-1.5 border">
+                                <div class="flex flex-wrap items-center justify-center gap-1">
 
                                     <a href="{{ route('admin.mahasiswa.edit', $m) }}"
-                                        class="px-3 py-1 text-xs text-center text-white bg-blue-600 rounded hover:bg-blue-700">
+                                        class="px-2 py-0.5 text-[11px] text-white bg-blue-600 rounded hover:bg-blue-700">
                                         Edit
                                     </a>
 
@@ -231,7 +174,7 @@
                                         @csrf
 
                                         <button type="submit"
-                                            class="px-3 py-1 w-full text-xs text-white bg-yellow-600 rounded hover:bg-yellow-700">
+                                            class="px-2 py-0.5 text-[11px] text-white bg-yellow-600 rounded hover:bg-yellow-700">
                                             Reset
                                         </button>
                                     </form>
@@ -242,7 +185,7 @@
                                             @method('DELETE')
 
                                             <button type="submit"
-                                                class="px-3 py-1 w-full text-xs text-white bg-red-600 rounded hover:bg-red-700">
+                                                class="px-2 py-0.5 text-[11px] text-white bg-red-600 rounded hover:bg-red-700">
                                                 Nonaktifkan
                                             </button>
                                         </form>
@@ -251,14 +194,13 @@
                                             @csrf
 
                                             <button type="submit"
-                                                class="px-3 py-1 w-full text-xs text-white bg-green-600 rounded hover:bg-green-700">
+                                                class="px-2 py-0.5 text-[11px] text-white bg-green-600 rounded hover:bg-green-700">
                                                 Aktifkan
                                             </button>
                                         </form>
                                     @endif
 
                                 </div>
-
                             </td>
 
                         </tr>
@@ -266,7 +208,7 @@
                     @empty
 
                         <tr>
-                            <td colspan="6" class="p-6 text-center text-gray-500">
+                            <td colspan="6" class="p-4 text-center text-gray-500">
                                 Data tidak ditemukan.
                             </td>
                         </tr>
