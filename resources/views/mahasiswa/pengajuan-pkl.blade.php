@@ -3,12 +3,12 @@
         Pengajuan PKL - Sibolang
     </x-slot>
 
-    <div class="px-0 py-8 min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 sm:px-6 lg:px-8">
-        <div class="mx-auto space-y-6 max-w-5xl">
+    <div class="min-h-screen px-0 py-8 bg-gradient-to-br from-green-50 via-white to-emerald-50 sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto space-y-6">
             {{-- ================= HEADER SECTION ================= --}}
             <div class="mb-8 text-center">
                 <div
-                    class="inline-flex justify-center items-center mb-4 w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg">
+                    class="inline-flex items-center justify-center w-16 h-16 mb-4 shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -35,12 +35,12 @@
 
             {{-- ================= ERROR VALIDASI ================= --}}
             @if ($errors->any())
-                <div class="p-5 bg-red-50 rounded-xl border-l-4 border-red-500 shadow-sm">
-                    <div class="flex gap-2 items-center mb-2">
+                <div class="p-5 border-l-4 border-red-500 shadow-sm bg-red-50 rounded-xl">
+                    <div class="flex items-center gap-2 mb-2">
                         <i class="text-red-600 fa-solid fa-circle-exclamation"></i>
                         <h4 class="font-semibold text-red-700">Terjadi Kesalahan Validasi</h4>
                     </div>
-                    <ul class="pl-6 space-y-1 text-sm list-disc text-red-700">
+                    <ul class="pl-6 space-y-1 text-sm text-red-700 list-disc">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -51,15 +51,15 @@
             {{-- ================= FORM ================= --}}
             <form id="formPengajuan" method="POST" action="{{ route('mahasiswa.pengajuan.store') }}"
                 enctype="multipart/form-data"
-                class="overflow-hidden bg-white rounded-2xl border border-gray-100 shadow-xl">
+                class="overflow-hidden bg-white border border-gray-100 shadow-xl rounded-2xl">
                 @csrf
                 <input type="hidden" name="force_create" id="force_create" value="0">
 
                 {{-- ================= DATA TEMPAT ================= --}}
-                <div class="p-6 bg-gradient-to-r to-transparent border-b border-gray-100 md:p-8 from-green-50/30">
-                    <div class="flex gap-3 items-center mb-6">
+                <div class="p-6 border-b border-gray-100 bg-gradient-to-r to-transparent md:p-8 from-green-50/30">
+                    <div class="flex items-center gap-3 mb-6">
                         <div
-                            class="flex justify-center items-center w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-md">
+                            class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -74,9 +74,9 @@
                                     class="text-red-500">*</span></label>
                             <input type="text" id="nama_tempat" name="nama_tempat" value="{{ old('nama_tempat') }}"
                                 required autocomplete="off"
-                                class="px-4 py-3 w-full rounded-xl border border-gray-300 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
+                                class="w-full px-4 py-3 transition-all duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
                             <div id="warningTempat"
-                                class="flex hidden gap-1 items-center mt-2 text-xs text-amber-600 md:text-sm">
+                                class="flex items-center hidden gap-1 mt-2 text-xs text-amber-600 md:text-sm">
                                 <i class="fa-solid fa-triangle-exclamation"></i>
                                 <span></span>
                             </div>
@@ -89,15 +89,15 @@
                             <div class="relative">
                                 <input type="text" id="lokasi_maps" name="lokasi_maps"
                                     value="{{ old('lokasi_maps') }}" required autocomplete="off"
-                                    class="px-4 py-3 pl-10 w-full rounded-xl border border-gray-300 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
-                                <div class="absolute left-3 top-1/2 -translate-y-1/2">
+                                    class="w-full px-4 py-3 pl-10 transition-all duration-200 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
+                                <div class="absolute -translate-y-1/2 left-3 top-1/2">
                                     <i class="text-gray-400 fa-solid fa-map-location-dot"></i>
                                 </div>
                             </div>
 
                             {{-- LOCATION STATUS --}}
-                            <div id="locationStatus" class="hidden p-3 mt-2 rounded-lg border">
-                                <div class="flex gap-2 items-center" id="statusContent">
+                            <div id="locationStatus" class="hidden p-3 mt-2 border rounded-lg">
+                                <div class="flex items-center gap-2" id="statusContent">
                                     <i class="fa-solid fa-spinner fa-spin" id="locationSpinner"></i>
                                     <span id="locationMessage">Sedang mencari lokasi...</span>
                                 </div>
@@ -105,24 +105,24 @@
 
                             <div class="flex flex-wrap gap-3 mt-3">
                                 <button type="button" id="btnCariLokasi"
-                                    class="inline-flex gap-2 items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl shadow-sm transition-all duration-200 hover:from-green-700 hover:to-emerald-700">
+                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 shadow-sm bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl hover:from-green-700 hover:to-emerald-700">
                                     <i class="fa-solid fa-magnifying-glass-location"></i>
                                     Cari Lokasi Otomatis
                                 </button>
                                 <button type="button" id="btnGoogleMaps"
-                                    class="inline-flex gap-2 items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-sm transition-all duration-200 hover:from-blue-700 hover:to-blue-800">
+                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 shadow-sm bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl hover:from-blue-700 hover:to-blue-800">
                                     <i class="fa-solid fa-map"></i>
                                     Buka Google Maps
                                 </button>
                             </div>
 
                             <div id="manualGuide"
-                                class="hidden p-4 mt-3 text-sm text-gray-700 bg-blue-50 rounded-xl border border-blue-200">
-                                <p class="flex gap-2 items-center mb-2 font-semibold text-blue-800">
+                                class="hidden p-4 mt-3 text-sm text-gray-700 border border-blue-200 bg-blue-50 rounded-xl">
+                                <p class="flex items-center gap-2 mb-2 font-semibold text-blue-800">
                                     <i class="fa-solid fa-lightbulb"></i>
                                     Cara mendapatkan link Google Maps:
                                 </p>
-                                <ol class="pl-5 space-y-1 list-decimal text-gray-600">
+                                <ol class="pl-5 space-y-1 text-gray-600 list-decimal">
                                     <li>Klik tombol <b>"Buka Google Maps"</b></li>
                                     <li>Cari nama instansi Anda</li>
                                     <li>Klik tombol <b>Bagikan (Share)</b></li>
@@ -131,7 +131,7 @@
                                 </ol>
                             </div>
 
-                            <p class="flex gap-1 items-center mt-2 text-xs text-gray-500">
+                            <p class="flex items-center gap-1 mt-2 text-xs text-gray-500">
                                 <i class="fa-solid fa-info-circle"></i>
                                 Masukkan nama instansi, lalu klik "Cari Lokasi Otomatis" untuk mengisi link Google Maps
                                 secara otomatis.
@@ -140,9 +140,9 @@
                             {{-- MAP PREVIEW --}}
                             <div id="mapPreview" class="hidden mt-4">
                                 <div
-                                    class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 shadow-sm">
-                                    <div class="flex justify-between items-center mb-3">
-                                        <h5 class="flex gap-2 items-center text-sm font-semibold text-green-800">
+                                    class="p-4 border border-green-200 shadow-sm bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h5 class="flex items-center gap-2 text-sm font-semibold text-green-800">
                                             <i class="fa-solid fa-map"></i>
                                             Preview Lokasi
                                         </h5>
@@ -156,7 +156,7 @@
                             <label class="block mb-2 text-sm font-semibold text-gray-700">Jenis Instansi <span
                                     class="text-red-500">*</span></label>
                             <select name="jenis_tempat" required
-                                class="px-4 py-3 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
                                 <option value="">-- Pilih Jenis Instansi --</option>
                                 @foreach (['Pemerintah', 'Sekolah', 'PT', 'CV'] as $jenis)
                                     <option value="{{ $jenis }}" @selected(old('jenis_tempat') === $jenis)>
@@ -168,9 +168,9 @@
                         <div>
                             <label class="block mb-2 text-sm font-semibold text-gray-700">No HP Instansi <span
                                     class="text-red-500">*</span></label>
-                            <input type="text" name="no_hp" pattern="^08[0-9]{7,14}$"
+                            <input type="text" name="no_hp" pattern="^08[0-9]{7,13}$"
                                 value="{{ old('no_hp') }}" required autocomplete="off"
-                                class="px-4 py-3 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
                             <p class="mt-1 text-xs text-gray-500">Format: 08xxxxxxxx (min 9 digit, max 15 digit)</p>
                         </div>
                     </div>
@@ -178,9 +178,9 @@
 
                 {{-- ================= DATA AKADEMIK ================= --}}
                 <div class="p-6 border-b border-gray-100 md:p-8">
-                    <div class="flex gap-3 items-center mb-6">
+                    <div class="flex items-center gap-3 mb-6">
                         <div
-                            class="flex justify-center items-center w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-md">
+                            class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -194,7 +194,7 @@
                         <div>
                             <label class="block mb-2 text-sm font-semibold text-gray-700">Semester Saat Ini</label>
                             <input type="text" value="{{ $semesterAktif }}" disabled
-                                class="px-4 py-3 w-full bg-gray-100 rounded-xl border border-gray-300">
+                                class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl">
                             @php
                                 $romawi = [
                                     1 => 'I',
@@ -217,7 +217,7 @@
                             <label class="block mb-2 text-sm font-semibold text-gray-700">Alamat Asal Mahasiswa <span
                                     class="text-red-500">*</span></label>
                             <textarea name="alamat_asal" required rows="3"
-                                class="px-4 py-3 w-full rounded-xl border border-gray-300 resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white"
+                                class="w-full px-4 py-3 border border-gray-300 resize-none rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white"
                                 placeholder="Contoh: Ds. Sumberagung RT 13/RW 01, Kec. Sukodadi, Kab. Lamongan">{{ old('alamat_asal') }}</textarea>
                         </div>
                     </div>
@@ -225,9 +225,9 @@
 
                 {{-- ================= DOKUMEN ================= --}}
                 <div class="p-6 md:p-8">
-                    <div class="flex gap-3 items-center mb-6">
+                    <div class="flex items-center gap-3 mb-6">
                         <div
-                            class="flex justify-center items-center w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-md">
+                            class="flex items-center justify-center w-10 h-10 shadow-md bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -237,8 +237,8 @@
                         <h4 class="text-xl font-bold text-gray-800">Upload Dokumen Wajib</h4>
                     </div>
 
-                    <div class="p-4 mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                        <div class="flex gap-3 items-start">
+                    <div class="p-4 mb-6 border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                        <div class="flex items-start gap-3">
                             <i class="mt-0.5 text-lg text-blue-600 fa-solid fa-circle-info"></i>
                             <div class="text-sm text-gray-700">
                                 <p>• Upload dokumen yang diperlukan untuk pengajuan PKL</p>
@@ -258,14 +258,16 @@
                                 'required' => true,
                                 'color' => 'blue',
                             ],
+
                             'dokumen_studi_tour' => [
                                 'label' => 'Sertifikat Studi Tour',
-                                'accept' => '.pdf,.doc,.docx',
+                                'accept' => '.pdf,.doc,.docx,.jpg,.jpeg,.png',
                                 'multiple' => false,
                                 'icon' => 'fa-ticket',
                                 'required' => true,
                                 'color' => 'purple',
                             ],
+
                             'dokumen_krs' => [
                                 'label' => 'Kartu Rencana Studi (KRS) Semester Berjalan',
                                 'accept' => '.pdf',
@@ -311,7 +313,7 @@
 
                 {{-- ================= BUTTON ================= --}}
                 <div
-                    class="flex flex-col gap-3 justify-end px-6 py-5 bg-gray-50 border-t border-gray-200 md:px-8 sm:flex-row">
+                    class="flex flex-col justify-end gap-3 px-6 py-5 border-t border-gray-200 bg-gray-50 md:px-8 sm:flex-row">
                     <a href="{{ route('mahasiswa.dashboard') }}"
                         class="inline-flex gap-2 justify-center items-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-white rounded-xl border border-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50">
                         <i class="fa-solid fa-arrow-left"></i>
@@ -340,6 +342,8 @@
 
                 if (!input || !listContainer) return;
 
+                const maxSize = 2 * 1024 * 1024; // 2 MB
+
                 input.addEventListener('change', function(e) {
                     const files = Array.from(e.target.files);
 
@@ -348,23 +352,38 @@
                         return;
                     }
 
-                    let html = '';
+                    // Validasi ukuran file
+                    const fileTooLarge = files.find(file => file.size > maxSize);
 
+                    if (fileTooLarge) {
+                        alert(
+                            `File "${fileTooLarge.name}" terlalu besar.\n\n` +
+                            `Ukuran maksimal adalah 2 MB.`
+                        );
+
+                        input.value = '';
+                        listContainer.innerHTML = '';
+                        return;
+                    }
+
+                    // lanjutkan kode preview...
+
+                    let html = '';
                     if (isMultiple) {
                         html = `
-                            <div class="p-3 bg-green-50 rounded-xl border border-green-200">
-                                <div class="flex gap-2 items-center mb-2">
+                            <div class="p-3 border border-green-200 bg-green-50 rounded-xl">
+                                <div class="flex items-center gap-2 mb-2">
                                     <i class="text-green-600 fa-solid fa-file-circle-check"></i>
                                     <span class="text-sm font-semibold text-green-700">File yang akan diupload (${files.length} file):</span>
                                 </div>
-                                <div class="overflow-y-auto space-y-1 max-h-40">
+                                <div class="space-y-1 overflow-y-auto max-h-40">
                         `;
 
                         files.forEach((file, index) => {
                             const fileSize = (file.size / 1024).toFixed(2);
                             html += `
-                                <div class="flex justify-between items-center p-2 text-sm bg-white rounded-lg border border-green-100">
-                                    <div class="flex gap-2 items-center">
+                                <div class="flex items-center justify-between p-2 text-sm bg-white border border-green-100 rounded-lg">
+                                    <div class="flex items-center gap-2">
                                         <i class="text-red-500 fa-regular fa-file-pdf"></i>
                                         <span class="max-w-xs text-gray-700 truncate">${file.name}</span>
                                     </div>
@@ -385,9 +404,9 @@
 
                         html = `
                             <div class="bg-${color === 'red' ? 'red' : color === 'blue' ? 'blue' : 'green'}-50 rounded-xl p-3 border border-${color === 'red' ? 'red' : color === 'blue' ? 'blue' : 'green'}-200">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex gap-3 items-center">
-                                        <div class="flex justify-center items-center w-10 h-10 bg-white rounded-lg shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex items-center justify-center w-10 h-10 bg-white rounded-lg shadow-sm">
                                             <i class="fa-regular ${icon} text-${color === 'red' ? 'red' : color === 'blue' ? 'blue' : 'green'}-500 text-xl"></i>
                                         </div>
                                         <div>
@@ -510,7 +529,7 @@
                 fetch(url, {
                         headers: {
                             'Accept': 'application/json',
-                            'User-Agent': 'Sibolang-PKL-App/1.0'
+                            // 'User-Agent': 'Sibolang-PKL-App/1.0'
                         }
                     })
                     .then(res => {
@@ -560,12 +579,7 @@
                         console.error('Error searching location with Photon:', err);
 
                         manualGuide.classList.remove('hidden');
-                        warningBox.classList.remove('hidden');
-                        warningBox.innerHTML = `
-                        <i class="text-blue-600 fa-solid fa-info-circle"></i>
-                        <span>💡 Lokasi tidak ditemukan otomatis. Klik "Buka Google Maps" untuk mencari manual, lalu salin link-nya.</span>
-                    `;
-
+                        warningBox.classList.add('hidden');
                         lokasiInput.value = "";
                         lokasiInput.placeholder = `Contoh: https://www.google.com/maps?q=-7.123,112.456`;
 

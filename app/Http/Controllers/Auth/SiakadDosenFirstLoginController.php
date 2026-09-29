@@ -46,12 +46,10 @@ class SiakadDosenFirstLoginController extends Controller
         $request->validate(
             [
                 'keahlian' => ['nullable', 'string', 'max:100'],
-                'jabatan' => ['required', 'in:dosen,kaprodi'],
                 'no_hp' => ['required', 'regex:/^08[0-9]{8,13}$/'],
                 'password' => ['required', 'confirmed', 'min:8'],
             ],
             [
-                'jabatan.required' => 'Jabatan wajib dipilih.',
                 'no_hp.required' => 'Nomor HP wajib diisi.',
                 'no_hp.regex' => 'Nomor HP harus diawali 08 dan hanya berisi angka.',
                 'password.required' => 'Password wajib diisi.',
@@ -62,7 +60,6 @@ class SiakadDosenFirstLoginController extends Controller
 
         $user->dosen->update([
             'keahlian' => $request->keahlian,
-            'jabatan' => $request->jabatan,
             'no_hp' => $request->no_hp,
         ]);
 

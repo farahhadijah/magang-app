@@ -202,16 +202,84 @@
             x-cloak
             x-show="isOpen"
             x-transition.opacity
-            class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
             @click.self="closeModal()"
             @keydown.escape.window="closeModal()"
         >
-            <div class="relative w-11/12 h-[90vh] bg-white rounded-2xl shadow-2xl">
-                <button @click="closeModal()"
-                        class="absolute z-10 flex items-center justify-center w-8 h-8 text-white bg-red-600 rounded-full -top-3 -right-3 hover:bg-red-700 focus:ring-2 focus:ring-red-500">
-                    ✕
-                </button>
-                <iframe :src="fileUrl" class="w-full h-full rounded-2xl" frameborder="0"></iframe>
+            <div
+                class="relative flex flex-col w-full max-w-6xl h-[90vh] overflow-hidden bg-gray-100 rounded-2xl shadow-2xl"
+            >
+
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-4 py-3 bg-white border-b">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">
+                            Preview Dokumen
+                        </h3>
+
+                        <p class="text-xs text-gray-500">
+                            <span x-show="isPdf()">PDF</span>
+                            <span x-show="isImage()">Gambar</span>
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        @click="closeModal()"
+                        class="flex items-center justify-center text-gray-600 transition bg-gray-100 rounded-full w-9 h-9 hover:bg-red-100 hover:text-red-600"
+                        aria-label="Tutup"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {{-- Preview --}}
+                <div class="flex-1 min-h-0 p-3 sm:p-5">
+
+                    {{-- PDF --}}
+                    <iframe
+                        x-show="isPdf()"
+                        :src="fileUrl"
+                        class="w-full h-full bg-white rounded-xl"
+                        frameborder="0"
+                    ></iframe>
+
+                    {{-- IMAGE --}}
+                    <div
+                        x-show="isImage()"
+                        class="flex items-center justify-center w-full h-full overflow-auto bg-gray-200 rounded-xl"
+                    >
+                        <img
+                            :src="fileUrl"
+                            alt="Preview dokumen"
+                            class="object-contain max-w-full max-h-full rounded-lg shadow-md"
+                        >
+                    </div>
+
+                    {{-- Unsupported --}}
+                    <div
+                        x-show="!isPdf() && !isImage()"
+                        class="flex flex-col items-center justify-center w-full h-full text-center"
+                    >
+                        <div class="mb-3 text-4xl">
+                            📄
+                        </div>
+
+                        <p class="font-medium text-gray-700">
+                            Format dokumen tidak dapat ditampilkan.
+                        </p>
+
+                        <a
+                            :href="fileUrl"
+                            target="_blank"
+                            class="px-4 py-2 mt-4 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
+                        >
+                            Buka Dokumen
+                        </a>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>

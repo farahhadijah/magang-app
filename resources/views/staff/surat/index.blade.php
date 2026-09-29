@@ -3,7 +3,7 @@
     Pengantar PKL - MagangApp
 </x-slot>
 
-<div class="p-6">
+<div class="p-0">
 
     <h1 class="mb-6 text-2xl font-bold">
         Surat Pengantar PKL
@@ -11,7 +11,7 @@
 
     {{-- ALERT --}}
     @if(session('success'))
-        <div class="px-4 py-3 mb-4 text-green-800 bg-green-100 rounded-lg">
+        <div class="px-0 py-3 mb-4 text-green-800 bg-green-100 rounded-lg">
             {{ session('success') }}
         </div>
     @endif

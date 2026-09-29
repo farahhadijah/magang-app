@@ -227,6 +227,7 @@
                                 'pending_kaprodi'  => 'bg-blue-100 text-blue-800 border-blue-200',
                                 'disetujui'        => 'bg-green-100 text-green-800 border-green-200',
                                 'ditolak_tu'       => 'bg-red-100 text-red-800 border-red-200',
+                                'ditolak_kaprodi' => 'bg-red-100 text-red-800 border-red-200',
                                 default            => 'bg-gray-100 text-gray-800 border-gray-200',
                             };
                             
@@ -235,6 +236,7 @@
                                 'pending_kaprodi'  => 'fa-hourglass-half',
                                 'disetujui'        => 'fa-circle-check',
                                 'ditolak_tu'       => 'fa-circle-xmark',
+                                'ditolak_kaprodi'  => 'fa-circle-xmark',
                                 default            => 'fa-question-circle',
                             };
                             
@@ -243,6 +245,7 @@
                                 'pending_kaprodi' => 'Menunggu Persetujuan Kaprodi',
                                 'disetujui'       => 'Disetujui',
                                 'ditolak_tu'      => 'Ditolak TU',
+                                'ditolak_kaprodi'  => 'Ditolak Kaprodi',
                                 default           => ucfirst($pengajuan->status),
                             };
                         @endphp
@@ -369,25 +372,42 @@
                                         </div>
                                     @endif
 
-                                    @if ($pengajuan->status === 'ditolak_tu' && $doc->status_verifikasi === 'invalid')
+                                    @if (
+                                        $pengajuan->status === 'ditolak_tu' &&
+                                        $doc->status_verifikasi === 'invalid'
+                                    )
                                         <form method="POST"
                                             action="{{ route('mahasiswa.pengajuan.dokumen.upload-ulang', $doc->id) }}"
                                             enctype="multipart/form-data"
                                             class="pt-3 mt-3 border-t border-gray-200">
+
                                             @csrf
+
                                             <div class="flex flex-col gap-3 sm:flex-row">
+
                                                 <div class="flex-1">
-                                                    <input type="file"
+                                                    <input
+                                                        type="file"
                                                         name="dokumen"
                                                         required
-                                                        accept=".pdf,.doc,.docx,.jpg,.png"
-                                                        class="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                                                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                                                        class="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                                    >
+
+                                                    <p class="mt-1 text-xs text-gray-500">
+                                                        Format yang diperbolehkan:
+                                                        PDF, JPG, JPEG, PNG, atau WEBP.
+                                                    </p>
                                                 </div>
-                                                <button type="submit"
-                                                        class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 rounded-lg shadow-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
+
+                                                <button
+                                                    type="submit"
+                                                    class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 rounded-lg shadow-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
+
                                                     <i class="fa-solid fa-upload"></i>
                                                     Upload Ulang
                                                 </button>
+
                                             </div>
                                         </form>
                                     @endif

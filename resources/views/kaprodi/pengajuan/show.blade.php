@@ -18,7 +18,7 @@
     <div x-data="kaprodiPengajuanShow(@js($lokasi), @js($dosenForSearch))" x-init="initMap()">
         <div class="py-6 space-y-6">
             {{-- Informasi Mahasiswa --}}
-            <div class="p-6 space-y-2 bg-green-50 rounded-lg border border-green-200 shadow-sm">
+            <div class="p-6 space-y-2 border border-green-200 rounded-lg shadow-sm bg-green-50">
                 <p class="text-gray-700"><strong class="text-green-800">Nama:</strong>
                     {{ $pengajuan->mahasiswa->nama ?? '-' }}</p>
                 <p class="text-gray-700"><strong class="text-green-800">NIM:</strong>
@@ -30,13 +30,13 @@
             </div>
 
             @if ($jarak)
-                <div class="p-3 mb-3 text-sm text-green-800 bg-green-50 rounded border border-green-200">
+                <div class="p-3 mb-3 text-sm text-green-800 border border-green-200 rounded bg-green-50">
                     Jarak dari Kampus :
                     <strong>{{ number_format($jarak, 2) }} KM</strong>
                 </div>
             @endif
 
-            <div class="p-4 mt-4 bg-green-50 rounded-lg border border-green-200">
+            <div class="p-4 mt-4 border border-green-200 rounded-lg bg-green-50">
                 <h4 class="mb-2 font-semibold text-green-800">Riwayat Tempat PKL</h4>
                 <p class="mb-2 text-xs text-gray-600">
                     Per prodi Anda · angkatan {{ $pengajuan->mahasiswa->angkatan ?? '-' }} · nama tempat sama · hanya
@@ -57,7 +57,7 @@
             </div>
 
             @if ($lokasi)
-                <div class="p-5 mt-6 bg-green-50 rounded-xl border border-green-200 shadow-sm">
+                <div class="p-5 mt-6 border border-green-200 shadow-sm bg-green-50 rounded-xl">
                     <div class="flex items-center mb-3 space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -75,22 +75,35 @@
                     </a>
                 </div>
             @else
-                <div class="p-4 mt-6 text-yellow-800 bg-yellow-50 rounded-lg border border-yellow-300">
+                <div class="p-4 mt-6 text-yellow-800 border border-yellow-300 rounded-lg bg-yellow-50">
                     Lokasi PKL belum tersedia.
                 </div>
             @endif
 
             {{-- Dokumen --}}
-            <div class="relative z-50 p-6 bg-white rounded-lg border border-green-200 shadow-sm">
+            <div class="relative z-50 p-6 bg-white border border-green-200 rounded-lg shadow-sm">
                 <h3 class="mb-3 text-lg font-semibold text-green-900">Dokumen Pengajuan</h3>
                 @if ($pengajuan->dokumenPengajuan->count())
                     <ul class="space-y-2 text-sm">
                         @foreach ($pengajuan->dokumenPengajuan as $dokumen)
                             <li>
+                                @php
+                                    $fileUrl = asset('storage/' . $dokumen->path_file);
+                                    $extension = strtolower(pathinfo($dokumen->path_file, PATHINFO_EXTENSION));
+                                    $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'webp']);
+                                @endphp
+
                                 <button type="button"
-                                    @click="openModal('{{ asset('storage/' . $dokumen->path_file) }}')"
-                                    class="flex gap-2 items-center text-green-700 hover:text-green-900">
-                                    <i class="fa-solid fa-file-pdf"></i> {{ $dokumen->jenis_dokumen }}
+                                    @click="openModal('{{ $fileUrl }}', '{{ $isImage ? 'image' : 'pdf' }}')"
+                                    class="flex items-center gap-2 text-green-700 hover:text-green-900">
+
+                                    @if ($isImage)
+                                        <i class="fa-solid fa-file-image"></i>
+                                    @else
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    @endif
+
+                                    {{ $dokumen->jenis_dokumen }}
                                 </button>
                             </li>
                         @endforeach
@@ -106,7 +119,7 @@
             @endphp
 
             @if ($verifikasiTu)
-                <div class="p-4 bg-blue-50 rounded border">
+                <div class="p-4 border rounded bg-blue-50">
                     <p><strong>Verifikasi TU:</strong></p>
                     <p>Oleh: {{ $verifikasiTu->user?->getNama() ?? '-' }}</p>
                     <p>Tanggal: {{ $verifikasiTu->tgl_verifikasi }}</p>
@@ -115,7 +128,7 @@
 
             {{-- Aksi Verifikasi Kaprodi --}}
             @if ($pengajuan->bisaDiverifikasiKaprodi())
-                <div class="p-6 space-y-6 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="p-6 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm">
                     {{-- APPROVE FORM --}}
                     <form method="POST" action="{{ route('kaprodi.pengajuan.approve', $pengajuan->id) }}"
                         class="space-y-4">
@@ -130,7 +143,7 @@
                             <div class="mb-4">
                                 <input type="text" x-model="searchDosen"
                                     placeholder="Cari dosen (nama atau keahlian)..."
-                                    class="px-3 py-2 w-full rounded-lg border focus:ring-2 focus:ring-green-500">
+                                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
                             </div>
 
                             {{-- LIST DOSEN --}}
@@ -140,7 +153,7 @@
                                     @forelse($dosenList as $d)
                                         <label
                                             x-show="matchesDosen(@js($d->nama), @js($d->keahlian ?? ''))"
-                                            class="flex items-start p-3 rounded-lg border transition cursor-pointer hover:bg-green-50 hover:border-green-300">
+                                            class="flex items-start p-3 transition border rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300">
 
                                             <input type="radio" name="id_dosen" value="{{ $d->id }}"
                                                 class="mt-1 mr-3" required>
@@ -198,7 +211,7 @@
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Catatan Penolakan</label>
                             <textarea name="catatan" required rows="3" placeholder="Wajib diisi jika menolak..."
-                                class="p-2 w-full rounded-md border"></textarea>
+                                class="w-full p-2 border rounded-md"></textarea>
                             @error('catatan')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -210,21 +223,41 @@
                     </form>
                 </div>
             @else
-                <div class="p-4 text-sm text-gray-700 bg-gray-50 rounded-lg border border-gray-300">
+                <div class="p-4 text-sm text-gray-700 border border-gray-300 rounded-lg bg-gray-50">
                     Pengajuan ini sudah diproses dan tidak dapat diverifikasi kembali.
                 </div>
             @endif
 
-            {{-- MODAL PDF --}}
+            {{-- MODAL PREVIEW DOKUMEN --}}
             <div x-show="isOpen" x-transition
                 class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-60"
                 style="display: none;">
-                <div class="relative z-50 w-11/12 bg-white rounded-lg shadow-lg h-[90vh]">
+
+                <div class="relative z-50 flex items-center justify-center w-11/12 h-[90vh] bg-white rounded-lg shadow-lg">
+
+                    {{-- Tombol Tutup --}}
                     <button @click="closeModal()"
-                        class="absolute -top-4 -right-4 z-10 w-10 h-10 text-xl text-white bg-red-600 rounded-full">
+                        class="absolute z-10 flex items-center justify-center w-10 h-10 text-xl text-white bg-red-600 rounded-full -top-4 -right-4 hover:bg-red-700">
                         ✕
                     </button>
-                    <iframe :src="fileUrl" class="w-full h-full rounded-lg" frameborder="0"></iframe>
+
+                    {{-- Preview Gambar --}}
+                    <template x-if="fileType === 'image'">
+                        <div class="flex items-center justify-center w-full h-full p-4">
+                            <img :src="fileUrl"
+                                class="object-contain max-w-full max-h-full rounded-lg"
+                                alt="Preview Dokumen">
+                        </div>
+                    </template>
+
+                    {{-- Preview PDF --}}
+                    <template x-if="fileType === 'pdf'">
+                        <iframe :src="fileUrl"
+                            class="w-full h-full rounded-lg"
+                            frameborder="0">
+                        </iframe>
+                    </template>
+
                 </div>
             </div>
         </div>

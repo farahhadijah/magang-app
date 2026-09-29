@@ -55,7 +55,7 @@ class PengajuanPklController extends Controller
         'alamat_asal' => 'required|string|max:500',
 
         'dokumen_pembayaran' => 'required|file|mimes:pdf,jpg,png|max:2048',
-        'dokumen_studi_tour' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        'dokumen_studi_tour' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:2048',
         'dokumen_krs' => 'required|file|mimes:pdf|max:2048',
     ]);
 
@@ -170,7 +170,7 @@ class PengajuanPklController extends Controller
     public function uploadUlangDokumen(Request $request, $id)
     {
         $request->validate([
-            'dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,png|max:2048',
+            'dokumen' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:2048',
         ]);
 
         $mahasiswa = Auth::user()->mahasiswa;
