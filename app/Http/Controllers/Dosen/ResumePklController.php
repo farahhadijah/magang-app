@@ -24,6 +24,10 @@ class ResumePklController extends Controller
             'laporanAkhir',
             'logbooks',
             'penilaianMitra',
+
+            // Dokumen PKL
+            'suratPengantar',
+            'suratBalasan',
         ])
         ->where('status', 'selesai');
 
@@ -45,19 +49,20 @@ class ResumePklController extends Controller
             });
         }
 
+        // ================= SEARCH =================
         if ($search !== '') {
+
             $query->whereHas('pengajuanPkl.mahasiswa', function ($q) use ($search) {
+
                 $q->where(function ($inner) use ($search) {
+
                     $inner->where('nim', 'like', '%' . $search . '%')
                         ->orWhere('nama', 'like', '%' . $search . '%');
                 });
             });
         }
 
-        $pkls = $query
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $pkls = $query ->orderByDesc('tgl_selesai') ->paginate(10) ->withQueryString();
 
         return view('dosen.resume.index', compact(
             'pkls',
@@ -91,6 +96,10 @@ class ResumePklController extends Controller
             'laporanAkhir',
             'logbooks',
             'penilaianMitra',
+
+            // Dokumen PKL
+            'suratPengantar',
+            'suratBalasan',
         ]);
 
         return view('dosen.resume.show', compact(

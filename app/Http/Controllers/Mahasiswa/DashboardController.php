@@ -21,7 +21,7 @@ class DashboardController extends Controller
     $pengajuan = PengajuanPkl::with([
         'tempatPkl',
         'pkl.dosen',
-        'pkl'
+        'pkl.suratBalasan',
     ])
     ->where('id_mhs', $mahasiswa->id)
     ->latest('created_at')

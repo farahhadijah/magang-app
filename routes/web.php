@@ -191,6 +191,7 @@ Route::middleware(['auth', 'kaprodi'])
         Route::get('/histori', [KaprodiPengajuanController::class, 'histori'])->name('pengajuan.histori');
         Route::get('/mahasiswa/belum', [KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
         Route::get('/dosen/search', [KaprodiPengajuanController::class, 'searchDosen'])->name('dosen.search');
+        Route::get('/mahasiswa/{mahasiswa}', [KaprodiMahasiswaController::class, 'detail'])->name('mahasiswa.detail');
     });
 /*
 |--------------------------------------------------------------------------
@@ -300,20 +301,22 @@ Route::middleware(['auth', 'first.login', 'role:admin'])->prefix('admin')->name(
     Route::post('fakultas/sync', [FakultasController::class, 'syncSiakad'])->name('fakultas.sync');
 });
 
-use App\Http\Controllers\Mitra\MitraController;
-use App\Http\Controllers\Mitra\PenilaianMitraController;
-use App\Http\Controllers\Mitra\TugasMitraController;
+
+/*
+|--------------------------------------------------------------------------
+| PIMPINAN AREA
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\Pimpinan\PimpinanController;
-
 Route::prefix('pimpinan')->middleware(['auth', 'first.login', 'role:pimpinan'])->group(function () {
-
+    
     Route::get('/', [PimpinanController::class, 'index']);
-
+    
     Route::get('/fakultas/{id}', [PimpinanController::class, 'prodi'])
-        ->name('pimpinan.prodi');
-
+    ->name('pimpinan.prodi');
+    
     Route::get('/prodi/{prodi_id}/angkatan/{angkatan}', [PimpinanController::class, 'mahasiswa'])
-        ->name('pimpinan.mahasiswa');
+    ->name('pimpinan.mahasiswa');
 });
 
 /*
@@ -321,6 +324,10 @@ Route::prefix('pimpinan')->middleware(['auth', 'first.login', 'role:pimpinan'])-
 | MITRA AREA
 |--------------------------------------------------------------------------
 */
+use App\Http\Controllers\Mitra\MitraController;
+use App\Http\Controllers\Mitra\PenilaianMitraController;
+use App\Http\Controllers\Mitra\TugasMitraController;
+use App\Http\Controllers\Mitra\SuratBalasanController;
 Route::middleware(['auth', 'first.login', 'role:mitra'])
     ->prefix('mitra')
     ->name('mitra.')
@@ -347,6 +354,8 @@ Route::middleware(['auth', 'first.login', 'role:mitra'])
         Route::get('/penilaian', [PenilaianMitraController::class, 'index'])->name('penilaian');
         Route::get('/penilaian/{id}', [PenilaianMitraController::class, 'form'])->name('penilaian.form');
         Route::post('/penilaian/{id}', [PenilaianMitraController::class, 'store'])->name('penilaian.store');
+        Route::get('/surat-balasan', [SuratBalasanController::class, 'index']) ->name('surat-balasan.index');
+        Route::post('/surat-balasan/{pkl}', [SuratBalasanController::class, 'store']) ->name('surat-balasan.store');
     });
 
 /*
