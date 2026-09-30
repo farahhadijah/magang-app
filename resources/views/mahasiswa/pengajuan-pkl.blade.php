@@ -158,7 +158,7 @@
                             <select name="jenis_tempat" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
                                 <option value="">-- Pilih Jenis Instansi --</option>
-                                @foreach (['Pemerintah', 'Sekolah', 'PT', 'CV'] as $jenis)
+                                @foreach ($jenisTempat ?? \App\Models\TempatPkl::JENIS_TEMPAT as $jenis)
                                     <option value="{{ $jenis }}" @selected(old('jenis_tempat') === $jenis)>
                                         {{ $jenis }}</option>
                                 @endforeach
