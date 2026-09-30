@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal('nilai', 5, 2);
             $table->string('keterangan', 100)->nullable();
             $table->date('tgl_input');
+            $table->timestamps();
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('nilai_pkl');
     }
 };

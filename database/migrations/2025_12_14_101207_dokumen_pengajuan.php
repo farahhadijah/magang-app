@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('path_file', 255);
             $table->enum('status_verifikasi', ['pending', 'valid', 'invalid'])->default('pending');
             $table->text('catatan')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('dokumen_pengajuan');
     }
 };

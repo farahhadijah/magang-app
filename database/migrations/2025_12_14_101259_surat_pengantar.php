@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('no_surat', 50);
             $table->date('tgl_terbit');
             $table->string('path_file', 255);
+            $table->timestamps();
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('surat_pengantar');
     }
 };

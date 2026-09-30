@@ -17,6 +17,7 @@ return new class extends Migration
             $table->date('tgl');
             $table->text('kegiatan');
             $table->enum('status_approve', ['pending', 'approved'])->default('pending');
+            $table->timestamps();
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('logbook');
     }
 };

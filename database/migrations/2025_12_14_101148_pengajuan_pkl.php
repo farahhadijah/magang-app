@@ -25,6 +25,7 @@ return new class extends Migration
             $table->text('catatan_tu')->nullable();
             $table->text('catatan_kaprodi')->nullable();
             $table->date('tgl_pengajuan')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('pengajuan_pkl');
     }
 };
