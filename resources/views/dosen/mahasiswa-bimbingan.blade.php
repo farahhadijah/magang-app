@@ -144,7 +144,7 @@
 
                                             {{-- LOGBOOK --}}
                                             @if ($pkl->status === 'aktif')
-                                                <a href="{{ route('dosen.logbook.index') }}"
+                                                <a href="{{ route('dosen.logbook.detail', $pkl->id) }}"
                                                     class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 rounded-lg transition-colors duration-150 hover:bg-green-200">
                                                     Logbook
                                                 </a>
@@ -296,7 +296,7 @@
 
                                 {{-- LOGBOOK --}}
                                 @if ($pkl->status === 'aktif')
-                                    <a href="{{ route('dosen.logbook.index') }}"
+                                    <a href="{{ route('dosen.logbook.detail', $pkl->id) }}"
                                         class="flex-1 px-3 py-2 text-xs font-medium text-center text-green-700 bg-green-100 rounded-lg transition-colors duration-150 hover:bg-green-200">
                                         Logbook
                                     </a>

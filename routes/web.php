@@ -64,6 +64,12 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
             Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
             Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen'])->name('pengajuan.dokumen.upload-ulang');
         });
+        // Dokumentasi Google Drive
+        Route::get('/logbook/dokumentasi/edit', [MahasiswaLogbookController::class, 'editDokumentasi'])
+            ->name('logbook.dokumentasi.edit');
+
+        Route::put('/logbook/dokumentasi', [MahasiswaLogbookController::class, 'updateDokumentasi'])
+            ->name('logbook.dokumentasi.update');
         // Logbook
         Route::get('/logbook', [MahasiswaLogbookController::class, 'index'])->name('logbook.index');
         Route::get('/logbook/create', [MahasiswaLogbookController::class, 'create'])->name('logbook.create');
@@ -86,11 +92,11 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::get('/penilaian-mitra', [NilaiMitraMahasiswaController::class, 'index'])->name('penilaianMitra.index');
         // remedial
         Route::get('/remedial', [RemedialController::class, 'index'])->name('remedial.index');
-
     });
 
-/*
-|--------------------------------------------------------------------------
+
+    /*
+    |--------------------------------------------------------------------------
 | AUTHENTICATED (GLOBAL)
 |--------------------------------------------------------------------------
 */
@@ -132,17 +138,21 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         // Mahasiswa Bimbingan
         Route::get('/mahasiswa-bimbingan', [MahasiswaBimbinganController::class, 'index']
         )->name('mahasiswa.bimbingan');
-
         // Logbook
-        Route::get('/logbook', [ReviewLogbookController::class, 'index']
-        )->name('logbook.index');
-        Route::put('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review']
-        )->name('logbook.review');
-        Route::post('/logbook/{logbook}/review-ajax', [ReviewLogbookController::class, 'reviewAjax']
-        )->name('logbook.review-ajax');
-        // bulk approve
-        Route::post('/logbook/bulk-approve', [ReviewLogbookController::class, 'bulkApprove']
-        )->name('logbook.bulk-approve');
+        Route::get('/logbook', [ReviewLogbookController::class, 'index'])
+            ->name('logbook.index');
+
+        Route::post('/logbook/{logbook}/review-ajax', [ReviewLogbookController::class, 'reviewAjax'])
+            ->name('logbook.review-ajax');
+
+        Route::put('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review'])
+            ->name('logbook.review');
+
+        Route::post('/logbook/bulk-approve', [ReviewLogbookController::class, 'bulkApprove'])
+            ->name('logbook.bulk-approve');
+
+        Route::get('/logbook/{pkl}', [ReviewLogbookController::class, 'detail'])
+            ->name('logbook.detail');
         // Nilai
         Route::get('/nilai', [DosenNilaiPklController::class, 'index']
         )->name('nilai.index');
