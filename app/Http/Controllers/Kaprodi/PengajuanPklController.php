@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\StatusPengajuanMail;
 
 class PengajuanPklController extends Controller
 {
@@ -243,6 +245,10 @@ class PengajuanPklController extends Controller
                 ]);
             });
 
+            if (!empty($pengajuan->mahasiswa->email)) {
+                Mail::to($pengajuan->mahasiswa->email)->queue(new StatusPengajuanMail($pengajuan));
+            }
+
             return redirect()->route('kaprodi.pengajuan.index')
                 ->with('success', 'Pengajuan disetujui & surat berhasil dibuat.');
 
@@ -263,7 +269,8 @@ class PengajuanPklController extends Controller
 
         $prodiId = $this->getProdiId();
 
-        $pengajuan = PengajuanPkl::whereHas('mahasiswa', function ($q) use ($prodiId) {
+        $pengajuan = PengajuanPkl::with('mahasiswa')
+            ->whereHas('mahasiswa', function ($q) use ($prodiId) {
             $q->where('prodi_id', $prodiId);
         })
             ->findOrFail($id);
@@ -289,6 +296,10 @@ class PengajuanPklController extends Controller
             ]);
         });
 
+        if (!empty($pengajuan->mahasiswa->email)) {
+            Mail::to($pengajuan->mahasiswa->email)->queue(new StatusPengajuanMail($pengajuan));
+        }
+        
         return redirect()->route('kaprodi.pengajuan.index')
             ->with('warning', 'Pengajuan PKL berhasil ditolak Kaprodi.');
     }
