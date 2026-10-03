@@ -12,20 +12,29 @@ class NilaiPklController extends Controller
     }
     private function konversiNilaiHuruf($nilai)
     {
-        // Use same thresholds as PenilaianMitra:
-        // >= 86 -> A
-        // >= 71 -> B
-        // >= 56 -> C
-        // else -> D
-        if ($nilai >= 86) {
+        // Updated grading scale:
+        // A  = 85-100
+        // AB = 80-84
+        // B  = 75-79
+        // BC = 68-74
+        // C  = 60-67
+        // D  = 50-59
+        // E  = 0-49
+        if ($nilai >= 85) {
             return 'A';
-        } elseif ($nilai >= 71) {
+        } elseif ($nilai >= 80) {
+            return 'AB';
+        } elseif ($nilai >= 75) {
             return 'B';
-        } elseif ($nilai >= 56) {
+        } elseif ($nilai >= 68) {
+            return 'BC';
+        } elseif ($nilai >= 60) {
             return 'C';
+        } elseif ($nilai >= 50) {
+            return 'D';
         }
 
-        return 'D';
+        return 'E';
     }
     /**
      * List mahasiswa siap dinilai

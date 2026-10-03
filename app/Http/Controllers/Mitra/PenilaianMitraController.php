@@ -123,24 +123,30 @@ class PenilaianMitraController extends Controller
         $rataRata = array_sum($nilai) / count($nilai);
 
         // =========================
-        // HITUNG GRADE
+        // HITUNG GRADE (Updated Grading Scale)
         // =========================
+        // A  = 85-100
+        // AB = 80-84
+        // B  = 75-79
+        // BC = 68-74
+        // C  = 60-67
+        // D  = 50-59
+        // E  = 0-49
 
-        if ($rataRata >= 86) {
-
+        if ($rataRata >= 85) {
             $grade = 'A';
-
-        } elseif ($rataRata >= 71) {
-
+        } elseif ($rataRata >= 80) {
+            $grade = 'AB';
+        } elseif ($rataRata >= 75) {
             $grade = 'B';
-
-        } elseif ($rataRata >= 56) {
-
+        } elseif ($rataRata >= 68) {
+            $grade = 'BC';
+        } elseif ($rataRata >= 60) {
             $grade = 'C';
-
-        } else {
-
+        } elseif ($rataRata >= 50) {
             $grade = 'D';
+        } else {
+            $grade = 'E';
         }
 
         // =========================
