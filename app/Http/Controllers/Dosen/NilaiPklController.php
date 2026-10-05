@@ -12,20 +12,29 @@ class NilaiPklController extends Controller
     }
     private function konversiNilaiHuruf($nilai)
     {
-        // Use same thresholds as PenilaianMitra:
-        // >= 86 -> A
-        // >= 71 -> B
-        // >= 56 -> C
-        // else -> D
-        if ($nilai >= 86) {
+        // Updated grading scale:
+        // A  = 85-100
+        // AB = 80-84
+        // B  = 75-79
+        // BC = 68-74
+        // C  = 60-67
+        // D  = 50-59
+        // E  = 0-49
+        if ($nilai >= 85) {
             return 'A';
-        } elseif ($nilai >= 71) {
+        } elseif ($nilai >= 80) {
+            return 'AB';
+        } elseif ($nilai >= 75) {
             return 'B';
-        } elseif ($nilai >= 56) {
+        } elseif ($nilai >= 68) {
+            return 'BC';
+        } elseif ($nilai >= 60) {
             return 'C';
+        } elseif ($nilai >= 50) {
+            return 'D';
         }
 
-        return 'D';
+        return 'E';
     }
     /**
      * List mahasiswa siap dinilai
@@ -67,6 +76,9 @@ class NilaiPklController extends Controller
     }
     /**
      * Simpan nilai
+     * DIUBAH: Tidak lagi mengubah status PKL menjadi 'selesai'
+     * Nilai hanya disimpan ke tabel nilai_pkl dengan status_approval = 'pending'
+     * Status PKL akan berubah menjadi 'selesai' setelah staff approve
      */
     public function store(Request $request, Pkl $pkl)
     {
@@ -84,19 +96,24 @@ class NilaiPklController extends Controller
         $nilaiHuruf = $this->konversiNilaiHuruf($nilaiAngka);
 
         NilaiPkl::create([
-            'id_pkl'       => $pkl->id,
-            'nilai_angka'  => $nilaiAngka,
-            'nilai_huruf'  => $nilaiHuruf,
-            'keterangan'   => $request->keterangan,
-            'tgl_input'    => now(),
+            'id_pkl'              => $pkl->id,
+            'nilai_angka'         => $nilaiAngka,
+            'nilai_huruf'         => $nilaiHuruf,
+            'keterangan'          => $request->keterangan,
+            'tgl_input'           => now(),
+            'status_approval'     => 'pending',  // Default pending
+            'tgl_approval'        => null,
+            'catatan_approval'    => null,
         ]);
 
-        $pkl->update([
-            'status' => 'selesai',
-            'tgl_selesai' => now(),
-        ]);
+        // ❌ DIHAPUS: Tidak lagi update status PKL
+        // $pkl->update([
+        //     'status' => 'selesai',
+        //     'tgl_selesai' => now(),
+        // ]);
+
         return redirect()->route('dosen.nilai.index')
-            ->with('success', 'Nilai berhasil disimpan dan PKL selesai.');
+            ->with('success', 'Nilai berhasil disimpan dan menunggu approval dari staff TU.');
     }
     public function daftar()
     {

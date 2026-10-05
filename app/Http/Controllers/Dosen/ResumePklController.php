@@ -24,6 +24,10 @@ class ResumePklController extends Controller
             'laporanAkhir',
             'logbooks',
             'penilaianMitra',
+
+            // Dokumen PKL
+            'suratPengantar',
+            'suratBalasan',
         ])
         ->where('status', 'selesai');
 
@@ -45,19 +49,20 @@ class ResumePklController extends Controller
             });
         }
 
+        // ================= SEARCH =================
         if ($search !== '') {
+
             $query->whereHas('pengajuanPkl.mahasiswa', function ($q) use ($search) {
+
                 $q->where(function ($inner) use ($search) {
+
                     $inner->where('nim', 'like', '%' . $search . '%')
                         ->orWhere('nama', 'like', '%' . $search . '%');
                 });
             });
         }
 
-        $pkls = $query
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $pkls = $query ->orderByDesc('tgl_selesai') ->paginate(10) ->withQueryString();
 
         return view('dosen.resume.index', compact(
             'pkls',
@@ -91,6 +96,10 @@ class ResumePklController extends Controller
             'laporanAkhir',
             'logbooks',
             'penilaianMitra',
+
+            // Dokumen PKL
+            'suratPengantar',
+            'suratBalasan',
         ]);
 
         return view('dosen.resume.show', compact(
@@ -145,11 +154,28 @@ class ResumePklController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Link Google Drive Dokumentasi PKL
+        |--------------------------------------------------------------------------
+        |
+        | Link dokumentasi dibuat pada logbook pertama.
+        | Ambil satu logbook paling awal yang memiliki link.
+        |
+        */
+        $logbookDrive = $pkl->logbooks()
+            ->whereNotNull('link_dokumentasi')
+            ->where('link_dokumentasi', '!=', '')
+            ->orderBy('tgl', 'asc')
+            ->orderBy('id', 'asc')
+            ->first();
+
         return view('dosen.resume.logbook', compact(
             'pkl',
             'isKaprodi',
             'logbooks',
-            'totalApproved'
+            'totalApproved',
+            'logbookDrive'
         ));
     }
 }

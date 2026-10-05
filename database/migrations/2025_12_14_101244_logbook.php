@@ -13,10 +13,26 @@ return new class extends Migration
     {
         Schema::create('logbook', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_pkl')->constrained('pkl')->cascadeOnDelete();
+
+            $table->foreignId('id_pkl')
+                ->constrained('pkl')
+                ->cascadeOnDelete();
+
             $table->date('tgl');
+
             $table->text('kegiatan');
-            $table->enum('status_approve', ['pending', 'approved'])->default('pending');
+
+            $table->enum('status_approve', [
+                'pending',
+                'approved',
+                'revisi'
+            ])->default('pending');
+
+            $table->text('catatan')->nullable();
+
+            $table->text('link_dokumentasi')->nullable();
+
+            $table->timestamps();
         });
     }
 
@@ -25,6 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('logbook');
     }
 };

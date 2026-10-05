@@ -23,20 +23,61 @@ class MahasiswaController extends Controller
         $prodiId = $this->getProdiId();
 
         $mahasiswas = Mahasiswa::where('prodi_id', $prodiId)
+
+            // Hanya mahasiswa yang memiliki PKL aktif
             ->whereHas('pengajuanPkl.pkl', function ($q) {
                 $q->where('status', 'aktif');
             })
+
             ->with([
                 'prodi',
+
                 'pengajuanPkl.pkl' => function ($q) {
                     $q->where('status', 'aktif')
-                    ->with('dosen');
-                }
+                        ->with([
+                            'dosen',
+                            'suratBalasan',
+                        ]);
+                },
             ])
+
             ->orderBy('nama')
             ->paginate(9);
 
         return view('kaprodi.mahasiswa.index', compact('mahasiswas'));
+    }
+
+    public function detail(Mahasiswa $mahasiswa)
+    {
+        $prodiId = $this->getProdiId();
+
+        // Kaprodi hanya boleh melihat mahasiswa
+        // yang berada pada prodinya sendiri.
+        abort_unless(
+            $mahasiswa->prodi_id === $prodiId,
+            403
+        );
+
+        $mahasiswa->load([
+            'prodi',
+
+            'pengajuanPkl' => function ($q) {
+                $q->latest('created_at')
+                    ->with([
+                        'tempatPkl',
+                        'pkl' => function ($q) {
+                            $q->where('status', 'aktif')
+                                ->with([
+                                    'dosen',
+                                    'suratBalasan',
+                                    'suratPengantar',
+                                ]);
+                        },
+                    ]);
+            },
+        ]);
+
+        return view('kaprodi.mahasiswa.detail', compact('mahasiswa'));
     }
 
     public function belumMengajukan()
@@ -44,10 +85,19 @@ class MahasiswaController extends Controller
         $prodiId = $this->getProdiId();
 
         $mahasiswas = Mahasiswa::where('prodi_id', $prodiId)
+
             ->whereDoesntHave('pengajuanPkl', function ($q) {
-                $q->whereNotIn('status', ['ditolak_tu', 'ditolak_kaprodi']);
+                $q->whereNotIn('status', [
+                    'ditolak_tu',
+                    'ditolak_kaprodi',
+                ]);
             })
-            ->with(['prodi', 'pengajuanPkl'])
+
+            ->with([
+                'prodi',
+                'pengajuanPkl',
+            ])
+
             ->orderBy('nama')
             ->paginate(15);
 

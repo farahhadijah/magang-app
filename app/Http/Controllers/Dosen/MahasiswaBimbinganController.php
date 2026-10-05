@@ -10,12 +10,13 @@ class MahasiswaBimbinganController extends Controller
 {
     public function index()
     {
-        $dosen = Auth::user()->dosen; // ambil data dosen
+        $dosen = Auth::user()->dosen;
 
         $pkls = Pkl::where('id_dosen', $dosen->id)
             ->with([
                 'pengajuan.mahasiswa.prodi',
-                'pengajuan.tempatPkl'
+                'pengajuan.tempatPkl',
+                'suratBalasan',
             ])
             ->orderByDesc('created_at')
             ->paginate(15);

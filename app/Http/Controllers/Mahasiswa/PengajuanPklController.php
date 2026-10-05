@@ -10,6 +10,7 @@ use App\Models\PengajuanPkl;
 use App\Models\TempatPkl;
 use App\Models\DokumenPengajuan;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\Rule;
 class PengajuanPklController extends Controller
 {
     /**
@@ -35,7 +36,8 @@ class PengajuanPklController extends Controller
                 ->with('error', 'Kamu sudah memiliki pengajuan PKL yang sedang diproses.');
         }
         $semesterAktif = $this->hitungSemester($mahasiswa->angkatan);
-        return view('mahasiswa.pengajuan-pkl', compact('semesterAktif'));
+        $jenisTempat = TempatPkl::JENIS_TEMPAT;
+        return view('mahasiswa.pengajuan-pkl', compact('semesterAktif', 'jenisTempat'));
     }
 
     /**
@@ -45,7 +47,7 @@ class PengajuanPklController extends Controller
 {
     $request->validate([
         'nama_tempat'  => 'required|string|max:150',
-        'jenis_tempat' => 'required|in:Pemerintah,Sekolah,PT,CV',
+        'jenis_tempat' => ['required', Rule::in(TempatPkl::JENIS_TEMPAT)],
         'no_hp'        => ['required', 'regex:/^08[0-9]{7,14}$/'],
         'lokasi_maps' => 'required|string|max:500',
         'semester' => [

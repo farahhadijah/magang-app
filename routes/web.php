@@ -64,6 +64,12 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
             Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
             Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen'])->name('pengajuan.dokumen.upload-ulang');
         });
+        // Dokumentasi Google Drive
+        Route::get('/logbook/dokumentasi/edit', [MahasiswaLogbookController::class, 'editDokumentasi'])
+            ->name('logbook.dokumentasi.edit');
+
+        Route::put('/logbook/dokumentasi', [MahasiswaLogbookController::class, 'updateDokumentasi'])
+            ->name('logbook.dokumentasi.update');
         // Logbook
         Route::get('/logbook', [MahasiswaLogbookController::class, 'index'])->name('logbook.index');
         Route::get('/logbook/create', [MahasiswaLogbookController::class, 'create'])->name('logbook.create');
@@ -86,11 +92,11 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::get('/penilaian-mitra', [NilaiMitraMahasiswaController::class, 'index'])->name('penilaianMitra.index');
         // remedial
         Route::get('/remedial', [RemedialController::class, 'index'])->name('remedial.index');
-
     });
 
-/*
-|--------------------------------------------------------------------------
+
+    /*
+    |--------------------------------------------------------------------------
 | AUTHENTICATED (GLOBAL)
 |--------------------------------------------------------------------------
 */
@@ -132,17 +138,21 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         // Mahasiswa Bimbingan
         Route::get('/mahasiswa-bimbingan', [MahasiswaBimbinganController::class, 'index']
         )->name('mahasiswa.bimbingan');
-
         // Logbook
-        Route::get('/logbook', [ReviewLogbookController::class, 'index']
-        )->name('logbook.index');
-        Route::put('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review']
-        )->name('logbook.review');
-        Route::post('/logbook/{logbook}/review-ajax', [ReviewLogbookController::class, 'reviewAjax']
-        )->name('logbook.review-ajax');
-        // bulk approve
-        Route::post('/logbook/bulk-approve', [ReviewLogbookController::class, 'bulkApprove']
-        )->name('logbook.bulk-approve');
+        Route::get('/logbook', [ReviewLogbookController::class, 'index'])
+            ->name('logbook.index');
+
+        Route::post('/logbook/{logbook}/review-ajax', [ReviewLogbookController::class, 'reviewAjax'])
+            ->name('logbook.review-ajax');
+
+        Route::put('/logbook/{logbook}/review', [ReviewLogbookController::class, 'review'])
+            ->name('logbook.review');
+
+        Route::post('/logbook/bulk-approve', [ReviewLogbookController::class, 'bulkApprove'])
+            ->name('logbook.bulk-approve');
+
+        Route::get('/logbook/{pkl}', [ReviewLogbookController::class, 'detail'])
+            ->name('logbook.detail');
         // Nilai
         Route::get('/nilai', [DosenNilaiPklController::class, 'index']
         )->name('nilai.index');
@@ -191,6 +201,7 @@ Route::middleware(['auth', 'kaprodi'])
         Route::get('/histori', [KaprodiPengajuanController::class, 'histori'])->name('pengajuan.histori');
         Route::get('/mahasiswa/belum', [KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
         Route::get('/dosen/search', [KaprodiPengajuanController::class, 'searchDosen'])->name('dosen.search');
+        Route::get('/mahasiswa/{mahasiswa}', [KaprodiMahasiswaController::class, 'detail'])->name('mahasiswa.detail');
     });
 /*
 |--------------------------------------------------------------------------
@@ -203,6 +214,7 @@ use App\Http\Controllers\Staff\FormulirRemedialController;
 use App\Http\Controllers\Staff\MitraController as StaffMitraController;
 use App\Http\Controllers\Staff\PengajuanPklController as StaffPengajuanController;
 use App\Http\Controllers\Staff\StaffSuratController;
+use App\Http\Controllers\Staff\ApprovalNilaiController;
 
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
@@ -246,6 +258,10 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::post('/formulir-remedial', [FormulirRemedialController::class, 'store'])->name('formulir-remedial.store');
         Route::put('/formulir-remedial/{formulirRemedial}', [FormulirRemedialController::class, 'update'])->name('formulir-remedial.update');
         Route::delete('/formulir-remedial/{formulirRemedial}', [FormulirRemedialController::class, 'destroy'])->name('formulir-remedial.destroy');
+        // ================= APPROVAL NILAI =================
+        Route::get('/nilai', [ApprovalNilaiController::class, 'index'])->name('nilai.index');
+        Route::post('/nilai/{pkl}/approve', [ApprovalNilaiController::class, 'approve'])->name('nilai.approve');
+        Route::post('/nilai/bulk-approve', [ApprovalNilaiController::class, 'bulkApprove'])->name('nilai.bulk-approve');
     });
 
 /*
@@ -300,20 +316,22 @@ Route::middleware(['auth', 'first.login', 'role:admin'])->prefix('admin')->name(
     Route::post('fakultas/sync', [FakultasController::class, 'syncSiakad'])->name('fakultas.sync');
 });
 
-use App\Http\Controllers\Mitra\MitraController;
-use App\Http\Controllers\Mitra\PenilaianMitraController;
-use App\Http\Controllers\Mitra\TugasMitraController;
+
+/*
+|--------------------------------------------------------------------------
+| PIMPINAN AREA
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\Pimpinan\PimpinanController;
-
 Route::prefix('pimpinan')->middleware(['auth', 'first.login', 'role:pimpinan'])->group(function () {
-
+    
     Route::get('/', [PimpinanController::class, 'index']);
-
+    
     Route::get('/fakultas/{id}', [PimpinanController::class, 'prodi'])
-        ->name('pimpinan.prodi');
-
+    ->name('pimpinan.prodi');
+    
     Route::get('/prodi/{prodi_id}/angkatan/{angkatan}', [PimpinanController::class, 'mahasiswa'])
-        ->name('pimpinan.mahasiswa');
+    ->name('pimpinan.mahasiswa');
 });
 
 /*
@@ -321,6 +339,10 @@ Route::prefix('pimpinan')->middleware(['auth', 'first.login', 'role:pimpinan'])-
 | MITRA AREA
 |--------------------------------------------------------------------------
 */
+use App\Http\Controllers\Mitra\MitraController;
+use App\Http\Controllers\Mitra\PenilaianMitraController;
+use App\Http\Controllers\Mitra\TugasMitraController;
+use App\Http\Controllers\Mitra\SuratBalasanController;
 Route::middleware(['auth', 'first.login', 'role:mitra'])
     ->prefix('mitra')
     ->name('mitra.')
@@ -347,6 +369,8 @@ Route::middleware(['auth', 'first.login', 'role:mitra'])
         Route::get('/penilaian', [PenilaianMitraController::class, 'index'])->name('penilaian');
         Route::get('/penilaian/{id}', [PenilaianMitraController::class, 'form'])->name('penilaian.form');
         Route::post('/penilaian/{id}', [PenilaianMitraController::class, 'store'])->name('penilaian.store');
+        Route::get('/surat-balasan', [SuratBalasanController::class, 'index']) ->name('surat-balasan.index');
+        Route::post('/surat-balasan/{pkl}', [SuratBalasanController::class, 'store']) ->name('surat-balasan.store');
     });
 
 /*

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->enum('status', ['approved', 'rejected']);
             $table->text('catatan')->nullable();
             $table->dateTime('tgl_verifikasi');
+            $table->timestamps();
         });
     }
 

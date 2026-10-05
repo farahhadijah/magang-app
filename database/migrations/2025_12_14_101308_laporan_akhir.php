@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('path_file', 255);
             $table->enum('status_approve', ['pending', 'approved'])->default('pending');
             $table->text('catatan_dosen')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('laporan_akhir');
     }
 };

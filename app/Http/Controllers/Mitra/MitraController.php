@@ -47,7 +47,16 @@ class MitraController extends Controller
             ])
             ->firstOrFail();
 
-        return view('mitra.logbook', compact('pkl'));
+        // Ambil link Google Drive dokumentasi PKL
+        $logbookDrive = $pkl->logbooks
+            ->first(function ($logbook) {
+                return !empty($logbook->link_dokumentasi);
+            });
+
+        return view('mitra.logbook', compact(
+            'pkl',
+            'logbookDrive'
+        ));
     }
 
     /**

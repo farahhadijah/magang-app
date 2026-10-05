@@ -6,6 +6,24 @@ use App\Models\Pkl;
 use App\Models\Mitra;
 class TempatPkl extends Model
 {
+    public const JENIS_TEMPAT = [
+        'Pemerintah',
+        'Sekolah',
+        'Perguruan Tinggi',
+        'Perusahaan',
+        'PT',
+        'CV',
+        'BUMN/BUMD',
+        'Yayasan',
+        'Organisasi/Lembaga',
+        'Rumah Sakit/Klinik',
+        'Pesantren',
+        'UMKM',
+        'Startup',
+        'Industri',
+        'Lainnya',
+    ];
+
     protected $table = 'tempat_pkl';
     protected $fillable = [
         'nama_tempat',

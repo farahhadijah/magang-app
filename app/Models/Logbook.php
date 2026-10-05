@@ -13,6 +13,7 @@ class Logbook extends Model
         'kegiatan',
         'status_approve',
         'catatan',
+        'link_dokumentasi'
     ];
     protected $casts = [
         'tgl' => 'date',
