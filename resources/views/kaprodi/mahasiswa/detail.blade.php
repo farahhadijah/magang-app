@@ -4,16 +4,14 @@
         Detail Mahasiswa PKL - MagangApp
     </x-slot>
 
-    <div x-data="pdfViewer" class="px-0 py-6 mx-auto max-w-5xl min-h-[70vh]">
+    <div x-data="pdfViewer" class="px-4 py-6 mx-auto max-w-4xl min-h-[70vh] sm:px-6">
 
         {{-- Header --}}
         <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
-
             <div>
-                <h1 class="text-xl font-bold text-gray-800">
+                <h1 class="text-xl font-bold text-gray-800 sm:text-2xl">
                     Detail Mahasiswa PKL
                 </h1>
-
                 <p class="mt-1 text-sm text-gray-500">
                     Informasi PKL dan dokumen mahasiswa.
                 </p>
@@ -24,52 +22,6 @@
                 <i class="fa-solid fa-arrow-left"></i>
                 Kembali
             </a>
-
-        </div>
-
-
-        {{-- Informasi Mahasiswa --}}
-        <div class="overflow-hidden mb-6 bg-white rounded-xl border border-gray-200 shadow-sm">
-
-            <div class="px-6 py-4 bg-green-50 border-b border-gray-200">
-                <h2 class="font-semibold text-gray-800">
-                    Informasi Mahasiswa
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2">
-
-                <div>
-                    <p class="text-sm text-gray-500">
-                        Nama
-                    </p>
-
-                    <p class="mt-1 font-medium text-gray-800">
-                        {{ $mahasiswa->nama }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-sm text-gray-500">
-                        NIM
-                    </p>
-
-                    <p class="mt-1 font-medium text-gray-800">
-                        {{ $mahasiswa->nim }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-sm text-gray-500">
-                        Program Studi
-                    </p>
-
-                    <p class="mt-1 font-medium text-gray-800">
-                        {{ $mahasiswa->prodi->nama ?? '-' }}
-                    </p>
-                </div>
-
-            </div>
         </div>
 
 
@@ -82,65 +34,90 @@
         @endphp
 
 
-        {{-- Informasi PKL --}}
-        <div class="overflow-hidden mb-6 bg-white rounded-xl border border-gray-200 shadow-sm">
+        {{-- ============================= --}}
+        {{-- KARTU IDENTITAS MAHASISWA    --}}
+        {{-- ============================= --}}
+        <div class="overflow-hidden mb-5 bg-white rounded-xl border border-gray-200 shadow-sm">
 
-            <div class="px-6 py-4 bg-green-50 border-b border-gray-200">
+            <div class="flex gap-3 items-center px-5 py-3 bg-green-50 border-b border-gray-200">
+                <div class="flex justify-center items-center w-8 h-8 text-green-700 bg-green-100 rounded-lg">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h2 class="font-semibold text-gray-800">
+                    Identitas Mahasiswa
+                </h2>
+            </div>
+
+            <dl class="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-y-0 sm:divide-x">
+                <div class="px-5 py-4">
+                    <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">Nama</dt>
+                    <dd class="mt-1 font-medium text-gray-800">{{ $mahasiswa->nama }}</dd>
+                </div>
+                <div class="px-5 py-4">
+                    <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">NIM</dt>
+                    <dd class="mt-1 font-medium text-gray-800">{{ $mahasiswa->nim }}</dd>
+                </div>
+                <div class="px-5 py-4">
+                    <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">Program Studi</dt>
+                    <dd class="mt-1 font-medium text-gray-800">{{ $mahasiswa->prodi->nama ?? '-' }}</dd>
+                </div>
+            </dl>
+
+        </div>
+
+
+        {{-- ============================= --}}
+        {{-- INFORMASI PKL                 --}}
+        {{-- ============================= --}}
+        <div class="overflow-hidden mb-5 bg-white rounded-xl border border-gray-200 shadow-sm">
+
+            <div class="flex gap-3 items-center px-5 py-3 bg-green-50 border-b border-gray-200">
+                <div class="flex justify-center items-center w-8 h-8 text-green-700 bg-green-100 rounded-lg">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
                 <h2 class="font-semibold text-gray-800">
                     Informasi PKL
                 </h2>
             </div>
 
             @if ($pkl)
-                <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2">
+                <dl class="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-2 sm:divide-y-0">
 
-                    <div>
-                        <p class="text-sm text-gray-500">
-                            Tempat PKL
-                        </p>
-
-                        <p class="mt-1 font-medium text-gray-800">
+                    <div class="px-5 py-4 sm:border-b sm:border-r sm:border-gray-100">
+                        <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">Tempat PKL</dt>
+                        <dd class="mt-1 font-medium text-gray-800">
                             {{ $pengajuan->tempatPkl->nama_tempat ?? '-' }}
-                        </p>
+                        </dd>
                     </div>
 
-                    <div>
-                        <p class="text-sm text-gray-500">
-                            Dosen Pembimbing
-                        </p>
-
-                        <p class="mt-1 font-medium text-gray-800">
+                    <div class="px-5 py-4 sm:border-b sm:border-gray-100">
+                        <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">Dosen Pembimbing</dt>
+                        <dd class="mt-1 font-medium text-gray-800">
                             {{ $pkl->dosen->nama ?? '-' }}
-                        </p>
+                        </dd>
                     </div>
 
-                    <div>
-                        <p class="text-sm text-gray-500">
-                            Tanggal Mulai
-                        </p>
-
-                        <p class="mt-1 font-medium text-gray-800">
+                    <div class="px-5 py-4 sm:border-r sm:border-gray-100">
+                        <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">Tanggal Mulai</dt>
+                        <dd class="mt-1 font-medium text-gray-800">
                             {{ $pkl->tgl_mulai?->format('d M Y') ?? '-' }}
-                        </p>
+                        </dd>
                     </div>
 
-                    <div>
-                        <p class="text-sm text-gray-500">
-                            Status PKL
-                        </p>
-
-                        <div class="mt-1">
+                    <div class="px-5 py-4">
+                        <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">Status PKL</dt>
+                        <dd class="mt-1">
                             <span
                                 class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
                                 <i class="mr-1.5 fa-solid fa-circle-check"></i>
                                 {{ ucfirst($pkl->status) }}
                             </span>
-                        </div>
+                        </dd>
                     </div>
 
-                </div>
+                </dl>
             @else
-                <div class="p-6 text-sm text-gray-500">
+                <div class="px-5 py-6 text-sm text-center text-gray-500">
                     Data PKL aktif tidak ditemukan.
                 </div>
             @endif
@@ -148,102 +125,194 @@
         </div>
 
 
-        {{-- Dokumen PKL --}}
+        {{-- ============================= --}}
+        {{-- DOKUMEN PKL (TABEL)           --}}
+        {{-- ============================= --}}
         <div class="overflow-hidden bg-white rounded-xl border border-gray-200 shadow-sm">
 
-            <div class="px-6 py-4 bg-green-50 border-b border-gray-200">
-                <h2 class="font-semibold text-gray-800">
-                    Dokumen PKL
-                </h2>
-
-                <p class="mt-1 text-sm text-gray-500">
-                    Status dokumen yang berkaitan dengan pelaksanaan PKL.
-                </p>
+            <div class="flex gap-3 items-center px-5 py-3 bg-green-50 border-b border-gray-200">
+                <div class="flex justify-center items-center w-8 h-8 text-green-700 bg-green-100 rounded-lg">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-gray-800">
+                        Dokumen PKL
+                    </h2>
+                    <p class="text-xs text-gray-500">
+                        Status dokumen yang berkaitan dengan pelaksanaan PKL.
+                    </p>
+                </div>
             </div>
 
+            {{-- Desktop: tabel --}}
+            <div class="hidden sm:block">
+                <table class="w-full text-sm text-left">
+                    <thead
+                        class="text-xs font-semibold tracking-wide text-gray-600 uppercase bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-5 py-3">Dokumen</th>
+                            <th class="px-5 py-3">Status</th>
+                            <th class="px-5 py-3 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
 
-            <div class="divide-y divide-gray-200">
+                        {{-- Surat Pengantar --}}
+                        <tr class="transition hover:bg-green-50/40">
+                            <td class="px-5 py-4">
+                                <div class="flex gap-2 items-center">
+                                    <i class="text-gray-400 fa-regular fa-file-lines"></i>
+                                    <span class="font-medium text-gray-800">Surat Pengantar</span>
+                                </div>
+                            </td>
+                            <td class="px-5 py-4">
+                                @if ($suratPengantar)
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+                                        <i class="mr-1.5 fa-solid fa-circle-check"></i>
+                                        Tersedia
+                                    </span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
+                                        Belum tersedia
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4 text-right">
+                                @if ($suratPengantar)
+                                    <button type="button" @click="openModal(@js(asset('storage/' . $suratPengantar->path_file)))"
+                                        class="inline-flex gap-1.5 items-center px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg transition hover:bg-green-700">
+                                        <i class="fa-regular fa-file-pdf"></i>
+                                        Lihat
+                                    </button>
+                                @else
+                                    <span class="text-xs text-gray-400">—</span>
+                                @endif
+                            </td>
+                        </tr>
+
+                        {{-- Surat Balasan --}}
+                        <tr class="transition hover:bg-green-50/40">
+                            <td class="px-5 py-4">
+                                <div class="flex gap-2 items-center">
+                                    <i class="text-gray-400 fa-regular fa-file-lines"></i>
+                                    <div>
+                                        <span class="font-medium text-gray-800">Surat Balasan Instansi</span>
+                                        @if ($suratBalasan)
+                                            <p class="text-xs text-gray-500">Diunggah oleh Mitra.</p>
+                                        @else
+                                            <p class="text-xs text-gray-500">Mitra belum mengunggah.</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-4">
+                                @if ($suratBalasan)
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+                                        <i class="mr-1.5 fa-solid fa-circle-check"></i>
+                                        Sudah Diupload
+                                    </span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
+                                        <i class="mr-1.5 fa-solid fa-clock"></i>
+                                        Belum Diupload
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4 text-right">
+                                @if ($suratBalasan)
+                                    <button type="button" @click="openModal(@js(asset('storage/' . $suratBalasan->path_file)))"
+                                        class="inline-flex gap-1.5 items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg transition hover:bg-blue-700">
+                                        <i class="fa-regular fa-file-pdf"></i>
+                                        Lihat
+                                    </button>
+                                @else
+                                    <span class="text-xs text-gray-400">—</span>
+                                @endif
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Mobile: list card --}}
+            <div class="divide-y divide-gray-100 sm:hidden">
 
                 {{-- Surat Pengantar --}}
-                <div class="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+                <div class="p-4">
+                    <div class="flex gap-2 items-start">
+                        <i class="mt-0.5 text-gray-400 fa-regular fa-file-lines"></i>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">Surat Pengantar</p>
+                            <div class="mt-2">
+                                @if ($suratPengantar)
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+                                        <i class="mr-1.5 fa-solid fa-circle-check"></i>
+                                        Tersedia
+                                    </span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
+                                        Belum tersedia
+                                    </span>
+                                @endif
+                            </div>
 
-                    <div>
-                        <div class="flex gap-2 items-center">
-                            <i class="text-gray-500 fa-regular fa-file-lines"></i>
-
-                            <h3 class="font-medium text-gray-800">
-                                Surat Pengantar
-                            </h3>
+                            @if ($suratPengantar)
+                                <button type="button" @click="openModal(@js(asset('storage/' . $suratPengantar->path_file)))"
+                                    class="inline-flex gap-1.5 justify-center items-center px-3 py-2 mt-3 w-full text-xs font-medium text-white bg-green-600 rounded-lg transition hover:bg-green-700">
+                                    <i class="fa-regular fa-file-pdf"></i>
+                                    Lihat Surat
+                                </button>
+                            @endif
                         </div>
-
-                        @if ($suratPengantar)
-                            <span
-                                class="inline-flex items-center px-2.5 py-1 mt-2 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                                <i class="mr-1.5 fa-solid fa-circle-check"></i>
-                                Tersedia
-                            </span>
-                        @else
-                            <span
-                                class="inline-flex items-center px-2.5 py-1 mt-2 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
-                                Belum tersedia
-                            </span>
-                        @endif
                     </div>
-
-                    @if ($suratPengantar)
-                        <button type="button" @click="openModal(@js(asset('storage/' . $suratPengantar->path_file)))"
-                            class="inline-flex gap-2 justify-center items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg transition hover:bg-green-700">
-                            <i class="fa-regular fa-file-pdf"></i>
-                            Lihat Surat
-                        </button>
-                    @endif
-
                 </div>
 
-
                 {{-- Surat Balasan --}}
-                <div class="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+                <div class="p-4">
+                    <div class="flex gap-2 items-start">
+                        <i class="mt-0.5 text-gray-400 fa-regular fa-file-lines"></i>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">Surat Balasan Instansi</p>
+                            <p class="mt-0.5 text-xs text-gray-500">
+                                @if ($suratBalasan)
+                                    Diunggah oleh Mitra.
+                                @else
+                                    Mitra belum mengunggah.
+                                @endif
+                            </p>
 
-                    <div>
-                        <div class="flex gap-2 items-center">
-                            <i class="text-gray-500 fa-regular fa-file-lines"></i>
+                            <div class="mt-2">
+                                @if ($suratBalasan)
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+                                        <i class="mr-1.5 fa-solid fa-circle-check"></i>
+                                        Sudah Diupload
+                                    </span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
+                                        <i class="mr-1.5 fa-solid fa-clock"></i>
+                                        Belum Diupload
+                                    </span>
+                                @endif
+                            </div>
 
-                            <h3 class="font-medium text-gray-800">
-                                Surat Balasan Instansi
-                            </h3>
+                            @if ($suratBalasan)
+                                <button type="button" @click="openModal(@js(asset('storage/' . $suratBalasan->path_file)))"
+                                    class="inline-flex gap-1.5 justify-center items-center px-3 py-2 mt-3 w-full text-xs font-medium text-white bg-blue-600 rounded-lg transition hover:bg-blue-700">
+                                    <i class="fa-regular fa-file-pdf"></i>
+                                    Lihat Surat
+                                </button>
+                            @endif
                         </div>
-
-                        @if ($suratBalasan)
-                            <span
-                                class="inline-flex items-center px-2.5 py-1 mt-2 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                                <i class="mr-1.5 fa-solid fa-circle-check"></i>
-                                Sudah Diupload
-                            </span>
-
-                            <p class="mt-2 text-sm text-gray-500">
-                                Surat balasan telah diunggah oleh Mitra.
-                            </p>
-                        @else
-                            <span
-                                class="inline-flex items-center px-2.5 py-1 mt-2 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
-                                <i class="mr-1.5 fa-solid fa-clock"></i>
-                                Belum Diupload
-                            </span>
-
-                            <p class="mt-2 text-sm text-gray-500">
-                                Mitra belum mengunggah surat balasan instansi.
-                            </p>
-                        @endif
                     </div>
-
-                    @if ($suratBalasan)
-                        <button type="button" @click="openModal(@js(asset('storage/' . $suratBalasan->path_file)))"
-                            class="inline-flex gap-2 justify-center items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg transition hover:bg-blue-700">
-                            <i class="fa-regular fa-file-pdf"></i>
-                            Lihat Surat
-                        </button>
-                    @endif
-
                 </div>
 
             </div>
