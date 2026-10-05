@@ -214,6 +214,7 @@ use App\Http\Controllers\Staff\FormulirRemedialController;
 use App\Http\Controllers\Staff\MitraController as StaffMitraController;
 use App\Http\Controllers\Staff\PengajuanPklController as StaffPengajuanController;
 use App\Http\Controllers\Staff\StaffSuratController;
+use App\Http\Controllers\Staff\ApprovalNilaiController;
 
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
@@ -257,6 +258,10 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::post('/formulir-remedial', [FormulirRemedialController::class, 'store'])->name('formulir-remedial.store');
         Route::put('/formulir-remedial/{formulirRemedial}', [FormulirRemedialController::class, 'update'])->name('formulir-remedial.update');
         Route::delete('/formulir-remedial/{formulirRemedial}', [FormulirRemedialController::class, 'destroy'])->name('formulir-remedial.destroy');
+        // ================= APPROVAL NILAI =================
+        Route::get('/nilai', [ApprovalNilaiController::class, 'index'])->name('nilai.index');
+        Route::post('/nilai/{pkl}/approve', [ApprovalNilaiController::class, 'approve'])->name('nilai.approve');
+        Route::post('/nilai/bulk-approve', [ApprovalNilaiController::class, 'bulkApprove'])->name('nilai.bulk-approve');
     });
 
 /*
