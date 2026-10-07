@@ -274,13 +274,13 @@ public function histori(Request $request)
 {
     $prodiId = $this->getProdiId();
 
-    $tempatPkls = TempatPkl::with('mitra')
+    $tempatPkls = TempatPkl::whereDoesntHave('mitra')
         ->whereHas('pengajuans', function ($q) use ($prodiId) {
             $q->where('status', 'disetujui')
               ->whereHas('mahasiswa', function ($q2) use ($prodiId) {
                   $q2->where('prodi_id', $prodiId);
               })
-              ->whereHas('pkl'); // pastikan sudah jadi PKL
+              ->whereHas('pkl');
         })
         ->withCount([
             'pengajuans as jumlah_mahasiswa' => function ($q) use ($prodiId) {

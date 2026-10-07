@@ -241,26 +241,16 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::get('/pengajuan/{id}', [StaffPengajuanController::class, 'show'])->name('pengajuan.show');
         Route::post('/pengajuan/{id}/approve', [StaffPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [StaffPengajuanController::class, 'reject'])->name('pengajuan.reject');
-        Route::get('/mitra',
-            [StaffPengajuanController::class, 'manajemenMitra']
-        )->name('mitra.index');
-        Route::get('/mitra/{id}/akun',
-            [StaffPengajuanController::class, 'showAkunMitra']
-        )->name('mitra.akun');
-        Route::post('/mitra/{id}',
-            [StaffPengajuanController::class, 'storeMitra']
-        )->name('mitra.store');
-        Route::get('/manajemen-mitra', [StaffMitraController::class, 'index']
-        )->name('manajemen-mitra.index');
-        Route::get('/manajemen-mitra/{id}', [StaffMitraController::class, 'show']
-        )->name('manajemen-mitra.show');
+        Route::get( '/mitra/{id}/angkatan/{tahun}', [StaffMitraController::class, 'mahasiswaByAngkatan'] )->name('mitra.mahasiswa');
+        Route::get('/mitra', [StaffPengajuanController::class, 'manajemenMitra'] )->name('mitra.index');
+        Route::get('/mitra/{id}/akun', [StaffPengajuanController::class, 'showAkunMitra'] )->name('mitra.akun');
+        Route::post('/mitra/{id}', [StaffPengajuanController::class, 'storeMitra'] )->name('mitra.store');
+        Route::get('/manajemen-mitra', [StaffMitraController::class, 'index'] )->name('manajemen-mitra.index');
+        Route::get('/manajemen-mitra/{id}', [StaffMitraController::class, 'show'] )->name('manajemen-mitra.show');
         Route::post('/mitra/{id}/regenerate', [StaffMitraController::class, 'regenerate'])->name('mitra.regenerate');
-        Route::get('/surat-pengantar', [StaffSuratController::class, 'index'])
-            ->name('surat.index');
-        Route::get('/surat-pengantar/{id}/cetak', [StaffSuratController::class, 'cetak'])
-            ->name('surat.cetak');
-        Route::post('/surat-pengantar/{id}/validasi', [StaffSuratController::class, 'validasi'])
-            ->name('surat.validasi');
+        Route::get('/surat-pengantar', [StaffSuratController::class, 'index'] )->name('surat.index');
+        Route::get('/surat-pengantar/{id}/cetak', [StaffSuratController::class, 'cetak'] )->name('surat.cetak');
+        Route::post('/surat-pengantar/{id}/validasi', [StaffSuratController::class, 'validasi'] )->name('surat.validasi');
         Route::get('/surat-pengantar/{id}/preview', [StaffSuratController::class, 'preview'])->name('surat.preview');
         Route::post('/surat-pengantar/bulk-print', [StaffSuratController::class, 'bulkPrint'])->name('surat.bulk');
         Route::post('/surat-pengantar/bulk-preview', [StaffSuratController::class, 'bulkPreview'])->name('surat.bulk-preview');
@@ -274,6 +264,7 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::get('/nilai', [ApprovalNilaiController::class, 'index'])->name('nilai.index');
         Route::post('/nilai/{pkl}/approve', [ApprovalNilaiController::class, 'approve'])->name('nilai.approve');
         Route::post('/nilai/bulk-approve', [ApprovalNilaiController::class, 'bulkApprove'])->name('nilai.bulk-approve');
+
     });
 
 /*

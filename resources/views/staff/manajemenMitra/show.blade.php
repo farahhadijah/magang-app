@@ -1,187 +1,239 @@
 <x-app-layout>
 
-<x-slot name="title">
-Detail Mitra - MagangApp
-</x-slot>
+    <x-slot name="title">
+        Detail Mitra - MagangApp
+    </x-slot>
 
-<div class="px-0 py-6 md:px-6">
+    <div class="px-0 py-6 md:px-6">
 
-<h1 class="mb-6 text-xl font-bold md:text-2xl text-slate-900">
-Detail Mitra
-</h1>
+        {{-- HEADER --}}
+        <div class="mb-6">
+            <h1 class="text-xl font-bold text-slate-900 md:text-2xl">
+                Detail Mitra
+            </h1>
 
-<!-- INFO MITRA -->
-<div class="p-4 mb-6 rounded-lg shadow bg-green-50 text-slate-800">
-
-    <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <p><b>Tempat PKL :</b> {{ $mitra->nama_tempat }}</p>
-        <p><b>No HP Mitra :</b> {{ $mitra->no_hp ?? '-' }}</p>
-    </div>
-
-    @if(session('username'))
-    <div class="p-4 mt-4 border border-green-300 rounded bg-green-50">
-        <p class="font-semibold text-green-700">
-            Akun Mitra Berhasil Dibuat Ulang
-        </p>
-
-        <p class="mt-2">
-            <b>Username :</b> {{ session('username') }}
-        </p>
-
-        <p>
-            <b>Password :</b> {{ session('password') }}
-        </p>
-    </div>
-    @endif
-
-</div>
+            <p class="mt-1 text-sm text-gray-500">
+                Informasi akun mitra dan daftar mahasiswa berdasarkan angkatan.
+            </p>
+        </div>
 
 
-<!-- HEADER + AKSI -->
-<div class="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
+        {{-- INFO MITRA --}}
+        <div class="p-5 mb-6 bg-green-50 rounded-xl border border-green-200">
 
-    <h2 class="text-lg font-semibold md:text-xl">
-        Daftar Mahasiswa PKL ({{ $mahasiswa->total() }})
-    </h2>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 
-    <div class="flex flex-col gap-2 sm:flex-row">
+                <div>
+                    <p class="text-xs font-medium text-gray-500">
+                        Tempat PKL
+                    </p>
 
-        <form action="{{ route('staff.mitra.regenerate', $mitra->id) }}" method="POST">
-            @csrf
-            <button class="w-full px-4 py-2 text-white bg-yellow-500 rounded hover:bg-yellow-600">
-                Generate Ulang Akun
-            </button>
-        </form>
+                    <p class="mt-1 font-semibold text-gray-800">
+                        {{ $mitra->nama_tempat }}
+                    </p>
+                </div>
 
-        @if(session('username'))
-        <button onclick="kirimWA()" class="w-full px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">
-            Kirim ke WhatsApp
-        </button>
+                <div>
+                    <p class="text-xs font-medium text-gray-500">
+                        No HP Mitra
+                    </p>
+
+                    <p class="mt-1 font-semibold text-gray-800">
+                        {{ $mitra->no_hp ?? '-' }}
+                    </p>
+                </div>
+
+            </div>
+
+
+            {{-- HASIL GENERATE ULANG --}}
+            @if (session('username'))
+                <div class="p-4 mt-5 bg-green-100 rounded-lg border border-green-300">
+
+                    <div class="flex gap-3 items-start">
+
+                        <div
+                            class="flex flex-shrink-0 justify-center items-center w-9 h-9 text-green-700 bg-white rounded-full">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <div>
+
+                            <p class="font-semibold text-green-800">
+                                Akun Mitra Berhasil Dibuat Ulang
+                            </p>
+
+                            <div class="mt-2 space-y-1 text-sm text-gray-700">
+
+                                <p>
+                                    <b>Username:</b>
+                                    {{ session('username') }}
+                                </p>
+
+                                <p>
+                                    <b>Password:</b>
+                                    {{ session('password') }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            @endif
+
+        </div>
+
+
+        {{-- AKSI --}}
+        <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:justify-end">
+
+            <form action="{{ route('staff.mitra.regenerate', $mitra->id) }}" method="POST">
+                @csrf
+
+                <button type="submit"
+                    class="px-4 py-2 w-full text-sm font-medium text-white bg-yellow-500 rounded-lg transition hover:bg-yellow-600 sm:w-auto">
+                    <i class="mr-1 fa-solid fa-key"></i>
+                    Generate Ulang Akun
+                </button>
+            </form>
+
+            @if (session('username'))
+                <button type="button" onclick="kirimWA()"
+                    class="px-4 py-2 w-full text-sm font-medium text-white bg-green-600 rounded-lg transition hover:bg-green-700 sm:w-auto">
+                    <i class="mr-1 fa-brands fa-whatsapp"></i>
+                    Kirim ke WhatsApp
+                </button>
+            @endif
+
+        </div>
+
+
+        {{-- DAFTAR ANGKATAN --}}
+        <div class="mb-4">
+
+            <h2 class="text-lg font-semibold text-gray-800 md:text-xl">
+                Daftar Angkatan
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-500">
+                Pilih angkatan untuk melihat daftar mahasiswa PKL.
+            </p>
+
+        </div>
+
+
+        {{-- CARD ANGKATAN --}}
+        @if ($angkatan->count())
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+                @foreach ($angkatan as $item)
+                    <a href="{{ route('staff.mitra.mahasiswa', [
+                        'id' => $mitra->id,
+                        'tahun' => $item->angkatan,
+                    ]) }}"
+                        class="block p-5 bg-white rounded-xl border border-gray-200 shadow-sm transition hover:border-green-400 hover:shadow-md hover:-translate-y-0.5">
+
+                        <div class="flex justify-between items-center">
+
+                            <div class="flex gap-4 items-center">
+
+                                <div
+                                    class="flex flex-shrink-0 justify-center items-center w-12 h-12 text-green-700 bg-green-100 rounded-xl">
+                                    <i class="text-lg fa-solid fa-graduation-cap"></i>
+                                </div>
+
+                                <div>
+
+                                    <p class="text-xs font-medium text-gray-500">
+                                        Angkatan
+                                    </p>
+
+                                    <h3 class="mt-0.5 text-xl font-bold text-gray-800">
+                                        {{ $item->angkatan }}
+                                    </h3>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="text-right">
+
+                                <p class="text-2xl font-bold text-green-700">
+                                    {{ $item->jumlah_mahasiswa }}
+                                </p>
+
+                                <p class="text-xs text-gray-500">
+                                    Mahasiswa
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="flex justify-between items-center pt-4 mt-4 border-t border-gray-100">
+
+                            <span class="text-sm font-medium text-green-700">
+                                Lihat Mahasiswa
+                            </span>
+
+                            <i class="text-sm text-green-600 fa-solid fa-arrow-right"></i>
+
+                        </div>
+
+                    </a>
+                @endforeach
+
+            </div>
+        @else
+            <div class="p-8 text-center bg-white rounded-xl border border-gray-200">
+
+                <div
+                    class="flex justify-center items-center mx-auto mb-4 w-14 h-14 text-gray-400 bg-gray-100 rounded-full">
+                    <i class="text-xl fa-solid fa-users"></i>
+                </div>
+
+                <h3 class="text-sm font-semibold text-gray-700">
+                    Belum Ada Mahasiswa PKL
+                </h3>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Belum ada mahasiswa dari prodi Anda yang melakukan PKL
+                    di tempat ini.
+                </p>
+
+            </div>
+
         @endif
 
     </div>
 
-</div>
 
+    {{-- WHATSAPP --}}
+    @if (session('username'))
+        <script>
+            function kirimWA() {
 
-<!-- DESKTOP TABLE -->
-<div class="hidden md:block overflow-x-auto bg-white rounded-lg shadow">
-    <table class="w-full">
+                /*
+                 * Karena halaman detail sekarang tidak menampilkan
+                 * nomor mahasiswa, tombol WhatsApp tidak bisa lagi
+                 * mengambil nomor dari halaman ini.
+                 *
+                 * Jadi untuk sementara tombol ini sebaiknya
+                 * dihilangkan atau dipindahkan ke halaman angkatan.
+                 */
 
-        <thead class="bg-green-100 border border-green-200 text-slate-800">
-            <tr>
-                <th class="p-3 text-left">NIM</th>
-                <th class="p-3 text-left">Nama</th>
-                <th class="p-3 text-left">Angkatan</th>
-                <th class="p-3 text-left">No HP</th>
-            </tr>
-        </thead>
+                alert(
+                    'Silakan buka angkatan terlebih dahulu untuk mengirim akun melalui WhatsApp.'
+                );
 
-        <tbody>
-        @forelse($mahasiswa as $mhs)
-            <tr class="border-t">
-                <td class="p-3">{{ $mhs->nim }}</td>
-                <td class="p-3">{{ $mhs->nama }}</td>
-                <td class="p-3">{{ $mhs->angkatan }}</td>
-                <td class="p-3 nomor">{{ $mhs->no_hp }}</td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="4" class="p-4 text-center text-gray-500">
-                    Belum ada mahasiswa PKL di tempat ini
-                </td>
-            </tr>
-        @endforelse
-        </tbody>
-
-    </table>
-</div>
-
-
-<!-- MOBILE CARD -->
-<div class="space-y-4 md:hidden">
-
-    @forelse($mahasiswa as $mhs)
-        <div class="p-4 bg-white border rounded-lg shadow-sm">
-
-            <div class="mb-2">
-                <p class="text-sm text-gray-500">NIM</p>
-                <p class="font-medium">{{ $mhs->nim }}</p>
-            </div>
-
-            <div class="mb-2">
-                <p class="text-sm text-gray-500">Nama</p>
-                <p>{{ $mhs->nama }}</p>
-            </div>
-
-            <div class="mb-2">
-                <p class="text-sm text-gray-500">Angkatan</p>
-                <p>{{ $mhs->angkatan }}</p>
-            </div>
-
-            <div>
-                <p class="text-sm text-gray-500">No HP</p>
-                <p class="nomor">{{ $mhs->no_hp }}</p>
-            </div>
-
-        </div>
-    @empty
-        <div class="p-4 text-center text-gray-500 bg-white border rounded">
-            Belum ada mahasiswa PKL di tempat ini
-        </div>
-    @endforelse
-
-</div>
-
-
-<!-- PAGINATION -->
-<div class="mt-4 flex justify-center">
-    {{ $mahasiswa->links() }}
-</div>
-
-</div>
-
-
-<script>
-
-function kirimWA(){
-
-let nomor = []
-
-document.querySelectorAll('.nomor').forEach(function(el){
-
-let no = el.innerText.trim()
-
-if(no !== ""){
-
-if(no.startsWith("0")){
-no = "62" + no.substring(1)
-}
-
-nomor.push(no)
-
-}
-
-})
-
-if(nomor.length === 0){
-alert("Tidak ada nomor mahasiswa")
-return
-}
-
-let username = "{{ session('username') }}"
-let password = "{{ session('password') }}"
-
-let pesan = encodeURIComponent(
-"Halo, berikut akun login mitra PKL.\n\nUsername: "+username+"\nPassword: "+password
-)
-
-nomor.forEach(function(no){
-window.open("https://wa.me/" + no + "?text=" + pesan, "_blank")
-})
-
-}
-
-</script>
+            }
+        </script>
+    @endif
 
 </x-app-layout>
