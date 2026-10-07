@@ -23,6 +23,18 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+// use App\Http\Controllers\DebugSiakadController;
+
+// Route::get('/debug-siakad/nilai', [DebugSiakadController::class, 'nilai']);
+// use Illuminate\Support\Facades\Mail;
+// use App\Mail\TestMail;
+
+// Route::get('/test-email', function () {
+//     Mail::to('nf8657855@gmail.com')->send(new TestMail());
+
+//     return 'Email berhasil dikirim.';
+// });
+
 /*
 |--------------------------------------------------------------------------
 | ROOT & AUTH
@@ -276,6 +288,7 @@ use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\InformasiController;
 
 Route::middleware(['auth', 'first.login', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('mahasiswa', MahasiswaController::class);
@@ -314,6 +327,8 @@ Route::middleware(['auth', 'first.login', 'role:admin'])->prefix('admin')->name(
     Route::post('fakultas/import', [FakultasController::class, 'import']
     )->name('fakultas.import');
     Route::post('fakultas/sync', [FakultasController::class, 'syncSiakad'])->name('fakultas.sync');
+    Route::resource('informasi', InformasiController::class)
+            ->except(['show']);
 });
 
 

@@ -595,4 +595,18 @@ class SiakadService
             return 0;
         }
     }
+    public function debugNilaiMahasiswa(string $nim, string $tahunsms): array
+{
+    $payload = [
+        'nim' => $nim,
+        'tahunsms' => $tahunsms,
+    ];
+
+    return $this->httpRequest(
+        'GET',
+        env('SIAKAD_BASE_URL').'/nilai',
+        $payload,
+        15
+    );
+}
 }

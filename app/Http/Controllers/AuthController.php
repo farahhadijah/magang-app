@@ -9,12 +9,18 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\Informasi;
 
 class AuthController extends Controller
 {
     public function showLogin()
     {
-        return view('auth.login');
+        $informasi = Informasi::active()
+            ->forRole('mahasiswa')
+            ->latest()
+            ->get();
+
+        return view('auth.login', compact('informasi'));
     }
 
     public function login(Request $request, SiakadService $siakadService)

@@ -43,6 +43,78 @@ export function registerAlpineComponents(Alpine) {
         },
     }));
 
+        Alpine.data("informasiModal", () => ({
+        isOpen: false,
+        fileUrl: "",
+        fileType: "",
+        title: "",
+
+        openModal(url, title = "") {
+            this.fileUrl = url;
+            this.title = title;
+            this.fileType = this.getFileType(url);
+            this.isOpen = true;
+
+            document.body.classList.add("overflow-hidden");
+        },
+
+        closeModal() {
+            this.isOpen = false;
+            this.fileUrl = "";
+            this.fileType = "";
+            this.title = "";
+
+            document.body.classList.remove("overflow-hidden");
+        },
+
+        getFileType(url) {
+            const cleanUrl = url.split("?")[0];
+            const extension = cleanUrl.split(".").pop().toLowerCase();
+
+            if (extension === "pdf") {
+                return "pdf";
+            }
+
+            if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension)) {
+                return "image";
+            }
+
+            if (["doc", "docx", "xls", "xlsx"].includes(extension)) {
+                return "office";
+            }
+
+            return "unknown";
+        },
+
+        viewerSrc() {
+            if (this.fileType === "pdf" || this.fileType === "image") {
+                return this.fileUrl;
+            }
+
+            if (this.fileType === "office") {
+                return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(this.fileUrl)}`;
+            }
+
+            return "";
+        },
+
+        isPdf() {
+            return this.fileType === "pdf";
+        },
+
+        isImage() {
+            return this.fileType === "image";
+        },
+
+        isOffice() {
+            return this.fileType === "office";
+        },
+
+        isUnknown() {
+            return this.fileType === "unknown";
+        },
+    }));
+
     Alpine.data("togglePdf", (src = "") => ({
         visible: false,
         src,

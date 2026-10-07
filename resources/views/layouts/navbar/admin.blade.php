@@ -4,7 +4,7 @@
 
     {{-- ================= MANAJEMEN FAKULTAS ================= --}}
     <a href="{{ route('admin.fakultas.index') }}"
-    class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+        class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
     {{ request()->routeIs('admin.fakultas.*') ? 'bg-green-800 text-amber-300' : '' }}">
         <i class="w-5 fa-solid fa-building-columns"></i>
         <span>Manajemen Fakultas</span>
@@ -12,7 +12,7 @@
 
     {{-- ================= MANAJEMEN PRODI ================= --}}
     <a href="{{ route('admin.prodi.index') }}"
-       class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+        class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
        {{ request()->routeIs('admin.prodi.*') ? 'bg-green-800 text-amber-300' : '' }}">
         <i class="w-5 fa-solid fa-graduation-cap"></i>
         <span>Manajemen Prodi</span>
@@ -20,21 +20,21 @@
 
     {{-- ================= MANAJEMEN MAHASISWA ================= --}}
     <a href="{{ route('admin.mahasiswa.index') }}"
-       class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+        class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
        {{ request()->routeIs('admin.mahasiswa.*') ? 'bg-green-800 text-amber-300' : '' }}">
         <i class="w-5 fa-solid fa-user-graduate"></i>
         <span>Manajemen Mahasiswa</span>
     </a>
 
     <a href="{{ route('admin.dosen.index') }}"
-    class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+        class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
     {{ request()->routeIs('admin.dosen.*') ? 'bg-green-800 text-amber-300' : '' }}">
         <i class="w-5 fa-solid fa-chalkboard-user"></i>
         <span>Manajemen Dosen</span>
     </a>
 
     <a href="{{ route('admin.staff.index') }}"
-    class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+        class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
     {{ request()->routeIs('admin.staff.*') ? 'bg-green-800 text-amber-300' : '' }}">
 
         <i class="w-5 fa-solid fa-user-tie"></i>
@@ -43,10 +43,19 @@
 
     {{-- ================= MANAJEMEN PIMPINAN ================= --}}
     <a href="{{ route('admin.pimpinan.index') }}"
-       class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+        class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
        {{ request()->routeIs('admin.pimpinan.*') ? 'bg-green-800 text-amber-300' : '' }}">
         <i class="w-5 fa-solid fa-user-shield"></i>
         <span>Manajemen Pimpinan</span>
+    </a>
+
+    {{-- ================= MANAJEMEN INFORMASI ================= --}}
+    <a href="{{ route('admin.informasi.index') }}"
+        class="flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-green-800
+       {{ request()->routeIs('admin.informasi.*') ? 'bg-green-800 text-amber-300' : '' }}">
+
+        <i class="w-5 fa-solid fa-circle-info"></i>
+        <span>Manajemen Informasi</span>
     </a>
 
 </div>
