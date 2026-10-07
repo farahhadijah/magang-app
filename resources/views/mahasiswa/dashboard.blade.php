@@ -223,7 +223,6 @@
                     </div>
                 </div>
             @endif
-
             <!-- Status Cards with Enhanced Green Theme -->
             <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
                 {{-- STATUS PKL --}}
@@ -347,7 +346,8 @@
                             {{ optional($pengajuan?->pkl?->dosen)->nama ?? '-' }}
                         </h3>
                         @if ($pengajuan?->pkl?->dosen?->email)
-                            <p class="mt-2 text-xs text-gray-500 truncate" title="{{ $pengajuan->pkl->dosen->email }}">{{ $pengajuan->pkl->dosen->email }}</p>
+                            <p class="mt-2 text-xs text-gray-500 truncate"
+                                title="{{ $pengajuan->pkl->dosen->email }}">{{ $pengajuan->pkl->dosen->email }}</p>
                         @endif
                     </div>
                 </div>
@@ -358,7 +358,7 @@
                     <div
                         class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-50 to-transparent rounded-bl-full opacity-50">
                     </div>
-                    <div class="relative p-6 flex flex-col justify-between h-full">
+                    <div class="flex relative flex-col justify-between p-6 h-full">
                         <div>
                             <div class="flex justify-between items-center mb-3">
                                 <div class="p-2 bg-green-100 rounded-lg">
@@ -368,7 +368,8 @@
                                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                 </div>
-                                <span class="text-xs font-medium tracking-wider text-green-600 uppercase">Dokumen</span>
+                                <span
+                                    class="text-xs font-medium tracking-wider text-green-600 uppercase">Dokumen</span>
                             </div>
                             <p class="mb-1 text-sm text-gray-500">Surat Balasan</p>
                             <h3 class="text-base font-bold text-gray-700">
@@ -378,30 +379,29 @@
                             <div class="mt-2">
                                 @if ($pengajuan?->pkl?->suratBalasan)
                                     <span
-                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-green-700 bg-green-100/80 rounded-full border border-green-200">
-                                        <i class="mr-1.5 fa-solid fa-circle-check text-green-600"></i>
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-green-700 rounded-full border border-green-200 bg-green-100/80">
+                                        <i class="mr-1.5 text-green-600 fa-solid fa-circle-check"></i>
                                         Sudah Diunggah
                                     </span>
                                 @else
                                     <span
-                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-amber-700 bg-amber-100/80 rounded-full border border-amber-200">
-                                        <i class="mr-1.5 fa-solid fa-clock text-amber-600"></i>
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-amber-700 rounded-full border border-amber-200 bg-amber-100/80">
+                                        <i class="mr-1.5 text-amber-600 fa-solid fa-clock"></i>
                                         Belum Diunggah
                                     </span>
                                 @endif
                             </div>
                         </div>
 
-                        <div class="mt-4 pt-3 border-t border-green-100/60">
+                        <div class="pt-3 mt-4 border-t border-green-100/60">
                             @if ($pengajuan?->pkl?->suratBalasan)
-                                <button type="button"
-                                    @click="openModal(@js(asset('storage/' . $pengajuan->pkl->suratBalasan->path_file)))"
-                                    class="inline-flex justify-center items-center gap-1.5 px-3 py-2 w-full text-xs font-medium text-white bg-green-600 rounded-lg shadow-sm transition hover:bg-green-700">
+                                <button type="button" @click="openModal(@js(asset('storage/' . $pengajuan->pkl->suratBalasan->path_file)))"
+                                    class="inline-flex gap-1.5 justify-center items-center px-3 py-2 w-full text-xs font-medium text-white bg-green-600 rounded-lg shadow-sm transition hover:bg-green-700">
                                     <i class="fa-regular fa-file-pdf"></i>
                                     Lihat Surat Balasan
                                 </button>
                             @else
-                                <p class="text-xs text-gray-400 italic">
+                                <p class="text-xs italic text-gray-400">
                                     Menunggu unggahan dari mitra
                                 </p>
                             @endif
@@ -619,21 +619,15 @@
         </div>
 
         {{-- MODAL PREVIEW PDF (Alpine Component pdfViewer) --}}
-        <div
-            x-cloak
-            x-show="isOpen"
-            x-transition.opacity
+        <div x-cloak x-show="isOpen" x-transition.opacity
             class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-            @click.self="closeModal()"
-            @keydown.escape.window="closeModal()"
-        >
+            @click.self="closeModal()" @keydown.escape.window="closeModal()">
             <div
-                class="relative flex flex-col w-full max-w-5xl h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl"
-            >
+                class="relative flex flex-col w-full max-w-5xl h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl">
                 {{-- Header --}}
-                <div class="flex items-center justify-between px-5 py-3.5 bg-white border-b border-gray-200">
-                    <div class="flex items-center gap-2.5">
-                        <div class="flex items-center justify-center w-8 h-8 text-green-600 bg-green-50 rounded-lg">
+                <div class="flex justify-between items-center px-5 py-3.5 bg-white border-b border-gray-200">
+                    <div class="flex gap-2.5 items-center">
+                        <div class="flex justify-center items-center w-8 h-8 text-green-600 bg-green-50 rounded-lg">
                             <i class="fa-solid fa-file-pdf"></i>
                         </div>
                         <div>
@@ -646,35 +640,26 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <a
-                            :href="fileUrl"
-                            target="_blank"
-                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-                            title="Buka di tab baru"
-                        >
+                    <div class="flex gap-2 items-center">
+                        <a :href="fileUrl" target="_blank"
+                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg transition hover:bg-gray-200"
+                            title="Buka di tab baru">
                             <i class="mr-1.5 fa-solid fa-arrow-up-right-from-square"></i>
                             Tab Baru
                         </a>
 
-                        <button
-                            type="button"
-                            @click="closeModal()"
-                            class="flex items-center justify-center text-gray-500 transition bg-gray-100 rounded-full w-8 h-8 hover:bg-red-100 hover:text-red-600"
-                            aria-label="Tutup"
-                        >
+                        <button type="button" @click="closeModal()"
+                            class="flex justify-center items-center w-8 h-8 text-gray-500 bg-gray-100 rounded-full transition hover:bg-red-100 hover:text-red-600"
+                            aria-label="Tutup">
                             ✕
                         </button>
                     </div>
                 </div>
 
                 {{-- Preview Iframe --}}
-                <div class="flex-1 min-h-0 p-2 sm:p-3 bg-gray-100">
-                    <iframe
-                        :src="fileUrl"
-                        class="w-full h-full bg-white rounded-xl shadow-inner"
-                        frameborder="0"
-                    ></iframe>
+                <div class="flex-1 p-2 min-h-0 bg-gray-100 sm:p-3">
+                    <iframe :src="fileUrl" class="w-full h-full bg-white rounded-xl shadow-inner"
+                        frameborder="0"></iframe>
                 </div>
             </div>
         </div>
