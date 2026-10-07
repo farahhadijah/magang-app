@@ -5,12 +5,22 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanPkl;
 use App\Models\TempatPkl;
+use App\Models\NilaiPkl;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         $prodiId = $this->getProdiId();
+
+        $totalNilaiBelumApprove = NilaiPkl::where('status_approval', 'pending')
+        ->whereHas('pkl', function ($q) use ($prodiId) {
+            $q->where('status', 'aktif')
+                ->whereHas('pengajuanPkl.mahasiswa', function ($q2) use ($prodiId) {
+                    $q2->where('prodi_id', $prodiId);
+                });
+        })
+        ->count();
 
         $totalMenunggu = PengajuanPkl::where('status', 'pending_tu')
             ->whereHas('mahasiswa', function ($q) use ($prodiId) {
@@ -65,7 +75,8 @@ class DashboardController extends Controller
             'totalSelesaiTu',
             'totalDitolak',
             'totalSuratBelumValidasi',
-            'totalMitraBelumDigenerate'
+            'totalMitraBelumDigenerate',
+            'totalNilaiBelumApprove'
         ));
     }
 

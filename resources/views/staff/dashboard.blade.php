@@ -177,6 +177,61 @@
                 </div>
             </a>
 
+            {{-- Nilai PKL Belum Diapprove --}}
+            <a href="{{ route('staff.nilai.index') }}"
+                class="block transition-transform duration-200 hover:scale-[1.02]">
+
+                <div
+                    class="bg-white rounded-xl border border-gray-200 shadow-sm transition-shadow duration-200 hover:shadow-md">
+
+                    <div class="p-6">
+
+                        <div class="flex justify-between items-center">
+
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 truncate">
+                                    Nilai PKL Belum Diapprove
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-purple-600">
+                                    {{ $totalNilaiBelumApprove }}
+                                </p>
+                            </div>
+
+                            <div class="p-3 bg-purple-100 rounded-lg">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0z">
+                                    </path>
+
+                                </svg>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4">
+
+                            <span
+                                class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-purple-800 bg-purple-100 rounded-full">
+
+                                Pending
+
+                            </span>
+
+                            <span class="ml-2 text-xs text-gray-400">
+                                Perlu approval staff
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </a>
+
         </div>
 
         {{-- Manual Book --}}
