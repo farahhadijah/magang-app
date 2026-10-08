@@ -4,7 +4,7 @@
         Mahasiswa Bimbingan - MagangApp
     </x-slot>
 
-    <div x-data="pdfViewer" class="px-4 py-6 mx-auto space-y-6 max-w-7xl">
+    <div x-data="pdfViewer" class="px-0 py-6 mx-auto space-y-6 max-w-7xl">
 
         {{-- CONTAINER --}}
         <div class="overflow-hidden bg-white rounded-xl border border-gray-200 shadow-sm">
@@ -191,98 +191,73 @@
 
 
                 {{-- MOBILE CARD --}}
-                <div class="p-4 space-y-4 md:hidden">
+                <div class="p-3 space-y-3 md:hidden">
 
                     @foreach ($pkls as $pkl)
                         <div
-                            class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm transition-shadow duration-200 hover:shadow-md">
+                            class="p-3 bg-white rounded-lg border border-gray-200 shadow-sm transition-shadow duration-200 hover:shadow-md">
 
                             {{-- HEADER --}}
-                            <div class="flex justify-between items-start mb-3">
+                            <div class="flex justify-between items-start gap-2 mb-2">
 
-                                <div class="flex-1">
-
-                                    <h3 class="text-base font-semibold text-gray-900">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm font-semibold text-gray-900 truncate">
                                         {{ optional($pkl->pengajuan->mahasiswa)->nama }}
                                     </h3>
-
-                                    <p class="mt-1 text-xs text-gray-500">
-                                        NIM:
+                                    <p class="text-[11px] text-gray-500">
                                         {{ optional($pkl->pengajuan->mahasiswa)->nim }}
                                     </p>
-
                                 </div>
 
-                                <div>
-
+                                <div class="shrink-0">
                                     @if ($pkl->status === 'aktif')
                                         <span
-                                            class="inline-flex gap-1 items-center px-2 py-1 text-xs font-semibold text-amber-700 bg-amber-100 rounded-full">
+                                            class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-amber-700 bg-amber-100 rounded-full">
                                             Berjalan
                                         </span>
                                     @else
                                         <span
-                                            class="inline-flex gap-1 items-center px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
+                                            class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-green-700 bg-green-100 rounded-full">
                                             Selesai
                                         </span>
                                     @endif
-
                                 </div>
 
                             </div>
 
 
-                            {{-- INFORMASI --}}
-                            <div class="space-y-2 text-sm">
+                            {{-- INFORMASI (GRID 2 KOLOM) --}}
+                            <div class="grid grid-cols-2 gap-2 text-xs">
 
-                                <div class="flex">
-
-                                    <span class="w-24 text-xs text-gray-500">
-                                        Program Studi
-                                    </span>
-
-                                    <span class="flex-1 text-gray-700">
+                                <div class="min-w-0">
+                                    <p class="text-[10px] text-gray-400 uppercase tracking-wide">Prodi</p>
+                                    <p class="text-gray-700 truncate">
                                         {{ optional($pkl->pengajuan->mahasiswa->prodi)->nama }}
-                                    </span>
-
+                                    </p>
                                 </div>
 
-                                <div class="flex">
-
-                                    <span class="w-24 text-xs text-gray-500">
-                                        Tempat PKL
-                                    </span>
-
-                                    <span class="flex-1 text-gray-700">
+                                <div class="min-w-0">
+                                    <p class="text-[10px] text-gray-400 uppercase tracking-wide">Tempat PKL</p>
+                                    <p class="text-gray-700 truncate">
                                         {{ optional($pkl->pengajuan->tempatPkl)->nama_tempat }}
-                                    </span>
-
+                                    </p>
                                 </div>
 
                             </div>
 
 
                             {{-- SURAT BALASAN --}}
-                            <div class="pt-3 mt-4 border-t border-gray-100">
-
-                                <p class="mb-2 text-xs text-gray-500">
-                                    Surat Balasan Instansi
-                                </p>
+                            <div class="pt-2 mt-2 border-t border-gray-100">
 
                                 @if ($pkl->suratBalasan)
                                     <button type="button" @click="openModal(@js(asset('storage/' . $pkl->suratBalasan->path_file)))"
-                                        class="inline-flex gap-2 justify-center items-center px-3 py-2 w-full text-xs font-medium text-white bg-blue-600 rounded-lg transition hover:bg-blue-700">
+                                        class="inline-flex gap-1.5 justify-center items-center px-2.5 py-1.5 w-full text-[11px] font-medium text-white bg-blue-600 rounded-md transition hover:bg-blue-700">
                                         <i class="fa-regular fa-file-pdf"></i>
                                         Preview Surat
                                     </button>
-
-                                    <p class="mt-2 text-xs text-green-600">
-                                        <i class="mr-1 fa-solid fa-circle-check"></i>
-                                        Surat sudah diunggah oleh Mitra.
-                                    </p>
                                 @else
                                     <span
-                                        class="inline-flex gap-1.5 items-center px-2.5 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
+                                        class="inline-flex gap-1 items-center px-2 py-0.5 text-[10px] font-medium text-amber-700 bg-amber-100 rounded-full">
                                         <i class="fa-solid fa-clock"></i>
                                         Surat belum ada
                                     </span>
@@ -292,17 +267,17 @@
 
 
                             {{-- AKSI --}}
-                            <div class="flex gap-2 pt-3 mt-4 border-t border-gray-100">
+                            <div class="flex gap-1.5 pt-2 mt-2 border-t border-gray-100">
 
                                 {{-- LOGBOOK --}}
                                 @if ($pkl->status === 'aktif')
                                     <a href="{{ route('dosen.logbook.detail', $pkl->id) }}"
-                                        class="flex-1 px-3 py-2 text-xs font-medium text-center text-green-700 bg-green-100 rounded-lg transition-colors duration-150 hover:bg-green-200">
+                                        class="flex-1 px-2 py-1.5 text-[11px] font-medium text-center text-green-700 bg-green-100 rounded-md transition-colors duration-150 hover:bg-green-200">
                                         Logbook
                                     </a>
                                 @else
                                     <span
-                                        class="flex-1 px-3 py-2 text-xs font-medium text-center text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+                                        class="flex-1 px-2 py-1.5 text-[11px] font-medium text-center text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
                                         Terkunci
                                     </span>
                                 @endif
@@ -312,18 +287,18 @@
                                 @if ($pkl->status === 'aktif' && $pkl->laporanAkhir && $pkl->laporanAkhir->status_approve === 'approved')
                                     @if (!$pkl->nilaiPkl)
                                         <a href="{{ route('dosen.nilai.create', $pkl->id) }}"
-                                            class="flex-1 px-3 py-2 text-xs font-medium text-center text-white bg-green-600 rounded-lg transition-colors duration-150 hover:bg-green-700">
+                                            class="flex-1 px-2 py-1.5 text-[11px] font-medium text-center text-white bg-green-600 rounded-md transition-colors duration-150 hover:bg-green-700">
                                             Input Nilai
                                         </a>
                                     @else
                                         <span
-                                            class="flex-1 px-3 py-2 text-xs font-medium text-center text-white bg-gray-500 rounded-lg cursor-not-allowed">
+                                            class="flex-1 px-2 py-1.5 text-[11px] font-medium text-center text-white bg-gray-500 rounded-md cursor-not-allowed">
                                             Sudah Dinilai
                                         </span>
                                     @endif
                                 @else
                                     <span
-                                        class="flex-1 px-3 py-2 text-xs font-medium text-center text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+                                        class="flex-1 px-2 py-1.5 text-[11px] font-medium text-center text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
                                         Disable
                                     </span>
                                 @endif

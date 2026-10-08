@@ -311,6 +311,23 @@
                                             {{ \Carbon\Carbon::parse($pkl->penilaianMitra->tgl_input)->format('d M Y') }}
                                         </span>
                                     </div>
+
+                                    @if ($pkl->penilaianMitra->file_pdf)
+                                        <div class="flex flex-wrap gap-1.5 pt-1 sm:gap-2">
+                                            <button type="button"
+                                                @click="openModal(@js(asset('storage/' . $pkl->penilaianMitra->file_pdf)))"
+                                                class="inline-flex gap-1.5 items-center px-2.5 py-1 text-[10px] text-white bg-blue-600 rounded hover:bg-blue-700 sm:px-3 sm:py-1.5 sm:text-xs">
+                                                <i class="fa-solid fa-eye"></i>
+                                                View PDF
+                                            </button>
+
+                                            <a href="{{ asset('storage/' . $pkl->penilaianMitra->file_pdf) }}" download
+                                                class="inline-flex gap-1.5 items-center px-2.5 py-1 text-[10px] text-white bg-green-600 rounded hover:bg-green-700 sm:px-3 sm:py-1.5 sm:text-xs">
+                                                <i class="fa-solid fa-download"></i>
+                                                Download
+                                            </a>
+                                        </div>
+                                    @endif
                                 </div>
                             @else
                                 <span class="italic text-gray-400">Belum tersedia</span>
@@ -472,13 +489,12 @@
 
                     <div class="flex gap-1.5 items-center sm:gap-2">
 
-                        @if ($pkl->laporanAkhir)
-                            <a :href="fileUrl" download
-                                class="hidden gap-2 items-center px-3 py-2 text-sm text-white bg-green-600 rounded-lg sm:inline-flex hover:bg-green-700">
-                                <i class="fa-solid fa-download"></i>
-                                Download
-                            </a>
-                        @endif
+                        <a :href="fileUrl" download
+                            x-show="fileUrl"
+                            class="hidden gap-2 items-center px-3 py-2 text-sm text-white bg-green-600 rounded-lg sm:inline-flex hover:bg-green-700">
+                            <i class="fa-solid fa-download"></i>
+                            Download
+                        </a>
 
                         <button type="button"
                             class="inline-flex justify-center items-center w-8 h-8 text-sm text-gray-600 rounded-lg hover:bg-gray-100 sm:w-10 sm:h-10"
@@ -493,7 +509,7 @@
                 <div class="bg-gray-50">
                     <div class="h-[70vh] w-full sm:h-[75vh]">
                         <iframe x-show="fileUrl" :src="fileUrl" class="w-full h-full"
-                            title="Preview Laporan Akhir"></iframe>
+                            title="Preview Dokumen"></iframe>
                     </div>
                 </div>
 

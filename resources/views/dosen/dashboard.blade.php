@@ -49,7 +49,7 @@
                         </div>
 
                         <div class="p-6 pt-2">
-                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
                                 {{-- Menunggu Verifikasi --}}
                                 <a href="{{ route('kaprodi.pengajuan.index') }}" class="block">
                                     <div
@@ -97,27 +97,6 @@
                                         </div>
                                     </div>
                                 </a>
-
-                                {{-- PKL Selesai --}}
-                                <div
-                                    class="overflow-hidden relative p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl transition-all duration-300 group hover:shadow-lg hover:-translate-y-1">
-                                    <div
-                                        class="absolute top-0 right-0 w-20 h-20 bg-purple-200 rounded-full opacity-30 transition-transform duration-300 translate-x-8 -translate-y-8 group-hover:scale-150">
-                                    </div>
-                                    <div class="relative">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <div
-                                                class="flex justify-center items-center w-10 h-10 bg-purple-500 rounded-xl shadow-md">
-                                                <i class="text-lg text-white fa-solid fa-flag-checkered"></i>
-                                            </div>
-                                            <i class="text-sm text-purple-400 fa-solid fa-check-circle"></i>
-                                        </div>
-                                        <p class="mb-1 text-xs font-semibold tracking-wider text-purple-700 uppercase">
-                                            PKL Selesai</p>
-                                        <p class="text-3xl font-bold text-purple-900">{{ $totalSelesai }}</p>
-                                        <p class="mt-2 text-xs text-purple-600">Telah menyelesaikan PKL</p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

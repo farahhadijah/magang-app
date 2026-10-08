@@ -29,7 +29,10 @@ class DashboardController extends Controller
             ->count();
 
         $laporanAkhirCount = LaporanAkhir::whereHas('pkl', function ($q) use ($dosenId) {
-            $q->where('id_dosen', $dosenId);
+
+            $q->where('id_dosen', $dosenId)
+            ->where('status', 'aktif');
+
         })
         ->count();
 
@@ -39,7 +42,6 @@ class DashboardController extends Controller
 
         $totalMenunggu = 0;
         $totalAktif = 0;
-        $totalSelesai = 0;
 
         if ($isKaprodi) {
 
@@ -60,29 +62,15 @@ class DashboardController extends Controller
                     });
                 })
                 ->count();
-
-            // PKL selesai
-            $totalSelesai = Pkl::where('status', 'selesai')
-                ->whereHas('pengajuan', function ($q) use ($prodiId) {
-                    $q->whereHas('mahasiswa', function ($q2) use ($prodiId) {
-                        $q2->where('prodi_id', $prodiId);
-                    });
-                })
-                ->count();
         }
 
         return view('dosen.dashboard', compact(
             'isKaprodi',
-
-            // statistik dosen
             'mahasiswaCount',
             'logbookPendingCount',
             'laporanAkhirCount',
-
-            // statistik kaprodi
             'totalMenunggu',
-            'totalAktif',
-            'totalSelesai'
+            'totalAktif'
         ));
     }
 }

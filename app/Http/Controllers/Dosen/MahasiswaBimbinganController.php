@@ -13,7 +13,8 @@ class MahasiswaBimbinganController extends Controller
         $dosen = Auth::user()->dosen;
 
         $pkls = Pkl::where('id_dosen', $dosen->id)
-            ->with([
+        ->where('status', 'aktif')
+        ->with([
                 'pengajuan.mahasiswa.prodi',
                 'pengajuan.tempatPkl',
                 'suratBalasan',

@@ -188,9 +188,22 @@ Route::middleware(['auth', 'first.login', 'role:dosen'])
         Route::post('/laporan/{pkl}/reject', [DosenLaporanAkhirController::class, 'reject']
         )->name('laporan.reject');
 
-        Route::get('/resume-pkl', [ResumePklController::class, 'index'])->name('resume.index');
-        Route::get('/resume-pkl/{pkl}', [ResumePklController::class, 'show'])->name('resume.show');
-        Route::get('/resume/{pkl}/logbook', [ResumePklController::class, 'logbook'])->name('resume.logbook');
+        // 1. Halaman utama resume → daftar ANGKATAN
+        Route::get('/resume-pkl', [ResumePklController::class, 'index'])
+            ->name('resume.index');
+
+        // 2. Daftar mahasiswa berdasarkan ANGKATAN
+        // Harus diletakkan SEBELUM /resume-pkl/{pkl}
+        Route::get('/resume-pkl/angkatan/{tahun}', [ResumePklController::class, 'mahasiswa'])
+            ->name('resume.mahasiswa');
+
+        // 3. Detail resume satu mahasiswa
+        Route::get('/resume-pkl/{pkl}', [ResumePklController::class, 'show'])
+            ->name('resume.show');
+
+        // 4. Detail logbook dari resume
+        Route::get('/resume-pkl/{pkl}/logbook', [ResumePklController::class, 'logbook'])
+            ->name('resume.logbook');
     });
 
 /*
