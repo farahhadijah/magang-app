@@ -18,14 +18,19 @@ class MitraController extends Controller
             abort(403, 'Data mitra tidak ditemukan.');
         }
 
-            $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
+        $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
                 $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
             })
-                ->with(['mahasiswa.user', 'penilaianMitra'])
-                ->paginate(10);
+            ->where('status', 'aktif')
+            ->with([
+                'mahasiswa.user',
+                'penilaianMitra'
+            ])
+            ->paginate(10);
 
         return view('mitra.mahasiswa', compact('pkls'));
     }
+
 
     public function logbook($pklId)
     {
@@ -70,76 +75,65 @@ class MitraController extends Controller
             abort(403, 'Data mitra tidak ditemukan.');
         }
 
-        // Ambil PKL yang terkait dengan tempat mitra dan memiliki minimal 1 logbook
         $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
                 $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
             })
+            ->where('status', 'aktif')
             ->whereHas('logbooks')
-            ->with(['mahasiswa', 'logbooks' => function ($q) {
-                $q->orderBy('tgl', 'desc');
-            }])
+            ->with([
+                'mahasiswa',
+                'logbooks' => function ($q) {
+                    $q->orderBy('tgl', 'desc');
+                }
+            ])
             ->paginate(10);
 
         return view('mitra.logbook_list', compact('pkls'));
     }
 
-public function dashboard()
-{
-    $mitra = Auth::user()->mitra;
+    public function dashboard()
+    {
+        $mitra = Auth::user()->mitra;
 
-    if (!$mitra) {
-        abort(403, 'Data mitra tidak ditemukan.');
-    }
+        if (!$mitra) {
+            abort(403, 'Data mitra tidak ditemukan.');
+        }
 
-    $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
+        // PKL milik tempat mitra ini, baik aktif maupun selesai
+        $baseQuery = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
             $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
-        })
-        ->where('status', 'aktif') // tambahkan ini
-        ->with('mahasiswa')
-        ->get();
+        })->whereIn('status', ['aktif', 'selesai']);
 
-    $jumlahMahasiswa = $pkls->count();
+        // Jumlah mahasiswa dengan PKL aktif
+        $jumlahMahasiswa = (clone $baseQuery)
+            ->where('status', 'aktif')
+            ->count();
 
-    $pklIds = $pkls->pluck('id');
+        // Ambil ID PKL yang masih aktif
+        $pklAktifIds = (clone $baseQuery)
+            ->where('status', 'aktif')
+            ->pluck('id');
 
-    // ======================
-    // STATISTIK TUGAS
-    // ======================
+        // Jumlah tugas yang sudah dikumpulkan dari PKL aktif
+        $sudahSubmit = TugasMitraSubmit::whereIn('id_pkl', $pklAktifIds)
+            ->count();
 
-    $totalTugas = TugasMitra::whereIn('id_pkl', $pklIds)->count();
+        // Jumlah mahasiswa yang belum mendapat surat balasan
+        $belumSuratBalasan = (clone $baseQuery)
+            ->whereDoesntHave('suratBalasan')
+            ->count();
 
-    $sudahSubmit = TugasMitraSubmit::whereIn('id_pkl', $pklIds)->count();
+        // Jumlah mahasiswa yang belum dinilai oleh mitra
+        $belumDinilai = (clone $baseQuery)
+            ->whereDoesntHave('penilaianMitra')
+            ->count();
 
-    $belumSubmit = $totalTugas - $sudahSubmit;
-
-    // ======================
-    // STATUS TUGAS
-    // ======================
-
-    $tugasPending = TugasMitraSubmit::whereIn('id_pkl', $pklIds)
-        ->where('status', 'pending')
-        ->where('revisi', false)
-        ->count();
-
-    $tugasRevisi = TugasMitraSubmit::whereIn('id_pkl', $pklIds)
-        ->where('revisi', true)
-        ->count();
-
-    $tugasSelesai = TugasMitraSubmit::whereIn('id_pkl', $pklIds)
-        ->where('status', 'selesai')
-        ->count();
-
-    return view('mitra.dashboard', [
-        'mitra' => $mitra,
-        'jumlahMahasiswa' => $jumlahMahasiswa,
-
-        'sudahSubmit' => $sudahSubmit,
-        'belumSubmit' => $belumSubmit,
-
-        'totalTugas' => $totalTugas,
-        'tugasPending' => $tugasPending,
-        'tugasRevisi' => $tugasRevisi,
-        'tugasSelesai' => $tugasSelesai,
-    ]);
-}
+        return view('mitra.dashboard', [
+            'mitra' => $mitra,
+            'jumlahMahasiswa' => $jumlahMahasiswa,
+            'sudahSubmit' => $sudahSubmit,
+            'belumSuratBalasan' => $belumSuratBalasan,
+            'belumDinilai' => $belumDinilai,
+        ]);
+    }
 }

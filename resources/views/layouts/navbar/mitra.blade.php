@@ -35,4 +35,11 @@
         Surat Balasan Instansi
     </a>
 
+    <a href="{{ route('mitra.resume.index') }}"
+        class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800
+	   {{ request()->routeIs('mitra.resume.*') ? 'bg-green-800 text-amber-300' : '' }}">
+        <i class="w-5 fa-solid fa-file-contract"></i>
+        Resume PKL
+    </a>
+
 </div>

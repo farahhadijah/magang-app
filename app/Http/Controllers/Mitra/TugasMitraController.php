@@ -11,23 +11,31 @@ use Illuminate\Support\Facades\Auth;
 class TugasMitraController extends Controller
 {
     public function index()
-{
-    $mitra = Auth::user()->mitra;
+    {
+        $mitra = Auth::user()->mitra;
 
-    $tugas = TugasMitra::whereHas('pkl.pengajuanPkl', function ($q) use ($mitra) {
-        $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
-    })
-    ->with([
-        'pkl.mahasiswa',
-        'submit' => function($q){
-            $q->latest();
+        if (!$mitra) {
+            abort(403, 'Data mitra tidak ditemukan.');
         }
-    ])
-    ->latest()
-    ->paginate(10);
 
-    return view('mitra.tugas.index', compact('tugas'));
-}
+        $tugas = TugasMitra::whereHas('pkl', function ($q) use ($mitra) {
+                $q->where('status', 'aktif')
+                    ->whereHas('pengajuanPkl', function ($subQuery) use ($mitra) {
+                        $subQuery->where('id_tempat_pkl', $mitra->tempat_pkl_id);
+                    });
+            })
+            ->with([
+                'pkl.mahasiswa',
+                'submit' => function ($q) {
+                    $q->latest();
+                }
+            ])
+            ->latest()
+            ->paginate(10);
+
+        return view('mitra.tugas.index', compact('tugas'));
+    }
+
     public function create()
     {
         $mitra = Auth::user()->mitra;
@@ -41,48 +49,48 @@ class TugasMitraController extends Controller
         return view('mitra.tugas.create', compact('pkls'));
     }
     public function store(Request $request)
-{
-    $request->validate([
-        'id_pkl' => 'required',
-        'judul' => 'required',
-        'deskripsi' => 'nullable',
-        'deadline' => 'nullable|date',
+    {
+        $request->validate([
+            'id_pkl' => 'required',
+            'judul' => 'required',
+            'deskripsi' => 'nullable',
+            'deadline' => 'nullable|date',
 
-        // file optional
-        'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240'
-    ]);
+            // file optional
+            'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240'
+        ]);
 
-    $data = $request->only([
-        'id_pkl',
-        'judul',
-        'deskripsi',
-        'deadline'
-    ]);
+        $data = $request->only([
+            'id_pkl',
+            'judul',
+            'deskripsi',
+            'deadline'
+        ]);
 
-    // server-side: prevent creating tugas for finished PKL
-    $targetPkl = Pkl::find($request->id_pkl);
-    if (! $targetPkl || $targetPkl->status === 'selesai') {
-        if ($request->wantsJson()) {
-            return response()->json(['message' => 'Tidak dapat membuat tugas untuk PKL yang sudah selesai.'], 403);
+        // server-side: prevent creating tugas for finished PKL
+        $targetPkl = Pkl::find($request->id_pkl);
+        if (! $targetPkl || $targetPkl->status === 'selesai') {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Tidak dapat membuat tugas untuk PKL yang sudah selesai.'], 403);
+            }
+
+            return redirect()->back()->with('error', 'Tidak dapat membuat tugas untuk PKL yang sudah selesai.');
         }
 
-        return redirect()->back()->with('error', 'Tidak dapat membuat tugas untuk PKL yang sudah selesai.');
+        if ($request->hasFile('file')) {
+
+            $path = $request->file('file')
+                ->store('tugas_mitra', 'public');
+
+            $data['file'] = $path;
+        }
+
+        TugasMitra::create($data);
+
+        return redirect()
+            ->route('mitra.tugas.index')
+            ->with('success', 'Tugas berhasil dibuat');
     }
-
-    if ($request->hasFile('file')) {
-
-        $path = $request->file('file')
-            ->store('tugas_mitra', 'public');
-
-        $data['file'] = $path;
-    }
-
-    TugasMitra::create($data);
-
-    return redirect()
-        ->route('mitra.tugas.index')
-        ->with('success', 'Tugas berhasil dibuat');
-}
     public function show($id)
     {
         $tugas = TugasMitra::with([

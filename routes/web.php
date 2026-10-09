@@ -362,6 +362,7 @@ use App\Http\Controllers\Mitra\MitraController;
 use App\Http\Controllers\Mitra\PenilaianMitraController;
 use App\Http\Controllers\Mitra\TugasMitraController;
 use App\Http\Controllers\Mitra\SuratBalasanController;
+use App\Http\Controllers\Mitra\ResumeController;
 Route::middleware(['auth', 'first.login', 'role:mitra'])
     ->prefix('mitra')
     ->name('mitra.')
@@ -390,6 +391,18 @@ Route::middleware(['auth', 'first.login', 'role:mitra'])
         Route::post('/penilaian/{id}', [PenilaianMitraController::class, 'store'])->name('penilaian.store');
         Route::get('/surat-balasan', [SuratBalasanController::class, 'index']) ->name('surat-balasan.index');
         Route::post('/surat-balasan/{pkl}', [SuratBalasanController::class, 'store']) ->name('surat-balasan.store');
+        // RESUME PKL
+        Route::get('/resume', [ResumeController::class, 'index'])
+            ->name('resume.index');
+
+        Route::get('/resume/angkatan/{tahun}', [ResumeController::class, 'mahasiswa'])
+            ->name('resume.mahasiswa');
+
+        Route::get('/resume/{pkl}/logbook', [ResumeController::class, 'logbook'])
+            ->name('resume.logbook');
+
+        Route::get('/resume/{pkl}', [ResumeController::class, 'show'])
+            ->name('resume.show');
     });
 
 /*

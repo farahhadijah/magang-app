@@ -9,6 +9,7 @@ use App\Models\LaporanAkhir;
 use App\Models\NilaiPkl;
 use App\Models\Mahasiswa;
 use App\Models\SuratBalasan;
+use App\Models\TugasMitra;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Carbon\Carbon;
 class Pkl extends Model
@@ -107,5 +108,9 @@ class Pkl extends Model
     public function suratBalasan()
     {
         return $this->hasOne(SuratBalasan::class, 'id_pkl');
+    }
+    public function tugasMitra()
+    {
+        return $this->hasMany(TugasMitra::class, 'id_pkl');
     }
 }

@@ -13,34 +13,37 @@ use Illuminate\Support\Facades\Auth;
 
 class PenilaianMitraController extends Controller
 {
-    /**
-     * Daftar mahasiswa aktif yang bisa dinilai
-     */
     public function index()
     {
         $mitra = Auth::user()->mitra;
 
-        if (!$mitra) {
-            abort(403, 'Data mitra tidak ditemukan.');
-        }
+        abort_unless($mitra, 403, 'Data mitra tidak ditemukan.');
 
-    $pkls = Pkl::where('status', 'aktif')
-
-            ->whereHas('pengajuanPkl', function ($q) use ($mitra) {
+        $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
                 $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
             })
+            ->where(function ($q) {
+                // PKL aktif tetap ditampilkan.
+                $q->where('status', 'aktif')
 
+                    // PKL selesai hanya ditampilkan jika belum dinilai.
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->where('status', 'selesai')
+                            ->whereDoesntHave('penilaianMitra');
+                    });
+            })
             ->with([
-                'mahasiswa.user',
-                'mahasiswa.prodi',
+                'pengajuanPkl.mahasiswa.user',
+                'pengajuanPkl.mahasiswa.prodi',
                 'penilaianMitra',
-                'nilaiPkl'
             ])
-
+            ->latest('id')
             ->paginate(10);
 
         return view('mitra.penilaian.index', compact('pkls'));
     }
+
+
 
     /**
      * Form input/edit nilai
@@ -48,47 +51,42 @@ class PenilaianMitraController extends Controller
     public function form($id)
     {
         $mitra = Auth::user()->mitra;
+        abort_unless($mitra, 403, 'Data mitra tidak ditemukan.');
 
         $pkl = Pkl::where('id', $id)
-
-            ->where('status', 'aktif')
-
+            ->whereIn('status', ['aktif', 'selesai'])
             ->whereHas('pengajuanPkl', function ($q) use ($mitra) {
                 $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
             })
-
             ->with([
-                'mahasiswa.user',
-                'mahasiswa.prodi',
-                'penilaianMitra'
+                'pengajuanPkl.mahasiswa.user',
+                'pengajuanPkl.mahasiswa.prodi',
+                'penilaianMitra',
             ])
-
             ->firstOrFail();
 
         return view('mitra.penilaian.form', compact('pkl'));
     }
+
 
     /**
      * Simpan nilai
      */
     public function store(Request $request, $id)
     {
-        $mitra = Auth::user()->mitra;
+    $mitra = Auth::user()->mitra;
+    abort_unless($mitra, 403, 'Data mitra tidak ditemukan.');
 
-        $pkl = Pkl::where('id', $id)
-
-            ->where('status', 'aktif')
-
-            ->whereHas('pengajuanPkl', function ($q) use ($mitra) {
-                $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
-            })
-
-            ->with([
-                'mahasiswa.user',
-                'mahasiswa.prodi'
-            ])
-
-            ->firstOrFail();
+    $pkl = Pkl::where('id', $id)
+        ->whereIn('status', ['aktif', 'selesai'])
+        ->whereHas('pengajuanPkl', function ($q) use ($mitra) {
+            $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
+        })
+        ->with([
+            'pengajuanPkl.mahasiswa.user',
+            'pengajuanPkl.mahasiswa.prodi',
+        ])
+        ->firstOrFail();
 
         $request->validate([
 
