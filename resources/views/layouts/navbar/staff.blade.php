@@ -101,4 +101,18 @@
         <i class="w-5 fa-solid fa-file-pdf"></i>
         Formulir Remedial
     </a>
+
+    {{-- RESUME PKL (BARU) --}}
+    <a href="{{ route('staff.resume.index') }}"
+        class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            transition
+            hover:bg-green-800
+            {{ request()->routeIs('staff.resume.*') ? 'bg-green-800 text-amber-300' : '' }}
+        ">
+        <i class="w-5 fa-solid fa-file-pdf"></i>
+        Resume PKL
+    </a>
 </div>
