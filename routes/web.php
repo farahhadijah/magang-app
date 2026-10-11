@@ -50,8 +50,8 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
-     ->middleware('auth')
-     ->name('logout');
+    ->middleware('auth')
+    ->name('logout');
 
 Route::middleware(['auth', 'first.login'])->group(function () {
     Route::get('/siakad/first-login', [SiakadFirstLoginController::class, 'show'])->name('siakad.first-login');
@@ -106,9 +106,8 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::get('/remedial', [RemedialController::class, 'index'])->name('remedial.index');
     });
 
-
-    /*
-    |--------------------------------------------------------------------------
+/*
+|--------------------------------------------------------------------------
 | AUTHENTICATED (GLOBAL)
 |--------------------------------------------------------------------------
 */
@@ -224,7 +223,8 @@ Route::middleware(['auth', 'kaprodi'])
         Route::post('/pengajuan/{id}/approve', [KaprodiPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [KaprodiPengajuanController::class, 'reject'])->name('pengajuan.reject');
         Route::get('/histori', [KaprodiPengajuanController::class, 'histori'])->name('pengajuan.histori');
-        Route::get('/mahasiswa/belum', [KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
+        Route::get('/mahasiswa/belum-pkl', [KaprodiMahasiswaController::class, 'daftarAngkatan'])->name('mahasiswa.angkatan');
+        Route::get('/mahasiswa/belum-pkl/{angkatan}', [KaprodiMahasiswaController::class, 'belumMengajukan'])->name('mahasiswa.belum');
         Route::get('/dosen/search', [KaprodiPengajuanController::class, 'searchDosen'])->name('dosen.search');
         Route::get('/mahasiswa/{mahasiswa}', [KaprodiMahasiswaController::class, 'detail'])->name('mahasiswa.detail');
     });
@@ -233,14 +233,14 @@ Route::middleware(['auth', 'kaprodi'])
 | STAFF TU AREA
 |--------------------------------------------------------------------------
 */
+use App\Http\Controllers\Staff\ApprovalNilaiController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\DokumenPengajuanController as StaffDokumenController;
 use App\Http\Controllers\Staff\FormulirRemedialController;
 use App\Http\Controllers\Staff\MitraController as StaffMitraController;
 use App\Http\Controllers\Staff\PengajuanPklController as StaffPengajuanController;
-use App\Http\Controllers\Staff\StaffSuratController;
-use App\Http\Controllers\Staff\ApprovalNilaiController;
 use App\Http\Controllers\Staff\ResumeController as StaffResumeController;
+use App\Http\Controllers\Staff\StaffSuratController;
 
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
@@ -255,16 +255,16 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::get('/pengajuan/{id}', [StaffPengajuanController::class, 'show'])->name('pengajuan.show');
         Route::post('/pengajuan/{id}/approve', [StaffPengajuanController::class, 'approve'])->name('pengajuan.approve');
         Route::post('/pengajuan/{id}/reject', [StaffPengajuanController::class, 'reject'])->name('pengajuan.reject');
-        Route::get( '/mitra/{id}/angkatan/{tahun}', [StaffMitraController::class, 'mahasiswaByAngkatan'] )->name('mitra.mahasiswa');
-        Route::get('/mitra', [StaffPengajuanController::class, 'manajemenMitra'] )->name('mitra.index');
-        Route::get('/mitra/{id}/akun', [StaffPengajuanController::class, 'showAkunMitra'] )->name('mitra.akun');
-        Route::post('/mitra/{id}', [StaffPengajuanController::class, 'storeMitra'] )->name('mitra.store');
-        Route::get('/manajemen-mitra', [StaffMitraController::class, 'index'] )->name('manajemen-mitra.index');
-        Route::get('/manajemen-mitra/{id}', [StaffMitraController::class, 'show'] )->name('manajemen-mitra.show');
+        Route::get('/mitra/{id}/angkatan/{tahun}', [StaffMitraController::class, 'mahasiswaByAngkatan'])->name('mitra.mahasiswa');
+        Route::get('/mitra', [StaffPengajuanController::class, 'manajemenMitra'])->name('mitra.index');
+        Route::get('/mitra/{id}/akun', [StaffPengajuanController::class, 'showAkunMitra'])->name('mitra.akun');
+        Route::post('/mitra/{id}', [StaffPengajuanController::class, 'storeMitra'])->name('mitra.store');
+        Route::get('/manajemen-mitra', [StaffMitraController::class, 'index'])->name('manajemen-mitra.index');
+        Route::get('/manajemen-mitra/{id}', [StaffMitraController::class, 'show'])->name('manajemen-mitra.show');
         Route::post('/mitra/{id}/regenerate', [StaffMitraController::class, 'regenerate'])->name('mitra.regenerate');
-        Route::get('/surat-pengantar', [StaffSuratController::class, 'index'] )->name('surat.index');
-        Route::get('/surat-pengantar/{id}/cetak', [StaffSuratController::class, 'cetak'] )->name('surat.cetak');
-        Route::post('/surat-pengantar/{id}/validasi', [StaffSuratController::class, 'validasi'] )->name('surat.validasi');
+        Route::get('/surat-pengantar', [StaffSuratController::class, 'index'])->name('surat.index');
+        Route::get('/surat-pengantar/{id}/cetak', [StaffSuratController::class, 'cetak'])->name('surat.cetak');
+        Route::post('/surat-pengantar/{id}/validasi', [StaffSuratController::class, 'validasi'])->name('surat.validasi');
         Route::get('/surat-pengantar/{id}/preview', [StaffSuratController::class, 'preview'])->name('surat.preview');
         Route::post('/surat-pengantar/bulk-print', [StaffSuratController::class, 'bulkPrint'])->name('surat.bulk');
         Route::post('/surat-pengantar/bulk-preview', [StaffSuratController::class, 'bulkPreview'])->name('surat.bulk-preview');
@@ -278,8 +278,8 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::get('/nilai', [ApprovalNilaiController::class, 'index'])->name('nilai.index');
         Route::post('/nilai/{pkl}/approve', [ApprovalNilaiController::class, 'approve'])->name('nilai.approve');
         Route::post('/nilai/bulk-approve', [ApprovalNilaiController::class, 'bulkApprove'])->name('nilai.bulk-approve');
-        Route::get('/resume', [StaffResumeController::class, 'index']) ->name('resume.index');
-        Route::get('/resume/angkatan/{angkatan}', [ StaffResumeController::class, 'showByAngkatan', ]) ->where('angkatan', '[0-9]{4}') ->name('resume.angkatan');
+        Route::get('/resume', [StaffResumeController::class, 'index'])->name('resume.index');
+        Route::get('/resume/angkatan/{angkatan}', [StaffResumeController::class, 'showByAngkatan'])->where('angkatan', '[0-9]{4}')->name('resume.angkatan');
     });
 
 /*
@@ -290,11 +290,11 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DosenController;
 use App\Http\Controllers\Admin\FakultasController;
+use App\Http\Controllers\Admin\InformasiController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\InformasiController;
 
 Route::middleware(['auth', 'first.login', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('mahasiswa', MahasiswaController::class);
@@ -334,9 +334,8 @@ Route::middleware(['auth', 'first.login', 'role:admin'])->prefix('admin')->name(
     )->name('fakultas.import');
     Route::post('fakultas/sync', [FakultasController::class, 'syncSiakad'])->name('fakultas.sync');
     Route::resource('informasi', InformasiController::class)
-            ->except(['show']);
+        ->except(['show']);
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -344,15 +343,16 @@ Route::middleware(['auth', 'first.login', 'role:admin'])->prefix('admin')->name(
 |--------------------------------------------------------------------------
 */
 use App\Http\Controllers\Pimpinan\PimpinanController;
+
 Route::prefix('pimpinan')->middleware(['auth', 'first.login', 'role:pimpinan'])->group(function () {
-    
+
     Route::get('/', [PimpinanController::class, 'index']);
-    
+
     Route::get('/fakultas/{id}', [PimpinanController::class, 'prodi'])
-    ->name('pimpinan.prodi');
-    
+        ->name('pimpinan.prodi');
+
     Route::get('/prodi/{prodi_id}/angkatan/{angkatan}', [PimpinanController::class, 'mahasiswa'])
-    ->name('pimpinan.mahasiswa');
+        ->name('pimpinan.mahasiswa');
 });
 
 /*
@@ -362,9 +362,10 @@ Route::prefix('pimpinan')->middleware(['auth', 'first.login', 'role:pimpinan'])-
 */
 use App\Http\Controllers\Mitra\MitraController;
 use App\Http\Controllers\Mitra\PenilaianMitraController;
-use App\Http\Controllers\Mitra\TugasMitraController;
-use App\Http\Controllers\Mitra\SuratBalasanController;
 use App\Http\Controllers\Mitra\ResumeController;
+use App\Http\Controllers\Mitra\SuratBalasanController;
+use App\Http\Controllers\Mitra\TugasMitraController;
+
 Route::middleware(['auth', 'first.login', 'role:mitra'])
     ->prefix('mitra')
     ->name('mitra.')
@@ -391,8 +392,8 @@ Route::middleware(['auth', 'first.login', 'role:mitra'])
         Route::get('/penilaian', [PenilaianMitraController::class, 'index'])->name('penilaian');
         Route::get('/penilaian/{id}', [PenilaianMitraController::class, 'form'])->name('penilaian.form');
         Route::post('/penilaian/{id}', [PenilaianMitraController::class, 'store'])->name('penilaian.store');
-        Route::get('/surat-balasan', [SuratBalasanController::class, 'index']) ->name('surat-balasan.index');
-        Route::post('/surat-balasan/{pkl}', [SuratBalasanController::class, 'store']) ->name('surat-balasan.store');
+        Route::get('/surat-balasan', [SuratBalasanController::class, 'index'])->name('surat-balasan.index');
+        Route::post('/surat-balasan/{pkl}', [SuratBalasanController::class, 'store'])->name('surat-balasan.store');
         // RESUME PKL
         Route::get('/resume', [ResumeController::class, 'index'])
             ->name('resume.index');

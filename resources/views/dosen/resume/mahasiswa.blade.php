@@ -3,7 +3,7 @@
         Resume PKL Mahasiswa
     </x-slot>
 
-    <div class="max-w-7xl px-4 py-6 mx-auto">
+    <div class="max-w-7xl py-6 mx-auto">
 
         {{-- Header --}}
         <div class="mb-6">

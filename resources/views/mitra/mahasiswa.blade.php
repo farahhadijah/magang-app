@@ -50,7 +50,7 @@
                                 </td>
 
                                 <td class="px-6 py-4 text-sm text-gray-700">
-                                    @if($pkl->status === 'selesai' && $pkl->penilaianMitra)
+                                    @if(in_array($pkl->status, ['aktif', 'selesai']) && $pkl->penilaianMitra)
                                         {{ $pkl->penilaianMitra->grade ?? $pkl->penilaianMitra->rata_rata ?? '-' }}
                                     @else
                                         -
@@ -113,7 +113,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs text-gray-500">Grade</span>
                                 <span class="text-sm font-medium text-gray-700">
-                                    @if($pkl->status === 'selesai' && $pkl->penilaianMitra)
+                                    @if(in_array($pkl->status, ['aktif', 'selesai']) && $pkl->penilaianMitra)
                                         {{ $pkl->penilaianMitra->grade ?? $pkl->penilaianMitra->rata_rata ?? '-' }}
                                     @else
                                         -

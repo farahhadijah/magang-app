@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Mitra;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Pkl;
-use App\Models\TugasMitra;
 use App\Models\TugasMitraSubmit;
+use Illuminate\Support\Facades\Auth;
 
 class MitraController extends Controller
 {
@@ -14,29 +13,30 @@ class MitraController extends Controller
     {
         $mitra = Auth::user()->mitra;
 
-        if (!$mitra) {
+        if (! $mitra) {
             abort(403, 'Data mitra tidak ditemukan.');
         }
 
         $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
-                $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
-            })
+            $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
+        })
+            // Hanya tampilkan PKL aktif
             ->where('status', 'aktif')
             ->with([
-                'mahasiswa.user',
-                'penilaianMitra'
-            ])
+            'mahasiswa.user',
+            'penilaianMitra',
+        ])
+            ->orderByDesc('tgl_mulai')
             ->paginate(10);
 
         return view('mitra.mahasiswa', compact('pkls'));
     }
 
-
     public function logbook($pklId)
     {
         $mitra = Auth::user()->mitra;
 
-        if (!$mitra) {
+        if (! $mitra) {
             abort(403, 'Data mitra tidak ditemukan.');
         }
 
@@ -48,14 +48,14 @@ class MitraController extends Controller
                 'mahasiswa.user',
                 'logbooks' => function ($query) {
                     $query->orderBy('tgl', 'asc');
-                }
+                },
             ])
             ->firstOrFail();
 
         // Ambil link Google Drive dokumentasi PKL
         $logbookDrive = $pkl->logbooks
             ->first(function ($logbook) {
-                return !empty($logbook->link_dokumentasi);
+                return ! empty($logbook->link_dokumentasi);
             });
 
         return view('mitra.logbook', compact(
@@ -71,20 +71,20 @@ class MitraController extends Controller
     {
         $mitra = Auth::user()->mitra;
 
-        if (!$mitra) {
+        if (! $mitra) {
             abort(403, 'Data mitra tidak ditemukan.');
         }
 
         $pkls = Pkl::whereHas('pengajuanPkl', function ($q) use ($mitra) {
-                $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
-            })
+            $q->where('id_tempat_pkl', $mitra->tempat_pkl_id);
+        })
             ->where('status', 'aktif')
             ->whereHas('logbooks')
             ->with([
                 'mahasiswa',
                 'logbooks' => function ($q) {
                     $q->orderBy('tgl', 'desc');
-                }
+                },
             ])
             ->paginate(10);
 
@@ -95,7 +95,7 @@ class MitraController extends Controller
     {
         $mitra = Auth::user()->mitra;
 
-        if (!$mitra) {
+        if (! $mitra) {
             abort(403, 'Data mitra tidak ditemukan.');
         }
 

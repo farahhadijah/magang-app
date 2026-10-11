@@ -3,7 +3,7 @@
         Detail Resume PKL
     </x-slot>
 
-    <div x-data="pdfViewer()" class="px-3 py-4 mx-auto space-y-3 max-w-5xl sm:px-4 sm:py-6 sm:space-y-6">
+    <div x-data="pdfViewer()" class="py-4 mx-auto space-y-3 max-w-5xl sm:py-6 sm:space-y-6">
 
         {{-- ========================================================= --}}
         {{-- HEADER DOKUMEN                                            --}}
@@ -314,8 +314,7 @@
 
                                     @if ($pkl->penilaianMitra->file_pdf)
                                         <div class="flex flex-wrap gap-1.5 pt-1 sm:gap-2">
-                                            <button type="button"
-                                                @click="openModal(@js(asset('storage/' . $pkl->penilaianMitra->file_pdf)))"
+                                            <button type="button" @click="openModal(@js(asset('storage/' . $pkl->penilaianMitra->file_pdf)))"
                                                 class="inline-flex gap-1.5 items-center px-2.5 py-1 text-[10px] text-white bg-blue-600 rounded hover:bg-blue-700 sm:px-3 sm:py-1.5 sm:text-xs">
                                                 <i class="fa-solid fa-eye"></i>
                                                 View PDF
@@ -489,8 +488,7 @@
 
                     <div class="flex gap-1.5 items-center sm:gap-2">
 
-                        <a :href="fileUrl" download
-                            x-show="fileUrl"
+                        <a :href="fileUrl" download x-show="fileUrl"
                             class="hidden gap-2 items-center px-3 py-2 text-sm text-white bg-green-600 rounded-lg sm:inline-flex hover:bg-green-700">
                             <i class="fa-solid fa-download"></i>
                             Download

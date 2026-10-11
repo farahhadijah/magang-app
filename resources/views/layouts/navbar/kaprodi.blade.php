@@ -23,11 +23,11 @@
         Mahasiswa PKL
     </a>
     {{-- ================= MAHASASISWA BELUM PKL ================= --}}
-    <a href="{{ route('kaprodi.mahasiswa.belum') }}"
+    <a href="{{ route('kaprodi.mahasiswa.angkatan') }}"
         class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800
-    {{ request()->routeIs('kaprodi.mahasiswa.belum') ? 'bg-green-800 text-amber-300' : '' }}">
+    {{ request()->routeIs('kaprodi.mahasiswa.angkatan') ? 'bg-green-800 text-amber-300' : '' }}">
         <i class="w-5 fa-solid fa-user-clock"></i>
-        Mahasiswa Belum Mengajukan
+        Mahasiswa Belum Mengajukan Pkl
     </a>
 
 </div>
