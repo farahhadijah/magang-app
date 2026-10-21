@@ -1,118 +1,113 @@
 <x-app-layout>
-
     <x-slot name="title">
-        Akun Mitra - MagangApp
+        Manajemen Mitra - SIBOLANG
     </x-slot>
 
-    <div class="container px-0 py-6 mx-auto">
+    <div class="px-0 py-6 mx-auto max-w-7xl min-h-[70vh]">
 
-    <h1 class="mb-0 text-xl font-bold md:text-2xl text-slate-900">
-        Manajemen Akun Mitra
-    </h1>
+        {{-- SEARCH --}}
+        <form method="GET" action="{{ route('staff.manajemen-mitra.index') }}" class="mb-4">
+            <div class="flex gap-2">
+                <input type="text" name="search" value="{{ $search ?? '' }}"
+                    placeholder="Cari nama tempat atau jenis instansi..."
+                    class="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500">
+                <button type="submit"
+                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    <i class="mr-1 fa-solid fa-search"></i> Cari
+                </button>
+                @if (!empty($search))
+                    <a href="{{ route('staff.manajemen-mitra.index') }}"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
 
-    <!-- Search -->
-    <form method="GET" action="{{ route('staff.manajemen-mitra.index') }}" class="mb-4">
-        <div class="flex flex-col gap-2 sm:flex-row">
-            <input 
-                type="text"
-                name="search"
-                value="{{ request('search') }}"
-                placeholder="Cari tempat PKL / jabatan..."
-                class="w-full px-3 py-2 border rounded sm:w-64 focus:outline-none focus:ring focus:ring-green-200"
-            >
+        <div class="overflow-hidden bg-white rounded-lg border border-green-200 shadow">
 
-            <button 
-                type="submit"
-                class="w-full px-4 py-2 text-white bg-green-600 rounded sm:w-auto hover:bg-green-700"
-            >
-                Cari
-            </button>
-        </div>
-    </form>
+            @if ($mitras->count())
 
+                {{-- DESKTOP --}}
+                <div class="hidden overflow-x-auto md:block">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-green-100">
+                            <tr>
+                                <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Tempat PKL</th>
+                                <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Email</th>
+                                <th class="px-6 py-3 text-sm font-semibold text-left text-gray-700">Username</th>
+                                <th class="px-6 py-3 text-sm font-semibold text-center text-gray-700">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach ($mitras as $mitra)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">
+                                        {{ $mitra->tempatPkl->nama_tempat ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 break-all">
+                                        {{ $mitra->tempatPkl->email ?? '— Belum ada —' }}
+                                    </td>
+                                    <td class="px-6 py-4 font-mono text-sm text-gray-700">
+                                        {{ $mitra->user->username ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-center whitespace-nowrap">
+                                        <a href="{{ route('staff.manajemen-mitra.show', $mitra->id) }}"
+                                            class="inline-block px-3 py-1.5 text-xs font-medium text-gray-700 bg-white rounded border border-gray-300 hover:bg-gray-50">
+                                            <i class="mr-1 fa-solid fa-eye"></i> Detail
+                                        </a>
+                                        <a href="{{ route('staff.mitra.kredensial.show', $mitra->id) }}"
+                                            class="inline-block px-3 py-1.5 ml-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                                            <i class="mr-1 fa-solid fa-key"></i> Kelola Kredensial
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-    <!-- DESKTOP TABLE -->
-    <div class="hidden overflow-x-auto bg-white rounded shadow md:block">
-        <table class="min-w-full border border-green-100">
+                {{-- MOBILE --}}
+                <div class="p-3 space-y-3 md:hidden">
+                    @foreach ($mitras as $mitra)
+                        <div class="p-4 bg-white rounded-lg border border-gray-200">
+                            <h3 class="text-base font-semibold text-gray-900">
+                                {{ $mitra->tempatPkl->nama_tempat ?? '-' }}</h3>
+                            <p class="mt-1 text-xs text-gray-500 break-all">Email: {{ $mitra->tempatPkl->email ?? '—' }}
+                            </p>
+                            <p class="text-xs text-gray-500 break-all">Username: {{ $mitra->user->username ?? '-' }}
+                            </p>
 
-            <thead class="bg-green-100 text-slate-900">
-                <tr>
-                    <th class="p-3 text-left">Tempat PKL</th>
-                    <th class="p-3 text-left">Jenis</th>
-                    <th class="p-3 text-left">No HP</th>
-                    <th class="p-3 text-left">Aksi</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            @forelse($mitras as $mitra)
-                <tr class="border-t text-slate-800">
-                    <td class="p-3">{{ $mitra->tempatPkl->nama_tempat }}</td>
-                    <td class="p-3">{{ $mitra->tempatPkl->jenis_tempat }}</td>
-                    <td class="p-3">{{ $mitra->no_hp }}</td>
-                    <td class="p-3">
-                        <a href="{{ route('staff.manajemen-mitra.show', $mitra->id) }}"
-                           class="px-3 py-1 text-white bg-green-600 rounded hover:bg-green-700">
-                            Detail
-                        </a>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="p-4 text-center text-gray-500">
-                        Data mitra tidak ditemukan
-                    </td>
-                </tr>
-            @endforelse
-            </tbody>
-
-        </table>
-    </div>
-
-
-    <!-- MOBILE CARD - MINIMALIS VERSION -->
-    <div class="space-y-2 md:hidden">
-        @forelse($mitras as $mitra)
-            <div class="p-3 bg-white border rounded-lg">
-
-                {{-- Header: Tempat PKL --}}
-                <div class="pb-2 mb-2 border-b border-gray-100">
-                    <h3 class="text-base font-semibold text-slate-900">
-                        {{ $mitra->tempatPkl->nama_tempat }}
-                    </h3>
-                    <p class="text-xs text-gray-500">
-                        {{ $mitra->tempatPkl->jenis_tempat }}
+                            <div class="grid grid-cols-2 gap-2 mt-3">
+                                <a href="{{ route('staff.manajemen-mitra.show', $mitra->id) }}"
+                                    class="py-2 text-xs font-medium text-center text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50">
+                                    <i class="mr-1 fa-solid fa-eye"></i> Detail
+                                </a>
+                                <a href="{{ route('staff.mitra.kredensial.show', $mitra->id) }}"
+                                    class="py-2 text-xs font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                                    <i class="mr-1 fa-solid fa-key"></i> Kredensial
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="flex flex-col justify-center items-center px-6 py-16 text-center">
+                    <div class="flex justify-center items-center mb-4 w-16 h-16 text-gray-400 bg-gray-100 rounded-full">
+                        <i class="text-2xl fa-solid fa-users"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-gray-800">Belum Ada Mitra</h3>
+                    <p class="mt-2 max-w-md text-sm text-gray-500">
+                        {{ !empty($search) ? 'Tidak ada mitra yang cocok dengan pencarian.' : 'Mitra akan muncul otomatis setelah pengajuan PKL disetujui Kaprodi.' }}
                     </p>
                 </div>
+            @endif
 
-                {{-- Body: Informasi ringkas dengan layout horizontal --}}
-                <div class="space-y-1.5 mb-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-gray-500">No HP</span>
-                        <span class="text-sm font-medium text-gray-700">{{ $mitra->no_hp }}</span>
-                    </div>
+            @if ($mitras->hasPages())
+                <div class="flex justify-center p-4 border-t border-gray-100">
+                    {{ $mitras->links() }}
                 </div>
-
-                {{-- Action Button --}}
-                <a href="{{ route('staff.manajemen-mitra.show', $mitra->id) }}"
-                   class="block w-full py-2 text-sm font-medium text-center text-green-600 transition border border-green-600 rounded hover:bg-green-50">
-                    Lihat Detail
-                </a>
-
-            </div>
-        @empty
-            <div class="p-4 text-center text-gray-500 bg-white border rounded">
-                Data mitra tidak ditemukan
-            </div>
-        @endforelse
+            @endif
+        </div>
     </div>
-
-
-    <!-- Pagination -->
-    <div class="flex justify-center mt-4">
-        {{ $mitras->links() }}
-    </div>
-
-</div>
-
 </x-app-layout>

@@ -7,7 +7,8 @@ use App\Models\Dosen;
 use App\Models\PengajuanPkl;
 use App\Models\Pkl;
 use App\Models\SuratPengantar;
-// use App\Models\User;
+use App\Models\User;
+use App\Models\Mitra;
 use App\Models\Verifikasi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -15,7 +16,12 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Mail\StatusPengajuanMail;
+use App\Mail\AkunMitraMail;
+use App\Models\EmailLog;
+use Illuminate\Support\Facades\Log;
 
 class PengajuanPklController extends Controller
 {
@@ -49,7 +55,7 @@ class PengajuanPklController extends Controller
             ->with([
                 'mahasiswa:id,nama,nim,prodi_id,angkatan',
                 'mahasiswa.prodi:id,nama',
-                'tempatPkl:id,nama_tempat,nama_normalized,jenis_tempat,lokasi_maps',
+                'tempatPkl:id,nama_tempat,nama_normalized,jenis_tempat,email,lokasi_maps',
                 'dokumenPengajuan:id,id_pengajuan_pkl,jenis_dokumen,path_file',
 
                 'verifikasi:id,id_pengajuan_pkl,id_user,level,status,tgl_verifikasi',
@@ -146,6 +152,9 @@ class PengajuanPklController extends Controller
     }
     /* ================= APPROVE ================= */
 
+    
+        /* ================= APPROVE ================= */
+
     public function approve(Request $request, $id)
     {
         $request->validate([
@@ -164,7 +173,7 @@ class PengajuanPklController extends Controller
             })
             ->findOrFail($id);
 
-        if (! $pengajuan->bisaDiverifikasiKaprodi()) {
+        if (!$pengajuan->bisaDiverifikasiKaprodi()) {
             return back()->with('warning', 'Pengajuan sudah diproses.');
         }
 
@@ -174,20 +183,28 @@ class PengajuanPklController extends Controller
 
         $dosen = Dosen::where('id', $request->id_dosen)
             ->where('is_active', 1)
+            ->where('prodi_id', $prodiId)
             ->first();
 
-        if (! $dosen) {
-            return back()->with('warning', 'Dosen tidak valid.');
+        if (!$dosen) {
+            return back()->with(
+                'warning',
+                'Dosen tidak valid atau bukan dari prodi yang sama.'
+            );
         }
 
-        //  WAJIB SATU PRODI
-        if ($dosen->prodi_id != $prodiId) {
-            return back()->with('warning', 'Dosen harus dari prodi yang sama.');
-        }
+        $mitraBaru = null;
+        $emailInstansiKosong = false;
 
         try {
-            DB::transaction(function () use ($pengajuan, $dosen, $prodiId) {
-
+            DB::transaction(function () use (
+                $pengajuan,
+                $dosen,
+                $prodiId,
+                &$mitraBaru,
+                &$emailInstansiKosong
+            ) {
+                // Catat persetujuan Kaprodi.
                 Verifikasi::create([
                     'id_pengajuan_pkl' => $pengajuan->id,
                     'id_user' => auth()->user()->getKey(),
@@ -200,6 +217,7 @@ class PengajuanPklController extends Controller
                     'status' => 'disetujui',
                 ]);
 
+                // Buat data PKL.
                 $pkl = Pkl::create([
                     'id_pengajuan_pkl' => $pengajuan->id,
                     'id_dosen' => $dosen->id,
@@ -208,10 +226,11 @@ class PengajuanPklController extends Controller
                     'status' => 'aktif',
                 ]);
 
-                // nomor surat
+                // Buat nomor surat pengantar.
                 $bulanRomawi = [
-                    1 => 'I', 'II', 'III', 'IV', 'V', 'VI',
-                    'VII', 'VIII', 'IX', 'X', 'XI', 'XII',
+                    1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV',
+                    5 => 'V', 6 => 'VI', 7 => 'VII', 8 => 'VIII',
+                    9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII',
                 ];
 
                 $noSurat = sprintf(
@@ -221,7 +240,6 @@ class PengajuanPklController extends Controller
                     now()->year
                 );
 
-                // ambil kaprodi dari prodi yg sama
                 $kaprodi = Dosen::where('jabatan', 'Kaprodi')
                     ->where('prodi_id', $prodiId)
                     ->where('is_active', 1)
@@ -234,7 +252,8 @@ class PengajuanPklController extends Controller
                     'kaprodi' => $kaprodi,
                 ])->setPaper('A4', 'portrait');
 
-                $path = 'surat/surat_pkl_'.$pkl->id.'.pdf';
+                $path = 'surat/surat_pkl_' . $pkl->id . '.pdf';
+
                 Storage::disk('public')->put($path, $pdf->output());
 
                 SuratPengantar::create([
@@ -243,21 +262,176 @@ class PengajuanPklController extends Controller
                     'tgl_terbit' => now(),
                     'path_file' => $path,
                 ]);
+
+                // ==================================================
+                // BUAT AKUN MITRA OTOMATIS (jika belum ada)
+                // ==================================================
+                $tempat = $pengajuan->tempatPkl;
+
+                if (
+                    $tempat &&
+                    !Mitra::where('tempat_pkl_id', $tempat->id)->exists()
+                ) {
+                    $email = strtolower(trim((string) $tempat->email));
+
+                    // Jangan membuat akun yang kredensialnya
+                    // tidak dapat dikirim karena email kosong.
+                    if ($email === '') {
+                        $emailInstansiKosong = true;
+
+                        Log::warning(
+                            'Akun mitra belum dibuat karena email instansi kosong.',
+                            ['tempat_pkl_id' => $tempat->id]
+                        );
+
+                        // ✅ CATAT: email kosong → status pending
+                        // (supaya muncul di halaman staff TU)
+                        EmailLog::create([
+                            'mitra_id'      => null,
+                            'tempat_pkl_id' => $tempat->id,
+                            'email_tujuan'  => '(kosong)',
+                            'jenis'         => EmailLog::JENIS_AKUN_BARU,
+                            'status'        => EmailLog::STATUS_PENDING,
+                            'error_message' => 'Email instansi belum tersedia saat persetujuan Kaprodi. '
+                                             . 'Staff TU perlu melengkapi email & mengirim ulang.',
+                            'triggered_by'  => auth()->user()?->getKey(),
+                        ]);
+                    } else {
+                        $baseUsername = 'mitra_' .
+                            (Str::slug($tempat->nama_tempat, '_') ?: 'instansi');
+
+                        $username = $baseUsername;
+                        $counter = 1;
+
+                        while (User::where('username', $username)->exists()) {
+                            $username = $baseUsername . '_' . $counter;
+                            $counter++;
+                        }
+
+                        $password = Str::random(12);
+
+                        $user = User::create([
+                            'username' => $username,
+                            'password' => Hash::make($password),
+                            'role' => 'mitra',
+                            'first_login' => 1,
+                        ]);
+
+                        $mitra = Mitra::create([
+                            'user_id' => $user->id,
+                            'tempat_pkl_id' => $tempat->id,
+                            'no_hp' => null,
+                        ]);
+
+                        // Simpan sementara untuk pengiriman email
+                        // setelah transaksi database berhasil.
+                        $mitraBaru = [
+                            'mitra_id'    => $mitra->id,      // ✅ untuk log
+                            'tempat_id'   => $tempat->id,     // ✅ untuk log
+                            'email'       => $email,
+                            'nama_tempat' => $tempat->nama_tempat,
+                            'username'    => $username,
+                            'password'    => $password,
+                        ];
+                    }
+                }
             });
 
-            if (!empty($pengajuan->mahasiswa->email)) {
-                Mail::to($pengajuan->mahasiswa->email)->queue(new StatusPengajuanMail($pengajuan));
+        } catch (\Throwable $e) {
+            Log::error('Gagal menyetujui pengajuan PKL.', [
+                'pengajuan_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with(
+                'error',
+                'Persetujuan gagal diproses. Periksa log aplikasi untuk mengetahui penyebabnya.'
+            );
+        }
+
+        // ==================================================
+        // KIRIM EMAIL KREDENSIAL SETELAH TRANSAKSI BERHASIL
+        // ==================================================
+        $emailMitraBerhasil = false;
+
+        if ($mitraBaru) {
+            $status = EmailLog::STATUS_FAILED;
+            $errorMsg = null;
+
+            try {
+                Mail::to($mitraBaru['email'])->send(
+                    new AkunMitraMail(
+                        $mitraBaru['nama_tempat'],
+                        $mitraBaru['username'],
+                        $mitraBaru['password']
+                    )
+                );
+
+                $emailMitraBerhasil = true;
+                $status = EmailLog::STATUS_SENT;
+
+            } catch (\Throwable $e) {
+                Log::error('Gagal mengirim email akun mitra.', [
+                    'pengajuan_id' => $id,
+                    'email' => $mitraBaru['email'],
+                    'error' => $e->getMessage(),
+                ]);
+
+                $errorMsg = $e->getMessage();
             }
 
-            return redirect()->route('kaprodi.pengajuan.index')
-                ->with('success', 'Pengajuan disetujui & surat berhasil dibuat.');
-
-        } catch (\Exception $e) {
-            \Log::error($e);
-
-            return back()->with('error', 'Terjadi kesalahan.');
+            // ✅ CATAT: hasil kirim email (sent / failed)
+            EmailLog::create([
+                'mitra_id'      => $mitraBaru['mitra_id'],
+                'tempat_pkl_id' => $mitraBaru['tempat_id'],
+                'email_tujuan'  => $mitraBaru['email'],
+                'jenis'         => EmailLog::JENIS_AKUN_BARU,
+                'status'        => $status,
+                'error_message' => $errorMsg,
+                'triggered_by'  => auth()->user()?->getKey(),
+            ]);
         }
+
+        // Kirim pemberitahuan status kepada mahasiswa.
+        try {
+            $emailMahasiswa = $pengajuan->mahasiswa->email ?? null;
+
+            if ($emailMahasiswa) {
+                Mail::to($emailMahasiswa)->queue(
+                    new StatusPengajuanMail($pengajuan)
+                );
+            }
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim email status mahasiswa.', [
+                'pengajuan_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        $pesan = 'Pengajuan disetujui dan surat pengantar PKL berhasil diterbitkan.';
+
+        if ($mitraBaru && $emailMitraBerhasil) {
+            $pesan .= ' Akun mitra berhasil dibuat dan kredensial dikirim ke email instansi.';
+            return redirect()
+                ->route('kaprodi.pengajuan.index')
+                ->with('success', $pesan);
+        } elseif ($mitraBaru && !$emailMitraBerhasil) {
+            $pesan .= ' Akun mitra berhasil dibuat, tetapi pengiriman email gagal. Email perlu dikirim ulang.';
+            return redirect()
+                ->route('kaprodi.pengajuan.index')
+                ->with('warning', $pesan);
+        } elseif ($emailInstansiKosong) {
+            $pesan .= ' Akun mitra belum dibuat karena email instansi belum tersedia.';
+            return redirect()
+                ->route('kaprodi.pengajuan.index')
+                ->with('warning', $pesan);
+        }
+
+        return redirect()
+            ->route('kaprodi.pengajuan.index')
+            ->with('success', $pesan);
     }
+
 
     /* ================= REJECT ================= */
 

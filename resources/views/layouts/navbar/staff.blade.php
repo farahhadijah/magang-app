@@ -14,8 +14,7 @@
         Verifikasi PKL
     </a>
 
-
-    {{-- APPROVAL NILAI PKL (BARU) --}}
+    {{-- APPROVAL NILAI PKL --}}
     <a href="{{ route('staff.nilai.index') }}"
         class="
             flex items-center gap-3
@@ -28,7 +27,6 @@
         <i class="w-5 fa-solid fa-star"></i>
         Approval Nilai PKL
     </a>
-
 
     {{-- HISTORI --}}
     <a href="{{ route('staff.pengajuan.histori') }}"
@@ -44,23 +42,7 @@
         Histori
     </a>
 
-
-    {{-- AKUN MITRA (Generate akun) --}}
-    <a href="{{ route('staff.mitra.index') }}"
-        class="
-            flex items-center gap-3
-            px-4 py-2.5
-            rounded-lg
-            transition
-            hover:bg-green-800
-            {{ request()->routeIs('staff.mitra.*') ? 'bg-green-800 text-amber-300' : '' }}
-        ">
-        <i class="w-5 fa-solid fa-user-plus"></i>
-        Akun Mitra
-    </a>
-
-
-    {{-- DATA MITRA (Manajemen mitra baru) --}}
+    {{-- DATA MITRA (list mitra + kelola kredensial) --}}
     <a href="{{ route('staff.manajemen-mitra.index') }}"
         class="
             flex items-center gap-3
@@ -68,13 +50,13 @@
             rounded-lg
             transition
             hover:bg-green-800
-            {{ request()->routeIs('staff.manajemen-mitra.*') ? 'bg-green-800 text-amber-300' : '' }}
+            {{ request()->routeIs('staff.manajemen-mitra.*') || request()->routeIs('staff.mitra.kredensial.*') ? 'bg-green-800 text-amber-300' : '' }}
         ">
         <i class="w-5 fa-solid fa-handshake"></i>
         Data Mitra
     </a>
 
-    {{-- SURAT PENGANTAR PKL (BARU) --}}
+    {{-- SURAT PENGANTAR PKL --}}
     <a href="{{ route('staff.surat.index') }}"
         class="
             flex items-center gap-3
@@ -102,7 +84,7 @@
         Formulir Remedial
     </a>
 
-    {{-- RESUME PKL (BARU) --}}
+    {{-- RESUME PKL --}}
     <a href="{{ route('staff.resume.index') }}"
         class="
             flex items-center gap-3

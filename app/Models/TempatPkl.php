@@ -29,7 +29,7 @@ class TempatPkl extends Model
         'nama_tempat',
         'nama_normalized',
         'jenis_tempat',
-        'no_hp',
+        'email',
         'lokasi_maps',
     ];
     public function pengajuans()
@@ -50,5 +50,9 @@ class TempatPkl extends Model
     public function mitra()
     {
         return $this->hasOne(Mitra::class, 'tempat_pkl_id');
+    }
+    public function emailLogs()
+    {
+        return $this->hasMany(EmailLog::class, 'tempat_pkl_id');
     }
 }

@@ -17,7 +17,7 @@ class MitraController extends Controller
         $search = $request->search;
         $prodiId = auth()->user()->staff->prodi_id;
 
-        $mitras = Mitra::with('tempatPkl')
+        $mitras = Mitra::with(['tempatPkl', 'user', 'latestEmailLog'])  // ← tambah 2
             ->whereHas('tempatPkl.pengajuans', function ($q) use ($prodiId) {
                 $q->where('status', 'disetujui')
                     ->whereHas('mahasiswa', function ($m) use ($prodiId) {
@@ -56,7 +56,7 @@ class MitraController extends Controller
             ->select(
                 'mitra.*',
                 'tempat_pkl.nama_tempat',
-                'tempat_pkl.no_hp as hp_tempat'
+                'tempat_pkl.email as email_tempat'
             )
             ->where('mitra.id', $id)
             ->firstOrFail();
@@ -161,30 +161,5 @@ class MitraController extends Controller
                 'tahun'
             )
         );
-    }
-
-
-    public function regenerate($id)
-    {
-        $mitra = Mitra::findOrFail($id);
-
-        $user = User::findOrFail($mitra->user_id);
-
-        $passwordBaru = Str::random(8);
-
-        $user->password = Hash::make($passwordBaru);
-
-        // Paksa mitra mengganti password saat login berikutnya
-        $user->first_login = true;
-
-        // Pastikan akun aktif
-        $user->is_active = true;
-
-        $user->save();
-
-        return redirect()->back()->with([
-            'username' => $user->username,
-            'password' => $passwordBaru
-        ]);
     }
 }

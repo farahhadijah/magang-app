@@ -295,10 +295,22 @@
                                 <p class="mt-1 text-base font-semibold text-gray-800">
                                     {{ optional($pengajuan->tempatPkl)->jenis_tempat ?? '-' }}</p>
                             </div>
-                            <div class="p-4 bg-gray-50 rounded-xl sm:col-span-2">
-                                <p class="text-xs font-medium tracking-wider text-gray-500 uppercase">No Telepon</p>
-                                <p class="mt-1 text-base font-semibold text-gray-800">
-                                    {{ optional($pengajuan->tempatPkl)->no_hp ?? '-' }}</p>
+                            <div class="p-4 bg-gray-50 rounded-xl">
+                                <p class="text-xs font-medium tracking-wider text-gray-500 uppercase">Email Instansi</p>
+                                <p class="mt-1 text-base font-semibold text-gray-800 break-all">
+                                    {{ optional($pengajuan->tempatPkl)->email ?? '-' }}</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-xl">
+                                <p class="text-xs font-medium tracking-wider text-gray-500 uppercase">Lokasi Google Maps</p>
+                                @if (optional($pengajuan->tempatPkl)->lokasi_maps)
+                                    <a href="{{ $pengajuan->tempatPkl->lokasi_maps }}" target="_blank"
+                                        class="inline-flex items-center gap-1.5 mt-1 text-sm font-semibold text-green-600 hover:text-green-700 hover:underline">
+                                        <i class="fa-solid fa-map-location-dot"></i>
+                                        Buka Google Maps
+                                    </a>
+                                @else
+                                    <p class="mt-1 text-base font-semibold text-gray-800">-</p>
+                                @endif
                             </div>
                         </div>
                     </div>

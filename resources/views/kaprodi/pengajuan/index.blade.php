@@ -4,6 +4,50 @@
     </x-slot>
 
     <div class="flex flex-col min-h-[70vh] px-0 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+
+        {{-- ================= NOTIFIKASI ================= --}}
+        @if (session('success'))
+            <div class="flex items-center gap-3 p-4 mb-4 text-green-800 border-l-4 border-green-500 shadow-sm bg-green-50 rounded-xl">
+                <i class="text-xl text-green-600 fa-solid fa-circle-check"></i>
+                <div class="flex-1 font-medium">{{ session('success') }}</div>
+            </div>
+        @endif
+
+        @if (session('warning'))
+            <div class="flex items-center gap-3 p-4 mb-4 border-l-4 shadow-sm text-amber-800 bg-amber-50 border-amber-500 rounded-xl">
+                <i class="text-xl fa-solid fa-triangle-exclamation text-amber-600"></i>
+                <div class="flex-1 font-medium">{{ session('warning') }}</div>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="flex items-center gap-3 p-4 mb-4 text-red-800 border-l-4 border-red-500 shadow-sm bg-red-50 rounded-xl">
+                <i class="text-xl text-red-600 fa-solid fa-circle-xmark"></i>
+                <div class="flex-1 font-medium">{{ session('error') }}</div>
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="flex items-center gap-3 p-4 mb-4 text-blue-800 border-l-4 border-blue-500 shadow-sm bg-blue-50 rounded-xl">
+                <i class="text-xl text-blue-600 fa-solid fa-circle-info"></i>
+                <div class="flex-1 font-medium">{{ session('info') }}</div>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="p-4 mb-4 border-l-4 border-red-500 shadow-sm bg-red-50 rounded-xl">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="text-red-600 fa-solid fa-circle-exclamation"></i>
+                    <h4 class="font-semibold text-red-700">Terjadi Kesalahan Validasi</h4>
+                </div>
+                <ul class="pl-6 space-y-1 text-sm text-red-700 list-disc">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @if ($pengajuans->isEmpty())
             <div class="p-5 text-sm text-center border border-yellow-300 rounded-lg bg-yellow-50">
                 <p class="font-medium text-yellow-800">

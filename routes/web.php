@@ -16,24 +16,10 @@ use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookControll
 use App\Http\Controllers\Mahasiswa\NilaiMitraMahasiswaController;
 use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
 use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
-// use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Mahasiswa\RemedialController;
 use App\Http\Controllers\Mahasiswa\TugasController as TugasMahasiswaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-
-// use App\Http\Controllers\DebugSiakadController;
-
-// Route::get('/debug-siakad/nilai', [DebugSiakadController::class, 'nilai']);
-// use Illuminate\Support\Facades\Mail;
-// use App\Mail\TestMail;
-
-// Route::get('/test-email', function () {
-//     Mail::to('nf8657855@gmail.com')->send(new TestMail());
-
-//     return 'Email berhasil dikirim.';
-// });
 
 /*
 |--------------------------------------------------------------------------
@@ -241,6 +227,7 @@ use App\Http\Controllers\Staff\MitraController as StaffMitraController;
 use App\Http\Controllers\Staff\PengajuanPklController as StaffPengajuanController;
 use App\Http\Controllers\Staff\ResumeController as StaffResumeController;
 use App\Http\Controllers\Staff\StaffSuratController;
+use App\Http\Controllers\Staff\KredensialMitraController;
 
 Route::middleware(['auth', 'first.login', 'role:staff_tu'])
     ->prefix('staff')
@@ -257,10 +244,17 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::post('/pengajuan/{id}/reject', [StaffPengajuanController::class, 'reject'])->name('pengajuan.reject');
         Route::get('/mitra/{id}/angkatan/{tahun}', [StaffMitraController::class, 'mahasiswaByAngkatan'])->name('mitra.mahasiswa');
         Route::get('/mitra', [StaffPengajuanController::class, 'manajemenMitra'])->name('mitra.index');
-        Route::get('/mitra/{id}/akun', [StaffPengajuanController::class, 'showAkunMitra'])->name('mitra.akun');
-        Route::post('/mitra/{id}', [StaffPengajuanController::class, 'storeMitra'])->name('mitra.store');
+        // Manajemen Mitra (list mitra + kelola kredensial)
         Route::get('/manajemen-mitra', [StaffMitraController::class, 'index'])->name('manajemen-mitra.index');
         Route::get('/manajemen-mitra/{id}', [StaffMitraController::class, 'show'])->name('manajemen-mitra.show');
+        Route::prefix('mitra/{mitra}/kredensial')
+            ->name('mitra.kredensial.')
+            ->group(function () {
+                Route::get('/', [KredensialMitraController::class, 'show'])->name('show');
+                Route::post('/resend', [KredensialMitraController::class, 'resend'])->name('resend');
+                Route::post('/update-email', [KredensialMitraController::class, 'updateEmail'])->name('update-email');
+                Route::post('/reset-password', [KredensialMitraController::class, 'resetPassword'])->name('reset-password');
+            });
         Route::post('/mitra/{id}/regenerate', [StaffMitraController::class, 'regenerate'])->name('mitra.regenerate');
         Route::get('/surat-pengantar', [StaffSuratController::class, 'index'])->name('surat.index');
         Route::get('/surat-pengantar/{id}/cetak', [StaffSuratController::class, 'cetak'])->name('surat.cetak');

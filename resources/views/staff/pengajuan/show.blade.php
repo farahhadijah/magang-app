@@ -35,8 +35,20 @@
                     <p class="font-medium text-gray-800">{{ $pengajuan->tempatPkl->jenis_tempat }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500">No. Telepon</p>
-                    <p class="font-medium text-gray-800">{{ $pengajuan->tempatPkl->no_hp }}</p>
+                    <p class="text-sm text-gray-500">Email Instansi</p>
+                    <p class="font-medium text-gray-800 break-all">{{ $pengajuan->tempatPkl->email ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Lokasi Maps</p>
+                    @if (optional($pengajuan->tempatPkl)->lokasi_maps)
+                        <a href="{{ $pengajuan->tempatPkl->lokasi_maps }}" target="_blank"
+                            class="inline-flex items-center gap-1 font-medium text-green-600 hover:underline">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            Buka Google Maps
+                        </a>
+                    @else
+                        <p class="font-medium text-gray-800">-</p>
+                    @endif
                 </div>
             </div>
         </div>

@@ -166,12 +166,13 @@
                         </div>
 
                         <div>
-                            <label class="block mb-2 text-sm font-semibold text-gray-700">No HP Instansi <span
+                            <label class="block mb-2 text-sm font-semibold text-gray-700">Email Instansi <span
                                     class="text-red-500">*</span></label>
-                            <input type="text" name="no_hp" pattern="^08[0-9]{7,13}$"
-                                value="{{ old('no_hp') }}" required autocomplete="off"
+                            <input type="email" name="email"
+                                value="{{ old('email') }}" required autocomplete="off"
+                                placeholder="contoh: info@perusahaan.com"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
-                            <p class="mt-1 text-xs text-gray-500">Format: 08xxxxxxxx (min 9 digit, max 15 digit)</p>
+                            <p class="mt-1 text-xs text-gray-500">Masukkan alamat email resmi instansi yang aktif</p>
                         </div>
                     </div>
                 </div>

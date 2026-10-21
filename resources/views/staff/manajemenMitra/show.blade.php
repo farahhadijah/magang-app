@@ -35,79 +35,27 @@
 
                 <div>
                     <p class="text-xs font-medium text-gray-500">
-                        No HP Mitra
+                        Email Mitra
                     </p>
 
                     <p class="mt-1 font-semibold text-gray-800">
-                        {{ $mitra->no_hp ?? '-' }}
+                        {{ $mitra->tempatPkl->email ?? '— Belum ada —' }}
                     </p>
                 </div>
 
             </div>
 
-
-            {{-- HASIL GENERATE ULANG --}}
-            @if (session('username'))
-                <div class="p-4 mt-5 bg-green-100 rounded-lg border border-green-300">
-
-                    <div class="flex gap-3 items-start">
-
-                        <div
-                            class="flex flex-shrink-0 justify-center items-center w-9 h-9 text-green-700 bg-white rounded-full">
-                            <i class="fa-solid fa-circle-check"></i>
-                        </div>
-
-                        <div>
-
-                            <p class="font-semibold text-green-800">
-                                Akun Mitra Berhasil Dibuat Ulang
-                            </p>
-
-                            <div class="mt-2 space-y-1 text-sm text-gray-700">
-
-                                <p>
-                                    <b>Username:</b>
-                                    {{ session('username') }}
-                                </p>
-
-                                <p>
-                                    <b>Password:</b>
-                                    {{ session('password') }}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            @endif
-
         </div>
-
 
         {{-- AKSI --}}
         <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:justify-end">
 
-            <form action="{{ route('staff.mitra.regenerate', $mitra->id) }}" method="POST">
-                @csrf
-
-                <button type="submit"
-                    class="px-4 py-2 w-full text-sm font-medium text-white bg-yellow-500 rounded-lg transition hover:bg-yellow-600 sm:w-auto">
-                    <i class="mr-1 fa-solid fa-key"></i>
-                    Generate Ulang Akun
-                </button>
-            </form>
-
-            @if (session('username'))
-                <button type="button" onclick="kirimWA()"
-                    class="px-4 py-2 w-full text-sm font-medium text-white bg-green-600 rounded-lg transition hover:bg-green-700 sm:w-auto">
-                    <i class="mr-1 fa-brands fa-whatsapp"></i>
-                    Kirim ke WhatsApp
-                </button>
-            @endif
-
+            {{-- ✅ BARU: tombol kelola kredensial --}}
+            <a href="{{ route('staff.mitra.kredensial.show', $mitra->id) }}"
+                class="px-4 py-2 w-full text-sm font-medium text-center text-white bg-blue-600 rounded-lg transition hover:bg-blue-700 sm:w-auto">
+                <i class="mr-1 fa-solid fa-key"></i>
+                Kelola Kredensial & Email
+            </a>
         </div>
 
 
@@ -212,28 +160,5 @@
         @endif
 
     </div>
-
-
-    {{-- WHATSAPP --}}
-    @if (session('username'))
-        <script>
-            function kirimWA() {
-
-                /*
-                 * Karena halaman detail sekarang tidak menampilkan
-                 * nomor mahasiswa, tombol WhatsApp tidak bisa lagi
-                 * mengambil nomor dari halaman ini.
-                 *
-                 * Jadi untuk sementara tombol ini sebaiknya
-                 * dihilangkan atau dipindahkan ke halaman angkatan.
-                 */
-
-                alert(
-                    'Silakan buka angkatan terlebih dahulu untuk mengirim akun melalui WhatsApp.'
-                );
-
-            }
-        </script>
-    @endif
 
 </x-app-layout>

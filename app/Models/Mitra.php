@@ -20,4 +20,13 @@ class Mitra extends Model
     {
         return $this->belongsTo(TempatPkl::class);
     }
+     public function emailLogs()
+    {
+        return $this->hasMany(EmailLog::class, 'mitra_id');
+    }
+
+    public function latestEmailLog()
+    {
+        return $this->hasOne(EmailLog::class, 'mitra_id')->latestOfMany();
+    }
 }

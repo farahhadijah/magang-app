@@ -14,7 +14,7 @@ class TempatPklSeeder extends Seeder
         'nama_tempat'     => $nama,
         'nama_normalized' => strtolower(preg_replace('/[^a-z0-9\s]/', '', $nama)),
         'jenis_tempat'    => 'PT',
-        'no_hp'           => '021888888',
+        'email'           => 'info@teknologinusantara.com',
         'lokasi_maps'     => 'https://maps.google.com',
     ]);
     }

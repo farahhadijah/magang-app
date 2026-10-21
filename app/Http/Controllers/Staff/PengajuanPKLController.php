@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AkunMitraMail;
+use Throwable;
+
+
 class PengajuanPklController extends Controller
 {
     /**
@@ -194,107 +199,6 @@ public function histori(Request $request)
         ->withQueryString();
 
     return view('staff.pengajuan.histori', compact('verifikasis'));
-}
-
-    public function storeMitra(Request $request, $id)
-{
-    $tempat = TempatPkl::findOrFail($id);
-
-    if ($tempat->mitra) {
-        return back()->with('error', 'Tempat PKL sudah memiliki mitra.');
-    }
-
-    return DB::transaction(function () use ($tempat) {
-
-        $baseUsername = 'mitra_' . Str::slug($tempat->nama_tempat, '_');
-        $username = $baseUsername;
-        $counter = 1;
-
-        while (User::where('username', $username)->exists()) {
-            $username = $baseUsername . '_' . $counter;
-            $counter++;
-        }
-
-        $password = Str::random(8);
-
-        $user = User::create([
-            'username' => $username,
-            'password' => Hash::make($password),
-            'role' => 'mitra',
-            'first_login' => 1,
-        ]);
-
-        Mitra::create([
-            'user_id' => $user->id,
-            'tempat_pkl_id' => $tempat->id,
-            'no_hp' => $tempat->no_hp,
-        ]);
-
-        return redirect()
-            ->route('staff.mitra.akun', ['id' => $tempat->id])
-            ->with('generated_account', [
-                'username' => $username,
-                'password' => $password
-            ]);
-    });
-}
-    public function showAkunMitra($id)
-{
-    $akun = session('generated_account');
-
-    if (!$akun) {
-        return redirect()
-            ->route('staff.mitra.index')
-            ->with('warning', 'Akun hanya dapat dilihat setelah dibuat.');
-    }
-
-    $prodiId = $this->getProdiId();
-    $tempat = TempatPkl::with('mitra.user')->findOrFail($id);
-
-    $mahasiswas = DB::table('pengajuan_pkl')
-        ->join('mahasiswa', 'pengajuan_pkl.id_mhs', '=', 'mahasiswa.id')
-        ->where('pengajuan_pkl.id_tempat_pkl', $tempat->id)
-        ->where('pengajuan_pkl.status', 'disetujui')
-        ->where('mahasiswa.prodi_id', $prodiId)
-        ->select(
-            'mahasiswa.nim',
-            'mahasiswa.nama',
-            'mahasiswa.no_hp'
-        )
-        ->get();
-
-    return view('staff.mitra.akun', [
-        'tempat' => $tempat,
-        'akun' => $akun,
-        'account_notice' => true,
-        'mahasiswas' => $mahasiswas,
-    ]);
-} 
-    public function manajemenMitra()
-{
-    $prodiId = $this->getProdiId();
-
-    $tempatPkls = TempatPkl::whereDoesntHave('mitra')
-        ->whereHas('pengajuans', function ($q) use ($prodiId) {
-            $q->where('status', 'disetujui')
-              ->whereHas('mahasiswa', function ($q2) use ($prodiId) {
-                  $q2->where('prodi_id', $prodiId);
-              })
-              ->whereHas('pkl');
-        })
-        ->withCount([
-            'pengajuans as jumlah_mahasiswa' => function ($q) use ($prodiId) {
-                $q->where('status', 'disetujui')
-                  ->whereHas('mahasiswa', function ($q2) use ($prodiId) {
-                      $q2->where('prodi_id', $prodiId);
-                  })
-                  ->whereHas('pkl');
-            }
-        ])
-        ->orderBy('nama_tempat')
-        ->paginate(9);
-
-    return view('staff.mitra.index', compact('tempatPkls'));
 }
 private function getProdiId()
 {
