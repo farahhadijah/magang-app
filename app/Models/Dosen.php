@@ -16,9 +16,7 @@ class Dosen extends Model
         'nama',
         'email',
         'prodi_id',
-        'keahlian',
         'jabatan',
-        'no_hp',
         'is_active',
     ];
 

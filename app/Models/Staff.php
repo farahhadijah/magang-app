@@ -14,7 +14,6 @@ class Staff extends Model
         'nama',
         'email',
         'prodi_id',
-        'no_hp',
         'is_active',
     ];
 

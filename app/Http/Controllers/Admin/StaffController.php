@@ -26,25 +26,24 @@ class StaffController extends Controller
         return view('admin.staff.create', compact('prodi'));
     }
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $request->validate([
             'nip' => 'required|unique:staff,nip',
             'nama' => 'required|string|max:100',
-            'no_hp' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255|unique:staff,email', // ✅ Tambah email
             'prodi_id' => 'required|exists:prodi,id',
         ]);
 
         DB::transaction(function () use ($request) {
-
             Staff::create([
                 'nip' => $request->nip,
                 'nama' => $request->nama,
-                'no_hp' => $request->no_hp,
+                'email' => $request->email, // ✅ Tambah email
                 'prodi_id' => $request->prodi_id,
                 'is_active' => 1,
+                // 'no_hp' => $request->no_hp, // ❌ Hapus
             ]);
-
         });
 
         return redirect()->route('admin.staff.index')
@@ -57,18 +56,26 @@ class StaffController extends Controller
         return view('admin.staff.edit', compact('staff','prodi'));
     }
 
-    public function update(Request $request, Staff $staff)
+        public function update(Request $request, Staff $staff)
     {
+        $staffId = (int) $staff->id;
+        
         $request->validate([
             'nama' => 'required|string|max:100',
-            'no_hp' => 'nullable|string|max:20',
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('staff', 'email')->ignore($staffId)
+            ],
             'prodi_id' => 'required|exists:prodi,id',
         ]);
 
         $staff->update([
             'nama' => $request->nama,
-            'no_hp' => $request->no_hp,
+            'email' => $request->email, // ✅ Tambah email
             'prodi_id' => $request->prodi_id,
+            // 'no_hp' => $request->no_hp, // ❌ Hapus
         ]);
 
         return back()->with('success','Data staff diperbarui.');
@@ -126,7 +133,7 @@ class StaffController extends Controller
         $headings = (new HeadingRowImport)->toArray($request->file('file'));
         $header = $headings[0][0] ?? [];
 
-        $required = ['nip','nama','no_hp','kode_prodi'];
+        $required = ['nip','nama','email','kode_prodi']; 
 
         $header = array_map(fn($h) => strtolower(trim($h)), $header);
 
@@ -134,7 +141,7 @@ class StaffController extends Controller
             if (!in_array($col, $header)) {
                 return back()->with(
                     'error',
-                    'Format file salah. Kolom wajib: nip, nama, no_hp, kode_prodi'
+                    'Format file salah. Kolom wajib: nip, nama, email, kode_prodi'
                 );
             }
         }

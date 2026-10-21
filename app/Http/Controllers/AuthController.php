@@ -55,6 +55,9 @@ class AuthController extends Controller
                 if ($user->role === 'dosen') {
                     return redirect()->route('siakad.dosen.first-login');
                 }
+                if ($user->role === 'staff_tu') {
+                    return redirect()->route('siakad.staff.first-login');
+                }
 
                 return redirect()->route('password.first');
             }

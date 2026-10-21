@@ -11,32 +11,40 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StaffSuratController extends Controller
 {
+    
     public function index()
     {
-        $data = PengajuanPkl::with([
-            'mahasiswa',
-            'tempatPkl',
-            'pkl.suratPengantar',
-        ])
-        ->where('status', 'disetujui')
+        $data = $this->pengajuanProdiQuery()
+            ->with([
+                'mahasiswa',
+                'tempatPkl',
+                'pkl.suratPengantar',
+            ])
+            ->where('status', 'disetujui')
 
-        // sembunyikan PKL selesai
-        ->whereDoesntHave('pkl', function ($q) {
-            $q->where('status', 'selesai');
-        })
+            // Sembunyikan PKL yang sudah selesai.
+            ->whereDoesntHave('pkl', function ($q) {
+                $q->where('status', 'selesai');
+            })
 
-        ->latest()
-        ->paginate(10);
+            ->latest()
+            ->paginate(10);
 
         return view('staff.surat.index', compact('data'));
     }
+
     public function cetak($id)
     {
+        $this->pengajuanProdiQuery()->findOrFail($id);
+
         return $this->serveSuratPdf((int) $id, inline: false);
     }
+
     public function validasi($id)
     {
-        $pengajuan = PengajuanPkl::with('mahasiswa')
+        // Ambil hanya dari prodi staff yang login.
+        $pengajuan = $this->pengajuanProdiQuery()
+            ->with('mahasiswa')
             ->findOrFail($id);
 
         $pengajuan->update([
@@ -71,83 +79,93 @@ class StaffSuratController extends Controller
 
     public function preview($id)
     {
-        $pengajuan = PengajuanPkl::with([
-            'mahasiswa.prodi.fakultas',
-            'tempatPkl'
-        ])->findOrFail($id);
+        $pengajuan = $this->pengajuanProdiQuery()
+            ->with([
+                'mahasiswa.prodi.fakultas',
+                'tempatPkl',
+            ])
+            ->findOrFail($id);
 
         $noSurat = '0' . $pengajuan->id . '/UNISLA/PKL/' . date('Y');
 
-        return Pdf::loadView('surat.pengantar', compact('pengajuan','noSurat'))
-            ->setPaper([0,0,595,935], 'portrait') // WAJIB SAMA
+        return Pdf::loadView('surat.pengantar', compact('pengajuan', 'noSurat'))
+            ->setPaper([0, 0, 595, 935], 'portrait')
             ->stream();
     }
 
     public function bulkPrint(Request $request)
     {
-        $ids = $request->ids ?? [];
-
-        $data = PengajuanPkl::with([
-            'mahasiswa.prodi.fakultas',
-            'tempatPkl'
-        ])
-        ->whereIn('id', $ids)
-        ->get();
-
-        if ($data->isEmpty()) {
-            return redirect()->back()->with('error', 'Tidak ada data terpilih atau surat tidak tersedia untuk dicetak.');
-        }
-
-        $pdf = Pdf::loadView('staff.surat.bulk_fixed', compact('data'))
-            ->setPaper([0,0,595,935], 'portrait');
-
-        return $pdf->stream('Bulk_Surat_PKL.pdf');
-    }
-    public function bulkValidasi(Request $request)
-    {
-        $ids = $request->ids ?? [];
+        $ids = $request->input('ids', []);
 
         if (empty($ids)) {
             return back()->with('error', 'Tidak ada mahasiswa dipilih.');
         }
 
-        $pengajuanList = PengajuanPkl::with('mahasiswa')
+        $this->pastikanIdsMilikProdi($ids);
+
+        $data = $this->pengajuanProdiQuery()
+            ->with([
+                'mahasiswa.prodi.fakultas',
+                'tempatPkl',
+            ])
+            ->whereIn('id', $ids)
+            ->get();
+
+        if ($data->isEmpty()) {
+            return back()->with(
+                'error',
+                'Tidak ada data terpilih atau surat tidak tersedia untuk dicetak.'
+            );
+        }
+
+        $pdf = Pdf::loadView('staff.surat.bulk_fixed', compact('data'))
+            ->setPaper([0, 0, 595, 935], 'portrait');
+
+        return $pdf->stream('Bulk_Surat_PKL.pdf');
+    }
+
+    public function bulkValidasi(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada mahasiswa dipilih.');
+        }
+
+        $this->pastikanIdsMilikProdi($ids);
+
+        $pengajuanList = $this->pengajuanProdiQuery()
+            ->with('mahasiswa')
             ->whereIn('id', $ids)
             ->get();
 
         foreach ($pengajuanList as $pengajuan) {
-
             $pengajuan->update([
-
                 'status_surat' => 'siap_diambil',
-
-                'pesan_surat' =>
-                    'Surat pengantar PKL Anda telah selesai diproses dan sudah ditandatangani rektor. Silakan mengambil surat di Tata Usaha (TU).',
-
+                'pesan_surat' => 'Surat pengantar PKL Anda telah selesai diproses dan sudah ditandatangani rektor. Silakan mengambil surat di Tata Usaha (TU).',
             ]);
         }
 
-        // =========================
-        // GENERATE LINK WHATSAPP
-        // =========================
         $waList = [];
 
         foreach ($pengajuanList as $item) {
-
             if (!$item->mahasiswa || !$item->mahasiswa->no_hp) {
                 continue;
             }
 
             $nomor = $this->formatWa($item->mahasiswa->no_hp);
 
-            $pesan = "Halo {$item->mahasiswa->nama}, surat pengantar PKL Anda telah selesai diproses dan sudah ditandatangani rektor. Silakan mengambil surat di Tata Usaha (TU).";
+            // Lewati nomor yang tidak valid.
+            if (!$nomor) {
+                continue;
+            }
 
-            $linkWa = 'https://wa.me/' . $nomor . '?text=' . urlencode($pesan);
+            $pesan = "Halo {$item->mahasiswa->nama}, surat pengantar PKL Anda telah selesai diproses dan sudah ditandatangani rektor. Silakan mengambil surat di Tata Usaha (TU).";
 
             $waList[] = [
                 'nama' => $item->mahasiswa->nama,
                 'nomor' => $nomor,
-                'link' => $linkWa,
+                'link' => 'https://wa.me/' . $nomor . '?text=' . urlencode($pesan),
             ];
         }
 
@@ -158,21 +176,28 @@ class StaffSuratController extends Controller
     }
     public function bulkPreview(Request $request)
     {
-        $ids = $request->ids ?? [];
+        $ids = $request->input('ids', []);
 
-        $data = PengajuanPkl::with([
-            'mahasiswa.prodi.fakultas',
-            'tempatPkl'
-        ])
-        ->whereIn('id', $ids)
-        ->get();
+        if (empty($ids)) {
+            abort(404, 'Tidak ada data yang dipilih.');
+        }
+
+        $this->pastikanIdsMilikProdi($ids);
+
+        $data = $this->pengajuanProdiQuery()
+            ->with([
+                'mahasiswa.prodi.fakultas',
+                'tempatPkl',
+            ])
+            ->whereIn('id', $ids)
+            ->get();
 
         if ($data->isEmpty()) {
             abort(404);
         }
 
         $pdf = Pdf::loadView('staff.surat.bulk_fixed', compact('data'))
-            ->setPaper([0,0,595,935], 'portrait');
+            ->setPaper([0, 0, 595, 935], 'portrait');
 
         return $pdf->stream('Preview_Bulk_Surat.pdf');
     }
@@ -215,4 +240,54 @@ class StaffSuratController extends Controller
 
         return $nohp;
     }
+
+    
+    /**
+     * Mengambil prodi milik staff yang sedang login.
+     */
+    private function getProdiId(): int
+    {
+        $prodiId = auth()->user()?->staff?->prodi_id;
+
+        abort_if(!$prodiId, 403, 'Data prodi staff tidak ditemukan.');
+
+        return (int) $prodiId;
+    }
+
+    /**
+     * Query pengajuan PKL yang mahasiswanya berasal
+     * dari prodi staff yang sedang login.
+     */
+    private function pengajuanProdiQuery()
+    {
+        $prodiId = $this->getProdiId();
+
+        return PengajuanPkl::whereHas('mahasiswa', function ($query) use ($prodiId) {
+            $query->where('prodi_id', $prodiId);
+        });
+    }
+
+    /**
+     * Memastikan seluruh ID yang dipilih termasuk
+     * dalam prodi staff yang sedang login.
+     */
+    private function pastikanIdsMilikProdi(array $ids): void
+    {
+        $ids = array_unique(array_map('intval', $ids));
+
+        if (empty($ids)) {
+            abort(404, 'Tidak ada data yang dipilih.');
+        }
+
+        $jumlahValid = $this->pengajuanProdiQuery()
+            ->whereIn('id', $ids)
+            ->count();
+
+        abort_if(
+            $jumlahValid !== count($ids),
+            403,
+            'Terdapat data surat dari prodi lain.'
+        );
+    }
+
 }

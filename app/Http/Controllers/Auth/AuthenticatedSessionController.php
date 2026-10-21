@@ -46,6 +46,11 @@ class AuthenticatedSessionController extends Controller
                         'siakad.dosen.first-login'
                     );
                 }
+                if ($user->role === 'staff_tu') {
+                    return redirect()->route(
+                        'siakad.staff.first-login'
+                    );
+                }
                 return redirect()->route(
                     'password.first'
                 );

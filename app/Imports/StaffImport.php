@@ -31,7 +31,7 @@ class StaffImport implements ToModel, WithHeadingRow
             ['nip' => trim($row['nip'])],
             [
                 'nama'      => trim($row['nama']),
-                'no_hp'     => trim($row['no_hp'] ?? null),
+                'email'     => isset($row['email']) ? strtolower(trim($row['email'])) : null, // ✅ Tambah email
                 'prodi_id'  => $prodi->id,
                 'is_active' => 1,
             ]

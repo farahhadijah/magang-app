@@ -7,20 +7,20 @@
 
         {{-- Notifikasi --}}
         @if (session('success'))
-            <div class="p-3 text-sm text-green-800 bg-green-100 border border-green-200 rounded-lg">
+            <div class="p-3 text-sm text-green-800 bg-green-100 rounded-lg border border-green-200">
                 ✅ {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="p-3 text-sm text-red-800 bg-red-100 border border-red-200 rounded-lg">
+            <div class="p-3 text-sm text-red-800 bg-red-100 rounded-lg border border-red-200">
                 ❌ {{ session('error') }}
             </div>
         @endif
 
 
         {{-- HEADER + SINKRONISASI SIAKAD (FOKUS UTAMA) --}}
-        <div class="p-5 border border-indigo-200 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50">
+        <div class="p-5 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-200">
             <div class="mb-4">
                 <h1 class="text-lg font-bold text-gray-800">Manajemen Dosen</h1>
                 <p class="text-sm text-gray-600">
@@ -39,7 +39,7 @@
                     </label>
 
                     <select id="sync_prodi_id" name="prodi_id" required
-                        class="w-full p-2 text-sm border rounded-lg focus:border-indigo-500 focus:ring-indigo-500">
+                        class="p-2 w-full text-sm rounded-lg border focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">-- Pilih Prodi --</option>
 
                         @foreach ($prodi as $p)
@@ -52,7 +52,7 @@
 
                 {{-- Tombol --}}
                 <button type="submit"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg shadow-lg animate-pulse hover:bg-indigo-700 hover:animate-none focus:ring-4 focus:ring-indigo-300">
+                    class="inline-flex gap-2 justify-center items-center px-6 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg shadow-lg animate-pulse hover:bg-indigo-700 hover:animate-none focus:ring-4 focus:ring-indigo-300">
                     Sinkronisasi SIAKAD
                 </button>
             </form>
@@ -60,16 +60,15 @@
 
 
         {{-- TOOLBAR: Tambah + Filter --}}
-        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
                 {{-- Filter --}}
                 <form method="GET" class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="Cari Nama / NIDN"
-                        class="w-full p-2 text-sm border rounded-lg sm:w-56">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama / NIDN"
+                        class="p-2 w-full text-sm rounded-lg border sm:w-56">
 
-                    <select name="prodi_id" class="w-full p-2 text-sm border rounded-lg sm:w-56">
+                    <select name="prodi_id" class="p-2 w-full text-sm rounded-lg border sm:w-56">
                         <option value="">-- Semua Prodi --</option>
                         @foreach ($prodi as $p)
                             <option value="{{ $p->id }}" {{ request('prodi_id') == $p->id ? 'selected' : '' }}>
@@ -86,7 +85,7 @@
 
                 {{-- Tambah --}}
                 <a href="{{ route('admin.dosen.create') }}"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    class="inline-flex gap-2 justify-center items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
                     + Tambah Dosen
                 </a>
             </div>
@@ -94,18 +93,17 @@
 
 
         {{-- Tabel Dosen --}}
-        <div class="overflow-x-auto bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
             <table class="w-full text-xs">
 
                 <thead class="text-white bg-green-700">
                     <tr>
-                        <th class="w-28 px-2 py-1.5 text-left border">NIDN</th>
+                        <th class="px-2 py-1.5 w-28 text-left border">NIDN</th>
                         <th class="px-2 py-1.5 text-left border">Nama</th>
                         <th class="px-2 py-1.5 text-left border">Prodi</th>
-                        <th class="w-24 px-2 py-1.5 text-left border">Jabatan</th>
-                        <th class="px-2 py-1.5 text-left border">Keahlian</th>
-                        <th class="w-24 px-2 py-1.5 text-left border">Status</th>
-                        <th class="w-44 px-2 py-1.5 text-center border">Aksi</th>
+                        <th class="px-2 py-1.5 w-24 text-left border">Jabatan</th>
+                        <th class="px-2 py-1.5 w-24 text-left border">Status</th>
+                        <th class="px-2 py-1.5 w-44 text-center border">Aksi</th>
                     </tr>
                 </thead>
 
@@ -131,10 +129,6 @@
                             </td>
 
                             <td class="px-2 py-1.5 border">
-                                {{ $d->keahlian ?? '-' }}
-                            </td>
-
-                            <td class="px-2 py-1.5 border">
                                 <span
                                     class="inline-block px-1.5 py-0.5 text-[10px] rounded-full
                                         {{ $d->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
@@ -143,7 +137,7 @@
                             </td>
 
                             <td class="px-2 py-1.5 border">
-                                <div class="flex flex-wrap items-center justify-center gap-1">
+                                <div class="flex flex-wrap gap-1 justify-center items-center">
 
                                     <a href="{{ route('admin.dosen.edit', $d) }}"
                                         class="px-2 py-0.5 text-[11px] text-white bg-blue-600 rounded hover:bg-blue-700">

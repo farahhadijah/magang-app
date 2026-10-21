@@ -40,11 +40,12 @@ class MahasiswaController extends Controller
         return view('admin.mahasiswa.create', compact('prodi'));
     }
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $request->validate([
             'nim' => 'required|unique:mahasiswa,nim',
             'nama' => 'required|string|max:100',
+            'email' => 'nullable|email|max:255|unique:mahasiswa,email', // ✅ Tambah validasi email
             'angkatan' => 'required|digits:4',
             'prodi_id' => 'nullable|exists:prodi,id',
         ]);
@@ -53,6 +54,7 @@ class MahasiswaController extends Controller
             $mahasiswa = Mahasiswa::create([
                 'nim' => $request->nim,
                 'nama' => $request->nama,
+                'email' => $request->email, // ✅ Tambah email
                 'angkatan' => $request->angkatan,
                 'no_hp' => $request->no_hp,
                 'prodi_id' => $request->prodi_id,
@@ -81,19 +83,31 @@ class MahasiswaController extends Controller
         return view('admin.mahasiswa.edit', compact('mahasiswa', 'prodi'));
     }
 
-    public function update(Request $request, Mahasiswa $mahasiswa)
+        public function update(Request $request, Mahasiswa $mahasiswa)
     {
+        // Pastikan ID integer
+        $mahasiswaId = (int) $mahasiswa->id;
+
         $request->validate([
-            'nim' => 'required|unique:mahasiswa,nim,'.$mahasiswa->id,
+            'nim' => 'required|unique:mahasiswa,nim,' . $mahasiswaId,
             'nama' => 'required|string|max:100',
+            // ✅ Tambah validasi email dengan Rule::ignore
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('mahasiswa', 'email')->ignore($mahasiswaId)
+            ],
             'angkatan' => 'required|digits:4',
             'prodi_id' => 'nullable|exists:prodi,id',
         ]);
+        
         DB::beginTransaction();
         try {
             $mahasiswa->update([
                 'nim' => $request->nim,
                 'nama' => $request->nama,
+                'email' => $request->email, // ✅ Tambah email
                 'angkatan' => $request->angkatan,
                 'no_hp' => $request->no_hp,
                 'prodi_id' => $request->prodi_id,

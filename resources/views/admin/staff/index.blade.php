@@ -30,7 +30,7 @@
                         <tr>
                             <th class="px-3 py-2 border">nip</th>
                             <th class="px-3 py-2 border">nama</th>
-                            <th class="px-3 py-2 border">no_hp</th>
+                            <th class="px-3 py-2 border">email</th>
                             <th class="px-3 py-2 border">kode_prodi</th>
                         </tr>
                     </thead>
@@ -39,7 +39,7 @@
                         <tr>
                             <td class="px-3 py-2 border">11231001</td>
                             <td class="px-3 py-2 border">Nur Faizah</td>
-                            <td class="px-3 py-2 border">08123456789</td>
+                            <td class="px-3 py-2 border">staff@unisla.ac.id</td>
                             <td class="px-3 py-2 border">55201</td>
                         </tr>
                     </tbody>
@@ -81,7 +81,7 @@
                     <tr>
                         <th class="p-3 text-left border">NIP</th>
                         <th class="p-3 text-left border">Nama</th>
-                        <th class="p-3 text-left border">No HP</th>
+                        <th class="p-3 text-left border">email</th>
                         <th class="p-3 text-left border">Prodi</th>
                         <th class="p-3 text-left border">Status</th>
                         <th class="p-3 text-center border">Aksi</th>
@@ -101,9 +101,7 @@
                                 {{ $item->nama }}
                             </td>
 
-                            <td class="p-3 border">
-                                {{ $item->no_hp ?? '-' }}
-                            </td>
+                            <td class="p-3 border">{{ $item->email ?? '-' }}</td>
 
                             <td class="p-3 border">
                                 {{ $item->prodi->nama ?? '-' }}

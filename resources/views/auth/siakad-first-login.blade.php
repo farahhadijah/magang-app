@@ -65,6 +65,23 @@
                         class="mt-1 w-full bg-gray-100 rounded-lg border" readonly>
                 </div>
 
+                {{-- ✅ Email (BARU) --}}
+                <div class="mb-4">
+                    <label class="block mb-1 font-medium text-green-800">
+                        Email
+                    </label>
+
+                    <input type="email" name="email" value="{{ old('email', $mahasiswa->email) }}"
+                        class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        placeholder="Contoh: nama@student.unisla.ac.id">
+
+                    @error('email')
+                        <div class="mt-1 text-sm text-red-600">
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+
                 {{-- No HP --}}
                 <div class="mb-4">
                     <label class="block mb-1 font-medium text-green-800">

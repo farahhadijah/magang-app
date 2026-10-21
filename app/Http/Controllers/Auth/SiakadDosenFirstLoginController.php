@@ -35,7 +35,7 @@ class SiakadDosenFirstLoginController extends Controller
         );
     }
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $user = Auth::user();
 
@@ -43,24 +43,44 @@ class SiakadDosenFirstLoginController extends Controller
             abort(403);
         }
 
+        // Ambil ID dosen untuk validasi unique
+        $dosenId = $user->dosen->id;
+
         $request->validate(
             [
                 'keahlian' => ['nullable', 'string', 'max:100'],
-                'no_hp' => ['required', 'regex:/^08[0-9]{8,13}$/'],
+                
+                // ✅ Tambah validasi email
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                    "unique:dosen,email,{$dosenId}",
+                ],
+
+                // ❌ Hapus validasi no_hp
+                
                 'password' => ['required', 'confirmed', 'min:8'],
             ],
             [
-                'no_hp.required' => 'Nomor HP wajib diisi.',
-                'no_hp.regex' => 'Nomor HP harus diawali 08 dan hanya berisi angka.',
+                // ✅ Pesan error email
+                'email.required' => 'Email wajib diisi.',
+                'email.email'    => 'Format email tidak valid.',
+                'email.unique'   => 'Email sudah digunakan oleh dosen lain.',
+                'email.max'      => 'Email maksimal 255 karakter.',
+
+                // ❌ Hapus pesan error no_hp
+
                 'password.required' => 'Password wajib diisi.',
                 'password.min' => 'Password minimal 8 karakter.',
                 'password.confirmed' => 'Konfirmasi password tidak sesuai.',
             ]
         );
 
+        // ✅ Simpan email & keahlian (tanpa no_hp)
         $user->dosen->update([
+            'email' => strtolower(trim($request->email)),
             'keahlian' => $request->keahlian,
-            'no_hp' => $request->no_hp,
         ]);
 
         $user->update([

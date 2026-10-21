@@ -20,6 +20,7 @@ use App\Http\Controllers\Mahasiswa\RemedialController;
 use App\Http\Controllers\Mahasiswa\TugasController as TugasMahasiswaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\SiakadStaffFirstLoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,8 @@ Route::middleware(['auth', 'first.login'])->group(function () {
     Route::post('/siakad/first-login', [SiakadFirstLoginController::class, 'store'])->name('siakad.first-login.store');
     Route::get('/siakad/dosen/first-login', [SiakadDosenFirstLoginController::class, 'show'])->name('siakad.dosen.first-login');
     Route::post('/siakad/dosen/first-login', [SiakadDosenFirstLoginController::class, 'store'])->name('siakad.dosen.first-login.store');
+    Route::get('/siakad/staff/first-login', [SiakadStaffFirstLoginController::class, 'show'])->name('siakad.staff.first-login');
+    Route::post('/siakad/staff/first-login', [SiakadStaffFirstLoginController::class, 'store'])->name('siakad.staff.first-login.store');
 });
 
 Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
@@ -99,8 +102,12 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
 */
 Route::middleware(['auth'])->group(function () {
     // First login flow
-    Route::get('/first-login', [FirstLoginController::class, 'show'])->name('password.first');
-    Route::post('/first-login', [FirstLoginController::class, 'update'])->name('password.first.update');
+    Route::get('/first-login', [FirstLoginController::class, 'show'])
+        ->middleware('first.login')
+        ->name('password.first');
+    Route::post('/first-login', [FirstLoginController::class, 'update'])
+        ->middleware('first.login')
+        ->name('password.first.update');
 
     // Dashboard (single entry)
     Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -255,7 +262,6 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
                 Route::post('/update-email', [KredensialMitraController::class, 'updateEmail'])->name('update-email');
                 Route::post('/reset-password', [KredensialMitraController::class, 'resetPassword'])->name('reset-password');
             });
-        Route::post('/mitra/{id}/regenerate', [StaffMitraController::class, 'regenerate'])->name('mitra.regenerate');
         Route::get('/surat-pengantar', [StaffSuratController::class, 'index'])->name('surat.index');
         Route::get('/surat-pengantar/{id}/cetak', [StaffSuratController::class, 'cetak'])->name('surat.cetak');
         Route::post('/surat-pengantar/{id}/validasi', [StaffSuratController::class, 'validasi'])->name('surat.validasi');

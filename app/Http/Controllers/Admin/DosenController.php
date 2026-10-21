@@ -47,6 +47,7 @@ class DosenController extends Controller
         $request->validate([
             'nidn' => 'required|unique:dosen,nidn',
             'nama' => 'required|string|max:100',
+            'email' => 'nullable|email|max:255|unique:dosen,email', // ✅ Tambah validasi email
             'prodi_id' => 'nullable|exists:prodi,id',
             'jabatan' => 'nullable|string|max:255',
         ]);
@@ -55,10 +56,10 @@ class DosenController extends Controller
             $dosen = Dosen::create([
                 'nidn' => $request->nidn,
                 'nama' => $request->nama,
+                'email' => $request->email, // ✅ Tambah email
                 'prodi_id' => $request->prodi_id,
                 'keahlian' => $request->keahlian,
                 'jabatan' => $request->jabatan,
-                'no_hp' => $request->no_hp,
                 'is_active' => 1,
             ]);
             UserAutoCreateService::fromDosen($dosen);
@@ -84,11 +85,12 @@ class DosenController extends Controller
         return view('admin.dosen.edit', compact('dosen', 'prodi'));
     }
 
-    public function update(Request $request, Dosen $dosen)
+           public function update(Request $request, Dosen $dosen)
     {
         $request->validate([
             'nidn' => 'required|unique:dosen,nidn,'.$dosen->id,
             'nama' => 'required|string|max:100',
+            'email' => 'nullable|email|max:255|unique:dosen,email,'.$dosen->id,
             'prodi_id' => 'nullable|exists:prodi,id',
             'jabatan' => 'nullable|in:dosen,kaprodi',
         ]);
@@ -96,10 +98,10 @@ class DosenController extends Controller
             $dosen->update([
                 'nidn' => $request->nidn,
                 'nama' => $request->nama,
+                'email' => $request->email,
                 'prodi_id' => $request->prodi_id,
-                'keahlian' => $request->keahlian,
+                // 'keahlian' => $request->keahlian, // ❌ HAPUS BARIS INI
                 'jabatan' => $request->jabatan,
-                'no_hp' => $request->no_hp,
             ]);
             UserAutoCreateService::fromDosen($dosen);
         });
@@ -149,51 +151,50 @@ class DosenController extends Controller
         return back()->with('success', 'Dosen berhasil diaktifkan.');
     }
 
-    public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv',
-        ]);
-        $headings = (new HeadingRowImport)
-            ->toArray($request->file('file'));
-        $header = $headings[0][0] ?? [];
-        $required = [
-            'nidn',
-            'nama',
-            'keahlian',
-            'jabatan',
-            'no_hp',
-            'kode_prodi',
-        ];
-        $header = array_map(
-            fn ($h) => strtolower(trim($h)),
-            $header
-        );
-        foreach ($required as $col) {
-            if (! in_array($col, $header)) {
-                return back()->with(
-                    'error',
-                    'Format file salah. Kolom wajib: nidn, nama, keahlian, jabatan, no_hp, kode_prodi'
-                );
-            }
-        }
-        try {
-            Excel::import(
-                new DosenImport,
-                $request->file('file')
-            );
+    // public function import(Request $request)
+    // {
+    //     $request->validate([
+    //         'file' => 'required|mimes:xlsx,xls,csv',
+    //     ]);
+    //     $headings = (new HeadingRowImport)
+    //         ->toArray($request->file('file'));
+    //     $header = $headings[0][0] ?? [];
+    //     $required = [
+    //         'nidn',
+    //         'nama',
+    //         'keahlian',
+    //         'jabatan',
+    //         'kode_prodi',
+    //     ];
+    //     $header = array_map(
+    //         fn ($h) => strtolower(trim($h)),
+    //         $header
+    //     );
+    //     foreach ($required as $col) {
+    //         if (! in_array($col, $header)) {
+    //             return back()->with(
+    //                 'error',
+    //                 'Format file salah. Kolom wajib: nidn, nama, keahlian, jabatan, kode_prodi'
+    //             );
+    //         }
+    //     }
+    //     try {
+    //         Excel::import(
+    //             new DosenImport,
+    //             $request->file('file')
+    //         );
 
-            return back()->with(
-                'success',
-                'Import dosen berhasil.'
-            );
-        } catch (\Exception $e) {
-            return back()->with(
-                'error',
-                'Import gagal: '.$e->getMessage()
-            );
-        }
-    }
+    //         return back()->with(
+    //             'success',
+    //             'Import dosen berhasil.'
+    //         );
+    //     } catch (\Exception $e) {
+    //         return back()->with(
+    //             'error',
+    //             'Import gagal: '.$e->getMessage()
+    //         );
+    //     }
+    // }
 
     public function syncSiakad(Request $request, SiakadService $siakad)
     {
