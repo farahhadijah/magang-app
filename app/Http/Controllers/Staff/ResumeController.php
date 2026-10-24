@@ -89,6 +89,8 @@ public function showByAngkatan(Request $request, $angkatan)
         'mahasiswa',
         'tempatPkl',
         'dokumenPengajuan',
+        'pkl.suratPengantar',
+        'pkl.suratBalasan',
     ])
         // Filter prodi dan angkatan.
         ->whereHas('mahasiswa', function ($query) use (

@@ -9,8 +9,8 @@ use App\Models\LaporanAkhir;
 use App\Models\NilaiPkl;
 use App\Models\Mahasiswa;
 use App\Models\SuratBalasan;
-use App\Models\TugasMitra;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\TugasMitra;
 use Carbon\Carbon;
 class Pkl extends Model
 {

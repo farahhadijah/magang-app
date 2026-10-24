@@ -73,6 +73,12 @@
                                 <th class="px-3 py-3 font-medium text-gray-700">Tempat PKL</th>
                                 <th class="px-3 py-3 font-medium text-gray-700">Tgl Pengajuan</th>
                                 <th class="px-3 py-3 font-medium text-gray-700">Dokumen</th>
+                                <th class="px-3 py-3 font-medium text-gray-700">
+                                    Surat Pengantar
+                                </th>
+                                <th class="px-3 py-3 font-medium text-gray-700">
+                                    Surat Balasan
+                                </th>
                             </tr>
                         </thead>
 
@@ -81,6 +87,11 @@
                                 @php
                                     $mahasiswa = $pengajuan->mahasiswa;
                                     $dokumenList = $pengajuan->dokumenPengajuan;
+                                @endphp
+
+                                @php
+                                    $suratPengantar = $pengajuan->pkl?->suratPengantar;
+                                    $suratBalasan = $pengajuan->pkl?->suratBalasan;
                                 @endphp
 
                                 <tr class="border-b border-gray-100 align-top">
@@ -136,6 +147,42 @@
                                             <span class="text-xs text-gray-400">Belum ada dokumen</span>
                                         @endif
                                     </td>
+                                    <td class="px-3 py-4">
+                                        @if (filled($suratPengantar?->path_file))
+                                            @php
+                                                $urlSuratPengantar = asset('storage/' . $suratPengantar->path_file);
+                                            @endphp
+
+                                            <button type="button"
+                                                @click="openModal( @js($urlSuratPengantar), @js('Surat Pengantar - ' . ($mahasiswa?->nama ?? 'Mahasiswa')) )"
+                                                class="text-xs text-gray-800 underline decoration-gray-400 underline-offset-2 hover:text-gray-950">
+                                                Surat Pengantar
+                                            </button>
+                                        @else
+                                            <button type="button" disabled title="Surat pengantar belum tersedia"
+                                                class="cursor-not-allowed text-xs text-gray-400">
+                                                Surat Pengantar
+                                            </button>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-4">
+                                        @if (filled($suratBalasan?->path_file))
+                                            @php
+                                                $urlSuratBalasan = asset('storage/' . $suratBalasan->path_file);
+                                            @endphp
+
+                                            <button type="button"
+                                                @click="openModal( @js($urlSuratBalasan), @js('Surat Balasan Mitra - ' . ($mahasiswa?->nama ?? 'Mahasiswa')) )"
+                                                class="text-xs text-gray-800 underline decoration-gray-400 underline-offset-2 hover:text-gray-950">
+                                                Surat Balasan
+                                            </button>
+                                        @else
+                                            <button type="button" disabled title="Surat balasan belum diunggah mitra"
+                                                class="cursor-not-allowed text-xs text-gray-400">
+                                                Surat Balasan
+                                            </button>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -148,6 +195,11 @@
                         @php
                             $mahasiswa = $pengajuan->mahasiswa;
                             $dokumenList = $pengajuan->dokumenPengajuan;
+                        @endphp
+
+                        @php
+                            $suratPengantar = $pengajuan->pkl?->suratPengantar;
+                            $suratBalasan = $pengajuan->pkl?->suratBalasan;
                         @endphp
 
                         <article class="border border-gray-200 bg-white">
@@ -201,6 +253,51 @@
                                         Belum ada dokumen yang diunggah.
                                     </p>
                                 @endif
+                            </div>
+
+                            {{-- SURAT PENGANTAR DAN SURAT BALASAN --}}
+                            <div class="border-t border-gray-100 px-3 py-3">
+                                <p class="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                    Surat PKL
+                                </p>
+
+                                <div class="grid grid-cols-2 gap-2">
+                                    {{-- SURAT PENGANTAR --}}
+                                    @if (filled($suratPengantar?->path_file))
+                                        @php
+                                            $urlSuratPengantar = asset('storage/' . $suratPengantar->path_file);
+                                        @endphp
+
+                                        <button type="button"
+                                            @click="openModal( @js($urlSuratPengantar), @js('Surat Pengantar - ' . ($mahasiswa?->nama ?? 'Mahasiswa')) )"
+                                            class="border border-gray-200 bg-white px-2 py-2 text-left text-xs text-gray-800 underline decoration-gray-400 underline-offset-2">
+                                            Surat Pengantar
+                                        </button>
+                                    @else
+                                        <button type="button" disabled title="Surat pengantar belum tersedia"
+                                            class="cursor-not-allowed border border-gray-200 bg-gray-50 px-2 py-2 text-left text-xs text-gray-400">
+                                            Surat Pengantar
+                                        </button>
+                                    @endif
+
+                                    {{-- SURAT BALASAN --}}
+                                    @if (filled($suratBalasan?->path_file))
+                                        @php
+                                            $urlSuratBalasan = asset('storage/' . $suratBalasan->path_file);
+                                        @endphp
+
+                                        <button type="button"
+                                            @click="openModal( @js($urlSuratBalasan), @js('Surat Balasan Mitra - ' . ($mahasiswa?->nama ?? 'Mahasiswa')) )"
+                                            class="border border-gray-200 bg-white px-2 py-2 text-left text-xs text-gray-800 underline decoration-gray-400 underline-offset-2">
+                                            Surat Balasan
+                                        </button>
+                                    @else
+                                        <button type="button" disabled title="Surat balasan belum diunggah mitra"
+                                            class="cursor-not-allowed border border-gray-200 bg-gray-50 px-2 py-2 text-left text-xs text-gray-400">
+                                            Surat Balasan
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
                         </article>
                     @endforeach

@@ -554,47 +554,6 @@
                     </div>
                 </div>
 
-                {{-- ================= SURAT PENGANTAR ================= --}}
-                @if ($pengajuan->pkl && $pengajuan->pkl->suratPengantar)
-                    <div
-                        class="overflow-hidden relative bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200 shadow-lg">
-                        <div
-                            class="absolute top-0 right-0 w-32 h-32 bg-green-200 rounded-full opacity-30 translate-x-16 -translate-y-16">
-                        </div>
-                        <div class="relative p-6">
-                            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <div class="flex gap-3 items-center">
-                                    <div
-                                        class="flex justify-center items-center w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-md">
-                                        <i class="text-xl text-white fa-solid fa-envelope-open-text"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-lg font-semibold text-green-800">
-                                            Surat Pengantar PKL
-                                        </h4>
-                                        <p class="text-sm text-green-600">Surat pengantar resmi untuk instansi tempat
-                                            PKL</p>
-                                    </div>
-                                </div>
-                                @if (Route::has('mahasiswa.surat-pengantar.download'))
-                                    <a href="{{ route('mahasiswa.surat-pengantar.download', $pengajuan->pkl->suratPengantar->id) }}"
-                                        class="inline-flex gap-2 items-center px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl shadow-md transition-all duration-200 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg">
-                                        <i class="fa-solid fa-download"></i>
-                                        Download Surat Pengantar
-                                    </a>
-                                @else
-                                    <button type="button" disabled
-                                        class="inline-flex gap-2 items-center px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl opacity-60 cursor-not-allowed"
-                                        title="Download hanya oleh Staff TU">
-                                        <i class="fa-solid fa-download"></i>
-                                        Download Surat Pengantar
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
                 {{-- ================= INFO PKL (SETELAH DISETUJUI) ================= --}}
                 @if ($pengajuan->pkl)
                     <div

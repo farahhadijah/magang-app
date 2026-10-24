@@ -95,6 +95,6 @@
             {{ request()->routeIs('staff.resume.*') ? 'bg-green-800 text-amber-300' : '' }}
         ">
         <i class="w-5 fa-solid fa-file-pdf"></i>
-        Resume PKL
+        Resume Pengajuan PKL
     </a>
 </div>

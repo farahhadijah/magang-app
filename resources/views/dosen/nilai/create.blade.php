@@ -189,7 +189,7 @@
                 <div class="flex justify-end pt-4 border-t border-gray-100">
                     <button type="submit"
                         class="px-6 py-2.5 w-full text-sm font-medium text-white bg-green-600 rounded-lg transition-colors hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:w-auto">
-                        Simpan &amp; Selesaikan PKL
+                        Simpan
                     </button>
                 </div>
 

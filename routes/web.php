@@ -8,7 +8,9 @@
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\Auth\SiakadDosenFirstLoginController;
 use App\Http\Controllers\Auth\SiakadFirstLoginController;
+use App\Http\Controllers\Auth\SiakadStaffFirstLoginController;
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
 use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
@@ -20,7 +22,6 @@ use App\Http\Controllers\Mahasiswa\RemedialController;
 use App\Http\Controllers\Mahasiswa\TugasController as TugasMahasiswaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Auth\SiakadStaffFirstLoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -269,6 +270,8 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
         Route::post('/surat-pengantar/bulk-print', [StaffSuratController::class, 'bulkPrint'])->name('surat.bulk');
         Route::post('/surat-pengantar/bulk-preview', [StaffSuratController::class, 'bulkPreview'])->name('surat.bulk-preview');
         Route::post('/surat-pengantar/bulk-validasi', [StaffSuratController::class, 'bulkValidasi'])->name('surat.bulk-validasi');
+        Route::post( '/surat-pengantar/{id}/tandai-dicetak', [StaffSuratController::class, 'tandaiDicetak'] )->name('surat.tandai-dicetak');
+        Route::post('/surat-pengantar/bulk-tandai-dicetak', [StaffSuratController::class, 'bulkTandaiDicetak'])->name('surat.bulk-tandai-dicetak');
         // ================= FORMULIR REMEDIAL =================
         Route::get('/formulir-remedial', [FormulirRemedialController::class, 'index'])->name('formulir-remedial.index');
         Route::post('/formulir-remedial', [FormulirRemedialController::class, 'store'])->name('formulir-remedial.store');
