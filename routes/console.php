@@ -8,14 +8,16 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-
+// Ringkasan email Staff TU
 Schedule::command('sibolang:ringkasan-staff-tu')
     ->weekdays()
     ->dailyAt('08:00')
     ->timezone('Asia/Jakarta')
     ->withoutOverlapping();
 
-
-// Schedule::command('sibolang:ringkasan-staff-tu')
-//     ->everyMinute()
-//     ->timezone('Asia/Jakarta');
+// Ringkasan email Kaprodi
+Schedule::command('sibolang:ringkasan-kaprodi')
+    ->weekdays()
+    ->dailyAt('08:00')
+    ->timezone('Asia/Jakarta')
+    ->withoutOverlapping();
