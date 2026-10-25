@@ -150,10 +150,8 @@ class PengajuanPklController extends Controller
             'terakhirDigunakan'
         ));
     }
-    /* ================= APPROVE ================= */
-
     
-        /* ================= APPROVE ================= */
+    /* ================= APPROVE ================= */
 
     public function approve(Request $request, $id)
     {
