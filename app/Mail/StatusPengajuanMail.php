@@ -2,58 +2,37 @@
 
 namespace App\Mail;
 
+use App\Models\PengajuanPkl;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class StatusPengajuanMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $pengajuan;
+    public PengajuanPkl $pengajuan;
 
-    public function __construct($pengajuan)
+    public function __construct(PengajuanPkl $pengajuan)
     {
         $this->pengajuan = $pengajuan;
     }
 
-    public function build()
+    public function build(): static
     {
-        return $this->subject('Update Status Pengajuan PKL - SIBOLANG')
-                    ->markdown('emails.status_pengajuan');
-    }
-    
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: 'Status Pengajuan Mail',
-        );
-    }
+        $this->pengajuan->loadMissing([
+            'mahasiswa',
+            'tempatPkl',
+        ]);
 
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            markdown: 'emails.status_pengajuan',
-        );
-    }
+        $subject = match ($this->pengajuan->status) {
+            'ditolak_tu' => 'Dokumen Pengajuan PKL Perlu Diperbaiki - SIBOLANG',
+            'ditolak_kaprodi' => 'Pengajuan PKL Ditolak Kaprodi - SIBOLANG',
+            'disetujui' => 'Pengajuan Disetujui, PKL Anda Aktif - SIBOLANG',
+            default => 'Informasi Pengajuan PKL - SIBOLANG',
+        };
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
+        return $this->subject($subject)
+            ->markdown('emails.status_pengajuan');
     }
 }
