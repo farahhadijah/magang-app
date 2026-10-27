@@ -19,20 +19,10 @@ class Logbook extends Model
         'tgl' => 'date',
     ];
     
-    /*
-    |--------------------------------------------------------------------------
-    | RELATION
-    |--------------------------------------------------------------------------
-    */
     public function pkl()
     {
         return $this->belongsTo(Pkl::class, 'id_pkl');
     }
-    /*
-    |--------------------------------------------------------------------------
-    | SCOPES
-    |--------------------------------------------------------------------------
-    */
     public function scopePending(Builder $query)
     {
         return $query->where('status_approve', 'pending');
@@ -41,11 +31,6 @@ class Logbook extends Model
     {
         return $query->where('status_approve', 'approved');
     }
-    /*
-    |--------------------------------------------------------------------------
-    | ACCESSORS
-    |--------------------------------------------------------------------------
-    */
     public function getStatusLabelAttribute()
     {
         return $this->status_approve === 'approved'

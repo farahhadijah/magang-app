@@ -8,12 +8,12 @@ use App\Models\Pkl;
 use App\Models\Logbook;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use App\Mail\NotifikasiLogbookDosen;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class LogbookController extends Controller
 {
-    /**
-     * Ambil PKL aktif mahasiswa login
-     */
     private function getActivePkl()
     {
         $user = auth()->user();
@@ -30,9 +30,6 @@ class LogbookController extends Controller
             ->first();
     }
 
-    /**
-     * Validasi bahwa logbook benar-benar milik mahasiswa login.
-     */
     private function authorizeLogbook(Logbook $logbook)
     {
         $user = auth()->user();
@@ -53,10 +50,6 @@ class LogbookController extends Controller
             abort(403, 'PKL sudah selesai.');
         }
     }
-
-    /**
-     * Index: tampilkan semua logbook mahasiswa.
-     */
     public function index()
     {
         $pkl = $this->getActivePkl();
@@ -65,19 +58,16 @@ class LogbookController extends Controller
             abort(403, 'PKL sudah selesai atau belum dimulai.');
         }
 
-        // Tampilkan logbook terbaru terlebih dahulu
         $logbooks = $pkl->logbooks()
             ->orderBy('tgl', 'desc')
             ->paginate(10);
 
-        // Cek apakah sudah ada logbook untuk hari ini
         $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
 
         $hasToday = $pkl->logbooks()
             ->whereDate('tgl', $todayJakarta)
             ->exists();
 
-        // Cari tanggal PKL yang belum memiliki logbook
         $tanggalKosong = collect();
 
         $mulai = Carbon::parse($pkl->tgl_mulai)->startOfDay();
@@ -96,12 +86,6 @@ class LogbookController extends Controller
             }
         }
 
-        /*
-         * Ambil link dokumentasi.
-         *
-         * Secara konsep hanya logbook pertama yang
-         * memiliki link dokumentasi.
-         */
         $logbookDokumentasi = $pkl->logbooks()
             ->orderBy('id')
             ->first();
@@ -115,9 +99,6 @@ class LogbookController extends Controller
         ));
     }
 
-    /**
-     * Form tambah logbook.
-     */
     public function create()
     {
         $pkl = $this->getActivePkl();
@@ -128,9 +109,6 @@ class LogbookController extends Controller
                 ->with('warning', 'Belum ada PKL aktif.');
         }
 
-        /*
-         * Logbook pertama wajib memiliki link dokumentasi.
-         */
         $isFirstLogbook = !$pkl->logbooks()->exists();
 
         return view('mahasiswa.logbook.create', compact(
@@ -139,9 +117,6 @@ class LogbookController extends Controller
         ));
     }
 
-    /**
-     * Simpan logbook baru.
-     */
     public function store(Request $request)
     {
         $pkl = $this->getActivePkl();
@@ -156,9 +131,6 @@ class LogbookController extends Controller
             abort(403, 'PKL sudah selesai.');
         }
 
-        /*
-         * Pastikan ini memang logbook pertama.
-         */
         $isFirstLogbook = !$pkl->logbooks()->exists();
 
         $rules = [
@@ -166,10 +138,6 @@ class LogbookController extends Controller
             'kegiatan' => 'required|string|max:2000',
         ];
 
-        /*
-         * Hanya logbook pertama yang wajib
-         * mengisi link Google Drive.
-         */
         if ($isFirstLogbook) {
             $rules['link_dokumentasi'] = [
                 'required',
@@ -196,7 +164,6 @@ class LogbookController extends Controller
 
         $request->validate($rules, $messages);
 
-        // Pastikan tanggal tidak setelah hari ini
         $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
 
         try {
@@ -221,7 +188,6 @@ class LogbookController extends Controller
                 ->withInput();
         }
 
-        // Tidak boleh sebelum tanggal mulai PKL
         $tgl = Carbon::parse($request->tgl);
         $mulai = Carbon::parse($pkl->tgl_mulai);
 
@@ -233,7 +199,6 @@ class LogbookController extends Controller
                 ->withInput();
         }
 
-        // Cek duplikat tanggal
         $exists = Logbook::where('id_pkl', $pkl->id)
             ->whereDate('tgl', $request->tgl)
             ->exists();
@@ -245,11 +210,7 @@ class LogbookController extends Controller
                 ])
                 ->withInput();
         }
-
-        /*
-         * Link dokumentasi hanya disimpan pada logbook pertama.
-         */
-        Logbook::create([
+        $logbook = Logbook::create([
             'id_pkl' => $pkl->id,
             'tgl' => $request->tgl,
             'kegiatan' => $request->kegiatan,
@@ -260,23 +221,37 @@ class LogbookController extends Controller
                 : null,
         ]);
 
+        // Hitung hanya logbook yang masih menunggu persetujuan.
+    $totalPending = $pkl->logbooks()
+        ->where('status_approve', 'pending')
+        ->count();
+
+    // Kirim notifikasi jika jumlah pending mencapai 7 atau kelipatannya.
+    if ($totalPending > 0 && $totalPending % 7 === 0) {
+        $dosen = $pkl->dosen;
+
+        if ($dosen && $dosen->email) {
+            try {
+                Mail::to($dosen->email)->send(
+                    new NotifikasiLogbookDosen($logbook)
+                );
+            } catch (\Throwable $e) {
+                Log::error('Gagal mengirim notifikasi logbook kepada dosen.', [
+                    'logbook_id' => $logbook->id,
+                    'dosen_id' => $dosen->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
         return redirect()
             ->route('mahasiswa.logbook.index')
             ->with('success', 'Logbook berhasil ditambahkan.');
     }
-
-    /**
-     * Form edit isi logbook.
-     *
-     * Hanya dapat digunakan untuk logbook pending/revisi.
-     */
     public function edit(Logbook $logbook)
     {
         $this->authorizeLogbook($logbook);
-
-        /*
-         * Logbook approved tidak boleh mengubah isi.
-         */
         if ($logbook->status_approve === 'approved') {
             abort(
                 403,
@@ -287,18 +262,10 @@ class LogbookController extends Controller
         return view('mahasiswa.logbook.edit', compact('logbook'));
     }
 
-    /**
-     * Update isi logbook.
-     *
-     * Tidak menangani link dokumentasi.
-     */
     public function update(Request $request, Logbook $logbook)
     {
         $this->authorizeLogbook($logbook);
 
-        /*
-         * Logbook approved tidak dapat diedit.
-         */
         if ($logbook->status_approve === 'approved') {
             abort(
                 403,
@@ -311,7 +278,6 @@ class LogbookController extends Controller
             'kegiatan' => 'required|string|max:2000',
         ]);
 
-        // Pastikan tanggal tidak setelah hari ini
         $todayJakarta = Carbon::now('Asia/Jakarta')->toDateString();
 
         try {
@@ -341,7 +307,6 @@ class LogbookController extends Controller
         $tgl = Carbon::parse($request->tgl);
         $mulai = Carbon::parse($pkl->tgl_mulai);
 
-        // Tidak boleh sebelum mulai PKL
         if ($tgl->lt($mulai)) {
             return back()
                 ->withErrors([
@@ -350,7 +315,6 @@ class LogbookController extends Controller
                 ->withInput();
         }
 
-        // Cek duplikat tanggal
         $exists = Logbook::where('id_pkl', $pkl->id)
             ->whereDate('tgl', $request->tgl)
             ->where('id', '!=', $logbook->id)
@@ -363,14 +327,6 @@ class LogbookController extends Controller
                 ])
                 ->withInput();
         }
-
-        /*
-         * Setelah isi logbook diperbaiki:
-         * - status kembali pending
-         * - catatan revisi dihapus
-         *
-         * Link dokumentasi tidak disentuh.
-         */
         $logbook->update([
             'tgl' => $request->tgl,
             'kegiatan' => $request->kegiatan,
@@ -383,17 +339,6 @@ class LogbookController extends Controller
             ->with('success', 'Logbook berhasil diperbarui.');
     }
 
-    /**
-     * ============================================================
-     * DOKUMENTASI GOOGLE DRIVE
-     * ============================================================
-     */
-
-    /**
-     * Form untuk memperbaiki / mengubah link dokumentasi.
-     *
-     * Berbeda dengan edit logbook.
-     */
     public function editDokumentasi()
     {
         $pkl = $this->getActivePkl();
@@ -401,21 +346,9 @@ class LogbookController extends Controller
         if (!$pkl) {
             abort(403, 'Belum ada PKL aktif.');
         }
-
-        /*
-        * Dokumentasi terikat pada logbook pertama.
-        * Tidak perlu mencari berdasarkan link_dokumentasi,
-        * karena halaman ini memang digunakan untuk memperbaiki
-        * atau mengisi link dokumentasi.
-        */
         $logbookDokumentasi = $pkl->logbooks()
             ->orderBy('id')
             ->first();
-
-        /*
-        * Jika belum ada logbook sama sekali,
-        * mahasiswa harus membuat logbook terlebih dahulu.
-        */
         if (!$logbookDokumentasi) {
             return redirect()
                 ->route('mahasiswa.logbook.create')
@@ -431,14 +364,6 @@ class LogbookController extends Controller
         );
     }
 
-    /**
-     * Update link dokumentasi Google Drive.
-     *
-     * Fungsi ini sengaja dipisahkan dari update logbook.
-     *
-     * Walaupun logbook sudah approved,
-     * link dokumentasi tetap dapat diperbaiki.
-     */
     public function updateDokumentasi(Request $request)
     {
         $pkl = $this->getActivePkl();
@@ -469,9 +394,6 @@ class LogbookController extends Controller
                 'Link dokumentasi terlalu panjang.',
         ]);
 
-        /*
-        * Dokumentasi disimpan pada logbook pertama.
-        */
         $logbookDokumentasi = $pkl->logbooks()
             ->orderBy('id')
             ->first();
@@ -485,10 +407,6 @@ class LogbookController extends Controller
                 );
         }
 
-        /*
-        * Hanya link dokumentasi yang diubah.
-        * Status approval dan kegiatan tidak berubah.
-        */
         $logbookDokumentasi->update([
             'link_dokumentasi' => $request->link_dokumentasi,
         ]);
@@ -501,9 +419,6 @@ class LogbookController extends Controller
             );
     }
 
-    /**
-     * Hapus logbook.
-     */
     public function destroy(Logbook $logbook)
     {
         $this->authorizeLogbook($logbook);
@@ -515,12 +430,6 @@ class LogbookController extends Controller
             );
         }
 
-        /*
-         * Jangan izinkan logbook pertama yang memiliki
-         * dokumentasi dihapus.
-         *
-         * Karena dokumentasi PKL terikat pada logbook pertama.
-         */
         if ($logbook->link_dokumentasi) {
             abort(
                 403,

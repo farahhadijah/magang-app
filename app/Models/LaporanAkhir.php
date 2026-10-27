@@ -19,13 +19,6 @@ class LaporanAkhir extends Model
         'approved_by',
         'approved_at',
     ];
-
-    /*
-    |--------------------------------------------------------------------------
-    | RELATIONSHIPS
-    |--------------------------------------------------------------------------
-    */
-
     public function pkl()
     {
         return $this->belongsTo(Pkl::class, 'id_pkl');
@@ -35,12 +28,6 @@ class LaporanAkhir extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | BUSINESS LOGIC
-    |--------------------------------------------------------------------------
-    */
     public function approve($dosenId)
 {
     $this->update([
@@ -50,11 +37,6 @@ class LaporanAkhir extends Model
         'catatan_dosen'  => null,
     ]);
 }
-
-
-    /**
-     * Reject laporan akhir
-     */
     public function reject($dosenId, $catatan)
     {
         $this->update([
