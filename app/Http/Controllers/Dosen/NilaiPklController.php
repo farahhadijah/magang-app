@@ -80,41 +80,46 @@ class NilaiPklController extends Controller
      * Nilai hanya disimpan ke tabel nilai_pkl dengan status_approval = 'pending'
      * Status PKL akan berubah menjadi 'selesai' setelah staff approve
      */
+    
     public function store(Request $request, Pkl $pkl)
     {
+        // Pastikan PKL merupakan bimbingan dosen yang sedang login.
         if ($pkl->id_dosen !== $this->getDosenId()) {
             abort(403);
         }
+
+        // Pastikan nilai belum pernah diinput.
         if ($pkl->nilaiPkl) {
             abort(403, 'Nilai sudah ada.');
         }
+
         $request->validate([
             'nilai'      => 'required|numeric|min:0|max:100',
             'keterangan' => 'nullable|string|max:2000',
         ]);
+
         $nilaiAngka = $request->nilai;
         $nilaiHuruf = $this->konversiNilaiHuruf($nilaiAngka);
 
+        // Simpan nilai dengan status menunggu approval Staff TU.
         NilaiPkl::create([
-            'id_pkl'              => $pkl->id,
-            'nilai_angka'         => $nilaiAngka,
-            'nilai_huruf'         => $nilaiHuruf,
-            'keterangan'          => $request->keterangan,
-            'tgl_input'           => now(),
-            'status_approval'     => 'pending',  // Default pending
-            'tgl_approval'        => null,
-            'catatan_approval'    => null,
+            'id_pkl'          => $pkl->id,
+            'nilai_angka'     => $nilaiAngka,
+            'nilai_huruf'     => $nilaiHuruf,
+            'keterangan'      => $request->keterangan,
+            'tgl_input'       => now()->toDateString(),
+            'status_approval' => 'pending',
+            'tgl_approval'    => null,
         ]);
 
-        // ❌ DIHAPUS: Tidak lagi update status PKL
-        // $pkl->update([
-        //     'status' => 'selesai',
-        //     'tgl_selesai' => now(),
-        // ]);
-
-        return redirect()->route('dosen.nilai.index')
-            ->with('success', 'Nilai berhasil disimpan dan menunggu approval dari staff TU.');
+        return redirect()
+            ->route('dosen.nilai.index')
+            ->with(
+                'success',
+                'Nilai berhasil disimpan dan menunggu approval dari Staff TU.'
+            );
     }
+
     public function daftar()
     {
         $dosenId = $this->getDosenId();

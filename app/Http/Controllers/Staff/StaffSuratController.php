@@ -258,43 +258,22 @@ class StaffSuratController extends Controller
 
         return $pdf->stream('Preview_Bulk_Surat.pdf');
     }
+    
     private function formatWa($nohp)
     {
-        // hapus semua karakter selain angka
         $nohp = preg_replace('/\D/', '', trim($nohp));
-
-        // jika kosong
         if (!$nohp) {
             return null;
         }
-
-        /*
-        FORMAT:
-        08123xxxx  -> 628123xxxx
-        8123xxxxx  -> 628123xxxx
-        628123xxxx -> tetap
-        */
-
-        // jika diawali 0
         if (str_starts_with($nohp, '0')) {
-
             $nohp = '62' . substr($nohp, 1);
-
         }
-
-        // jika diawali 8
         elseif (str_starts_with($nohp, '8')) {
-
             $nohp = '62' . $nohp;
-
         }
-
-        // jika tidak diawali 62
         elseif (!str_starts_with($nohp, '62')) {
-
             return null;
         }
-
         return $nohp;
     }
 
@@ -314,7 +293,6 @@ class StaffSuratController extends Controller
             (string) ($pengajuan->mahasiswa->email ?? '')
         ));
 
-        // Email bukan syarat validasi surat.
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return [
                 'status' => 'skipped',
@@ -337,7 +315,6 @@ class StaffSuratController extends Controller
                 'email' => $email,
                 'error' => $e->getMessage(),
             ]);
-
             return [
                 'status' => 'failed',
                 'message' => 'Pengiriman email gagal.',
@@ -345,55 +322,36 @@ class StaffSuratController extends Controller
         }
     }
 
-
-    /**
-     * Mengambil prodi milik staff yang sedang login.
-     */
     private function getProdiId(): int
     {
         $prodiId = auth()->user()?->staff?->prodi_id;
-
         abort_if(!$prodiId, 403, 'Data prodi staff tidak ditemukan.');
-
         return (int) $prodiId;
     }
 
-    /**
-     * Query pengajuan PKL yang mahasiswanya berasal
-     * dari prodi staff yang sedang login.
-     */
     private function pengajuanProdiQuery()
     {
         $prodiId = $this->getProdiId();
-
         return PengajuanPkl::whereHas('mahasiswa', function ($query) use ($prodiId) {
             $query->where('prodi_id', $prodiId);
         });
     }
 
-    /**
-     * Memastikan seluruh ID yang dipilih termasuk
-     * dalam prodi staff yang sedang login.
-     */
     private function pastikanIdsMilikProdi(array $ids): void
     {
         $ids = array_unique(array_map('intval', $ids));
-
         if (empty($ids)) {
             abort(404, 'Tidak ada data yang dipilih.');
         }
-
         $jumlahValid = $this->pengajuanProdiQuery()
             ->whereIn('id', $ids)
             ->count();
-
         abort_if(
             $jumlahValid !== count($ids),
             403,
             'Terdapat data surat dari prodi lain.'
         );
     }
-
     public function tandaiDicetak($id)
     {
         $pengajuan = $this->pengajuanProdiQuery()
@@ -402,44 +360,34 @@ class StaffSuratController extends Controller
                 $q->where('status', 'selesai');
             })
             ->findOrFail($id);
-
         if ($pengajuan->status_surat === 'siap_diambil') {
             return back()->with(
                 'warning',
                 'Surat sudah divalidasi sebelumnya.'
             );
         }
-
         if ($pengajuan->status_surat === 'sudah_dicetak') {
             return back()->with(
                 'warning',
                 'Surat sudah ditandai dicetak.'
             );
         }
-
         $pengajuan->update([
             'status_surat' => 'sudah_dicetak',
         ]);
-
         return back()->with(
             'success',
             'Surat berhasil ditandai sudah dicetak dan siap divalidasi.'
         );
     }
-
     public function bulkTandaiDicetak(Request $request)
     {
         $validated = $request->validate([
             'ids' => 'required|array|min:1',
             'ids.*' => 'required|integer|distinct',
         ]);
-
         $ids = array_map('intval', $validated['ids']);
-
-        // Pastikan semua ID berasal dari prodi staff yang login.
         $this->pastikanIdsMilikProdi($ids);
-
-        // Ambil hanya pengajuan yang disetujui dan PKL belum selesai.
         $pengajuanList = $this->pengajuanProdiQuery()
             ->where('status', 'disetujui')
             ->whereDoesntHave('pkl', function ($q) {
@@ -447,50 +395,37 @@ class StaffSuratController extends Controller
             })
             ->whereIn('id', $ids)
             ->get();
-
         $berhasil = 0;
         $sudahDicetak = 0;
         $sudahDivalidasi = 0;
         $tidakMemenuhiSyarat = count($ids) - $pengajuanList->count();
-
         foreach ($pengajuanList as $pengajuan) {
-            // Jangan mengubah surat yang sudah divalidasi.
             if ($pengajuan->status_surat === 'siap_diambil') {
                 $sudahDivalidasi++;
                 continue;
             }
-
-            // Jangan memproses surat yang sudah ditandai dicetak.
             if ($pengajuan->status_surat === 'sudah_dicetak') {
                 $sudahDicetak++;
                 continue;
             }
-
             $pengajuan->update([
                 'status_surat' => 'sudah_dicetak',
             ]);
-
             $berhasil++;
         }
-
         $pesan = "{$berhasil} surat berhasil ditandai sudah dicetak.";
-
         if ($sudahDicetak > 0) {
             $pesan .= " {$sudahDicetak} surat dilewati karena sudah ditandai dicetak.";
         }
-
         if ($sudahDivalidasi > 0) {
             $pesan .= " {$sudahDivalidasi} surat dilewati karena sudah divalidasi.";
         }
-
         if ($tidakMemenuhiSyarat > 0) {
             $pesan .= " {$tidakMemenuhiSyarat} data dilewati karena pengajuan tidak disetujui atau PKL sudah selesai.";
         }
-
         if ($berhasil === 0) {
             return back()->with('warning', $pesan);
         }
-
         if (
             $sudahDicetak > 0 ||
             $sudahDivalidasi > 0 ||
@@ -498,9 +433,6 @@ class StaffSuratController extends Controller
         ) {
             return back()->with('warning', $pesan);
         }
-
         return back()->with('success', $pesan);
     }
-
-
 }

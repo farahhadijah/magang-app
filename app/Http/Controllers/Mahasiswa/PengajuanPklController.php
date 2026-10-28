@@ -11,6 +11,9 @@ use App\Models\TempatPkl;
 use App\Models\DokumenPengajuan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
+use App\Mail\NotifikasiPengajuanStaffTU;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 class PengajuanPklController extends Controller
 {
     /**
@@ -154,6 +157,58 @@ class PengajuanPklController extends Controller
                 'status_verifikasi' => 'pending',
             ]);
         });
+
+        
+        // Ambil prodi mahasiswa yang mengajukan PKL.
+        $prodiId = $mahasiswa->prodi_id;
+
+        // Hitung pengajuan yang masih menunggu verifikasi TU
+        // khusus untuk prodi mahasiswa tersebut.
+        $jumlahPengajuanPending = PengajuanPkl::query()
+            ->where('status', 'pending_tu')
+            ->whereHas('mahasiswa', function ($query) use ($prodiId) {
+                $query->where('prodi_id', $prodiId);
+            })
+            ->count();
+
+        // Kirim email hanya ketika jumlah pending mencapai
+        // 2 atau kelipatannya: 2, 4, 6, 8, dan seterusnya.
+        if (
+            $jumlahPengajuanPending >= 2 &&
+            $jumlahPengajuanPending % 2 === 0
+        ) {
+            // Ambil Staff TU aktif pada prodi yang sama
+            // dan memiliki alamat email.
+            $staffTu = DB::table('staff')
+                ->where('prodi_id', $prodiId)
+                ->where('is_active', 1)
+                ->whereNotNull('email')
+                ->where('email', '<>', '')
+                ->get(['id', 'nama', 'email']);
+
+            foreach ($staffTu as $staff) {
+                try {
+                    Mail::to($staff->email)->send(
+                        new NotifikasiPengajuanStaffTU(
+                            namaStaff: $staff->nama,
+                            jumlahPengajuan: $jumlahPengajuanPending,
+                        )
+                    );
+                } catch (\Throwable $e) {
+                    // Email gagal tidak membatalkan pengajuan mahasiswa.
+                    Log::error(
+                        'Gagal mengirim notifikasi pengajuan PKL kepada Staff TU.',
+                        [
+                            'staff_id' => $staff->id,
+                            'email' => $staff->email,
+                            'jumlah_pengajuan' => $jumlahPengajuanPending,
+                            'error' => $e->getMessage(),
+                        ]
+                    );
+                }
+            }
+        }
+
 
         return redirect()
             ->route('mahasiswa.pengajuan.status')
