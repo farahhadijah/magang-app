@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\Staff;
+use App\Models\Dosen;
+use App\Mail\RingkasanHarianKaprodiMail;
 use App\Http\Controllers\Controller;
 use App\Models\Mitra;
 // use App\Models\Verifikasi;
@@ -18,11 +20,6 @@ use Throwable;
 
 class PengajuanPklController extends Controller
 {
-    /**
-     * ===============================
-     * LIST PENGAJUAN UNTUK TU
-     * ===============================
-     */
     public function index()
     {
         $prodiId = $this->getProdiId();
@@ -40,11 +37,7 @@ class PengajuanPklController extends Controller
             ->paginate(15);
      return view('staff.pengajuan.index', compact('pengajuans'));
     }
-    /**
-     * ===============================
-     * DETAIL PENGAJUAN
-     * ===============================
-     */
+
     public function show($id)
     {
         $prodiId = $this->getProdiId();
@@ -61,12 +54,8 @@ class PengajuanPklController extends Controller
 
         return view('staff.pengajuan.show', compact('pengajuan'));
     }
-        /**
-         * ===============================
-         * SELESAIKAN VERIFIKASI TU
-         * ===============================
-         */
-        public function approve($id)
+
+    public function approve($id)
     {
         $prodiId = $this->getProdiId();
 
@@ -97,6 +86,9 @@ class PengajuanPklController extends Controller
             ]);
         });
 
+        // Kirim notifikasi Kaprodi setelah transaksi berhasil.
+        $this->kirimNotifikasiKaprodi($prodiId);
+
         return redirect()
             ->route('staff.pengajuan.index')
             ->with(
@@ -104,11 +96,6 @@ class PengajuanPklController extends Controller
                 'Verifikasi administrasi selesai. Pengajuan diteruskan ke Kaprodi.'
             );
     }
-        /**
-         * ===============================
-         * KEMBALIKAN KE MAHASISWA
-         * ===============================
-         */
         
     public function reject(Request $request, $id)
     {
@@ -194,11 +181,6 @@ class PengajuanPklController extends Controller
             );
     }
 
-        /**
-         * ===============================
-         * HISTORI DITOLAK TU
-         * ===============================
-         */
     public function histori(Request $request)
     {
         $prodiId = $this->getProdiId();
@@ -236,6 +218,54 @@ class PengajuanPklController extends Controller
 
         return view('staff.pengajuan.histori', compact('verifikasis'));
     }
+
+    private function kirimNotifikasiKaprodi(int $prodiId): void
+    {
+        try {
+            // Hitung hanya pengajuan yang menunggu verifikasi Kaprodi
+            // pada program studi yang bersangkutan.
+            $jumlahPengajuan = PengajuanPkl::query()
+                ->where('status', 'pending_kaprodi')
+                ->whereHas('mahasiswa', function ($query) use ($prodiId) {
+                    $query->where('prodi_id', $prodiId);
+                })
+                ->count();
+
+            // Email hanya dikirim pada jumlah 2, 4, 6, 8, dan seterusnya.
+            if ($jumlahPengajuan === 0 || $jumlahPengajuan % 2 !== 0) {
+                return;
+            }
+
+            // Ambil Kaprodi aktif dari program studi yang sama.
+            $kaprodis = Dosen::query()
+                ->where('prodi_id', $prodiId)
+                ->where('jabatan', 'Kaprodi')
+                ->where('is_active', 1)
+                ->whereNotNull('email')
+                ->where('email', '<>', '')
+                ->get();
+
+            foreach ($kaprodis as $kaprodi) {
+                Mail::to($kaprodi->email)->send(
+                    new RingkasanHarianKaprodiMail(
+                        namaKaprodi: $kaprodi->nama,
+                        jumlahPengajuan: $jumlahPengajuan,
+                        urlSibolang: route('kaprodi.pengajuan.index'),
+                    )
+                );
+            }
+        } catch (Throwable $e) {
+            Log::error(
+                'Gagal mengirim notifikasi pengajuan kepada Kaprodi.',
+                [
+                    'prodi_id' => $prodiId,
+                    'jumlah_pengajuan' => $jumlahPengajuan ?? null,
+                    'error' => $e->getMessage(),
+                ]
+            );
+        }
+    }
+
     private function getProdiId()
     {
         $staff = auth()->user()->staff;
