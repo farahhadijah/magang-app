@@ -81,9 +81,6 @@ class SiakadService
         }
     }
 
-    /**
-     * Helper untuk mengakses nested value dari response JSON
-     */
     private function getJsonValue(array $response, string $key, $default = null)
     {
         $data = $response['json'] ?? [];
@@ -137,6 +134,62 @@ class SiakadService
         );
 
         return $data;
+    }
+
+    public function getNilaiMahasiswaPadaSemester(
+        string $nim,
+        string $tahunSms
+    ): array {
+        $cacheKey = "siakad_nilai_{$nim}_{$tahunSms}";
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+        $payload = [
+            'nim' => $nim,
+            'tahunsms' => $tahunSms,
+        ];
+        $response = $this->httpRequest(
+            'GET',
+            env('SIAKAD_BASE_URL') . '/nilai',
+            $payload,
+            15
+        );
+        if (! $response['successful']) {
+            Log::error('Gagal mengambil nilai mahasiswa berdasarkan semester', [
+                'nim' => $nim,
+                'tahun_sms' => $tahunSms,
+                'status' => $response['status'],
+                'response' => $response['body'],
+            ]);
+            return [
+                'success' => false,
+                'message' => 'Gagal mengambil data dari SIAKAD',
+                'data' => [],
+            ];
+        }
+        $data = $this->getJsonValue($response, 'data', []);
+        if (! is_array($data)) {
+            Log::warning('Format data nilai SIAKAD tidak valid', [
+                'nim' => $nim,
+                'tahun_sms' => $tahunSms,
+            ]);
+            return [
+                'success' => false,
+                'message' => 'Format data SIAKAD tidak valid',
+                'data' => [],
+            ];
+        }
+        $result = [
+            'success' => true,
+            'message' => 'Berhasil mengambil data',
+            'data' => $data,
+        ];
+        Cache::put(
+            $cacheKey,
+            $result,
+            now()->addMinutes(10)
+        );
+        return $result;
     }
 
     public function getNilaiBermasalah(string $nim): array
@@ -596,17 +649,85 @@ class SiakadService
         }
     }
     public function debugNilaiMahasiswa(string $nim, string $tahunsms): array
-{
-    $payload = [
-        'nim' => $nim,
-        'tahunsms' => $tahunsms,
-    ];
+    {
+        $payload = [
+            'nim' => $nim,
+            'tahunsms' => $tahunsms,
+        ];
 
-    return $this->httpRequest(
-        'GET',
-        env('SIAKAD_BASE_URL').'/nilai',
-        $payload,
-        15
-    );
-}
+        return $this->httpRequest(
+            'GET',
+            env('SIAKAD_BASE_URL').'/nilai',
+            $payload,
+            15
+        );
+    }
+
+    public function getTahunSemesterAktif(): ?string
+    {
+        $cacheKey = 'siakad_tahun_semester_aktif';
+        return Cache::remember($cacheKey, now()->addMinutes(10), function () {
+            $response = $this->httpRequest(
+                'GET',
+                env('SIAKAD_BASE_URL') . '/setting/ta',
+                null,
+                15
+            );
+            if (! $response['successful']) {
+                Log::error('Gagal mengambil tahun semester aktif SIAKAD', [
+                    'status' => $response['status'],
+                    'response' => $response['body'],
+                ]);
+                return null;
+            }
+            $tahunSms = data_get($response['json'], 'data.TAHUNSMS');
+            if (
+                ! is_string($tahunSms) ||
+                ! preg_match('/^\d{4}[12]$/', $tahunSms)
+            ) {
+                Log::warning('Format TAHUNSMS SIAKAD tidak valid', [
+                    'tahun_sms' => $tahunSms,
+                ]);
+                return null;
+            }
+            return $tahunSms;
+        });
+    }
+
+    public function getTahunSemesterValidasi(): ?string
+    {
+        $tahunSmsAktif = $this->getTahunSemesterAktif();
+        if (! $tahunSmsAktif) {
+            return null;
+        }
+        $tahun = (int) substr($tahunSmsAktif, 0, 4);
+        $semester = (int) substr($tahunSmsAktif, 4, 1);
+        if ($semester === 1) {
+            $tahun--;
+            $semester = 2;
+        } else {
+            $semester = 1;
+        }
+        return sprintf('%04d%d', $tahun, $semester);
+    }
+
+    public function hasKrsValidasi(string $nim): ?bool
+    {
+        $tahunSmsValidasi = $this->getTahunSemesterValidasi();
+        if (! $tahunSmsValidasi) {
+            return null;
+        }
+        $response = $this->getNilaiMahasiswaPadaSemester(
+            $nim,
+            $tahunSmsValidasi
+        );
+        if (
+            ! isset($response['success']) ||
+            $response['success'] !== true
+        ) {
+            return null;
+        }
+        $data = $response['data'] ?? [];
+        return count($data) > 0;
+    }
 }
