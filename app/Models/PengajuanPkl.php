@@ -55,7 +55,6 @@ class PengajuanPkl extends Model
         $dokumenWajib = [
             DokumenPengajuan::JENIS_PEMBAYARAN,
             DokumenPengajuan::JENIS_STUDI_TOUR,
-            DokumenPengajuan::JENIS_KRS,
         ];
 
         foreach ($dokumenWajib as $jenis) {

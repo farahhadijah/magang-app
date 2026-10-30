@@ -30,10 +30,16 @@ class MahasiswaNavbarComposer
             ->isApiAvailable($mahasiswa->nim);
 
         $punyaNilaiDE = false;
+        $belumKrs = false;
 
         if ($siakadAktif) {
+            // getNilaiMahasiswa() di-cache 10 menit, jadi dua panggilan
+            // di bawah tidak menghasilkan request dobel ke SIAKAD.
             $punyaNilaiDE = $siakadService
                 ->hasNilaiDE($mahasiswa->nim);
+
+            $belumKrs = ! $siakadService
+                ->hasKrsForValidasi($mahasiswa->nim);
         }
 
         $view->with([
@@ -41,6 +47,7 @@ class MahasiswaNavbarComposer
             'navbarPkl' => $pkl,
             'navbarSiakadAktif' => $siakadAktif,
             'navbarPunyaNilaiDE' => $punyaNilaiDE,
+            'navbarBelumKrs' => $belumKrs,
             'navbarBolehUploadLaporan' => $pkl?->isSiapUploadLaporan(),
             'navbarPenilaianMitra' => $pkl?->penilaianMitra,
         ]);

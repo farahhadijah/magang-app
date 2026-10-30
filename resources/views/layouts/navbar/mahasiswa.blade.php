@@ -1,321 +1,189 @@
-{{-- 
-|--------------------------------------------------------------------------
-| DATA DARI MAHASISWANAVBARCOMPOSER
-|--------------------------------------------------------------------------
-| navbarPengajuan
-| navbarPkl
-| navbarSiakadAktif
-| navbarPunyaNilaiDE
-| navbarBolehUploadLaporan
-| navbarPenilaianMitra
-|--------------------------------------------------------------------------
---}}
-
 <div class="space-y-1">
 
-{{-- ================= MENU UTAMA PKL ================= --}}
+    @if (!$navbarSiakadAktif)
 
-{{-- API SIAKAD DOWN --}}
-@if(!$navbarSiakadAktif)
+        <div class="flex gap-3 items-center px-4 py-2.5 rounded-lg opacity-60 cursor-not-allowed">
+            <i class="w-5 bi bi-server"></i>
 
-    <div
-        class="
-            flex items-center gap-3
-            px-4 py-2.5
-            rounded-lg
-            opacity-60
-            cursor-not-allowed
-        "
-    >
-        <i class="w-5 bi bi-server"></i>
+            SIAKAD Bermasalah
+        </div>
 
-        SIAKAD Bermasalah
-    </div>
-
-{{-- ADA NILAI D / E --}}
-@elseif($navbarPunyaNilaiDE)
-
-    <a
-        href="{{ route('mahasiswa.remedial.index') }}"
-        class="
+        {{-- ADA KENDALA AKADEMIK (D/E atau belum KRS) --}}
+    @elseif($navbarPunyaNilaiDE || $navbarBelumKrs)
+        <a href="{{ route('mahasiswa.status-akademik.index') }}"
+            class="
             flex items-center gap-3
             px-4 py-2.5
             rounded-lg
             transition
             hover:bg-green-800
-            {{ request()->routeIs('mahasiswa.remedial.*')
-                ? 'bg-green-800 text-amber-300'
-                : '' }}
-        "
-    >
-        <i class="w-5 bi bi-exclamation-triangle"></i>
+            {{ request()->routeIs('mahasiswa.status-akademik.*') ? 'bg-green-800 text-amber-300' : '' }}
+        ">
+            <i class="w-5 bi bi-exclamation-triangle"></i>
 
-        Remedial
-    </a>
+            Status Akademik
+        </a>
 
-{{-- AMAN, BOLEH AJUKAN PKL --}}
-@else
-
-    @if(!$navbarPengajuan)
-
-        <a
-            href="{{ route('mahasiswa.pengajuan.create') }}"
-            class="
+        {{-- AMAN, BOLEH AJUKAN PKL --}}
+    @else
+        @if (!$navbarPengajuan)
+            <a href="{{ route('mahasiswa.pengajuan.create') }}"
+                class="
                 flex items-center gap-3
                 px-4 py-2.5
                 rounded-lg
                 transition
                 hover:bg-green-800
-                {{ request()->routeIs('mahasiswa.pengajuan.create')
-                    ? 'bg-green-800 text-amber-300'
-                    : '' }}
-            "
-        >
-            <i class="w-5 bi bi-file-earmark-plus"></i>
+                {{ request()->routeIs('mahasiswa.pengajuan.create') ? 'bg-green-800 text-amber-300' : '' }}
+            ">
+                <i class="w-5 bi bi-file-earmark-plus"></i>
 
-            Ajukan PKL
-        </a>
+                Ajukan PKL
+            </a>
+        @else
+            <div class="flex gap-3 items-center px-4 py-2.5 rounded-lg opacity-60 cursor-not-allowed">
+                <i class="w-5 bi bi-file-earmark-plus"></i>
 
-    @else
-
-        <div
-            class="
-                flex items-center gap-3
-                px-4 py-2.5
-                rounded-lg
-                opacity-60
-                cursor-not-allowed
-            "
-        >
-            <i class="w-5 bi bi-file-earmark-plus"></i>
-
-            PKL Sudah Diajukan
-        </div>
+                PKL Sudah Diajukan
+            </div>
+        @endif
 
     @endif
 
-@endif
-
     {{-- ================= STATUS PKL ================= --}}
-    @if($navbarPengajuan)
-
-        <a
-            href="{{ route('mahasiswa.pengajuan.status') }}"
+    @if ($navbarPengajuan)
+        <a href="{{ route('mahasiswa.pengajuan.status') }}"
             class="
                 flex items-center gap-3
                 px-4 py-2.5
                 rounded-lg
                 transition
                 hover:bg-green-800
-                {{ request()->routeIs('mahasiswa.pengajuan.status')
-                    ? 'bg-green-800 text-amber-300'
-                    : '' }}
-            "
-        >
+                {{ request()->routeIs('mahasiswa.pengajuan.status') ? 'bg-green-800 text-amber-300' : '' }}
+            ">
             <i class="w-5 bi bi-info-circle"></i>
 
             Status PKL
         </a>
-
     @endif
 
     {{-- ================= LOGBOOK ================= --}}
-    @if($navbarPkl && $navbarPkl->status !== 'selesai')
-
-        <a
-            href="{{ route('mahasiswa.logbook.index') }}"
+    @if ($navbarPkl && $navbarPkl->status !== 'selesai')
+        <a href="{{ route('mahasiswa.logbook.index') }}"
             class="
                 flex items-center gap-3
                 px-4 py-2.5
                 rounded-lg
                 transition
                 hover:bg-green-800
-                {{ request()->routeIs('mahasiswa.logbook.*')
-                    ? 'bg-green-800 text-amber-300'
-                    : '' }}
-            "
-        >
+                {{ request()->routeIs('mahasiswa.logbook.*') ? 'bg-green-800 text-amber-300' : '' }}
+            ">
             <i class="w-5 bi bi-book"></i>
 
             Logbook
         </a>
-
     @else
-
-        <div
-            class="
-                flex items-center gap-3
-                px-4 py-2.5
-                rounded-lg
-                opacity-60
-                cursor-not-allowed
-            "
-        >
+        <div class="flex gap-3 items-center px-4 py-2.5 rounded-lg opacity-60 cursor-not-allowed">
             <i class="w-5 bi bi-book"></i>
 
             Logbook
         </div>
-
     @endif
 
     {{-- ================= TUGAS DARI MITRA ================= --}}
-    @if($navbarPkl && $navbarPkl->status !== 'selesai')
-
-        <a
-            href="{{ route('mahasiswa.tugas') }}"
+    @if ($navbarPkl && $navbarPkl->status !== 'selesai')
+        <a href="{{ route('mahasiswa.tugas') }}"
             class="
                 flex items-center gap-3
                 px-4 py-2.5
                 rounded-lg
                 transition
                 hover:bg-green-800
-                {{ request()->routeIs('mahasiswa.tugas')
-                    ? 'bg-green-800 text-amber-300'
-                    : '' }}
-            "
-        >
+                {{ request()->routeIs('mahasiswa.tugas') ? 'bg-green-800 text-amber-300' : '' }}
+            ">
             <i class="w-5 bi bi-list-check"></i>
 
             Tugas
         </a>
-
     @else
-
-        <div
-            class="
-                flex items-center gap-3
-                px-4 py-2.5
-                rounded-lg
-                opacity-60
-                cursor-not-allowed
-            "
-        >
+        <div class="flex gap-3 items-center px-4 py-2.5 rounded-lg opacity-60 cursor-not-allowed">
             <i class="w-5 bi bi-list-check"></i>
 
             Tugas
         </div>
-
     @endif
 
     {{-- ================= LAPORAN AKHIR ================= --}}
-    @if($navbarPkl)
+    @if ($navbarPkl)
 
-        @if($navbarBolehUploadLaporan)
-
-            <a
-                href="{{ route('mahasiswa.laporan.index') }}"
+        @if ($navbarBolehUploadLaporan)
+            <a href="{{ route('mahasiswa.laporan.index') }}"
                 class="
                     flex items-center gap-3
                     px-4 py-2.5
                     rounded-lg
                     transition
                     hover:bg-green-800
-                    {{ request()->routeIs('mahasiswa.laporan.*')
-                        ? 'bg-green-800 text-amber-300'
-                        : '' }}
-                "
-            >
+                    {{ request()->routeIs('mahasiswa.laporan.*') ? 'bg-green-800 text-amber-300' : '' }}
+                ">
                 <i class="w-5 bi bi-file-text"></i>
 
                 Laporan Akhir
             </a>
-
         @else
-
-            <div
-                class="
-                    flex items-center gap-3
-                    px-4 py-2.5
-                    rounded-lg
-                    opacity-60
-                    cursor-not-allowed
-                "
-            >
+            <div class="flex gap-3 items-center px-4 py-2.5 rounded-lg opacity-60 cursor-not-allowed">
                 <i class="w-5 bi bi-file-text"></i>
 
                 Laporan Akhir
             </div>
-
         @endif
 
     @endif
 
     {{-- ================= PENILAIAN MITRA ================= --}}
-    @if($navbarPenilaianMitra)
-
-        <a
-            href="{{ route('mahasiswa.penilaianMitra.index') }}"
+    @if ($navbarPenilaianMitra)
+        <a href="{{ route('mahasiswa.penilaianMitra.index') }}"
             class="
                 flex items-center gap-3
                 px-4 py-2.5
                 rounded-lg
                 transition
                 hover:bg-green-800
-                {{ request()->routeIs('mahasiswa.penilaianMitra.*')
-                    ? 'bg-green-800 text-amber-300'
-                    : '' }}
-            "
-        >
+                {{ request()->routeIs('mahasiswa.penilaianMitra.*') ? 'bg-green-800 text-amber-300' : '' }}
+            ">
             <i class="w-5 bi bi-star"></i>
 
             Penilaian Mitra
         </a>
-
     @else
-
-        <div
-            class="
-                flex items-center gap-3
-                px-4 py-2.5
-                rounded-lg
-                opacity-60
-                cursor-not-allowed
-            "
-        >
+        <div class="flex gap-3 items-center px-4 py-2.5 rounded-lg opacity-60 cursor-not-allowed">
             <i class="w-5 bi bi-star"></i>
 
             Penilaian Mitra
         </div>
-
     @endif
 
     {{-- ================= NILAI PKL ================= --}}
-    @if($navbarPkl && $navbarPkl->status === 'selesai')
-
-        <a
-            href="{{ route('mahasiswa.nilai.index') }}"
+    @if ($navbarPkl && $navbarPkl->status === 'selesai')
+        <a href="{{ route('mahasiswa.nilai.index') }}"
             class="
                 flex items-center gap-3
                 px-4 py-2.5
                 rounded-lg
                 transition
                 hover:bg-green-800
-                {{ request()->routeIs('mahasiswa.nilai.*')
-                    ? 'bg-green-800 text-amber-300'
-                    : '' }}
-            "
-        >
+                {{ request()->routeIs('mahasiswa.nilai.*') ? 'bg-green-800 text-amber-300' : '' }}
+            ">
             <i class="w-5 bi bi-clipboard-check"></i>
 
             Nilai PKL
         </a>
-
     @else
-
-        <div
-            class="
-                flex items-center gap-3
-                px-4 py-2.5
-                rounded-lg
-                opacity-60
-                cursor-not-allowed
-            "
-        >
+        <div class="flex gap-3 items-center px-4 py-2.5 rounded-lg opacity-60 cursor-not-allowed">
             <i class="w-5 bi bi-clipboard-check"></i>
 
             Nilai PKL
         </div>
-
     @endif
 
 </div>

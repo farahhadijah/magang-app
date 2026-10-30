@@ -66,7 +66,7 @@ class PengajuanPklController extends Controller
 
             'dokumen_pembayaran' => 'required|file|mimes:pdf,jpg,png|max:2048',
             'dokumen_studi_tour' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:2048',
-            'dokumen_krs' => 'required|file|mimes:pdf|max:2048',
+            // 'dokumen_krs' DIHAPUS — validasi KRS sekarang via API SIAKAD
         ]);
 
         $mahasiswa = Auth::user()->mahasiswa;
@@ -144,26 +144,13 @@ class PengajuanPklController extends Controller
                 'jenis_dokumen' => DokumenPengajuan::JENIS_STUDI_TOUR,
                 'path_file' => $studiTourPath,
                 'status_verifikasi' => 'pending',
-            ]);
-
-            // Dokumen KRS
-            $krsPath = $request->file('dokumen_krs')
-                ->store($basePath, 'public');
-
-            DokumenPengajuan::create([
-                'id_pengajuan_pkl' => $pengajuan->id,
-                'jenis_dokumen' => DokumenPengajuan::JENIS_KRS,
-                'path_file' => $krsPath,
-                'status_verifikasi' => 'pending',
-            ]);
+            ]);  
         });
 
         
         // Ambil prodi mahasiswa yang mengajukan PKL.
         $prodiId = $mahasiswa->prodi_id;
 
-        // Hitung pengajuan yang masih menunggu verifikasi TU
-        // khusus untuk prodi mahasiswa tersebut.
         $jumlahPengajuanPending = PengajuanPkl::query()
             ->where('status', 'pending_tu')
             ->whereHas('mahasiswa', function ($query) use ($prodiId) {
@@ -171,14 +158,10 @@ class PengajuanPklController extends Controller
             })
             ->count();
 
-        // Kirim email hanya ketika jumlah pending mencapai
-        // 2 atau kelipatannya: 2, 4, 6, 8, dan seterusnya.
         if (
             $jumlahPengajuanPending >= 2 &&
             $jumlahPengajuanPending % 2 === 0
         ) {
-            // Ambil Staff TU aktif pada prodi yang sama
-            // dan memiliki alamat email.
             $staffTu = DB::table('staff')
                 ->where('prodi_id', $prodiId)
                 ->where('is_active', 1)
@@ -216,9 +199,6 @@ class PengajuanPklController extends Controller
     }
 
 
-    /**
-     * Upload ulang dokumen invalid
-     */
     public function uploadUlangDokumen(Request $request, $id)
     {
         $request->validate([

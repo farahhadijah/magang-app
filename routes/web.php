@@ -1,16 +1,10 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| MAHASISWA AREA
-|--------------------------------------------------------------------------
-*/
 use App\Http\Controllers\Auth\FirstLoginController;
 use App\Http\Controllers\Auth\SiakadDosenFirstLoginController;
 use App\Http\Controllers\Auth\SiakadFirstLoginController;
 use App\Http\Controllers\Auth\SiakadStaffFirstLoginController;
 use App\Http\Controllers\AuthController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
 use App\Http\Controllers\Mahasiswa\LaporanAkhirController as MahasiswaLaporanAkhirController;
@@ -18,10 +12,11 @@ use App\Http\Controllers\Mahasiswa\LogbookController as MahasiswaLogbookControll
 use App\Http\Controllers\Mahasiswa\NilaiMitraMahasiswaController;
 use App\Http\Controllers\Mahasiswa\NilaiPklController as MahasiswaNilaiPklController;
 use App\Http\Controllers\Mahasiswa\PengajuanPklController as MahasiswaPengajuanController;
-use App\Http\Controllers\Mahasiswa\RemedialController;
+use App\Http\Controllers\Mahasiswa\StatusAkademikController;
 use App\Http\Controllers\Mahasiswa\TugasController as TugasMahasiswaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,24 +49,44 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
     ->group(function () {
+
         Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
-        // formulir (DIHAPUS: fitur download formulir dinonaktifkan)
-        // Pengajuan PKL
-        Route::get('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
-        Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
-        Route::get('/status-pengajuan', [MahasiswaPengajuanController::class, 'status'])->name('pengajuan.status');
-        Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen'])->name('pengajuan.dokumen.upload-ulang');
-        Route::middleware('bebas.nilai.de')->group(function () {
+
+        /*
+        |------------------------------------------------------------------
+        | STATUS AKADEMIK
+        | Halaman yang menampung semua kendala akademik (D/E & belum KRS).
+        | Tidak memakai middleware bebas.nilai.de / validasi.krs.siakad,
+        | karena justru di sinilah mahasiswa yang gagal validasi diarahkan.
+        |------------------------------------------------------------------
+        */
+        Route::get('/status-akademik', [StatusAkademikController::class, 'index'])
+            ->name('status-akademik.index');
+
+        /*
+        |------------------------------------------------------------------
+        | PENGAJUAN PKL
+        | Dilindungi dua middleware berlapis:
+        |   1. bebas.nilai.de     -> cek nilai D/E
+        |   2. validasi.krs.siakad -> cek KRS semester validasi
+        |------------------------------------------------------------------
+        */
+        Route::middleware(['bebas.nilai.de', 'validasi.krs.siakad'])->group(function () {
             Route::get('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
             Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
             Route::post('/pengajuan-pkl/dokumen/{id}/upload-ulang', [MahasiswaPengajuanController::class, 'uploadUlangDokumen'])->name('pengajuan.dokumen.upload-ulang');
         });
+
+        Route::get('/status-pengajuan', [MahasiswaPengajuanController::class, 'status'])->name('pengajuan.status');
+        Route::post('/cek-kemiripan-tempat', [MahasiswaPengajuanController::class, 'cekKemiripanAjax'])->name('pengajuan.cek-kemiripan');
+
         // Dokumentasi Google Drive
         Route::get('/logbook/dokumentasi/edit', [MahasiswaLogbookController::class, 'editDokumentasi'])
             ->name('logbook.dokumentasi.edit');
 
         Route::put('/logbook/dokumentasi', [MahasiswaLogbookController::class, 'updateDokumentasi'])
             ->name('logbook.dokumentasi.update');
+
         // Logbook
         Route::get('/logbook', [MahasiswaLogbookController::class, 'index'])->name('logbook.index');
         Route::get('/logbook/create', [MahasiswaLogbookController::class, 'create'])->name('logbook.create');
@@ -79,21 +94,22 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
         Route::get('/logbook/{logbook}/edit', [MahasiswaLogbookController::class, 'edit'])->name('logbook.edit');
         Route::put('/logbook/{logbook}', [MahasiswaLogbookController::class, 'update'])->name('logbook.update');
         Route::delete('/logbook/{logbook}', [MahasiswaLogbookController::class, 'destroy'])->name('logbook.destroy');
+
         // Laporan Akhir
         Route::get('/laporan', [MahasiswaLaporanAkhirController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/create', [MahasiswaLaporanAkhirController::class, 'create'])->name('laporan.create');
         Route::post('/laporan', [MahasiswaLaporanAkhirController::class, 'store'])->name('laporan.store');
-        Route::post('/cek-kemiripan-tempat', [MahasiswaPengajuanController::class, 'cekKemiripanAjax'])->name('pengajuan.cek-kemiripan');
+
         // nilai
         Route::get('/nilai-pkl', [MahasiswaNilaiPklController::class, 'index'])->name('nilai.index');
+
         // tugas
         Route::get('/tugas', [TugasMahasiswaController::class, 'index'])->name('tugas');
         Route::get('/tugas/{id}', [TugasMahasiswaController::class, 'show'])->name('tugas.show');
         Route::post('/tugas/{id}/submit', [TugasMahasiswaController::class, 'submit'])->name('tugas.submit');
+
         // penilaian mitra
         Route::get('/penilaian-mitra', [NilaiMitraMahasiswaController::class, 'index'])->name('penilaianMitra.index');
-        // remedial
-        Route::get('/remedial', [RemedialController::class, 'index'])->name('remedial.index');
     });
 
 /*

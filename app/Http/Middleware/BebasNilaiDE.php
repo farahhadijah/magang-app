@@ -28,10 +28,20 @@ class BebasNilaiDE
          */
         $siakadService = app(SiakadService::class);
 
+        // API down -> jangan blokir dengan pesan D/E, arahkan ke Status Akademik
+        if (! $siakadService->isApiAvailable($mahasiswa->nim)) {
+            return redirect()
+                ->route('mahasiswa.status-akademik.index')
+                ->with(
+                    'error',
+                    'Server SIAKAD sedang bermasalah. Silakan coba lagi nanti.'
+                );
+        }
+
         if ($siakadService->hasNilaiDE($mahasiswa->nim)) {
 
             return redirect()
-                ->route('mahasiswa.remedial.index')
+                ->route('mahasiswa.status-akademik.index')
                 ->with(
                     'error',
                     'Anda masih memiliki nilai D/E dan wajib remedial terlebih dahulu.'

@@ -301,10 +301,11 @@
                                     {{ optional($pengajuan->tempatPkl)->email ?? '-' }}</p>
                             </div>
                             <div class="p-4 bg-gray-50 rounded-xl">
-                                <p class="text-xs font-medium tracking-wider text-gray-500 uppercase">Lokasi Google Maps</p>
+                                <p class="text-xs font-medium tracking-wider text-gray-500 uppercase">Lokasi Google
+                                    Maps</p>
                                 @if (optional($pengajuan->tempatPkl)->lokasi_maps)
                                     <a href="{{ $pengajuan->tempatPkl->lokasi_maps }}" target="_blank"
-                                        class="inline-flex items-center gap-1.5 mt-1 text-sm font-semibold text-green-600 hover:text-green-700 hover:underline">
+                                        class="inline-flex gap-1.5 items-center mt-1 text-sm font-semibold text-green-600 hover:text-green-700 hover:underline">
                                         <i class="fa-solid fa-map-location-dot"></i>
                                         Buka Google Maps
                                     </a>
@@ -333,9 +334,11 @@
                     <div class="p-6">
                         @php
                             // Filter out KHS documents
-                            $dokumenLainnya = $pengajuan->dokumenPengajuan
-                                ->where('jenis_dokumen', '!=', 'KHS')
-                                ->where('jenis_dokumen', '!=', 'Form PKN');
+                            $dokumenLainnya = $pengajuan->dokumenPengajuan->whereNotIn('jenis_dokumen', [
+                                'KHS',
+                                'Form PKN',
+                                'KRS',
+                            ]);
                         @endphp
 
                         {{-- ================= DOKUMEN WAJIB ================= --}}
@@ -363,7 +366,6 @@
                                                         $docIcon = match ($doc->jenis_dokumen) {
                                                             'Pembayaran' => 'fa-receipt',
                                                             'Studi Tour' => 'fa-ticket',
-                                                            'KRS' => 'fa-file-lines',
                                                             default => 'fa-file',
                                                         };
                                                     @endphp
