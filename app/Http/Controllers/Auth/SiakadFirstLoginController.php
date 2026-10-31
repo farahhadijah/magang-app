@@ -17,6 +17,10 @@ class SiakadFirstLoginController extends Controller
             abort(403);
         }
 
+        if (! $user->first_login) {
+            return redirect()->route('dashboard');
+        }
+
         $mahasiswa = $user->mahasiswa;
 
         if (! $mahasiswa->is_active) {
@@ -35,12 +39,16 @@ class SiakadFirstLoginController extends Controller
         );
     }
 
-        public function store(Request $request)
+    public function store(Request $request)
     {
         $user = Auth::user();
 
         if (! $user || ! $user->mahasiswa) {
             abort(403);
+        }
+
+        if (! $user->first_login) {
+            return redirect()->route('dashboard');
         }
 
         // ✅ Ambil ID mahasiswa untuk validasi unique (abaikan diri sendiri)
@@ -83,6 +91,8 @@ class SiakadFirstLoginController extends Controller
             'password' => Hash::make($request->password),
             'first_login' => false,
         ]);
+
+        session()->forget('url.intended');
 
         return redirect()->route('dashboard');
     }

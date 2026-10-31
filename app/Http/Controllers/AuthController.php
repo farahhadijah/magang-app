@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\SiakadService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +22,7 @@ class AuthController extends Controller
         return view('auth.login', compact('informasi'));
     }
 
-    public function login(Request $request, SiakadService $siakadService)
+    public function login(Request $request)
     {
         $request->validate([
             'username' => 'required',
@@ -49,6 +48,9 @@ class AuthController extends Controller
             }
 
             if ($user->first_login) {
+                // Bersihkan intended URL agar tidak mencemari login berikutnya
+                session()->forget('url.intended');
+
                 if ($user->role === 'mahasiswa') {
                     return redirect()->route('siakad.first-login');
                 }
@@ -62,27 +64,13 @@ class AuthController extends Controller
                 return redirect()->route('password.first');
             }
 
-            return redirect()->intended(route('dashboard'));
-        }
-
-        if ($request->username === $request->password) {
-            $mahasiswa = $siakadService->findMahasiswaByNim($request->username);
-
-            if ($mahasiswa) {
-                RateLimiter::clear($this->throttleKey($request));
-
-                session([
-                    'siakad_first_login' => [
-                        'nim' => $mahasiswa['nim'],
-                        'nama' => $mahasiswa['nama'],
-                        'angkatan' => $mahasiswa['angkatan'],
-                        'jenis_kelamin' => $mahasiswa['jenis_kelamin'],
-                        'kelas' => $mahasiswa['kelas'],
-                    ],
-                ]);
-
-                return redirect()->route('siakad.first-login');
+            // Jika user sudah menyelesaikan first login, pastikan intended URL bukan halaman first login
+            $intended = session()->get('url.intended');
+            if ($intended && str_contains($intended, 'first-login')) {
+                session()->forget('url.intended');
             }
+
+            return redirect()->intended(route('dashboard'));
         }
 
         RateLimiter::hit($this->throttleKey($request));

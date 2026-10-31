@@ -53,29 +53,41 @@ class UserAutoCreateService
 
     public static function fromStaff(Staff $staff)
     {
-        return User::updateOrCreate(
-            ['staff_id' => $staff->id],
-            [
-                'username'     => $staff->nip,
-                'password'     => Hash::make($staff->nip),
-                'role'         => 'staff_tu',
-                'is_active'    => $staff->is_active ?? true,
-                'first_login'  => true
-            ]
-        );
+        $user = User::firstOrNew([
+            'staff_id' => $staff->id
+        ]);
+
+        $user->username = $staff->nip;
+        $user->role = 'staff_tu';
+        $user->is_active = $staff->is_active ?? true;
+
+        if (!$user->exists) {
+            $user->password = Hash::make($staff->nip);
+            $user->first_login = true;
+        }
+
+        $user->save();
+
+        return $user;
     }
 
     public static function fromPimpinan(Pimpinan $pimpinan)
     {
-        return User::updateOrCreate(
-            ['pimpinan_id' => $pimpinan->id],
-            [
-                'username'     => $pimpinan->nip,
-                'password'     => Hash::make($pimpinan->nip),
-                'role'         => 'pimpinan',
-                'is_active'    => $pimpinan->is_active ?? true,
-                'first_login'  => true
-            ]
-        );
+        $user = User::firstOrNew([
+            'pimpinan_id' => $pimpinan->id
+        ]);
+
+        $user->username = $pimpinan->nip;
+        $user->role = 'pimpinan';
+        $user->is_active = $pimpinan->is_active ?? true;
+
+        if (!$user->exists) {
+            $user->password = Hash::make($pimpinan->nip);
+            $user->first_login = true;
+        }
+
+        $user->save();
+
+        return $user;
     }
 }
