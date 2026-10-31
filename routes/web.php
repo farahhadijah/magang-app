@@ -89,25 +89,9 @@ Route::middleware(['auth', 'first.login', 'role:mahasiswa'])
 
         Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
 
-        /*
-        |------------------------------------------------------------------
-        | STATUS AKADEMIK
-        | Halaman yang menampung semua kendala akademik (D/E & belum KRS).
-        | Tidak memakai middleware bebas.nilai.de / validasi.krs.siakad,
-        | karena justru di sinilah mahasiswa yang gagal validasi diarahkan.
-        |------------------------------------------------------------------
-        */
         Route::get('/status-akademik', [MahasiswaStatusAkademikController::class, 'index'])
             ->name('status-akademik.index');
 
-        /*
-        |------------------------------------------------------------------
-        | PENGAJUAN PKL
-        | Dilindungi dua middleware berlapis:
-        |   1. bebas.nilai.de     -> cek nilai D/E
-        |   2. validasi.krs.siakad -> cek KRS semester validasi
-        |------------------------------------------------------------------
-        */
         Route::middleware(['bebas.nilai.de', 'validasi.krs.siakad'])->group(function () {
             Route::get('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
             Route::post('/pengajuan-pkl', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
@@ -330,28 +314,48 @@ Route::middleware(['auth', 'first.login', 'role:staff_tu'])
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'first.login', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('mahasiswa', AdminMahasiswaController::class);
-    Route::post('mahasiswa/import', [AdminMahasiswaController::class, 'import'])->name('mahasiswa.import');
-    Route::post('mahasiswa/{mahasiswa}/reset-password', [AdminMahasiswaController::class, 'resetPassword'])->name('mahasiswa.reset-password');
-    Route::post('mahasiswa/{id}/activate', [AdminMahasiswaController::class, 'activate'])->name('mahasiswa.activate');
+
+    Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+        Route::get('/', [AdminMahasiswaController::class, 'indexProdi'])->name('index');
+        Route::get('/prodi/{prodiId}/angkatan', [AdminMahasiswaController::class, 'angkatanByProdi'])
+            ->name('angkatan')
+            ->whereNumber('prodiId');
+
+        Route::get('/prodi/{prodiId}/angkatan/{angkatan}', [AdminMahasiswaController::class, 'byAngkatan'])
+            ->name('by-angkatan')
+            ->whereNumber('prodiId')
+            ->where('angkatan', '[0-9]{4}');
+
+        Route::get('/create', [AdminMahasiswaController::class, 'create'])->name('create');
+        Route::post('/', [AdminMahasiswaController::class, 'store'])->name('store');
+        Route::post('/import', [AdminMahasiswaController::class, 'import'])->name('import');
+        Route::post('/sync', [AdminMahasiswaController::class, 'syncSiakad'])->name('sync');
+
+        // ---- ROUTE WILDCARD {mahasiswa} (paling akhir) ----
+        Route::get('/{mahasiswa}', [AdminMahasiswaController::class, 'show'])->name('show');
+        Route::get('/{mahasiswa}/edit', [AdminMahasiswaController::class, 'edit'])->name('edit');
+        Route::put('/{mahasiswa}', [AdminMahasiswaController::class, 'update'])->name('update');
+        Route::delete('/{mahasiswa}', [AdminMahasiswaController::class, 'destroy'])->name('destroy');
+        Route::post('/{mahasiswa}/reset-password', [AdminMahasiswaController::class, 'resetPassword'])->name('reset-password');
+        Route::post('/{id}/activate', [AdminMahasiswaController::class, 'activate'])->name('activate');
+    });
 
     Route::resource('dosen', AdminDosenController::class)->except(['show']);
     Route::post('dosen/{dosen}/reset-password', [AdminDosenController::class, 'resetPassword'])->name('dosen.reset-password');
     Route::post('dosen/{id}/activate', [AdminDosenController::class, 'activate'])->name('dosen.activate');
-
-    Route::post('mahasiswa/sync', [AdminMahasiswaController::class, 'syncSiakad'])->name('mahasiswa.sync');
     Route::post('dosen/sync', [AdminDosenController::class, 'syncSiakad'])->name('dosen.sync');
 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::resource('users', AdminUserController::class)->only(['create', 'store']);
-    Route::resource('prodi', AdminProdiController::class)->except(['show']);
 
-    // Manajemen Pimpinan (Admin)
+    Route::resource('users', AdminUserController::class)->only(['create', 'store']);
+
+    Route::resource('prodi', AdminProdiController::class)->except(['show']);
+    Route::post('prodi/import', [AdminProdiController::class, 'import'])->name('prodi.import');
+    Route::post('prodi/sync', [AdminProdiController::class, 'syncSiakad'])->name('prodi.sync');
+
     Route::resource('pimpinan', AdminPimpinanController::class)->except(['show']);
     Route::post('pimpinan/{id}/reset', [AdminPimpinanController::class, 'reset'])->name('pimpinan.reset');
     Route::post('pimpinan/{id}/activate', [AdminPimpinanController::class, 'activate'])->name('pimpinan.activate');
-    Route::post('prodi/import', [AdminProdiController::class, 'import'])->name('prodi.import');
-    Route::post('prodi/sync', [AdminProdiController::class, 'syncSiakad'])->name('prodi.sync');
 
     Route::resource('staff', AdminStaffController::class)->except(['show']);
     Route::post('staff/{id}/reset', [AdminStaffController::class, 'reset'])->name('staff.reset');
@@ -363,12 +367,11 @@ Route::middleware(['auth', 'first.login', 'role:admin'])->prefix('admin')->name(
     Route::resource('fakultas', AdminFakultasController::class)->except(['show'])->parameters([
         'fakultas' => 'fakultas',
     ]);
-
     Route::post('fakultas/import', [AdminFakultasController::class, 'import'])->name('fakultas.import');
     Route::post('fakultas/sync', [AdminFakultasController::class, 'syncSiakad'])->name('fakultas.sync');
+
     Route::resource('informasi', AdminInformasiController::class)->except(['show']);
 });
-
 /*
 |--------------------------------------------------------------------------
 | PIMPINAN AREA
