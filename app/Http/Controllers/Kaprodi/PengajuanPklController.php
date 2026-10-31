@@ -129,7 +129,8 @@ class PengajuanPklController extends Controller
                 DB::raw('COUNT(pkl.id) as total_bimbingan')
             )
             ->groupBy('dosen.id', 'dosen.nama', 'dosen.keahlian')
-            ->orderBy('dosen.nama')
+            ->orderByDesc('total_bimbingan')
+            ->orderBy('dosen.nama', 'asc')
             ->get();
         $jarak = null;
         $mapsUrl = $pengajuan->tempatPkl->lokasi_maps ?? null;

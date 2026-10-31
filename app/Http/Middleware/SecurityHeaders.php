@@ -43,7 +43,8 @@ class SecurityHeaders
             "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.bunny.net https://unpkg.com; " .
             "font-src 'self' https://cdnjs.cloudflare.com https://fonts.bunny.net https://fonts.gstatic.com; " .
             "img-src 'self' data: https:; " .
-            "connect-src 'self';"
+            "connect-src 'self';" .
+            "frame-src 'self' https://mozilla.github.io;"
         );
 
         // Permissions Policy

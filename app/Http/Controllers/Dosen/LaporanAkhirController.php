@@ -45,36 +45,34 @@ public function index()
         return view('dosen.laporan.show', compact('pkl', 'laporan'));
     }
 
-    public function approve(Request $request, Pkl $pkl)
-{
-    if ($pkl->id_dosen !== $this->getDosenId()) {
-        abort(403);
-    }
+        public function approve(Request $request, Pkl $pkl)
+        {
+            if ($pkl->id_dosen !== $this->getDosenId()) {
+                abort(403);
+            }
 
-    $laporan = $pkl->laporanAkhir;
+            $laporan = $pkl->laporanAkhir;
 
-    if (!$laporan) {
-        abort(404);
-    }
+            if (!$laporan) {
+                abort(404);
+            }
 
-    if ($laporan->status_approve === 'approved') {
-        return back()->with('warning', 'Laporan sudah disetujui.');
-    }
+            if ($laporan->status_approve === 'approved') {
+                return back()->with('warning', 'Laporan sudah disetujui.');
+            }
 
-    $request->validate([
-        'catatan_dosen' => 'nullable|string|max:2000'
-    ]);
+            $request->validate([
+                'catatan_dosen' => 'nullable|string|max:2000'
+            ]);
 
-    DB::transaction(function () use ($laporan, $pkl) {
+            DB::transaction(function () use ($laporan, $pkl) {
+                $laporan->approve(auth()->user()->dosen->id);
+            });
 
-        $laporan->approve(auth()->user()->dosen->id);
-    });
-
-    return back()->with(
-        'success',
-        'Laporan berhasil disetujui.'
-    );
-}
+            return back()
+                ->with('success', 'Laporan berhasil disetujui.')
+                ->with('warning', 'Laporan telah di-approve! Silakan segera input nilai akhir mahasiswa.');
+        }
 
     public function reject(Request $request, Pkl $pkl)
     {

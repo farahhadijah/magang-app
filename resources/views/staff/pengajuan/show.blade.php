@@ -247,9 +247,10 @@
                 {{-- Preview --}}
                 <div class="flex-1 p-3 min-h-0 sm:p-5">
 
-                    {{-- PDF --}}
-                    <iframe x-show="isPdf()" :src="fileUrl" class="w-full h-full bg-white rounded-xl"
-                        frameborder="0"></iframe>
+                    {{-- PDF (via PDF.js agar bisa tampil di mobile) --}}
+                    <iframe x-show="isPdf()" x-bind:src="isPdf() ? pdfViewerUrl() : ''"
+                        class="w-full h-full bg-white rounded-xl" frameborder="0" allowfullscreen>
+                    </iframe>
 
                     {{-- IMAGE --}}
                     <div x-show="isImage()"
@@ -280,5 +281,40 @@
             </div>
         </div>
     </div>
+    @push('scripts')
+        <script>
+            function pdfViewer() {
+                return {
+                    isOpen: false,
+                    fileUrl: '',
 
+                    openModal(url) {
+                        this.fileUrl = url;
+                        this.isOpen = true;
+                    },
+
+                    closeModal() {
+                        this.isOpen = false;
+                        this.fileUrl = '';
+                    },
+
+                    isPdf() {
+                        return this.fileUrl.toLowerCase().split('?')[0].endsWith('.pdf');
+                    },
+
+                    isImage() {
+                        const u = this.fileUrl.toLowerCase().split('?')[0];
+                        return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/.test(u);
+                    },
+
+                    pdfViewerUrl() {
+                        if (!this.isPdf()) return '';
+                        // Pakai PDF.js viewer (v4.10.38) yang kompatibel luas
+                        const viewer = 'https://mozilla.github.io/pdf.js/web/viewer.html';
+                        return `${viewer}?file=${encodeURIComponent(this.fileUrl)}`;
+                    }
+                };
+            }
+        </script>
+    @endpush
 </x-app-layout>
