@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Mail\NotifikasiDosenPembimbing;
 use App\Mail\StatusPengajuanMail;
 use App\Mail\AkunMitraMail;
 use App\Models\EmailLog;
@@ -398,9 +399,10 @@ class PengajuanPklController extends Controller
                 ]);
             }
         }
+                // === Kirim email ke Mahasiswa ===
         try {
             $pengajuan->refresh()->load([
-                'mahasiswa',
+                'mahasiswa.prodi', // pastikan prodi diload
                 'tempatPkl',
             ]);
             $emailMahasiswa = $pengajuan->mahasiswa->email ?? null;
@@ -422,7 +424,37 @@ class PengajuanPklController extends Controller
                 ]
             );
         }
-        $pesan = 'Pengajuan disetujui dan surat pengantar PKL berhasil diterbitkan.';
+
+        // === TAMBAHAN: Kirim email ke Dosen Pembimbing ===
+        try {
+            $emailDosen = $dosen->email ?? null;
+            if ($emailDosen) {
+                Mail::to($emailDosen)->send(
+                    new NotifikasiDosenPembimbing(
+                        namaDosen: $dosen->nama,
+                        namaMahasiswa: $pengajuan->mahasiswa->nama,
+                        nimMahasiswa: $pengajuan->mahasiswa->nim,
+                        namaTempat: $pengajuan->tempatPkl->nama_tempat ?? '-',
+                        prodiMahasiswa: $pengajuan->mahasiswa->prodi->nama ?? null,
+                    )
+                );
+            } else {
+                Log::warning('Email dosen kosong saat persetujuan PKL.', [
+                    'pengajuan_id' => $pengajuan->id,
+                    'dosen_id' => $dosen->id,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::error(
+                'Gagal mengirim email notifikasi ke dosen pembimbing.',
+                [
+                    'pengajuan_id' => $pengajuan->id,
+                    'dosen_id' => $dosen->id,
+                    'error' => $e->getMessage(),
+                ]
+            );
+        }
+        $pesan = 'Pengajuan disetujui, surat pengantar PKL diterbitkan, dan notifikasi telah dikirim ke dosen pembimbing.';
         if ($mitraBaru && $emailMitraBerhasil) {
             $pesan .= ' Akun mitra berhasil dibuat dan kredensial dikirim ke email instansi.';
             return redirect()
