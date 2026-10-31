@@ -17,6 +17,10 @@ class SiakadDosenFirstLoginController extends Controller
             abort(403);
         }
 
+        if (! $user->first_login) {
+            return redirect()->route('dashboard');
+        }
+
         $dosen = $user->dosen;
 
         if (! $dosen->is_active) {
@@ -35,12 +39,16 @@ class SiakadDosenFirstLoginController extends Controller
         );
     }
 
-        public function store(Request $request)
+    public function store(Request $request)
     {
         $user = Auth::user();
 
         if (! $user || ! $user->dosen) {
             abort(403);
+        }
+
+        if (! $user->first_login) {
+            return redirect()->route('dashboard');
         }
 
         // Ambil ID dosen untuk validasi unique
@@ -87,6 +95,8 @@ class SiakadDosenFirstLoginController extends Controller
             'password' => Hash::make($request->password),
             'first_login' => false,
         ]);
+
+        session()->forget('url.intended');
 
         return redirect()->route('dashboard');
     }

@@ -1,6 +1,5 @@
 <x-app-layout>
 
-    ```
     <x-slot name="title">
         Edit Logbook - MagangApp
     </x-slot>

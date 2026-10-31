@@ -145,7 +145,7 @@
 
                     {{-- Tombol --}}
                     <div class="flex justify-end pt-4 border-t">
-                        <a href="{{ route('staff.mitra.index') }}"
+                        <a href="{{ route('staff.manajemen-mitra.index') }}"
                             class="inline-flex gap-2 justify-center items-center px-5 py-2.5 w-full text-sm font-medium text-white bg-gray-600 rounded-lg shadow sm:w-auto hover:bg-gray-700">
                             <i class="fa-solid fa-arrow-left"></i>
                             Kembali ke Manajemen Mitra
@@ -159,7 +159,7 @@
                             Data akun tidak tersedia atau halaman telah direfresh.
                         </p>
 
-                        <a href="{{ route('staff.mitra.index') }}"
+                        <a href="{{ route('staff.manajemen-mitra.index') }}"
                             class="inline-block px-5 py-2 mt-4 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700">
                             Kembali ke Manajemen Mitra
                         </a>

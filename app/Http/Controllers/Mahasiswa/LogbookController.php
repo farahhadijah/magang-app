@@ -14,22 +14,6 @@ use Illuminate\Support\Facades\Log;
 
 class LogbookController extends Controller
 {
-    private function getActivePkl()
-    {
-        $user = auth()->user();
-
-        if (!$user || !$user->mahasiswa) {
-            return null;
-        }
-
-        return Pkl::whereHas('pengajuanPkl', function ($q) use ($user) {
-                $q->where('id_mhs', $user->mahasiswa->id);
-            })
-            ->where('status', 'aktif')
-            ->latest()
-            ->first();
-    }
-
     private function authorizeLogbook(Logbook $logbook)
     {
         $user = auth()->user();
@@ -52,10 +36,12 @@ class LogbookController extends Controller
     }
     public function index()
     {
-        $pkl = $this->getActivePkl();
+        $pkl = $this->getPkl();
 
         if (!$pkl) {
-            abort(403, 'PKL sudah selesai atau belum dimulai.');
+            return redirect()
+                ->route('mahasiswa.dashboard')
+                ->with('warning', 'Anda belum memiliki data PKL.');
         }
 
         $logbooks = $pkl->logbooks()
@@ -70,19 +56,22 @@ class LogbookController extends Controller
 
         $tanggalKosong = collect();
 
-        $mulai = Carbon::parse($pkl->tgl_mulai)->startOfDay();
-        $today = Carbon::now('Asia/Jakarta')->startOfDay();
+        // Hanya hitung tanggal kosong kalau PKL masih aktif
+        if ($pkl->status === 'aktif') {
+            $mulai = Carbon::parse($pkl->tgl_mulai)->startOfDay();
+            $today = Carbon::now('Asia/Jakarta')->startOfDay();
 
-        $period = CarbonPeriod::create($mulai, $today);
+            $period = CarbonPeriod::create($mulai, $today);
 
-        $tanggalTerisi = $pkl->logbooks()
-            ->pluck('tgl')
-            ->map(fn ($tgl) => Carbon::parse($tgl)->toDateString())
-            ->toArray();
+            $tanggalTerisi = $pkl->logbooks()
+                ->pluck('tgl')
+                ->map(fn ($tgl) => Carbon::parse($tgl)->toDateString())
+                ->toArray();
 
-        foreach ($period as $date) {
-            if (!in_array($date->toDateString(), $tanggalTerisi)) {
-                $tanggalKosong->push($date->copy());
+            foreach ($period as $date) {
+                if (!in_array($date->toDateString(), $tanggalTerisi)) {
+                    $tanggalKosong->push($date->copy());
+                }
             }
         }
 
@@ -104,9 +93,14 @@ class LogbookController extends Controller
         $pkl = $this->getActivePkl();
 
         if (!$pkl) {
+            $anyPkl = $this->getPkl();
+            $msg = $anyPkl
+                ? 'PKL sudah selesai. Logbook tidak dapat ditambah.'
+                : 'Belum ada PKL aktif.';
+
             return redirect()
                 ->route('mahasiswa.logbook.index')
-                ->with('warning', 'Belum ada PKL aktif.');
+                ->with('warning', $msg);
         }
 
         $isFirstLogbook = !$pkl->logbooks()->exists();
@@ -122,9 +116,14 @@ class LogbookController extends Controller
         $pkl = $this->getActivePkl();
 
         if (!$pkl) {
+            $anyPkl = $this->getPkl();
+            $msg = $anyPkl
+                ? 'PKL sudah selesai. Logbook tidak dapat ditambah.'
+                : 'Belum ada PKL aktif.';
+
             return redirect()
                 ->route('mahasiswa.logbook.index')
-                ->with('warning', 'Belum ada PKL aktif.');
+                ->with('warning', $msg);
         }
 
         if ($pkl->status !== 'aktif') {
@@ -252,11 +251,17 @@ class LogbookController extends Controller
     public function edit(Logbook $logbook)
     {
         $this->authorizeLogbook($logbook);
+
+        if ($logbook->pkl->status !== 'aktif') {
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'PKL sudah selesai. Logbook tidak dapat diubah.');
+        }
+
         if ($logbook->status_approve === 'approved') {
-            abort(
-                403,
-                'Logbook sudah disetujui dan isi logbook tidak dapat diubah.'
-            );
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'Logbook sudah disetujui dan isi logbook tidak dapat diubah.');
         }
 
         return view('mahasiswa.logbook.edit', compact('logbook'));
@@ -266,11 +271,16 @@ class LogbookController extends Controller
     {
         $this->authorizeLogbook($logbook);
 
+        if ($logbook->pkl->status !== 'aktif') {
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'PKL sudah selesai. Logbook tidak dapat diubah.');
+        }
+
         if ($logbook->status_approve === 'approved') {
-            abort(
-                403,
-                'Logbook sudah disetujui dan isi logbook tidak dapat diubah.'
-            );
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'Logbook sudah disetujui dan isi logbook tidak dapat diubah.');
         }
 
         $request->validate([
@@ -341,21 +351,28 @@ class LogbookController extends Controller
 
     public function editDokumentasi()
     {
-        $pkl = $this->getActivePkl();
+        $pkl = $this->getPkl();
 
         if (!$pkl) {
-            abort(403, 'Belum ada PKL aktif.');
+            return redirect()
+                ->route('mahasiswa.dashboard')
+                ->with('warning', 'Anda belum memiliki data PKL.');
         }
+
+        if ($pkl->status !== 'aktif') {
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'PKL sudah selesai. Dokumentasi tidak dapat diubah.');
+        }
+
         $logbookDokumentasi = $pkl->logbooks()
             ->orderBy('id')
             ->first();
+
         if (!$logbookDokumentasi) {
             return redirect()
                 ->route('mahasiswa.logbook.create')
-                ->with(
-                    'warning',
-                    'Silakan buat logbook pertama terlebih dahulu.'
-                );
+                ->with('warning', 'Silakan buat logbook pertama terlebih dahulu.');
         }
 
         return view(
@@ -366,10 +383,18 @@ class LogbookController extends Controller
 
     public function updateDokumentasi(Request $request)
     {
-        $pkl = $this->getActivePkl();
+        $pkl = $this->getPkl();
 
         if (!$pkl) {
-            abort(403, 'Belum ada PKL aktif.');
+            return redirect()
+                ->route('mahasiswa.dashboard')
+                ->with('warning', 'Anda belum memiliki data PKL.');
+        }
+
+        if ($pkl->status !== 'aktif') {
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'PKL sudah selesai. Dokumentasi tidak dapat diubah.');
         }
 
         $request->validate([
@@ -383,13 +408,10 @@ class LogbookController extends Controller
         ], [
             'link_dokumentasi.required' =>
                 'Link Google Drive wajib diisi.',
-
             'link_dokumentasi.url' =>
                 'Link dokumentasi harus berupa URL yang valid.',
-
             'link_dokumentasi.regex' =>
                 'Link dokumentasi harus berasal dari Google Drive.',
-
             'link_dokumentasi.max' =>
                 'Link dokumentasi terlalu panjang.',
         ]);
@@ -400,11 +422,8 @@ class LogbookController extends Controller
 
         if (!$logbookDokumentasi) {
             return redirect()
-                ->route('mahasiswa.logbook.create')
-                ->with(
-                    'warning',
-                    'Silakan buat logbook pertama terlebih dahulu.'
-                );
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'Belum ada logbook dokumentasi untuk PKL ini.');
         }
 
         $logbookDokumentasi->update([
@@ -413,33 +432,56 @@ class LogbookController extends Controller
 
         return redirect()
             ->route('mahasiswa.logbook.index')
-            ->with(
-                'success',
-                'Link dokumentasi Google Drive berhasil diperbarui.'
-            );
-    }
+            ->with('success', 'Link dokumentasi Google Drive berhasil diperbarui.');
+        }
 
     public function destroy(Logbook $logbook)
     {
         $this->authorizeLogbook($logbook);
 
+        if ($logbook->pkl->status !== 'aktif') {
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'PKL sudah selesai. Logbook tidak dapat dihapus.');
+        }
+
         if ($logbook->status_approve === 'approved') {
-            abort(
-                403,
-                'Logbook yang sudah disetujui tidak dapat dihapus.'
-            );
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'Logbook yang sudah disetujui tidak dapat dihapus.');
         }
 
         if ($logbook->link_dokumentasi) {
-            abort(
-                403,
-                'Logbook pertama yang memiliki dokumentasi tidak dapat dihapus.'
-            );
+            return redirect()
+                ->route('mahasiswa.logbook.index')
+                ->with('warning', 'Logbook pertama yang memiliki dokumentasi tidak dapat dihapus.');
         }
 
         $logbook->delete();
 
         return back()
             ->with('success', 'Logbook berhasil dihapus.');
+    }
+
+    private function getPkl()
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->mahasiswa) {
+            return null;
+        }
+
+        return Pkl::whereHas('pengajuanPkl', function ($q) use ($user) {
+                $q->where('id_mhs', $user->mahasiswa->id);
+            })
+            ->whereIn('status', ['aktif', 'selesai'])
+            ->latest()
+            ->first();
+    }
+
+    private function getActivePkl()
+    {
+        $pkl = $this->getPkl();
+        return $pkl && $pkl->status === 'aktif' ? $pkl : null;
     }
 }

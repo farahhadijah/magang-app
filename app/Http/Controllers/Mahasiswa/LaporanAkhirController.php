@@ -10,56 +10,103 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 class LaporanAkhirController extends Controller
 {
-    private function getActivePkl()
+    private function getPkl()
     {
         $user = auth()->user();
+
         if (!$user || !$user->mahasiswa) {
             return null;
         }
+
         return Pkl::whereHas('pengajuanPkl', function ($q) use ($user) {
                 $q->where('id_mhs', $user->mahasiswa->id);
             })
-            ->where('status', 'aktif')
+            ->whereIn('status', ['aktif', 'selesai'])
             ->latest()
             ->first();
     }
+
+    private function getActivePkl()
+    {
+        $pkl = $this->getPkl();
+        return $pkl && $pkl->status === 'aktif' ? $pkl : null;
+    }
     public function index()
     {
-        $pkl = $this->getActivePkl();
+        $pkl = $this->getPkl();
+
         if (!$pkl) {
-            return redirect()->route('mahasiswa.dashboard');
+            return redirect()
+                ->route('mahasiswa.dashboard')
+                ->with('warning', 'Anda belum memiliki data PKL.');
         }
+
         $laporan = $pkl->laporanAkhir;
+
         return view('mahasiswa.laporan.index', compact('pkl', 'laporan'));
     }
     public function create()
     {
         $pkl = $this->getActivePkl();
+
         if (!$pkl) {
-            return back()->with('warning', 'Belum ada PKL aktif.');
+            $anyPkl = $this->getPkl();
+            $msg = $anyPkl
+                ? 'PKL sudah selesai. Laporan tidak dapat diunggah.'
+                : 'Belum ada PKL aktif.';
+
+            return redirect()
+                ->route('mahasiswa.laporan.index')
+                ->with('warning', $msg);
         }
+
         if (!$pkl->isSiapUploadLaporan()) {
-            return back()->with('warning', 'Belum memenuhi syarat upload laporan akhir.');
+            return redirect()
+                ->route('mahasiswa.laporan.index')
+                ->with('warning', 'Belum memenuhi syarat upload laporan akhir.');
         }
+
         if ($pkl->laporanAkhir && $pkl->laporanAkhir->status_approve === 'approved') {
-            return back()->with('warning', 'Laporan sudah disetujui dan tidak bisa diubah.');
+            return redirect()
+                ->route('mahasiswa.laporan.index')
+                ->with('warning', 'Laporan sudah disetujui dan tidak bisa diubah.');
         }
+
         return view('mahasiswa.laporan.create', compact('pkl'));
     }
     public function store(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:pdf|max:10240'
-        ]);
         $pkl = $this->getActivePkl();
-        if (!$pkl || !$pkl->isSiapUploadLaporan()) {
-            abort(403, 'Tidak memenuhi syarat upload laporan.');
+
+        if (!$pkl) {
+            $anyPkl = $this->getPkl();
+            $msg = $anyPkl
+                ? 'PKL sudah selesai. Laporan tidak dapat diunggah.'
+                : 'Belum ada PKL aktif.';
+
+            return redirect()
+                ->route('mahasiswa.laporan.index')
+                ->with('warning', $msg);
         }
+
+        if (!$pkl->isSiapUploadLaporan()) {
+            return redirect()
+                ->route('mahasiswa.laporan.index')
+                ->with('warning', 'Belum memenuhi syarat upload laporan akhir.');
+        }
+
+        $request->validate([
+            'file' => 'required|mimes:pdf|max:10240',
+        ]);
+
         $existing = $pkl->laporanAkhir;
+
         if ($existing && $existing->status_approve === 'approved') {
             abort(403, 'Laporan sudah disetujui.');
         }
+
         $path = $request->file('file')->store('laporan_akhir', 'public');
+
         if ($existing) {
             Storage::disk('public')->delete($existing->path_file);
 
@@ -71,7 +118,6 @@ class LaporanAkhirController extends Controller
                 'approved_at'    => null,
             ]);
 
-            // Laporan yang diperbarui akan dikirim untuk direview kembali.
             $laporan = $existing;
         } else {
             $laporan = LaporanAkhir::create([
@@ -81,7 +127,6 @@ class LaporanAkhirController extends Controller
             ]);
         }
 
-        // Kirim notifikasi kepada dosen pembimbing.
         $dosen = $pkl->dosen;
 
         if ($dosen && $dosen->email) {
@@ -90,7 +135,6 @@ class LaporanAkhirController extends Controller
                     new NotifikasiLaporanAkhirDosen($laporan)
                 );
             } catch (\Throwable $e) {
-                // Email gagal tidak membatalkan penyimpanan laporan.
                 Log::error('Gagal mengirim notifikasi laporan akhir kepada dosen.', [
                     'laporan_id' => $laporan->id,
                     'dosen_id'   => $dosen->id,
@@ -98,6 +142,7 @@ class LaporanAkhirController extends Controller
                 ]);
             }
         }
+
         return redirect()
             ->route('mahasiswa.laporan.index')
             ->with('success', 'Laporan akhir berhasil diupload.');

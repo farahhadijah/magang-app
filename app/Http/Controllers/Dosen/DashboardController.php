@@ -29,11 +29,10 @@ class DashboardController extends Controller
             ->count();
 
         $laporanAkhirCount = LaporanAkhir::whereHas('pkl', function ($q) use ($dosenId) {
-
             $q->where('id_dosen', $dosenId)
-            ->where('status', 'aktif');
-
+              ->where('status', 'aktif');
         })
+        ->where('status_approve', 'pending')
         ->count();
 
         /* ================= CEK KAPRODI ================= */

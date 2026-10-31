@@ -20,40 +20,44 @@
 
             {{-- ================= NOTIFIKASI ================= --}}
             @if (session('success'))
-                <div class="flex items-center gap-3 p-4 text-green-800 border-l-4 border-green-500 shadow-sm bg-green-50 rounded-xl">
+                <div
+                    class="flex gap-3 items-center p-4 text-green-800 bg-green-50 rounded-xl border-l-4 border-green-500 shadow-sm">
                     <i class="text-xl text-green-600 fa-solid fa-circle-check"></i>
                     <div class="flex-1 font-medium">{{ session('success') }}</div>
                 </div>
             @endif
 
             @if (session('warning'))
-                <div class="flex items-center gap-3 p-4 border-l-4 shadow-sm text-amber-800 bg-amber-50 border-amber-500 rounded-xl">
-                    <i class="text-xl fa-solid fa-triangle-exclamation text-amber-600"></i>
+                <div
+                    class="flex gap-3 items-center p-4 text-amber-800 bg-amber-50 rounded-xl border-l-4 border-amber-500 shadow-sm">
+                    <i class="text-xl text-amber-600 fa-solid fa-triangle-exclamation"></i>
                     <div class="flex-1 font-medium">{{ session('warning') }}</div>
                 </div>
             @endif
 
             @if (session('error'))
-                <div class="flex items-center gap-3 p-4 text-red-800 border-l-4 border-red-500 shadow-sm bg-red-50 rounded-xl">
+                <div
+                    class="flex gap-3 items-center p-4 text-red-800 bg-red-50 rounded-xl border-l-4 border-red-500 shadow-sm">
                     <i class="text-xl text-red-600 fa-solid fa-circle-xmark"></i>
                     <div class="flex-1 font-medium">{{ session('error') }}</div>
                 </div>
             @endif
 
             @if (session('info'))
-                <div class="flex items-center gap-3 p-4 text-blue-800 border-l-4 border-blue-500 shadow-sm bg-blue-50 rounded-xl">
+                <div
+                    class="flex gap-3 items-center p-4 text-blue-800 bg-blue-50 rounded-xl border-l-4 border-blue-500 shadow-sm">
                     <i class="text-xl text-blue-600 fa-solid fa-circle-info"></i>
                     <div class="flex-1 font-medium">{{ session('info') }}</div>
                 </div>
             @endif
 
             @if ($errors->any())
-                <div class="p-4 border-l-4 border-red-500 shadow-sm bg-red-50 rounded-xl">
-                    <div class="flex items-center gap-2 mb-2">
+                <div class="p-4 bg-red-50 rounded-xl border-l-4 border-red-500 shadow-sm">
+                    <div class="flex gap-2 items-center mb-2">
                         <i class="text-red-600 fa-solid fa-circle-exclamation"></i>
                         <h4 class="font-semibold text-red-700">Terjadi Kesalahan Validasi</h4>
                     </div>
-                    <ul class="pl-6 space-y-1 text-sm text-red-700 list-disc">
+                    <ul class="pl-6 space-y-1 text-sm list-disc text-red-700">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -62,7 +66,7 @@
             @endif
 
             {{-- Informasi Mahasiswa --}}
-            <div class="p-6 space-y-2 border border-green-200 rounded-lg shadow-sm bg-green-50">
+            <div class="p-6 space-y-2 bg-green-50 rounded-lg border border-green-200 shadow-sm">
                 <p class="text-gray-700"><strong class="text-green-800">Nama:</strong>
                     {{ $pengajuan->mahasiswa->nama ?? '-' }}</p>
                 <p class="text-gray-700"><strong class="text-green-800">NIM:</strong>
@@ -76,13 +80,13 @@
             </div>
 
             @if ($jarak)
-                <div class="p-3 mb-3 text-sm text-green-800 border border-green-200 rounded bg-green-50">
+                <div class="p-3 mb-3 text-sm text-green-800 bg-green-50 rounded border border-green-200">
                     Jarak dari Kampus :
                     <strong>{{ number_format($jarak, 2) }} KM</strong>
                 </div>
             @endif
 
-            <div class="p-4 mt-4 border border-green-200 rounded-lg bg-green-50">
+            <div class="p-4 mt-4 bg-green-50 rounded-lg border border-green-200">
                 <h4 class="mb-2 font-semibold text-green-800">Riwayat Tempat PKL</h4>
                 <p class="mb-2 text-xs text-gray-600">
                     Per prodi Anda · angkatan {{ $pengajuan->mahasiswa->angkatan ?? '-' }} · nama tempat sama · hanya
@@ -103,7 +107,7 @@
             </div>
 
             @if ($lokasi)
-                <div class="p-5 mt-6 border border-green-200 shadow-sm bg-green-50 rounded-xl">
+                <div class="p-5 mt-6 bg-green-50 rounded-xl border border-green-200 shadow-sm">
                     <div class="flex items-center mb-3 space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -121,13 +125,13 @@
                     </a>
                 </div>
             @else
-                <div class="p-4 mt-6 text-yellow-800 border border-yellow-300 rounded-lg bg-yellow-50">
+                <div class="p-4 mt-6 text-yellow-800 bg-yellow-50 rounded-lg border border-yellow-300">
                     Lokasi PKL belum tersedia.
                 </div>
             @endif
 
             {{-- Dokumen --}}
-            <div class="relative z-50 p-6 bg-white border border-green-200 rounded-lg shadow-sm">
+            <div class="relative z-50 p-6 bg-white rounded-lg border border-green-200 shadow-sm">
                 <h3 class="mb-3 text-lg font-semibold text-green-900">Dokumen Pengajuan</h3>
                 @if ($pengajuan->dokumenPengajuan->count())
                     <ul class="space-y-2 text-sm">
@@ -141,7 +145,7 @@
 
                                 <button type="button"
                                     @click="openModal('{{ $fileUrl }}', '{{ $isImage ? 'image' : 'pdf' }}')"
-                                    class="flex items-center gap-2 text-green-700 hover:text-green-900">
+                                    class="flex gap-2 items-center text-green-700 hover:text-green-900">
 
                                     @if ($isImage)
                                         <i class="fa-solid fa-file-image"></i>
@@ -165,7 +169,7 @@
             @endphp
 
             @if ($verifikasiTu)
-                <div class="p-4 border rounded bg-blue-50">
+                <div class="p-4 bg-blue-50 rounded border">
                     <p><strong>Verifikasi TU:</strong></p>
                     <p>Oleh: {{ $verifikasiTu->user?->getNama() ?? '-' }}</p>
                     <p>Tanggal: {{ $verifikasiTu->tgl_verifikasi }}</p>
@@ -174,7 +178,7 @@
 
             {{-- Aksi Verifikasi Kaprodi --}}
             @if ($pengajuan->bisaDiverifikasiKaprodi())
-                <div class="p-6 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div class="p-6 space-y-6 bg-white rounded-lg border border-gray-200 shadow-sm">
                     {{-- APPROVE FORM --}}
                     <form method="POST" action="{{ route('kaprodi.pengajuan.approve', $pengajuan->id) }}"
                         class="space-y-4">
@@ -189,7 +193,7 @@
                             <div class="mb-4">
                                 <input type="text" x-model="searchDosen"
                                     placeholder="Cari dosen (nama atau keahlian)..."
-                                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
+                                    class="px-3 py-2 w-full rounded-lg border focus:ring-2 focus:ring-green-500">
                             </div>
 
                             {{-- LIST DOSEN --}}
@@ -199,7 +203,7 @@
                                     @forelse($dosenList as $d)
                                         <label
                                             x-show="matchesDosen(@js($d->nama), @js($d->keahlian ?? ''))"
-                                            class="flex items-start p-3 transition border rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300">
+                                            class="flex items-start p-3 rounded-lg border transition cursor-pointer hover:bg-green-50 hover:border-green-300">
 
                                             <input type="radio" name="id_dosen" value="{{ $d->id }}"
                                                 class="mt-1 mr-3" required>
@@ -218,9 +222,19 @@
                                                 @endif
 
                                                 {{-- JUMLAH BIMBINGAN --}}
-                                                <p class="mt-1 text-xs text-blue-600">
-                                                    {{ $d->total_bimbingan }} mahasiswa aktif
-                                                </p>
+                                                <div class="flex gap-2 items-center mt-1">
+                                                    <p class="text-xs text-blue-600">
+                                                        {{ $d->total_bimbingan }} mahasiswa aktif
+                                                    </p>
+
+                                                    {{-- Tambahan Badge (Opsional) --}}
+                                                    @if ($d->total_bimbingan > 0)
+                                                        <span
+                                                            class="px-2 py-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 rounded-md">
+                                                            Sudah Bimbingan
+                                                        </span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </label>
                                     @empty
@@ -257,7 +271,7 @@
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Catatan Penolakan</label>
                             <textarea name="catatan" required rows="3" placeholder="Wajib diisi jika menolak..."
-                                class="w-full p-2 border rounded-md"></textarea>
+                                class="p-2 w-full rounded-md border"></textarea>
                             @error('catatan')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -269,7 +283,7 @@
                     </form>
                 </div>
             @else
-                <div class="p-4 text-sm text-gray-700 border border-gray-300 rounded-lg bg-gray-50">
+                <div class="p-4 text-sm text-gray-700 bg-gray-50 rounded-lg border border-gray-300">
                     Pengajuan ini sudah diproses dan tidak dapat diverifikasi kembali.
                 </div>
             @endif
@@ -279,28 +293,26 @@
                 class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-60"
                 style="display: none;">
 
-                <div class="relative z-50 flex items-center justify-center w-11/12 h-[90vh] bg-white rounded-lg shadow-lg">
+                <div
+                    class="relative z-50 flex items-center justify-center w-11/12 h-[90vh] bg-white rounded-lg shadow-lg">
 
                     {{-- Tombol Tutup --}}
                     <button @click="closeModal()"
-                        class="absolute z-10 flex items-center justify-center w-10 h-10 text-xl text-white bg-red-600 rounded-full -top-4 -right-4 hover:bg-red-700">
+                        class="flex absolute -top-4 -right-4 z-10 justify-center items-center w-10 h-10 text-xl text-white bg-red-600 rounded-full hover:bg-red-700">
                         ✕
                     </button>
 
                     {{-- Preview Gambar --}}
                     <template x-if="fileType === 'image'">
-                        <div class="flex items-center justify-center w-full h-full p-4">
-                            <img :src="fileUrl"
-                                class="object-contain max-w-full max-h-full rounded-lg"
+                        <div class="flex justify-center items-center p-4 w-full h-full">
+                            <img :src="fileUrl" class="object-contain max-w-full max-h-full rounded-lg"
                                 alt="Preview Dokumen">
                         </div>
                     </template>
 
                     {{-- Preview PDF --}}
                     <template x-if="fileType === 'pdf'">
-                        <iframe :src="fileUrl"
-                            class="w-full h-full rounded-lg"
-                            frameborder="0">
+                        <iframe :src="fileUrl" class="w-full h-full rounded-lg" frameborder="0">
                         </iframe>
                     </template>
 

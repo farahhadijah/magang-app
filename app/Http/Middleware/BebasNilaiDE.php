@@ -18,12 +18,21 @@ class BebasNilaiDE
             abort(403);
         }
         $siakadService = app(SiakadService::class);
-        $statusKrs = $siakadService->hasKrsValidasi(
-            $mahasiswa->nim
-        );
-        if ($statusKrs === null) {
+
+        // API down -> jangan blokir dengan pesan D/E, arahkan ke Status Akademik
+        if (! $siakadService->isApiAvailable($mahasiswa->nim)) {
             return redirect()
-                ->route('dashboard')
+                ->route('mahasiswa.status-akademik.index')
+                ->with(
+                    'error',
+                    'Server SIAKAD sedang bermasalah. Silakan coba lagi nanti.'
+                );
+        }
+
+        if ($siakadService->hasNilaiDE($mahasiswa->nim)) {
+
+            return redirect()
+                ->route('mahasiswa.status-akademik.index')
                 ->with(
                     'error',
                     'SIAKAD sedang bermasalah. Silakan coba kembali nanti.'

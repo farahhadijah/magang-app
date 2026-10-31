@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\Log;
 
 class SiakadService
 {
-    /**
-     * Melakukan HTTP request menggunakan native PHP streams (tanpa CURL)
-     */
     private function httpRequest(string $method, string $url, ?array $data = null, int $timeout = 15): array
     {
         try {
@@ -22,7 +19,6 @@ class SiakadService
                 'Accept: application/json',
                 'Content-Type: application/json',
             ];
-
             $context_options = [
                 'http' => [
                     'method' => $method,
@@ -31,25 +27,19 @@ class SiakadService
                     'ignore_errors' => true,
                 ],
             ];
-
-            // Jika ada data, jadikan JSON dan masukkan ke body
             if ($data !== null) {
                 $json_data = json_encode($data);
                 $context_options['http']['content'] = $json_data;
                 $context_options['http']['header'] .= "\r\nContent-Length: ".strlen($json_data);
             }
-
             $context = stream_context_create($context_options);
             $response = @file_get_contents($url, false, $context);
-
-            // Ambil HTTP response headers
             $status_code = 500;
             if (isset($http_response_header) && is_array($http_response_header)) {
                 if (preg_match('/HTTP\/\d\.\d (\d+)/', $http_response_header[0], $matches)) {
                     $status_code = (int) $matches[1];
                 }
             }
-
             if ($response === false) {
                 return [
                     'successful' => false,
@@ -58,14 +48,12 @@ class SiakadService
                     'json' => [],
                 ];
             }
-
             return [
                 'successful' => $status_code >= 200 && $status_code < 300,
                 'status' => $status_code,
                 'body' => $response,
                 'json' => json_decode($response, true) ?? [],
             ];
-
         } catch (\Exception $e) {
             Log::error('HTTP Request Error', [
                 'url' => $url,
@@ -97,7 +85,9 @@ class SiakadService
 
         $payload = [
             'nim' => $nim,
-            'tahunsms' => '20252',
+            // Pakai tahunsms saat ini; API saat ini mengabaikan field ini,
+            // tapi ini menjaga kompatibilitas kalau filter diterapkan di server.
+            'tahunsms' => $this->getCurrentTahunsms() ?? '',
         ];
 
         $response = $this->httpRequest(
@@ -449,10 +439,6 @@ class SiakadService
     public function syncMahasiswa(int $prodiId, int $tahunmasuk): int
     {
         try {
-            /*
-            * Cari Prodi lokal berdasarkan ID yang dipilih admin.
-            * Kolom kode menyimpan KODEPRODI dari SIAKAD.
-            */
             $prodi = Prodi::where('id', $prodiId)
                 ->where('is_active', true)
                 ->first();
@@ -465,22 +451,11 @@ class SiakadService
                 return 0;
             }
 
-            /*
-            * Data yang dikirim ke API SIAKAD.
-            *
-            * Contoh:
-            * kodeprodi  = 55201
-            * tahunmasuk = 2024
-            */
             $payload = [
                 'kodeprodi' => $prodi->kode,
                 'tahunmasuk' => (string) $tahunmasuk,
             ];
 
-            /*
-            * Endpoint /daftarmhs menggunakan GET
-            * dengan JSON body.
-            */
             $response = $this->httpRequest(
                 'GET',
                 env('SIAKAD_BASE_URL').'/daftarmhs',
@@ -500,9 +475,6 @@ class SiakadService
                 return 0;
             }
 
-            /*
-            * Ambil data mahasiswa dari response API.
-            */
             $items = $this->getJsonValue($response, 'data', []);
 
             if (! is_array($items)) {
@@ -533,22 +505,8 @@ class SiakadService
                 $nama = trim($item['NAMAMHS']);
                 $kelas = trim($item['KELASMHS']);
 
-                /*
-                * Angkatan tetap diambil dari KELASMHS.
-                *
-                * Contoh:
-                * 2024A → 2024
-                * 2023P → 2023
-                */
                 $angkatan = (int) substr($kelas, 0, 4);
 
-                /*
-                * Simpan/update mahasiswa.
-                *
-                * Yang paling penting:
-                * prodi_id sekarang otomatis diisi dengan
-                * ID Prodi lokal yang dipilih admin.
-                */
                 Mahasiswa::updateOrCreate(
                     [
                         'nim' => $nim,
@@ -662,72 +620,93 @@ class SiakadService
             15
         );
     }
-
-    public function getTahunSemesterAktif(): ?string
+    public function getCurrentTahunsms(): ?string
     {
-        $cacheKey = 'siakad_tahun_semester_aktif';
-        return Cache::remember($cacheKey, now()->addMinutes(10), function () {
-            $response = $this->httpRequest(
-                'GET',
-                env('SIAKAD_BASE_URL') . '/setting/ta',
-                null,
-                15
-            );
-            if (! $response['successful']) {
-                Log::error('Gagal mengambil tahun semester aktif SIAKAD', [
-                    'status' => $response['status'],
-                    'response' => $response['body'],
-                ]);
-                return null;
-            }
-            $tahunSms = data_get($response['json'], 'data.TAHUNSMS');
-            if (
-                ! is_string($tahunSms) ||
-                ! preg_match('/^\d{4}[12]$/', $tahunSms)
-            ) {
-                Log::warning('Format TAHUNSMS SIAKAD tidak valid', [
-                    'tahun_sms' => $tahunSms,
-                ]);
-                return null;
-            }
-            return $tahunSms;
-        });
-    }
+        $cacheKey = 'siakad_tahunsms_current';
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
 
-    public function getTahunSemesterValidasi(): ?string
-    {
-        $tahunSmsAktif = $this->getTahunSemesterAktif();
-        if (! $tahunSmsAktif) {
-            return null;
-        }
-        $tahun = (int) substr($tahunSmsAktif, 0, 4);
-        $semester = (int) substr($tahunSmsAktif, 4, 1);
-        if ($semester === 1) {
-            $tahun--;
-            $semester = 2;
-        } else {
-            $semester = 1;
-        }
-        return sprintf('%04d%d', $tahun, $semester);
-    }
-
-    public function hasKrsValidasi(string $nim): ?bool
-    {
-        $tahunSmsValidasi = $this->getTahunSemesterValidasi();
-        if (! $tahunSmsValidasi) {
-            return null;
-        }
-        $response = $this->getNilaiMahasiswaPadaSemester(
-            $nim,
-            $tahunSmsValidasi
+        $response = $this->httpRequest(
+            'GET',
+            env('SIAKAD_BASE_URL').'/setting/ta',
+            null,
+            15
         );
-        if (
-            ! isset($response['success']) ||
-            $response['success'] !== true
-        ) {
+
+        if (! $response['successful']) {
+            Log::error('Gagal ambil tahunsms SIAKAD', [
+                'status' => $response['status'],
+                'response' => $response['body'],
+            ]);
             return null;
         }
-        $data = $response['data'] ?? [];
-        return count($data) > 0;
+
+        $tahunsms = $this->getJsonValue(
+            ['json' => $response['json']['data'] ?? []],
+            'TAHUNSMS',
+            null
+        );
+
+        if (! $tahunsms) {
+            return null;
+        }
+
+        Cache::put($cacheKey, $tahunsms, now()->addMinutes(30));
+        return $tahunsms;
+    }
+
+    private function getTahunsmsValidasi(): ?string
+    {
+        $current = $this->getCurrentTahunsms();
+        if (! $current || strlen($current) !== 5) {
+            return null;
+        }
+
+        $tahun = (int) substr($current, 0, 4); // 2026
+        $smester = (int) substr($current, 4, 1); // 1 (ganjil) / 2 (genap)
+
+        if ($smester === 1) {
+            // 20261 -> 20252 (tahun lalu, semester genap)
+            return ($tahun - 1).'2';
+        }
+
+        // 20252 -> 20242 (tahun yang sama, semester ganjil)
+        return $tahun.'1';
+    }
+
+    public function hasKrsForValidasi(string $nim): bool
+    {
+        $resp = $this->getNilaiMahasiswa($nim);
+
+        // Fail-safe: kalau API error -> anggap BELUM KRS (blokir)
+        if (! is_array($resp) || (isset($resp['success']) && $resp['success'] === false)) {
+            return false;
+        }
+
+        $target = $this->getTahunsmsValidasi();
+        if (! $target) {
+            return false; // gagal resolve tahunsms -> blokir
+        }
+
+        $items = $resp['data'] ?? [];
+
+        // PENTING: filter eksplisit kolom TAHUNSMS, bukan cuma data.length
+        $adaKrs = collect($items)
+            ->filter(fn ($item) => is_array($item))
+            ->contains(fn ($item) => (string) ($item['TAHUNSMS'] ?? '') === $target);
+
+        // Kalau belum ada, buang cache supaya request berikutnya fresh
+        // (mahasiswa mungkin baru saja mengisi KRS di SIAKAD).
+        if (! $adaKrs) {
+            $this->clearCache($nim);
+        }
+
+        return $adaKrs;
+    }
+    public function canAjukanPklDenganKrs(string $nim): bool
+    {
+        return $this->hasNilaiDE($nim) === false
+            && $this->hasKrsForValidasi($nim) === true;
     }
 }

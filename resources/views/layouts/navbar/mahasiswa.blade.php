@@ -1,29 +1,55 @@
 <div class="space-y-1">
+
     @if (!$navbarSiakadAktif)
+
         <div class="flex gap-3 items-center px-4 py-2.5 rounded-lg opacity-60 cursor-not-allowed">
             <i class="w-5 bi bi-server"></i>
+
             SIAKAD Bermasalah
         </div>
-    @elseif($navbarPunyaNilaiDE)
-        <a href="{{ route('mahasiswa.remedial.index') }}"
-            class=" flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800 {{ request()->routeIs('mahasiswa.remedial.*') ? 'bg-green-800 text-amber-300' : '' }}">
+
+        {{-- ADA KENDALA AKADEMIK (D/E atau belum KRS) --}}
+    @elseif($navbarPunyaNilaiDE || ($navbarBelumKrs ?? false))
+        <a href="{{ route('mahasiswa.status-akademik.index') }}"
+            class="
+            flex items-center gap-3
+            px-4 py-2.5
+            rounded-lg
+            transition
+            hover:bg-green-800
+            {{ request()->routeIs('mahasiswa.status-akademik.*') ? 'bg-green-800 text-amber-300' : '' }}
+        ">
             <i class="w-5 bi bi-exclamation-triangle"></i>
-            Remedial
+
+            Status Akademik
         </a>
+
+        {{-- AMAN, BOLEH AJUKAN PKL --}}
     @else
         @if (!$navbarPengajuan)
             <a href="{{ route('mahasiswa.pengajuan.create') }}"
-                class=" flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800 {{ request()->routeIs('mahasiswa.pengajuan.create') ? 'bg-green-800 text-amber-300' : '' }}">
+                class="
+                flex items-center gap-3
+                px-4 py-2.5
+                rounded-lg
+                transition
+                hover:bg-green-800
+                {{ request()->routeIs('mahasiswa.pengajuan.create') ? 'bg-green-800 text-amber-300' : '' }}
+            ">
                 <i class="w-5 bi bi-file-earmark-plus"></i>
+
                 Ajukan PKL
             </a>
         @else
             <div class="flex gap-3 items-center px-4 py-2.5 rounded-lg opacity-60 cursor-not-allowed">
                 <i class="w-5 bi bi-file-earmark-plus"></i>
+
                 PKL Sudah Diajukan
             </div>
         @endif
+
     @endif
+
     {{-- ================= STATUS PKL ================= --}}
     @if ($navbarPengajuan)
         <a href="{{ route('mahasiswa.pengajuan.status') }}"
@@ -90,7 +116,7 @@
     {{-- ================= LAPORAN AKHIR ================= --}}
     @if ($navbarPkl)
 
-        @if ($navbarBolehUploadLaporan)
+        @if ($navbarBolehUploadLaporan || $navbarPkl->status === 'selesai')
             <a href="{{ route('mahasiswa.laporan.index') }}"
                 class="
                     flex items-center gap-3
