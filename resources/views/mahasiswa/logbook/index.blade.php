@@ -31,17 +31,27 @@
 
             <div class="flex flex-col gap-2 sm:flex-row">
 
-                <a href="{{ route('mahasiswa.logbook.create') }}"
-                    class="px-4 py-2 w-full text-sm text-center text-white bg-green-600 rounded-lg sm:w-auto hover:bg-green-700">
-                    + Tambah
-                </a>
+                @if ($pkl->status === 'aktif')
+                    <a href="{{ route('mahasiswa.logbook.create') }}"
+                        class="px-4 py-2 w-full text-sm text-center text-white bg-green-600 rounded-lg sm:w-auto hover:bg-green-700">
+                        + Tambah
+                    </a>
+                @endif
 
                 @if ($logbookDokumentasi)
-                    <a href="{{ route('mahasiswa.logbook.dokumentasi.edit') }}"
-                        class="px-4 py-2 w-full text-sm text-center text-blue-700 bg-blue-50 rounded-lg border border-blue-200 sm:w-auto hover:bg-blue-100">
-                        <i class="mr-1 fa-brands fa-google-drive"></i>
-                        Dokumentasi
-                    </a>
+                    @if ($pkl->status === 'aktif')
+                        <a href="{{ route('mahasiswa.logbook.dokumentasi.edit') }}"
+                            class="px-4 py-2 w-full text-sm text-center text-blue-700 bg-blue-50 rounded-lg border border-blue-200 sm:w-auto hover:bg-blue-100">
+                            <i class="mr-1 fa-brands fa-google-drive"></i>
+                            Dokumentasi
+                        </a>
+                    @elseif ($logbookDokumentasi->link_dokumentasi)
+                        <a href="{{ $logbookDokumentasi->link_dokumentasi }}" target="_blank" rel="noopener noreferrer"
+                            class="px-4 py-2 w-full text-sm text-center text-blue-700 bg-blue-50 rounded-lg border border-blue-200 sm:w-auto hover:bg-blue-100">
+                            <i class="mr-1 fa-brands fa-google-drive"></i>
+                            Lihat Dokumentasi
+                        </a>
+                    @endif
                 @endif
 
                 <div class="px-3 py-2 text-sm text-center bg-white rounded-lg border">
@@ -54,6 +64,16 @@
             </div>
 
         </div>
+
+        @if ($pkl->status === 'selesai')
+            <div class="flex gap-3 items-center p-4 text-sm text-blue-800 bg-blue-50 rounded-xl border border-blue-200">
+                <i class="text-lg text-blue-600 fa-solid fa-circle-check"></i>
+                <div>
+                    <span class="font-semibold">Status PKL: Selesai.</span>
+                    Seluruh aktivitas pembuatan, perubahan logbook, dan link dokumentasi telah dikunci (mode baca saja).
+                </div>
+            </div>
+        @endif
 
         {{-- Pagination links --}}
         <div class="px-4 mt-4">
@@ -130,7 +150,7 @@
                                 </td>
 
                                 <td class="px-4 py-3">
-                                    @if (in_array($log->status_approve, ['pending', 'revisi']))
+                                    @if ($pkl->status === 'aktif' && in_array($log->status_approve, ['pending', 'revisi']))
                                         <a href="{{ route('mahasiswa.logbook.edit', $log->id) }}"
                                             class="text-sm text-green-600 hover:underline">
                                             Edit
@@ -180,11 +200,15 @@
                             {{ $log->catatan ?? 'Tidak ada catatan' }}
                         </p>
 
-                        @if (in_array($log->status_approve, ['pending', 'revisi']))
+                        @if ($pkl->status === 'aktif' && in_array($log->status_approve, ['pending', 'revisi']))
                             <a href="{{ route('mahasiswa.logbook.edit', $log->id) }}"
                                 class="block py-2 w-full text-sm text-center text-white bg-green-600 rounded">
                                 Edit
                             </a>
+                        @else
+                            <span class="block py-1 text-xs text-center text-gray-400 bg-gray-50 rounded border border-gray-200">
+                                Terkunci
+                            </span>
                         @endif
 
                     </div>

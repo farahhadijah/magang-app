@@ -68,7 +68,7 @@
     @endif
 
     {{-- ================= LOGBOOK ================= --}}
-    @if ($navbarPkl && $navbarPkl->status !== 'selesai')
+    @if ($navbarPkl)
         <a href="{{ route('mahasiswa.logbook.index') }}"
             class="
                 flex items-center gap-3
@@ -91,7 +91,7 @@
     @endif
 
     {{-- ================= TUGAS DARI MITRA ================= --}}
-    @if ($navbarPkl && $navbarPkl->status !== 'selesai')
+    @if ($navbarPkl)
         <a href="{{ route('mahasiswa.tugas') }}"
             class="
                 flex items-center gap-3
@@ -116,7 +116,7 @@
     {{-- ================= LAPORAN AKHIR ================= --}}
     @if ($navbarPkl)
 
-        @if ($navbarBolehUploadLaporan)
+        @if ($navbarBolehUploadLaporan || $navbarPkl->status === 'selesai')
             <a href="{{ route('mahasiswa.laporan.index') }}"
                 class="
                     flex items-center gap-3
