@@ -99,10 +99,6 @@ class PengajuanPklController extends Controller
         
     public function reject(Request $request, $id)
     {
-        $request->validate([
-            'catatan' => 'required|string|max:255',
-        ]);
-
         $prodiId = $this->getProdiId();
 
         $pengajuan = PengajuanPkl::with([
@@ -129,17 +125,19 @@ class PengajuanPklController extends Controller
             );
         }
 
-        DB::transaction(function () use ($pengajuan, $request) {
+        DB::transaction(function () use ($pengajuan) {
+            // Catatan penolakan TIDAK lagi disimpan di pengajuan_pkl.
+            // Catatan sudah tersimpan per-dokumen di dokumen_pengajuan.catatan.
             $pengajuan->update([
                 'status' => 'ditolak_tu',
-                'catatan_tu' => $request->catatan,
+                'catatan_tu' => null, // pastikan bersih, jangan simpan apa pun
             ]);
 
             $pengajuan->verifikasi()->create([
                 'id_user' => auth()->user()->getKey(),
                 'level' => 'tu',
                 'status' => 'rejected',
-                'catatan' => $request->catatan,
+                'catatan' => null, // tidak lagi menyimpan catatan di level verifikasi
                 'tgl_verifikasi' => now(),
             ]);
         });
@@ -149,6 +147,7 @@ class PengajuanPklController extends Controller
             $pengajuan->refresh()->load([
                 'mahasiswa',
                 'tempatPkl',
+                'dokumenPengajuan',
             ]);
 
             $emailMahasiswa = $pengajuan->mahasiswa->email ?? null;
@@ -158,13 +157,13 @@ class PengajuanPklController extends Controller
                     new \App\Mail\StatusPengajuanMail($pengajuan)
                 );
             } else {
-                \Illuminate\Support\Facades\Log::warning(
+                Log::warning(
                     'Email mahasiswa kosong saat penolakan Tata Usaha.',
                     ['pengajuan_id' => $pengajuan->id]
                 );
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error(
+            Log::error(
                 'Gagal mengirim email penolakan Tata Usaha.',
                 [
                     'pengajuan_id' => $pengajuan->id,
@@ -179,7 +178,7 @@ class PengajuanPklController extends Controller
                 'warning',
                 'Pengajuan PKL dikembalikan ke mahasiswa untuk perbaikan.'
             );
-    }
+}
 
     public function histori(Request $request)
     {

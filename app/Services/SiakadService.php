@@ -557,10 +557,9 @@ class SiakadService
 
                 return 0;
             }
-
             $response = $this->httpRequest(
                 'GET',
-                env('SIAKAD_BASE_URL').'/daftardosen',
+                env('SIAKAD_BASE_URL') . '/daftardosen',
                 [
                     'kodeprodi' => (string) $prodi->kode,
                 ],
@@ -569,7 +568,7 @@ class SiakadService
 
             if (! $response['successful']) {
                 Log::error('Gagal sinkronisasi dosen', [
-                    'status' => $response['status'],
+                    'status'   => $response['status'],
                     'response' => $response['body'],
                 ]);
 
@@ -578,34 +577,52 @@ class SiakadService
 
             $items = $this->getJsonValue($response, 'data', []);
 
-            $total = 0;
+            if (! is_array($items)) {
+                Log::error('Format data dosen SIAKAD tidak valid', [
+                    'prodi_id' => $prodiId,
+                    'response' => $response['body'],
+                ]);
 
+                return 0;
+            }
+            $total = 0;
             foreach ($items as $item) {
-                Dosen::updateOrCreate(
-                    [
-                        'nidn' => trim($item['NIDN']),
-                    ],
-                    [
-                        'nama' => trim($item['NAMA']),
-                        'prodi_id' => $prodi->id,
-                        'jabatan' => 'dosen',
-                        'is_active' => true,
-                    ]
-                );
+                $nidn = trim((string) ($item['NIDN'] ?? ''));
+                $nama = trim((string) ($item['NAMA'] ?? ''));
+                if ($nidn === '' || $nama === '') {
+                    continue;
+                }
+                $dosen = Dosen::firstOrNew(['nidn' => $nidn]);
+                $dosen->nama      = $nama;
+                $dosen->prodi_id  = $prodi->id;
+                $dosen->is_active = true;
+                if (! $dosen->exists) {
+                    $dosen->jabatan = 'dosen';
+                }
+                $dosen->save();
 
                 $total++;
             }
+
+            Log::info('Sinkronisasi dosen selesai', [
+                'prodi_id' => $prodi->id,
+                'prodi'    => $prodi->nama,
+                'kode'     => $prodi->kode,
+                'jumlah'   => $total,
+            ]);
 
             return $total;
 
         } catch (\Exception $e) {
             Log::error('Error sinkronisasi dosen', [
-                'message' => $e->getMessage(),
+                'prodi_id' => $prodiId,
+                'message'  => $e->getMessage(),
             ]);
 
             return 0;
         }
     }
+    
     public function debugNilaiMahasiswa(string $nim, string $tahunsms): array
     {
         $payload = [

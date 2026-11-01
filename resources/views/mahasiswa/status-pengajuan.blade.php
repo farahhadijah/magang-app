@@ -79,6 +79,10 @@
             @else
                 {{-- ================= DITOLAK TU ================= --}}
                 @if ($pengajuan->status === 'ditolak_tu')
+                    @php
+                        $dokumenInvalid = $pengajuan->dokumenPengajuan->where('status_verifikasi', 'invalid');
+                    @endphp
+
                     <div
                         class="overflow-hidden relative bg-gradient-to-r from-red-50 to-rose-50 rounded-xl border-l-4 border-red-500 shadow-md">
                         <div
@@ -95,10 +99,29 @@
                                     <p class="text-sm font-semibold text-red-800">
                                         Pengajuan PKL ditolak oleh TU
                                     </p>
-                                    <p class="mt-1 text-sm text-red-700">
-                                        <span class="font-medium">Alasan:</span>
-                                        <span class="italic">{{ $pengajuan->catatan_tu ?? 'Tidak ada catatan.' }}</span>
-                                    </p>
+
+                                    @if ($dokumenInvalid->count() > 0)
+                                        <p class="mt-1 text-sm text-red-700">
+                                            Dokumen berikut perlu Anda perbaiki:
+                                        </p>
+                                        <ul class="mt-2 space-y-1.5 text-sm text-red-700">
+                                            @foreach ($dokumenInvalid as $dok)
+                                                <li class="flex gap-2 items-start">
+                                                    <i class="mt-1 text-xs fa-solid fa-circle-exclamation"></i>
+                                                    <span>
+                                                        <strong>{{ $dok->jenis_dokumen }}</strong>
+                                                        @if ($dok->catatan)
+                                                            — <em>{{ $dok->catatan }}</em>
+                                                        @endif
+                                                    </span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        <p class="mt-1 text-sm text-red-700">
+                                            <span class="italic">Tidak ada detail catatan. Silakan hubungi TU.</span>
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -296,7 +319,8 @@
                                     {{ optional($pengajuan->tempatPkl)->jenis_tempat ?? '-' }}</p>
                             </div>
                             <div class="p-4 bg-gray-50 rounded-xl">
-                                <p class="text-xs font-medium tracking-wider text-gray-500 uppercase">Email Instansi</p>
+                                <p class="text-xs font-medium tracking-wider text-gray-500 uppercase">Email Instansi
+                                </p>
                                 <p class="mt-1 text-base font-semibold text-gray-800 break-all">
                                     {{ optional($pengajuan->tempatPkl)->email ?? '-' }}</p>
                             </div>

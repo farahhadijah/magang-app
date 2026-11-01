@@ -179,14 +179,12 @@
                     </button>
                 </form>
             @elseif ($pengajuan->bisaDikembalikanKeMahasiswa())
-                <div class="p-4 mb-4 text-sm text-amber-800 bg-amber-100 rounded-lg">
-                    <strong>⚠️ Ada dokumen yang perlu diperbaiki.</strong> Berikan catatan untuk mahasiswa.
-                </div>
                 <form method="POST" action="{{ route('staff.pengajuan.reject', $pengajuan->id) }}" class="space-y-3">
                     @csrf
-                    <textarea name="catatan" required rows="3"
-                        placeholder="Catatan untuk mahasiswa (wajib diisi)&#10;Contoh: File pembayaran kurang jelas, silakan upload ulang dengan kualitas yang lebih baik."
-                        class="p-3 w-full text-sm rounded-lg border border-gray-300 focus:ring-red-500 focus:border-red-500"></textarea>
+                    <p class="text-sm text-gray-700">
+                        Catatan penolakan sudah Anda berikan pada masing-masing dokumen di atas.
+                        Mahasiswa akan melihat catatan tersebut per-dokumen.
+                    </p>
                     <button
                         class="inline-flex gap-2 items-center px-5 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

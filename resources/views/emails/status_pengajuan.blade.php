@@ -39,12 +39,27 @@
                 </p>
             </div>
 
-            @if ($pengajuan->catatan_tu)
-                <p><strong>Catatan Tata Usaha:</strong></p>
-                <div
-                    style="background-color: #f8fafc; border-left: 4px solid #f59e0b; padding: 12px 15px; margin: 10px 0 20px; white-space: pre-line;">
-                    {{ $pengajuan->catatan_tu }}
-                </div>
+            @php
+                $dokumenInvalid = $pengajuan->dokumenPengajuan->where('status_verifikasi', 'invalid');
+            @endphp
+
+            @if ($dokumenInvalid->count() > 0)
+                <p style="margin: 0 0 8px;"><strong>Dokumen yang perlu Anda perbaiki:</strong></p>
+
+                <table cellpadding="0" cellspacing="0" border="0"
+                    style="width: 100%; border-collapse: collapse; margin: 0 0 20px; font-size: 14px;">
+                    @foreach ($dokumenInvalid as $dok)
+                        <tr>
+                            <td
+                                style="padding: 10px 12px; background-color: #f8fafc; border-left: 4px solid #f59e0b; border-bottom: 1px solid #e2e8f0;">
+                                <strong style="color: #0f172a;">{{ $dok->jenis_dokumen }}</strong>
+                                <div style="color: #475569; margin-top: 2px;">
+                                    {{ $dok->catatan ?? 'Perlu diperbaiki' }}
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </table>
             @endif
 
             <p>Silakan masuk ke SIBOLANG untuk memeriksa dan memperbaiki dokumen Anda.</p>

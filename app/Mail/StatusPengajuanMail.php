@@ -23,16 +23,17 @@ class StatusPengajuanMail extends Mailable
         $this->pengajuan->loadMissing([
             'mahasiswa',
             'tempatPkl',
+            'dokumenPengajuan',   // pastikan relasi ini ada di model PengajuanPkl
         ]);
 
         $subject = match ($this->pengajuan->status) {
-            'ditolak_tu' => 'Dokumen Pengajuan PKL Perlu Diperbaiki - SIBOLANG',
+            'ditolak_tu'      => 'Dokumen Pengajuan PKL Perlu Diperbaiki - SIBOLANG',
             'ditolak_kaprodi' => 'Pengajuan PKL Ditolak Kaprodi - SIBOLANG',
-            'disetujui' => 'Pengajuan Disetujui, PKL Anda Aktif - SIBOLANG',
-            default => 'Informasi Pengajuan PKL - SIBOLANG',
+            'disetujui'       => 'Pengajuan Disetujui, PKL Anda Aktif - SIBOLANG',
+            default           => 'Informasi Pengajuan PKL - SIBOLANG',
         };
 
         return $this->subject($subject)
-            ->markdown('emails.status_pengajuan');
+            ->view('emails.status_pengajuan');
     }
 }

@@ -14,7 +14,7 @@ class DashboardController extends Controller
     $user = Auth::user();
     $mahasiswa = $user->mahasiswa;
 
-    if (!$mahasiswa) {
+    if (! $mahasiswa) {
         abort(403, 'Mahasiswa tidak ditemukan');
     }
 
@@ -22,10 +22,11 @@ class DashboardController extends Controller
         'tempatPkl',
         'pkl.dosen',
         'pkl.suratBalasan',
+        'dokumenPengajuan',   // ← tambahkan ini
     ])
-    ->where('id_mhs', $mahasiswa->id)
-    ->latest('created_at')
-    ->first();
+        ->where('id_mhs', $mahasiswa->id)
+        ->latest('created_at')
+        ->first();
 
     $tugasList = collect();
     $tugas = null;
@@ -38,7 +39,6 @@ class DashboardController extends Controller
     $targetHari = 30;
 
     if ($pengajuan && $pengajuan->pkl) {
-
         $pkl = $pengajuan->pkl;
 
         // ================= LOGBOOK =================
@@ -53,39 +53,50 @@ class DashboardController extends Controller
         $hariPkl = $mulai->diffInDays($end) + 1;
         $targetHari = 30;
         $logbookTotal = Logbook::where('id_pkl', $pkl->id)->count();
-
         $logbookKosong = max($hariPkl - $logbookTotal, 0);
-
         $isPklSelesai = $pkl->status === 'selesai';
 
         // ================= TUGAS =================
         $tugasList = TugasMitra::where('id_pkl', $pkl->id)
-                        ->latest()
-                        ->get();
+            ->latest()
+            ->get();
 
         $tugas = $tugasList->first();
 
-        $submit = $tugas 
-        ? $tugas->submit()
-            ->where('id_pkl', $pkl->id)
-            ->first()
-        : null;
+        $submit = $tugas
+            ? $tugas->submit()->where('id_pkl', $pkl->id)->first()
+            : null;
     }
 
     $notifikasiPenolakan = null;
 
     if ($pengajuan) {
+        /*
+         * Catatan TU tidak lagi disimpan di pengajuan_pkl.
+         * Untuk status ditolak_tu, bangun ringkasan dari catatan
+         * per-dokumen di dokumen_pengajuan.
+         */
         if ($pengajuan->status === 'ditolak_tu') {
+            $dokumenInvalid = $pengajuan->dokumenPengajuan
+                ->where('status_verifikasi', 'invalid');
+
+            $ringkasan = $dokumenInvalid
+                ->map(fn ($dok) => $dok->jenis_dokumen
+                    . ($dok->catatan ? ': ' . $dok->catatan : ''))
+                ->implode('; ');
+
             $notifikasiPenolakan = [
-                'tipe' => 'tu',
-                'pesan' => $pengajuan->catatan_tu
+                'tipe'  => 'tu',
+                'pesan' => $ringkasan !== ''
+                    ? $ringkasan
+                    : 'Beberapa dokumen perlu diperbaiki. Silakan periksa detail pengajuan.',
             ];
         }
 
         if ($pengajuan->status === 'ditolak_kaprodi') {
             $notifikasiPenolakan = [
-                'tipe' => 'kaprodi',
-                'pesan' => $pengajuan->catatan_kaprodi
+                'tipe'  => 'kaprodi',
+                'pesan' => $pengajuan->catatan_kaprodi,
             ];
         }
     }

@@ -224,19 +224,24 @@ class PengajuanPklController extends Controller
                 ->store("dokumen_pengajuan_pkl/{$mahasiswa->nim}", 'public');
 
             $dokumen->update([
-                'path_file'        => $path,
-                'status_verifikasi'=> 'pending',
-                'catatan'          => null,
+                'path_file'         => $path,
+                'status_verifikasi' => 'pending',
+                'catatan'           => null,
             ]);
 
+            /*
+            * Cek apakah masih ada dokumen lain yang invalid.
+            * Jika sudah tidak ada, kembalikan status pengajuan ke pending_tu
+            * agar muncul lagi di daftar verifikasi Staff TU.
+            */
             $hasInvalid = $pengajuan->dokumenPengajuan()
                 ->where('status_verifikasi', 'invalid')
                 ->exists();
 
-            if (!$hasInvalid) {
+            if (! $hasInvalid) {
                 $pengajuan->update([
                     'status'     => 'pending_tu',
-                    'catatan_tu' => null,
+                    'catatan_tu' => null,   // tetap null (field lama, tidak dipakai)
                 ]);
             }
         });

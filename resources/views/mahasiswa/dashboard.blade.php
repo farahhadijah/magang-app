@@ -121,7 +121,7 @@
                                 <p class="mt-2 text-sm leading-relaxed text-gray-600">
                                     <span class="font-medium text-gray-700">Alasan:</span>
                                     <span class="text-gray-600">
-                                        {{ $notifikasiPenolakan['pesan'] ?? 'Tidak ada catatan.' }}
+                                        {{ $notifikasiPenolakan['pesan'] ?? 'Silakan periksa detail pengajuan Anda.' }}
                                     </span>
                                 </p>
 

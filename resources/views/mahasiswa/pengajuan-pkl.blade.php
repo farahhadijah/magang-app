@@ -131,11 +131,11 @@
                                 </ol>
                             </div>
 
-                            <p class="flex gap-1 items-center mt-2 text-xs text-gray-500">
+                            {{-- <p class="flex gap-1 items-center mt-2 text-xs text-gray-500">
                                 <i class="fa-solid fa-info-circle"></i>
                                 Masukkan nama instansi, lalu klik "Cari Lokasi Otomatis" untuk mengisi link Google Maps
                                 secara otomatis.
-                            </p>
+                            </p> --}}
 
                             {{-- MAP PREVIEW --}}
                             <div id="mapPreview" class="hidden mt-4">
@@ -171,7 +171,7 @@
                             <input type="email" name="email" value="{{ old('email') }}" required
                                 autocomplete="off" placeholder="contoh: info@perusahaan.com"
                                 class="px-4 py-3 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50/50 hover:bg-white">
-                            <p class="mt-1 text-xs text-gray-500">Masukkan alamat email resmi instansi yang aktif</p>
+                            {{-- <p class="mt-1 text-xs text-gray-500">Masukkan alamat email resmi instansi yang aktif</p> --}}
                         </div>
                     </div>
                 </div>

@@ -20,10 +20,6 @@ class Dosen extends Model
         'is_active',
     ];
 
-    /**
-     * DEFAULT VALUE
-     * mencegah error is_active NULL
-     */
     protected $attributes = [
         'is_active' => true,
     ];

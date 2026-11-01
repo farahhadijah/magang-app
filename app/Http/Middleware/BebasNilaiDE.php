@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\SiakadService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Services\SiakadService;
 
 class BebasNilaiDE
 {
@@ -13,10 +13,19 @@ class BebasNilaiDE
         Request $request,
         Closure $next
     ): Response {
+
         $mahasiswa = auth()->user()?->mahasiswa;
-        if (! $mahasiswa) {
+
+        /**
+         * Jika bukan mahasiswa
+         */
+        if (!$mahasiswa) {
             abort(403);
         }
+
+        /**
+         * Cek nilai D/E dari API SIAKAD
+         */
         $siakadService = app(SiakadService::class);
 
         // API down -> jangan blokir dengan pesan D/E, arahkan ke Status Akademik
@@ -35,16 +44,10 @@ class BebasNilaiDE
                 ->route('mahasiswa.status-akademik.index')
                 ->with(
                     'error',
-                    'SIAKAD sedang bermasalah. Silakan coba kembali nanti.'
+                    'Anda masih memiliki nilai D/E dan wajib remedial terlebih dahulu.'
                 );
         }
-        $punyaNilaiDE = $siakadService->hasNilaiDE(
-            $mahasiswa->nim
-        );
-        if (! $statusKrs || $punyaNilaiDE) {
-            return redirect()
-                ->route('mahasiswa.remedial.index');
-        }
+
         return $next($request);
     }
 }
