@@ -51,7 +51,49 @@
                             </h1>
 
                             {{-- Data dari database --}}
-                            <div x-data="informasiModal">
+                            {{-- FUNGSI ALPINE DITARUH LANGSUNG DI SINI AGAR ANTI GAGAL --}}
+                            <div x-data="{
+                                isOpen: false,
+                                fileUrl: '',
+                                title: '',
+                                openModal(url, titleText) {
+                                    this.fileUrl = url;
+                                    this.title = titleText;
+                                    this.isOpen = true;
+                                },
+                                closeModal() {
+                                    this.isOpen = false;
+                                    this.fileUrl = '';
+                                    this.title = '';
+                                },
+                                isPdf() {
+                                    if (!this.fileUrl) return false;
+                                    return this.fileUrl.toLowerCase().split('?')[0].endsWith('.pdf');
+                                },
+                                isImage() {
+                                    if (!this.fileUrl) return false;
+                                    const u = this.fileUrl.toLowerCase().split('?')[0];
+                                    return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/.test(u);
+                                },
+                                isOffice() {
+                                    if (!this.fileUrl) return false;
+                                    const u = this.fileUrl.toLowerCase().split('?')[0];
+                                    return /\.(doc|docx|xls|xlsx|ppt|pptx)$/.test(u);
+                                },
+                                isUnknown() {
+                                    return this.fileUrl && !this.isPdf() && !this.isImage() && !this.isOffice();
+                                },
+                                pdfViewerUrl() {
+                                    if (!this.isPdf()) return '';
+                                    // GUNAKAN PDF.JS LOKAL (SELF-HOST)
+                                    const viewer = '/vendor/pdfjs/web/viewer.html';
+                                    return `${viewer}?file=${encodeURIComponent(this.fileUrl)}`;
+                                },
+                                viewerSrc() {
+                                    if (!this.isOffice()) return '';
+                                    return `https://docs.google.com/gview?url=${encodeURIComponent(this.fileUrl)}&embedded=true`;
+                                }
+                            }">
 
                                 {{-- MOBILE: Grid card kecil (2 kolom) --}}
                                 {{-- DESKTOP: List vertikal --}}
@@ -77,56 +119,63 @@
 
                                 </div>
 
-                                {{-- MODAL INFORMASI --}}
+                                {{-- MODAL INFORMASI (DIPERLUAS & FULL SCREEN) --}}
                                 <div x-show="isOpen" x-cloak @keydown.escape.window="closeModal()"
-                                    class="flex fixed inset-0 z-50 justify-center items-center p-2 sm:p-4">
-                                    <div class="absolute inset-0 bg-black/60" @click="closeModal()"></div>
+                                    class="flex fixed inset-0 z-50 justify-center items-center p-0 backdrop-blur-sm bg-black/70 sm:p-4">
+
+                                    <div class="absolute inset-0" @click="closeModal()"></div>
 
                                     <div x-show="isOpen" x-transition
-                                        class="relative z-10 flex flex-col w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden bg-white rounded-xl sm:rounded-2xl shadow-2xl">
+                                        class="relative z-10 flex flex-col w-full h-full sm:h-[90vh] max-w-6xl sm:rounded-2xl overflow-hidden bg-white shadow-2xl">
 
+                                        {{-- Header Modal --}}
                                         <div
-                                            class="flex justify-between items-center px-4 py-3 border-b sm:px-6 sm:py-4">
+                                            class="flex justify-between items-center px-4 py-3 border-b sm:px-6 sm:py-4 shrink-0">
                                             <div class="pr-4">
                                                 <h2 class="text-base font-bold text-gray-800 sm:text-lg" x-text="title">
                                                 </h2>
                                                 <p class="mt-1 text-xs text-gray-500">Informasi Sibolang</p>
                                             </div>
                                             <button type="button" @click="closeModal()"
-                                                class="flex flex-shrink-0 justify-center items-center w-8 h-8 text-gray-500 rounded-full transition sm:w-9 sm:h-9 hover:bg-gray-100 hover:text-gray-700">
+                                                class="flex flex-shrink-0 justify-center items-center w-8 h-8 text-gray-500 rounded-full transition sm:w-9 sm:h-9 hover:bg-red-100 hover:text-red-600">
                                                 <i class="text-lg fa-solid fa-xmark"></i>
                                             </button>
                                         </div>
 
-                                        <div class="overflow-auto bg-gray-100">
+                                        {{-- Body Modal --}}
+                                        <div class="overflow-hidden flex-1 w-full bg-gray-100">
+                                            {{-- PDF (via PDF.js lokal) --}}
                                             <template x-if="isPdf()">
-                                                <iframe :src="fileUrl" class="w-full h-[70vh] sm:h-[75vh]"
-                                                    frameborder="0"></iframe>
+                                                <iframe x-bind:src="pdfViewerUrl()" class="w-full h-full border-0"
+                                                    allowfullscreen></iframe>
                                             </template>
 
+                                            {{-- IMAGE --}}
                                             <template x-if="isImage()">
                                                 <div
-                                                    class="flex justify-center items-center p-3 min-h-[40vh] sm:p-6 sm:min-h-[50vh]">
+                                                    class="flex overflow-auto justify-center items-center p-3 w-full h-full bg-gray-200 sm:p-6">
                                                     <img :src="fileUrl" :alt="title"
-                                                        class="object-contain max-w-full max-h-[70vh] sm:max-h-[75vh] rounded-lg shadow">
+                                                        class="object-contain max-w-full max-h-full rounded-lg shadow-md">
                                                 </div>
                                             </template>
 
+                                            {{-- OFFICE (Word/Excel/PPT) --}}
                                             <template x-if="isOffice()">
-                                                <iframe :src="viewerSrc()" class="w-full h-[70vh] sm:h-[75vh]"
-                                                    frameborder="0"></iframe>
+                                                <iframe x-bind:src="viewerSrc()" class="w-full h-full border-0"
+                                                    allowfullscreen></iframe>
                                             </template>
 
+                                            {{-- UNKNOWN --}}
                                             <template x-if="isUnknown()">
                                                 <div
-                                                    class="flex flex-col justify-center items-center p-6 min-h-[250px] text-center sm:p-10 sm:min-h-[300px]">
+                                                    class="flex flex-col justify-center items-center p-6 w-full h-full text-center sm:p-10">
                                                     <i
                                                         class="mb-4 text-4xl text-gray-400 fa-solid fa-file sm:text-5xl"></i>
                                                     <p class="text-sm text-gray-600 sm:text-base">
                                                         File tidak dapat ditampilkan langsung.
                                                     </p>
                                                     <a :href="fileUrl" target="_blank"
-                                                        class="px-5 py-2 mt-4 text-sm font-semibold text-white rounded-lg"
+                                                        class="px-5 py-2 mt-4 text-sm font-semibold text-white rounded-lg transition hover:opacity-90"
                                                         style="background-color: #1f8a1b;">
                                                         Buka File
                                                     </a>

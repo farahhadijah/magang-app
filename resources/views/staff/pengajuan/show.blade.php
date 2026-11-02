@@ -3,7 +3,33 @@
         Detail Pengajuan PKL - Sibolang
     </x-slot>
 
-    <div x-data="pdfViewer()" class="py-4 space-y-5 sm:py-6 sm:space-y-6">
+    {{-- FUNGSI ALPINE DITARUH LANGSUNG DI SINI AGAR ANTI GAGAL --}}
+    <div x-data="{
+        isOpen: false,
+        fileUrl: '',
+        openModal(url) {
+            this.fileUrl = url;
+            this.isOpen = true;
+        },
+        closeModal() {
+            this.isOpen = false;
+            this.fileUrl = '';
+        },
+        isPdf() {
+            if (!this.fileUrl) return false;
+            return this.fileUrl.toLowerCase().split('?')[0].endsWith('.pdf');
+        },
+        isImage() {
+            if (!this.fileUrl) return false;
+            const u = this.fileUrl.toLowerCase().split('?')[0];
+            return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/.test(u);
+        },
+        pdfViewerUrl() {
+            if (!this.isPdf()) return '';
+            const viewer = '/vendor/pdfjs/web/viewer.html';
+            return `${viewer}?file=${encodeURIComponent(this.fileUrl)}`;
+        }
+    }" class="py-4 space-y-5 sm:py-6 sm:space-y-6">
 
         {{-- ================= INFORMASI MAHASISWA ================= --}}
         <div
@@ -279,40 +305,4 @@
             </div>
         </div>
     </div>
-    @push('scripts')
-        <script>
-            function pdfViewer() {
-                return {
-                    isOpen: false,
-                    fileUrl: '',
-
-                    openModal(url) {
-                        this.fileUrl = url;
-                        this.isOpen = true;
-                    },
-
-                    closeModal() {
-                        this.isOpen = false;
-                        this.fileUrl = '';
-                    },
-
-                    isPdf() {
-                        return this.fileUrl.toLowerCase().split('?')[0].endsWith('.pdf');
-                    },
-
-                    isImage() {
-                        const u = this.fileUrl.toLowerCase().split('?')[0];
-                        return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/.test(u);
-                    },
-
-                    pdfViewerUrl() {
-                        if (!this.isPdf()) return '';
-                        // Pakai PDF.js viewer (v4.10.38) yang kompatibel luas
-                        const viewer = 'https://mozilla.github.io/pdf.js/web/viewer.html';
-                        return `${viewer}?file=${encodeURIComponent(this.fileUrl)}`;
-                    }
-                };
-            }
-        </script>
-    @endpush
 </x-app-layout>
