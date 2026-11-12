@@ -72,7 +72,40 @@ class User extends Authenticatable
         return $this->hasOne(Mitra::class);
     }
 
-    // ================= HELPER =================
+        // ================= EMAIL HELPER =================
+    public function profileOwner(): Mahasiswa|Dosen|Staff|null
+    {
+        return match ($this->role) {
+            'mahasiswa' => $this->mahasiswa ?? null,
+            'dosen'     => $this->dosen ?? null,
+            'staff_tu'  => $this->staff ?? null,
+            default     => null,
+        };
+    }
+
+    /**
+     * Apakah user boleh mengganti email dari halaman profile.
+     */
+    public function canEditEmail(): bool
+    {
+        return $this->profileOwner() !== null;
+    }
+
+    /**
+     * Email aktif user (dari table master). Null jika tidak ada.
+     */
+    public function getProfileEmailAttribute(): ?string
+    {
+        return $this->profileOwner()?->email;
+    }
+
+    /**
+     * Nama table master pemilik email (untuk rule unique kondisional).
+     */
+    public function profileEmailTable(): ?string
+    {
+        return $this->profileOwner()?->getTable();
+    }
 
     public function getNama()
     {

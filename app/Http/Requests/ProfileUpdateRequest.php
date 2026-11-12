@@ -2,29 +2,63 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
     /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return $this->user() !== null;
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * Email hanya divalidasi jika user punya sumber email (mahasiswa/dosen/staff).
+     * Unique dicek di table master yang sesuai (bukan di table users).
      */
     public function rules(): array
     {
+        $user = $this->user();
+
+        // User tanpa sumber email (pimpinan, mitra, admin):
+        // field email harus benar-benar tidak dikirim.
+        if (! $user->canEditEmail()) {
+            return [
+                'email' => ['prohibited'],
+            ];
+        }
+
+        $owner = $user->profileOwner();
+        $table = $user->profileEmailTable();
+
         return [
-            'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'string',
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                Rule::unique($table, 'email')->ignore($owner->id),
             ],
+        ];
+    }
+
+    /**
+     * Custom messages (opsional, membantu UX).
+     */
+    public function messages(): array
+    {
+        return [
+            'email.required'   => 'Email wajib diisi.',
+            'email.email'      => 'Format email tidak valid.',
+            'email.lowercase'  => 'Email harus menggunakan huruf kecil.',
+            'email.unique'     => 'Email ini sudah digunakan.',
+            'email.prohibited' => 'Role Anda tidak memiliki akses untuk mengubah email.',
         ];
     }
 }
