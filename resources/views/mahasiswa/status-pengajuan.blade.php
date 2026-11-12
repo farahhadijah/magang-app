@@ -3,7 +3,9 @@
         Status Pengajuan PKL - Sibolang
     </x-slot>
 
-    <div class="px-0 py-8 min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 sm:px-6 lg:px-8">
+    {{-- PANGGIL COMPONENT JS DI ROOT HALAMAN --}}
+    <div x-data="documentViewer()"
+        class="px-0 py-8 min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 sm:px-6 lg:px-8">
         <div class="mx-auto space-y-6 max-w-5xl">
             @if ($pengajuan->pesan_surat)
                 <div class="p-4 mt-4 bg-green-50 rounded-lg border-l-4 border-green-500">
@@ -342,8 +344,7 @@
                 </div>
 
                 {{-- ================= DOKUMEN ================= --}}
-                <div x-data="informasiModal"
-                    class="overflow-hidden bg-white rounded-2xl border border-gray-100 shadow-xl">
+                <div class="overflow-hidden bg-white rounded-2xl border border-gray-100 shadow-xl">
                     <div class="p-6 bg-gradient-to-r to-transparent border-b border-gray-100 from-green-50/50">
                         <div class="flex gap-2 items-center">
                             <div
@@ -357,7 +358,6 @@
                     </div>
                     <div class="p-6">
                         @php
-                            // Filter out KHS documents
                             $dokumenLainnya = $pengajuan->dokumenPengajuan->whereNotIn('jenis_dokumen', [
                                 'KHS',
                                 'Form PKN',
@@ -477,104 +477,6 @@
                                         <p class="text-sm text-gray-500">Belum ada dokumen yang diunggah.</p>
                                     </div>
                                 @endforelse
-                                {{-- ================= MODAL PREVIEW DOKUMEN ================= --}}
-                                <div x-cloak x-show="isOpen" x-transition.opacity
-                                    @keydown.escape.window="closeModal()" @click.self="closeModal()"
-                                    class="flex fixed inset-0 z-[999999999] justify-center items-center p-4 bg-black/70">
-                                    <div x-show="isOpen" x-transition
-                                        class="relative flex flex-col w-full max-w-5xl max-h-[90vh] overflow-hidden bg-white shadow-2xl rounded-2xl">
-
-                                        {{-- Header Modal --}}
-                                        <div
-                                            class="flex justify-between items-center px-5 py-4 border-b border-gray-200">
-                                            <div class="flex gap-3 items-center min-w-0">
-                                                <div
-                                                    class="flex flex-shrink-0 justify-center items-center w-9 h-9 bg-green-100 rounded-lg">
-                                                    <i class="text-green-600 fa-solid fa-file"></i>
-                                                </div>
-
-                                                <div class="min-w-0">
-                                                    <h3 class="font-semibold text-gray-800 truncate" x-text="title">
-                                                    </h3>
-
-                                                    <p class="text-xs text-gray-500">
-                                                        Preview Dokumen
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <button type="button" @click="closeModal()"
-                                                class="flex flex-shrink-0 justify-center items-center w-9 h-9 text-gray-500 bg-gray-100 rounded-lg transition hover:text-red-600 hover:bg-red-50"
-                                                title="Tutup">
-                                                <i class="fa-solid fa-xmark"></i>
-                                            </button>
-                                        </div>
-
-                                        {{-- Isi Preview --}}
-                                        <div class="overflow-auto flex-1 p-3 min-h-0 bg-gray-100">
-
-                                            {{-- PDF --}}
-                                            <template x-if="isPdf()">
-                                                <iframe :src="viewerSrc()"
-                                                    class="w-full h-[75vh] bg-white rounded-lg border border-gray-200"
-                                                    frameborder="0"></iframe>
-                                            </template>
-
-                                            {{-- IMAGE --}}
-                                            <template x-if="isImage()">
-                                                <div class="flex items-center justify-center min-h-[60vh]">
-                                                    <img :src="viewerSrc()" :alt="title"
-                                                        class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-md">
-                                                </div>
-                                            </template>
-
-                                            {{-- OFFICE --}}
-                                            <template x-if="isOffice()">
-                                                <iframe :src="viewerSrc()"
-                                                    class="w-full h-[75vh] bg-white rounded-lg border border-gray-200"
-                                                    frameborder="0"></iframe>
-                                            </template>
-
-                                            {{-- UNKNOWN --}}
-                                            <template x-if="isUnknown()">
-                                                <div
-                                                    class="flex flex-col items-center justify-center min-h-[50vh] text-center">
-                                                    <div
-                                                        class="flex justify-center items-center mb-4 w-16 h-16 bg-gray-200 rounded-full">
-                                                        <i
-                                                            class="text-2xl text-gray-500 fa-solid fa-file-circle-question"></i>
-                                                    </div>
-
-                                                    <h4 class="font-semibold text-gray-800">
-                                                        Dokumen tidak dapat dipreview
-                                                    </h4>
-
-                                                    <p class="mt-2 max-w-md text-sm text-gray-500">
-                                                        Format dokumen ini tidak mendukung preview langsung.
-                                                        Silakan buka atau download dokumen secara manual.
-                                                    </p>
-
-                                                    <a :href="fileUrl" target="_blank"
-                                                        class="inline-flex gap-2 items-center px-4 py-2 mt-4 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                                                        <i class="fa-solid fa-up-right-from-square"></i>
-                                                        Buka Dokumen
-                                                    </a>
-                                                </div>
-                                            </template>
-
-                                        </div>
-
-                                        {{-- Footer Modal --}}
-                                        <div class="flex justify-end px-5 py-3 bg-gray-50 border-t border-gray-200">
-                                            <button type="button" @click="closeModal()"
-                                                class="inline-flex gap-2 items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 transition hover:bg-gray-100">
-                                                <i class="fa-solid fa-xmark"></i>
-                                                Tutup
-                                            </button>
-                                        </div>
-
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -613,6 +515,107 @@
                 @endif
 
             @endif
+        </div>
+
+        {{-- ================= MODAL PREVIEW DOKUMEN (MENGGUNAKAN OBJECT) ================= --}}
+        <div x-cloak x-show="isOpen" x-transition.opacity @keydown.escape.window="closeModal()"
+            @click.self="closeModal()"
+            class="fixed inset-0 z-[99999] flex justify-center items-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
+
+            <div x-show="isOpen" x-transition
+                class="relative flex flex-col w-full h-full sm:h-[90vh] max-w-6xl overflow-hidden bg-gray-100 sm:rounded-2xl shadow-2xl">
+
+                {{-- Header Modal --}}
+                <div class="flex justify-between items-center px-4 py-3 bg-white border-b shrink-0 sm:px-6 sm:py-4">
+                    <div class="flex gap-3 items-center min-w-0">
+                        <div class="flex flex-shrink-0 justify-center items-center w-9 h-9 bg-green-100 rounded-lg">
+                            <i class="text-green-600 fa-solid fa-file"></i>
+                        </div>
+
+                        <div class="min-w-0">
+                            <h3 class="font-semibold text-gray-800 truncate" x-text="title || 'Preview Dokumen'"></h3>
+                            <p class="text-xs text-gray-500">
+                                <span x-show="isPdf()">PDF</span>
+                                <span x-show="isImage()">Gambar</span>
+                                <span x-show="isOffice()">Office</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="button" @click="closeModal()"
+                        class="flex flex-shrink-0 justify-center items-center w-9 h-9 text-gray-500 bg-gray-100 rounded-lg transition hover:text-red-600 hover:bg-red-50"
+                        title="Tutup">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                {{-- Isi Preview --}}
+                <div class="overflow-hidden flex-1 w-full bg-gray-100">
+
+                    {{-- PDF (MENGGUNAKAN TAG OBJECT) --}}
+                    <template x-if="isPdf()">
+                        <object x-bind:data="fileUrl" type="application/pdf" class="w-full h-full border-0">
+                            <!-- Fallback -->
+                            <div
+                                class="flex flex-col justify-center items-center w-full h-full p-6 text-center bg-gray-100">
+                                <div class="mb-3 text-4xl text-gray-400">📄</div>
+                                <p class="text-sm text-gray-600 sm:text-base mb-4">
+                                    Browser Anda mungkin tidak mendukung pratinjau PDF langsung.
+                                </p>
+                                <a :href="fileUrl" target="_blank"
+                                    class="px-5 py-2 text-sm font-semibold text-white rounded-lg transition hover:opacity-90 bg-green-600">
+                                    Buka / Unduh PDF
+                                </a>
+                            </div>
+                        </object>
+                    </template>
+
+                    {{-- IMAGE --}}
+                    <template x-if="isImage()">
+                        <div class="flex overflow-auto justify-center items-center w-full h-full p-3 bg-gray-200">
+                            <img :src="fileUrl" :alt="title"
+                                class="object-contain max-w-full max-h-full rounded-lg shadow-md">
+                        </div>
+                    </template>
+
+                    {{-- OFFICE --}}
+                    <template x-if="isOffice()">
+                        <iframe x-bind:src="officeViewerUrl()" class="w-full h-full border-0" allowfullscreen></iframe>
+                    </template>
+
+                    {{-- UNKNOWN --}}
+                    <template x-if="isUnknown()">
+                        <div
+                            class="flex flex-col justify-center items-center w-full h-full text-center p-6 bg-gray-100">
+                            <div class="flex justify-center items-center mb-4 w-16 h-16 bg-gray-200 rounded-full">
+                                <i class="text-2xl text-gray-500 fa-solid fa-file-circle-question"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">
+                                Dokumen tidak dapat dipreview
+                            </h4>
+                            <p class="mt-2 max-w-md text-sm text-gray-500">
+                                Format dokumen ini tidak mendukung preview langsung.
+                            </p>
+                            <a :href="fileUrl" target="_blank"
+                                class="inline-flex gap-2 items-center px-4 py-2 mt-4 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                                <i class="fa-solid fa-up-right-from-square"></i>
+                                Buka Dokumen
+                            </a>
+                        </div>
+                    </template>
+
+                </div>
+
+                {{-- Footer Modal --}}
+                <div class="flex justify-end px-5 py-3 bg-gray-50 border-t border-gray-200 shrink-0">
+                    <button type="button" @click="closeModal()"
+                        class="inline-flex gap-2 items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 transition hover:bg-gray-100">
+                        <i class="fa-solid fa-xmark"></i>
+                        Tutup
+                    </button>
+                </div>
+
+            </div>
         </div>
     </div>
 </x-app-layout>

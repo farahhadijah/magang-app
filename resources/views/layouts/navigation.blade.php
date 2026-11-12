@@ -1,4 +1,4 @@
-<nav x-data="navScrollActive()" class="relative z-[999] flex flex-col w-64 h-[100dvh] text-green-100">
+<nav x-data="navScrollActive()" class="relative z-[9999] flex flex-col w-64 h-[100dvh] text-green-100">
 
     <!-- ================= LOGO (STICKY ATAS) ================= -->
     <div class="flex sticky top-0 z-20 justify-center items-center h-16 border-b border-green-800 bg-primary shrink-0">

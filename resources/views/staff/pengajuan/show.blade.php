@@ -3,33 +3,8 @@
         Detail Pengajuan PKL - Sibolang
     </x-slot>
 
-    {{-- FUNGSI ALPINE DITARUH LANGSUNG DI SINI AGAR ANTI GAGAL --}}
-    <div x-data="{
-        isOpen: false,
-        fileUrl: '',
-        openModal(url) {
-            this.fileUrl = url;
-            this.isOpen = true;
-        },
-        closeModal() {
-            this.isOpen = false;
-            this.fileUrl = '';
-        },
-        isPdf() {
-            if (!this.fileUrl) return false;
-            return this.fileUrl.toLowerCase().split('?')[0].endsWith('.pdf');
-        },
-        isImage() {
-            if (!this.fileUrl) return false;
-            const u = this.fileUrl.toLowerCase().split('?')[0];
-            return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/.test(u);
-        },
-        pdfViewerUrl() {
-            if (!this.isPdf()) return '';
-            const viewer = '/vendor/pdfjs/web/viewer.html';
-            return `${viewer}?file=${encodeURIComponent(this.fileUrl)}`;
-        }
-    }" class="py-4 space-y-5 sm:py-6 sm:space-y-6">
+    {{-- PANGGIL COMPONENT JS --}}
+    <div x-data="documentViewer()" class="py-4 space-y-5 sm:py-6 sm:space-y-6">
 
         {{-- ================= INFORMASI MAHASISWA ================= --}}
         <div
@@ -119,8 +94,7 @@
                                             {{ $dokumen->jenis_dokumen }}
                                         </p>
                                         <span
-                                            class="inline-block w-fit px-2 py-0.5 text-xs rounded-full
-                                    {{ $dokumen->statusBadge()['class'] }}">
+                                            class="inline-block w-fit px-2 py-0.5 text-xs rounded-full {{ $dokumen->statusBadge()['class'] }}">
                                             {{ $dokumen->statusBadge()['text'] }}
                                         </span>
                                     </div>
@@ -180,6 +154,7 @@
                 <p class="mt-2 text-sm text-gray-500">Belum ada dokumen yang diunggah.</p>
             </div>
         @endif
+
         {{-- ================= KEPUTUSAN FINAL ================= --}}
         <div class="overflow-hidden p-5 bg-white rounded-xl border border-gray-200 sm:p-6">
             <div class="flex gap-2 items-center mb-4">
@@ -241,23 +216,22 @@
             @endif
         </div>
 
-        {{-- MODAL PREVIEW PDF --}}
+        {{-- MODAL PREVIEW DOKUMEN (MENGGUNAKAN OBJECT) --}}
         <div x-cloak x-show="isOpen" x-transition.opacity
-            class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            class="fixed inset-0 z-[99999] flex items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
             @click.self="closeModal()" @keydown.escape.window="closeModal()">
+
             <div
-                class="relative flex flex-col w-full max-w-6xl h-[90vh] overflow-hidden bg-gray-100 rounded-2xl shadow-2xl">
+                class="relative flex flex-col w-full h-full sm:h-[90vh] max-w-6xl overflow-hidden bg-gray-100 sm:rounded-2xl shadow-2xl">
 
                 {{-- Header --}}
-                <div class="flex justify-between items-center px-4 py-3 bg-white border-b">
+                <div class="flex justify-between items-center px-4 py-3 bg-white border-b shrink-0">
                     <div>
-                        <h3 class="font-semibold text-gray-800">
-                            Preview Dokumen
-                        </h3>
-
+                        <h3 class="font-semibold text-gray-800" x-text="title || 'Preview Dokumen'"></h3>
                         <p class="text-xs text-gray-500">
                             <span x-show="isPdf()">PDF</span>
                             <span x-show="isImage()">Gambar</span>
+                            <span x-show="isOffice()">Office</span>
                         </p>
                     </div>
 
@@ -268,40 +242,53 @@
                     </button>
                 </div>
 
-                {{-- Preview --}}
-                <div class="flex-1 p-3 min-h-0 sm:p-5">
+                {{-- Preview Body --}}
+                <div class="flex-1 w-full bg-gray-100 overflow-hidden">
 
-                    {{-- PDF (via PDF.js agar bisa tampil di mobile) --}}
-                    <iframe x-show="isPdf()" x-bind:src="isPdf() ? pdfViewerUrl() : ''"
-                        class="w-full h-full bg-white rounded-xl" frameborder="0" allowfullscreen>
-                    </iframe>
+                    {{-- PDF (MENGGUNAKAN TAG OBJECT) --}}
+                    <template x-if="isPdf()">
+                        <object x-bind:data="fileUrl" type="application/pdf" class="w-full h-full border-0">
+                            <!-- Fallback -->
+                            <div
+                                class="flex flex-col justify-center items-center w-full h-full p-6 text-center bg-gray-100">
+                                <div class="mb-3 text-4xl text-gray-400">📄</div>
+                                <p class="text-sm text-gray-600 sm:text-base mb-4">
+                                    Browser Anda mungkin tidak mendukung pratinjau PDF langsung.
+                                </p>
+                                <a :href="fileUrl" target="_blank"
+                                    class="px-5 py-2 text-sm font-semibold text-white rounded-lg transition hover:opacity-90 bg-green-600">
+                                    Buka / Unduh PDF
+                                </a>
+                            </div>
+                        </object>
+                    </template>
 
                     {{-- IMAGE --}}
-                    <div x-show="isImage()"
-                        class="flex overflow-auto justify-center items-center w-full h-full bg-gray-200 rounded-xl">
-                        <img :src="fileUrl" alt="Preview dokumen"
-                            class="object-contain max-w-full max-h-full rounded-lg shadow-md">
-                    </div>
-
-                    {{-- Unsupported --}}
-                    <div x-show="!isPdf() && !isImage()"
-                        class="flex flex-col justify-center items-center w-full h-full text-center">
-                        <div class="mb-3 text-4xl">
-                            📄
+                    <template x-if="isImage()">
+                        <div class="flex overflow-auto justify-center items-center w-full h-full p-3 bg-gray-200">
+                            <img :src="fileUrl" alt="Preview dokumen"
+                                class="object-contain max-w-full max-h-full rounded-lg shadow-md">
                         </div>
+                    </template>
 
-                        <p class="font-medium text-gray-700">
-                            Format dokumen tidak dapat ditampilkan.
-                        </p>
+                    {{-- OFFICE --}}
+                    <template x-if="isOffice()">
+                        <iframe x-bind:src="officeViewerUrl()" class="w-full h-full border-0" allowfullscreen></iframe>
+                    </template>
 
-                        <a :href="fileUrl" target="_blank"
-                            class="px-4 py-2 mt-4 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-                            Buka Dokumen
-                        </a>
-                    </div>
+                    {{-- UNKNOWN --}}
+                    <template x-if="isUnknown()">
+                        <div class="flex flex-col justify-center items-center w-full h-full text-center p-6">
+                            <div class="mb-3 text-4xl">📄</div>
+                            <p class="font-medium text-gray-700">Format dokumen tidak dapat ditampilkan langsung.</p>
+                            <a :href="fileUrl" target="_blank"
+                                class="px-4 py-2 mt-4 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                                Buka Dokumen
+                            </a>
+                        </div>
+                    </template>
 
                 </div>
-
             </div>
         </div>
     </div>

@@ -83,12 +83,6 @@
                                 isUnknown() {
                                     return this.fileUrl && !this.isPdf() && !this.isImage() && !this.isOffice();
                                 },
-                                pdfViewerUrl() {
-                                    if (!this.isPdf()) return '';
-                                    // GUNAKAN PDF.JS LOKAL (SELF-HOST)
-                                    const viewer = '/vendor/pdfjs/web/viewer.html';
-                                    return `${viewer}?file=${encodeURIComponent(this.fileUrl)}`;
-                                },
                                 viewerSrc() {
                                     if (!this.isOffice()) return '';
                                     return `https://docs.google.com/gview?url=${encodeURIComponent(this.fileUrl)}&embedded=true`;
@@ -144,10 +138,26 @@
 
                                         {{-- Body Modal --}}
                                         <div class="overflow-hidden flex-1 w-full bg-gray-100">
-                                            {{-- PDF (via PDF.js lokal) --}}
+
+                                            {{-- PDF (MENGGUNAKAN TAG OBJECT) --}}
                                             <template x-if="isPdf()">
-                                                <iframe x-bind:src="pdfViewerUrl()" class="w-full h-full border-0"
-                                                    allowfullscreen></iframe>
+                                                <object x-bind:data="fileUrl" type="application/pdf"
+                                                    class="w-full h-full border-0">
+                                                    <!-- Fallback jika browser benar-benar tidak bisa render PDF (misal HP jadul) -->
+                                                    <div
+                                                        class="flex flex-col justify-center items-center w-full h-full p-6 text-center bg-gray-100">
+                                                        <i
+                                                            class="mb-4 text-4xl text-gray-400 fa-solid fa-file-pdf sm:text-5xl"></i>
+                                                        <p class="text-sm text-gray-600 sm:text-base mb-4">
+                                                            Browser Anda mungkin tidak mendukung pratinjau PDF langsung.
+                                                        </p>
+                                                        <a :href="fileUrl" target="_blank"
+                                                            class="px-5 py-2 text-sm font-semibold text-white rounded-lg transition hover:opacity-90"
+                                                            style="background-color: #1f8a1b;">
+                                                            Buka / Unduh PDF
+                                                        </a>
+                                                    </div>
+                                                </object>
                                             </template>
 
                                             {{-- IMAGE --}}

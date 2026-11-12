@@ -290,7 +290,7 @@
 
             {{-- MODAL PREVIEW DOKUMEN --}}
             <div x-show="isOpen" x-transition
-                class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-60"
+                class="fixed inset-0 z-[999999999] flex items-center justify-center bg-black bg-opacity-60"
                 style="display: none;">
 
                 <div
