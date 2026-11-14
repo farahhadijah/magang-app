@@ -17,7 +17,10 @@
                         class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">Dosen</span>
                 </h1>
                 <p class="mt-2 text-gray-600">
-                    @if ($isKaprodi)
+                    @if (auth()->user()->isPimpinanFakultas())
+                        Selamat datang, {{ auth()->user()->isDekan() ? 'Dekan' : 'Wakil Dekan' }}. Pantau resume PKL dan
+                        bimbingan mahasiswa Anda.
+                    @elseif ($isKaprodi)
                         Selamat datang, Kaprodi. Kelola pengajuan PKL dan pantau aktivitas mahasiswa.
                     @else
                         Selamat datang, Dosen Pembimbing. Pantau logbook dan bimbingan mahasiswa bimbingan Anda.

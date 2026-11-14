@@ -8,15 +8,32 @@
 
         {{-- HEADER --}}
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-green-700">
-                Resume PKL Mahasiswa
-            </h1>
+            <div class="flex flex-wrap items-center gap-3">
+                <h1 class="text-2xl font-bold text-green-700">
+                    Resume PKL Mahasiswa
+                </h1>
+                @if (!empty($isPimpinanFakultas))
+                    <span class="px-2.5 py-0.5 text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full">
+                        {{ $jabatan === 'dekan' ? 'Dekan' : 'Wakil Dekan' }} — Satu Fakultas
+                    </span>
+                @elseif (!empty($isKaprodi))
+                    <span class="px-2.5 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
+                        Kaprodi — Satu Program Studi
+                    </span>
+                @else
+                    <span class="px-2.5 py-0.5 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
+                        Dosen Pembimbing
+                    </span>
+                @endif
+            </div>
 
             <p class="mt-1 text-sm text-gray-500">
-                @if ($isKaprodi)
-                    Rekap mahasiswa yang telah menyelesaikan PKL berdasarkan angkatan
+                @if (!empty($isPimpinanFakultas))
+                    Rekap mahasiswa satu fakultas yang telah menyelesaikan PKL berdasarkan angkatan.
+                @elseif (!empty($isKaprodi))
+                    Rekap mahasiswa program studi yang telah menyelesaikan PKL berdasarkan angkatan.
                 @else
-                    Rekap mahasiswa bimbingan yang telah menyelesaikan PKL berdasarkan angkatan
+                    Rekap mahasiswa bimbingan yang telah menyelesaikan PKL berdasarkan angkatan.
                 @endif
             </p>
         </div>

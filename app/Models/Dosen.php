@@ -43,4 +43,34 @@ class Dosen extends Model
     {
         return $this->hasMany(Pkl::class, 'id_dosen');
     }
+
+    public function getFakultasIdAttribute(): ?int
+    {
+        return $this->prodi?->fakultas_id;
+    }
+
+    public function getFakultasAttribute(): ?Fakultas
+    {
+        return $this->prodi?->fakultas;
+    }
+
+    public function isDekan(): bool
+    {
+        return strtolower($this->jabatan ?? '') === 'dekan';
+    }
+
+    public function isWadek(): bool
+    {
+        return strtolower($this->jabatan ?? '') === 'wadek';
+    }
+
+    public function isKaprodi(): bool
+    {
+        return strtolower($this->jabatan ?? '') === 'kaprodi';
+    }
+
+    public function isPimpinanFakultas(): bool
+    {
+        return in_array(strtolower($this->jabatan ?? ''), ['dekan', 'wadek']);
+    }
 }

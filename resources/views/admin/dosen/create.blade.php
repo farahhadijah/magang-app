@@ -69,6 +69,14 @@
                         Kaprodi
                     </option>
 
+                    <option value="dekan" {{ old('jabatan') == 'dekan' ? 'selected' : '' }}>
+                        Dekan
+                    </option>
+
+                    <option value="wadek" {{ old('jabatan') == 'wadek' ? 'selected' : '' }}>
+                        Wakil Dekan
+                    </option>
+
                 </select>
             </div>
 

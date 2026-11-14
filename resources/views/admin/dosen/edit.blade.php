@@ -70,6 +70,14 @@
                         Kaprodi
                     </option>
 
+                    <option value="dekan" {{ old('jabatan', $dosen->jabatan) == 'dekan' ? 'selected' : '' }}>
+                        Dekan
+                    </option>
+
+                    <option value="wadek" {{ old('jabatan', $dosen->jabatan) == 'wadek' ? 'selected' : '' }}>
+                        Wakil Dekan
+                    </option>
+
                 </select>
             </div>
 

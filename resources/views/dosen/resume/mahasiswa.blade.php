@@ -7,15 +7,32 @@
 
         {{-- Header --}}
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-green-700">
-                Resume PKL Mahasiswa
-            </h1>
-
-            <p class="text-sm text-gray-500">
-                @if ($isKaprodi)
-                    Seluruh data mahasiswa PKL pada program studi Anda
+            <div class="flex flex-wrap items-center gap-3">
+                <h1 class="text-2xl font-bold text-green-700">
+                    Resume PKL Mahasiswa — Angkatan {{ $tahun }}
+                </h1>
+                @if (!empty($isPimpinanFakultas))
+                    <span class="px-2.5 py-0.5 text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full">
+                        {{ $jabatan === 'dekan' ? 'Dekan' : 'Wakil Dekan' }} — Satu Fakultas
+                    </span>
+                @elseif (!empty($isKaprodi))
+                    <span class="px-2.5 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
+                        Kaprodi — Satu Program Studi
+                    </span>
                 @else
-                    Data mahasiswa bimbingan yang telah menyelesaikan PKL
+                    <span class="px-2.5 py-0.5 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
+                        Dosen Pembimbing
+                    </span>
+                @endif
+            </div>
+
+            <p class="mt-1 text-sm text-gray-500">
+                @if (!empty($isPimpinanFakultas))
+                    Seluruh data mahasiswa PKL pada fakultas Anda untuk angkatan {{ $tahun }}
+                @elseif (!empty($isKaprodi))
+                    Seluruh data mahasiswa PKL pada program studi Anda untuk angkatan {{ $tahun }}
+                @else
+                    Data mahasiswa bimbingan yang telah menyelesaikan PKL untuk angkatan {{ $tahun }}
                 @endif
             </p>
         </div>
@@ -58,6 +75,9 @@
                         <tr>
                             <th class="px-4 py-3">Nama</th>
                             <th class="px-4 py-3">NIM</th>
+                            @if (!empty($isPimpinanFakultas))
+                                <th class="px-4 py-3">Prodi</th>
+                            @endif
                             <th class="px-4 py-3">Tempat PKL</th>
                             <th class="px-4 py-3">Dosen</th>
                             <th class="px-4 py-3">Status</th>
@@ -79,6 +99,13 @@
                                 <td class="px-4 py-3">
                                     {{ $pkl->pengajuanPkl->mahasiswa->nim }}
                                 </td>
+
+                                @if (!empty($isPimpinanFakultas))
+                                    {{-- Prodi --}}
+                                    <td class="px-4 py-3 text-xs text-gray-700">
+                                        {{ $pkl->pengajuanPkl->mahasiswa->prodi->nama ?? '-' }}
+                                    </td>
+                                @endif
 
                                 {{-- Tempat PKL --}}
                                 <td class="px-4 py-3">
@@ -115,7 +142,7 @@
                         @empty
 
                             <tr>
-                                <td colspan="6" class="py-8 text-center text-gray-500">
+                                <td colspan="{{ !empty($isPimpinanFakultas) ? 7 : 6 }}" class="py-8 text-center text-gray-500">
                                     Belum ada data resume PKL.
                                 </td>
                             </tr>
@@ -149,6 +176,14 @@
                     </div>
 
                     <div class="mt-3 space-y-2 text-sm">
+                        @if (!empty($isPimpinanFakultas))
+                            <div class="flex gap-2">
+                                <span class="w-20 text-xs font-medium text-gray-500">Prodi</span>
+                                <span class="text-gray-800 break-words">
+                                    {{ $pkl->pengajuanPkl->mahasiswa->prodi->nama ?? '-' }}
+                                </span>
+                            </div>
+                        @endif
                         <div class="flex gap-2">
                             <span class="w-20 text-xs font-medium text-gray-500">Tempat</span>
                             <span class="text-gray-800 break-words">

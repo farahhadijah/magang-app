@@ -72,6 +72,24 @@
 
                     <tr>
                         <td class="px-3 py-2 font-medium text-gray-600 align-top bg-gray-50 sm:px-4 sm:py-3">
+                            Program Studi
+                        </td>
+                        <td class="px-3 py-2 font-semibold text-gray-800 align-top sm:px-4 sm:py-3">
+                            {{ $pkl->pengajuanPkl->mahasiswa->prodi->nama ?? '-' }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="px-3 py-2 font-medium text-gray-600 align-top bg-gray-50 sm:px-4 sm:py-3">
+                            Fakultas
+                        </td>
+                        <td class="px-3 py-2 font-semibold text-gray-800 align-top sm:px-4 sm:py-3">
+                            {{ $pkl->pengajuanPkl->mahasiswa->prodi?->fakultas?->nama ?? '-' }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="px-3 py-2 font-medium text-gray-600 align-top bg-gray-50 sm:px-4 sm:py-3">
                             No. HP
                         </td>
                         <td class="px-3 py-2 font-semibold text-gray-800 align-top sm:px-4 sm:py-3">

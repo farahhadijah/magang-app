@@ -9,45 +9,91 @@ use Illuminate\Support\Facades\DB;
 
 class ResumePklController extends Controller
 {
+    /**
+     * Terapkan batasan lingkup (scope) data resume PKL berdasarkan jabatan:
+     * - Dekan / Wadek : Mahasiswa satu fakultas
+     * - Kaprodi       : Mahasiswa satu program studi
+     * - Dosen         : Mahasiswa bimbingan sendiri
+     */
+    private function applyScope($query, $user)
+    {
+        $dosen = $user->dosen;
+        $jabatan = strtolower($dosen->jabatan ?? '');
+
+        if (in_array($jabatan, ['dekan', 'wadek'])) {
+            $fakultasId = $dosen?->prodi?->fakultas_id;
+            if ($fakultasId) {
+                $query->whereHas('pengajuanPkl.mahasiswa.prodi', function ($q) use ($fakultasId) {
+                    $q->where('prodi.fakultas_id', $fakultasId);
+                });
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        } elseif ($jabatan === 'kaprodi') {
+            $prodiId = $dosen?->prodi_id;
+            if ($prodiId) {
+                $query->whereHas('pengajuanPkl.mahasiswa', function ($q) use ($prodiId) {
+                    $q->where('mahasiswa.prodi_id', $prodiId);
+                });
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        } else {
+            $dosenId = $dosen?->id ?? null;
+            $query->where('pkl.id_dosen', $dosenId);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Otorisasi hak akses detail resume PKL per aktor.
+     */
+    private function authorizeResumeAccess(Pkl $pkl, $user): void
+    {
+        $dosen = $user->dosen;
+        $jabatan = strtolower($dosen->jabatan ?? '');
+
+        if (in_array($jabatan, ['dekan', 'wadek'])) {
+            $fakultasId = $dosen?->prodi?->fakultas_id;
+            $pkl->loadMissing('pengajuanPkl.mahasiswa.prodi');
+            $mahasiswaFakultasId = $pkl->pengajuanPkl?->mahasiswa?->prodi?->fakultas_id;
+
+            if (!$fakultasId || (int) $mahasiswaFakultasId !== (int) $fakultasId) {
+                abort(403, 'Anda tidak memiliki hak akses untuk melihat resume mahasiswa di luar fakultas Anda.');
+            }
+        } elseif ($jabatan === 'kaprodi') {
+            $prodiId = $dosen?->prodi_id ?? null;
+            $pkl->loadMissing('pengajuanPkl.mahasiswa');
+            $mahasiswaProdiId = $pkl->pengajuanPkl?->mahasiswa?->prodi_id;
+
+            if (!$prodiId || (int) $mahasiswaProdiId !== (int) $prodiId) {
+                abort(403, 'Anda tidak memiliki hak akses untuk melihat resume mahasiswa di luar program studi Anda.');
+            }
+        } else {
+            $dosenId = $dosen?->id ?? null;
+            if ((int) $pkl->id_dosen !== (int) $dosenId) {
+                abort(403, 'Anda tidak memiliki hak akses untuk melihat resume mahasiswa bimbingan dosen lain.');
+            }
+        }
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
+        $jabatan = strtolower($user->dosen->jabatan ?? '');
+        $isPimpinanFakultas = in_array($jabatan, ['dekan', 'wadek']);
+        $isKaprodi = $jabatan === 'kaprodi';
 
-        $isKaprodi = strtolower(
-            $user->dosen->jabatan ?? ''
-        ) === 'kaprodi';
-
-        $search = trim(
-            (string) $request->input('search', '')
-        );
+        $search = trim((string) $request->input('search', ''));
 
         $query = Pkl::query()
             ->where('pkl.status', 'selesai')
             ->whereHas('pengajuanPkl.mahasiswa');
-        if (!$isKaprodi) {
 
-            $dosenId = $user->dosen->id ?? null;
+        $this->applyScope($query, $user);
 
-            $query->where(
-                'pkl.id_dosen',
-                $dosenId
-            );
-        } else {
-
-            $prodiId = $user->dosen->prodi_id ?? null;
-
-            $query->whereHas(
-                'pengajuanPkl.mahasiswa',
-                function ($q) use ($prodiId) {
-                    $q->where(
-                        'mahasiswa.prodi_id',
-                        $prodiId
-                    );
-                }
-            );
-        }
         if ($search !== '') {
-
             $query->whereHas(
                 'pengajuanPkl.mahasiswa',
                 function ($q) use ($search) {
@@ -59,6 +105,7 @@ class ResumePklController extends Controller
                 }
             );
         }
+
         $angkatan = $query
             ->join(
                 'pengajuan_pkl',
@@ -85,25 +132,25 @@ class ResumePklController extends Controller
             compact(
                 'angkatan',
                 'isKaprodi',
+                'isPimpinanFakultas',
+                'jabatan',
                 'search'
             )
         );
     }
+
     public function mahasiswa(Request $request, $tahun)
     {
         $user = auth()->user();
+        $jabatan = strtolower($user->dosen->jabatan ?? '');
+        $isPimpinanFakultas = in_array($jabatan, ['dekan', 'wadek']);
+        $isKaprodi = $jabatan === 'kaprodi';
 
-        $isKaprodi = strtolower(
-            $user->dosen->jabatan ?? ''
-        ) === 'kaprodi';
-
-        $search = trim(
-            (string) $request->input('search', '')
-        );
+        $search = trim((string) $request->input('search', ''));
 
         $query = Pkl::with([
             'dosen',
-            'pengajuanPkl.mahasiswa',
+            'pengajuanPkl.mahasiswa.prodi',
             'pengajuanPkl.tempatPkl',
             'nilaiPkl',
             'laporanAkhir',
@@ -122,35 +169,14 @@ class ResumePklController extends Controller
                     );
                 }
             );
-        if (!$isKaprodi) {
 
-            $dosenId = $user->dosen->id ?? null;
+        $this->applyScope($query, $user);
 
-            $query->where(
-                'pkl.id_dosen',
-                $dosenId
-            );
-        } else {
-
-            $prodiId = $user->dosen->prodi_id ?? null;
-
-            $query->whereHas(
-                'pengajuanPkl.mahasiswa',
-                function ($q) use ($prodiId) {
-                    $q->where(
-                        'mahasiswa.prodi_id',
-                        $prodiId
-                    );
-                }
-            );
-        }
         if ($search !== '') {
             $query->whereHas(
                 'pengajuanPkl.mahasiswa',
                 function ($q) use ($search) {
-
                     $q->where(function ($inner) use ($search) {
-
                         $inner->where(
                             'mahasiswa.nim',
                             'like',
@@ -161,9 +187,7 @@ class ResumePklController extends Controller
                             'like',
                             '%' . $search . '%'
                         );
-
                     });
-
                 }
             );
         }
@@ -179,46 +203,25 @@ class ResumePklController extends Controller
                 'pkls',
                 'tahun',
                 'isKaprodi',
+                'isPimpinanFakultas',
+                'jabatan',
                 'search'
             )
         );
     }
+
     public function show(Pkl $pkl)
     {
         $user = auth()->user();
+        $jabatan = strtolower($user->dosen->jabatan ?? '');
+        $isPimpinanFakultas = in_array($jabatan, ['dekan', 'wadek']);
+        $isKaprodi = $jabatan === 'kaprodi';
 
-        $isKaprodi = strtolower(
-            $user->dosen->jabatan ?? ''
-        ) === 'kaprodi';
-
-        if (!$isKaprodi) {
-
-            $dosenId = $user->dosen->id ?? null;
-
-            if ($pkl->id_dosen != $dosenId) {
-                abort(403);
-            }
-
-        } else {
-
-            $prodiId = $user->dosen->prodi_id ?? null;
-
-            $pkl->loadMissing(
-                'pengajuanPkl.mahasiswa'
-            );
-
-            $mahasiswaProdi =
-                $pkl->pengajuanPkl->mahasiswa->prodi_id
-                ?? null;
-
-            if ($mahasiswaProdi != $prodiId) {
-                abort(403);
-            }
-        }
+        $this->authorizeResumeAccess($pkl, $user);
 
         $pkl->load([
             'dosen',
-            'pengajuanPkl.mahasiswa',
+            'pengajuanPkl.mahasiswa.prodi.fakultas',
             'pengajuanPkl.tempatPkl',
             'nilaiPkl',
             'laporanAkhir',
@@ -232,45 +235,24 @@ class ResumePklController extends Controller
             'dosen.resume.show',
             compact(
                 'pkl',
-                'isKaprodi'
+                'isKaprodi',
+                'isPimpinanFakultas',
+                'jabatan'
             )
         );
     }
+
     public function logbook(Pkl $pkl)
     {
         $user = auth()->user();
+        $jabatan = strtolower($user->dosen->jabatan ?? '');
+        $isPimpinanFakultas = in_array($jabatan, ['dekan', 'wadek']);
+        $isKaprodi = $jabatan === 'kaprodi';
 
-        $isKaprodi = strtolower(
-            $user->dosen->jabatan ?? ''
-        ) === 'kaprodi';
-
-        if (!$isKaprodi) {
-
-            $dosenId = $user->dosen->id ?? null;
-
-            if ($pkl->id_dosen != $dosenId) {
-                abort(403);
-            }
-
-        } else {
-
-            $prodiId = $user->dosen->prodi_id ?? null;
-
-            $pkl->loadMissing(
-                'pengajuanPkl.mahasiswa'
-            );
-
-            $mahasiswaProdi =
-                $pkl->pengajuanPkl->mahasiswa->prodi_id
-                ?? null;
-
-            if ($mahasiswaProdi != $prodiId) {
-                abort(403);
-            }
-        }
+        $this->authorizeResumeAccess($pkl, $user);
 
         $pkl->load([
-            'pengajuanPkl.mahasiswa',
+            'pengajuanPkl.mahasiswa.prodi',
             'pengajuanPkl.tempatPkl',
         ]);
 
@@ -296,6 +278,8 @@ class ResumePklController extends Controller
             compact(
                 'pkl',
                 'isKaprodi',
+                'isPimpinanFakultas',
+                'jabatan',
                 'logbooks',
                 'totalApproved',
                 'logbookDrive'

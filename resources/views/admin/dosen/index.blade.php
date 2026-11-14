@@ -125,7 +125,15 @@
                             </td>
 
                             <td class="px-2 py-1.5 border">
-                                {{ ucfirst($d->jabatan ?? '-') }}
+                                @if ($d->jabatan === 'wadek')
+                                    <span class="font-medium text-purple-700">Wakil Dekan</span>
+                                @elseif ($d->jabatan === 'dekan')
+                                    <span class="font-medium text-indigo-700">Dekan</span>
+                                @elseif ($d->jabatan === 'kaprodi')
+                                    <span class="font-medium text-blue-700">Kaprodi</span>
+                                @else
+                                    <span class="text-gray-700">{{ ucfirst($d->jabatan ?? '-') }}</span>
+                                @endif
                             </td>
 
                             <td class="px-2 py-1.5 border">

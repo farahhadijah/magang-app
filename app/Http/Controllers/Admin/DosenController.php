@@ -49,7 +49,7 @@ class DosenController extends Controller
             'nama' => 'required|string|max:100',
             'email' => 'nullable|email|max:255|unique:dosen,email', // ✅ Tambah validasi email
             'prodi_id' => 'nullable|exists:prodi,id',
-            'jabatan' => 'nullable|string|max:255',
+            'jabatan' => 'nullable|in:dosen,kaprodi,dekan,wadek',
         ]);
         try {
             DB::beginTransaction();
@@ -92,7 +92,7 @@ class DosenController extends Controller
             'nama' => 'required|string|max:100',
             'email' => 'nullable|email|max:255|unique:dosen,email,'.$dosen->id,
             'prodi_id' => 'nullable|exists:prodi,id',
-            'jabatan' => 'nullable|in:dosen,kaprodi',
+            'jabatan' => 'nullable|in:dosen,kaprodi,dekan,wadek',
         ]);
         DB::transaction(function () use ($request, $dosen) {
             $dosen->update([

@@ -55,11 +55,29 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Dosen::class, 'dosen_id');
     }
-    public function isKaprodi()
+    public function isKaprodi(): bool
     {
         // Make check case-insensitive to avoid mismatches like 'Kaprodi' vs 'kaprodi'
         $jabatan = $this->dosen?->jabatan ?? null;
         return $jabatan ? strtolower($jabatan) === 'kaprodi' : false;
+    }
+
+    public function isDekan(): bool
+    {
+        $jabatan = $this->dosen?->jabatan ?? null;
+        return $jabatan ? strtolower($jabatan) === 'dekan' : false;
+    }
+
+    public function isWadek(): bool
+    {
+        $jabatan = $this->dosen?->jabatan ?? null;
+        return $jabatan ? strtolower($jabatan) === 'wadek' : false;
+    }
+
+    public function isPimpinanFakultas(): bool
+    {
+        $jabatan = $this->dosen?->jabatan ?? null;
+        return $jabatan ? in_array(strtolower($jabatan), ['dekan', 'wadek']) : false;
     }
 
     public function staff()
