@@ -30,8 +30,8 @@
         @if (auth()->user()->role === 'mahasiswa')
             @include('layouts.navbar.mahasiswa')
         @elseif(auth()->user()->role === 'dosen')
-            {{-- TAMBAHAN NAVBAR KAPRODI --}}
-            @if (auth()->user()->isKaprodi())
+            {{-- TAMBAHAN NAVBAR KAPRODI / PIMPINAN FAKULTAS (DEKAN & WADEK) --}}
+            @if (auth()->user()->isKaprodi() || auth()->user()->isPimpinanFakultas())
                 @include('layouts.navbar.kaprodi')
             @endif
 

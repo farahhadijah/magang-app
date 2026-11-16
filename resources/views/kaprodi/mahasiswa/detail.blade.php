@@ -48,7 +48,7 @@
                 </h2>
             </div>
 
-            <dl class="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-y-0 sm:divide-x">
+            <dl class="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
                 <div class="px-5 py-4">
                     <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">Nama</dt>
                     <dd class="mt-1 font-medium text-gray-800">{{ $mahasiswa->nama }}</dd>
@@ -60,6 +60,10 @@
                 <div class="px-5 py-4">
                     <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">Program Studi</dt>
                     <dd class="mt-1 font-medium text-gray-800">{{ $mahasiswa->prodi->nama ?? '-' }}</dd>
+                </div>
+                <div class="px-5 py-4">
+                    <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">Fakultas</dt>
+                    <dd class="mt-1 font-medium text-gray-800">{{ $mahasiswa->prodi?->fakultas?->nama ?? '-' }}</dd>
                 </div>
             </dl>
 

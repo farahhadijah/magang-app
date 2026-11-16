@@ -35,15 +35,17 @@ class DashboardController extends Controller
         ->where('status_approve', 'pending')
         ->count();
 
-        /* ================= CEK KAPRODI ================= */
+        /* ================= CEK JABATAN DOSEN ================= */
 
         $isKaprodi = $dosen && strtolower($dosen->jabatan) === 'kaprodi';
+        $isPimpinanFakultas = $dosen && in_array(strtolower($dosen->jabatan), ['dekan', 'wadek']);
 
         $totalMenunggu = 0;
         $totalAktif = 0;
+        $totalBelumPkl = 0;
+        $totalResumeFakultas = 0;
 
         if ($isKaprodi) {
-
             $prodiId = $dosen->prodi_id;
 
             // Menunggu verifikasi kaprodi
@@ -61,15 +63,43 @@ class DashboardController extends Controller
                     });
                 })
                 ->count();
+        } elseif ($isPimpinanFakultas) {
+            $fakultasId = $dosen->prodi?->fakultas_id;
+
+            // PKL aktif satu fakultas
+            $totalAktif = Pkl::where('status', 'aktif')
+                ->whereHas('pengajuanPkl.mahasiswa.prodi', function ($q) use ($fakultasId) {
+                    $q->where('fakultas_id', $fakultasId);
+                })
+                ->count();
+
+            // Mahasiswa belum mengajukan PKL satu fakultas
+            $totalBelumPkl = \App\Models\Mahasiswa::whereHas('prodi', function ($q) use ($fakultasId) {
+                    $q->where('fakultas_id', $fakultasId);
+                })
+                ->whereDoesntHave('pengajuanPkl', function ($q) {
+                    $q->whereNotIn('status', ['ditolak_tu', 'ditolak_kaprodi']);
+                })
+                ->count();
+
+            // Total mahasiswa PKL selesai satu fakultas
+            $totalResumeFakultas = Pkl::where('status', 'selesai')
+                ->whereHas('pengajuanPkl.mahasiswa.prodi', function ($q) use ($fakultasId) {
+                    $q->where('fakultas_id', $fakultasId);
+                })
+                ->count();
         }
 
         return view('dosen.dashboard', compact(
             'isKaprodi',
+            'isPimpinanFakultas',
             'mahasiswaCount',
             'logbookPendingCount',
             'laporanAkhirCount',
             'totalMenunggu',
-            'totalAktif'
+            'totalAktif',
+            'totalBelumPkl',
+            'totalResumeFakultas'
         ));
     }
 }

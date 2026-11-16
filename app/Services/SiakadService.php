@@ -594,7 +594,10 @@ class SiakadService
                 }
                 $dosen = Dosen::firstOrNew(['nidn' => $nidn]);
                 $dosen->nama      = $nama;
-                $dosen->prodi_id  = $prodi->id;
+                // Jangan timpa prodi_id jika dosen sudah terdaftar (terutama jika sudah memiliki jabatan seperti kaprodi)
+                if (! $dosen->exists || empty($dosen->prodi_id)) {
+                    $dosen->prodi_id  = $prodi->id;
+                }
                 $dosen->is_active = true;
                 if (! $dosen->exists) {
                     $dosen->jabatan = 'dosen';

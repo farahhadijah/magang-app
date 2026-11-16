@@ -43,7 +43,7 @@
             <div>
                 <label class="block mb-1 font-medium">Prodi</label>
                 <select name="prodi_id" class="px-3 py-2 w-full rounded border">
-
+                    <option value="">-- Pilih Prodi --</option>
                     @foreach ($prodi as $p)
                         <option value="{{ $p->id }}"
                             {{ old('prodi_id', $dosen->prodi_id) == $p->id ? 'selected' : '' }}>

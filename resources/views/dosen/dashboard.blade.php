@@ -106,6 +106,111 @@
                 </div>
             @endif
 
+            {{-- ================= SECTION PIMPINAN FAKULTAS (DEKAN & WADEK) ================= --}}
+            @if (!empty($isPimpinanFakultas))
+                <div class="relative">
+                    {{-- Badge Pimpinan Fakultas Section --}}
+                    <div class="absolute -top-3 left-4 z-10">
+                        <div
+                            class="inline-flex gap-2 items-center px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-md">
+                            <i class="text-xs text-white fa-solid fa-graduation-cap"></i>
+                            <span class="text-xs font-semibold tracking-wider text-white uppercase">
+                                Khusus {{ auth()->user()->isDekan() ? 'Dekan' : 'Wakil Dekan' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Card Container Pimpinan Fakultas --}}
+                    <div class="overflow-hidden pt-6 bg-white rounded-2xl border border-gray-100 shadow-xl">
+                        <div class="px-6 pb-2">
+                            <h2 class="flex gap-2 items-center text-xl font-bold text-gray-800">
+                                <i class="text-indigo-600 fa-solid fa-chart-line"></i>
+                                Ringkasan Monitoring Fakultas
+                            </h2>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Data keseluruhan mahasiswa PKL di lingkungan {{ auth()->user()->dosen?->prodi?->fakultas?->nama ?? 'Fakultas' }}
+                            </p>
+                        </div>
+
+                        <div class="p-6 pt-2">
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                                {{-- PKL Aktif Fakultas --}}
+                                <a href="{{ route('kaprodi.mahasiswa.index') }}" class="block">
+                                    <div
+                                        class="relative p-6 overflow-hidden transition-all duration-300 cursor-pointer group bg-gradient-to-br from-green-50 to-green-100 rounded-2xl hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
+                                        <div
+                                            class="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full opacity-30 transition-transform duration-300 translate-x-8 -translate-y-8 group-hover:scale-150">
+                                        </div>
+                                        <div class="relative">
+                                            <div class="flex justify-between items-center mb-3">
+                                                <div
+                                                    class="flex justify-center items-center w-10 h-10 bg-green-500 rounded-xl shadow-md">
+                                                    <i class="text-lg text-white fa-solid fa-user-graduate"></i>
+                                                </div>
+                                                <i class="text-sm text-green-400 fa-solid fa-arrow-right"></i>
+                                            </div>
+                                            <p
+                                                class="mb-1 text-xs font-semibold tracking-wider text-green-700 uppercase">
+                                                Mahasiswa PKL Aktif</p>
+                                            <p class="text-3xl font-bold text-green-900">{{ $totalAktif }}</p>
+                                            <p class="mt-2 text-xs text-green-600">Satu Fakultas</p>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                {{-- Belum PKL Fakultas --}}
+                                <a href="{{ route('kaprodi.mahasiswa.angkatan') }}" class="block">
+                                    <div
+                                        class="relative p-6 overflow-hidden transition-all duration-300 cursor-pointer group bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
+                                        <div
+                                            class="absolute top-0 right-0 w-20 h-20 bg-amber-200 rounded-full opacity-30 transition-transform duration-300 translate-x-8 -translate-y-8 group-hover:scale-150">
+                                        </div>
+                                        <div class="relative">
+                                            <div class="flex justify-between items-center mb-3">
+                                                <div
+                                                    class="flex justify-center items-center w-10 h-10 bg-amber-500 rounded-xl shadow-md">
+                                                    <i class="text-lg text-white fa-solid fa-user-clock"></i>
+                                                </div>
+                                                <i class="text-sm text-amber-400 fa-solid fa-arrow-right"></i>
+                                            </div>
+                                            <p
+                                                class="mb-1 text-xs font-semibold tracking-wider text-amber-700 uppercase">
+                                                Belum Mengajukan PKL</p>
+                                            <p class="text-3xl font-bold text-amber-900">{{ $totalBelumPkl }}</p>
+                                            <p class="mt-2 text-xs text-amber-600">Satu Fakultas</p>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                {{-- Resume PKL Fakultas --}}
+                                <a href="{{ route('dosen.resume.index') }}" class="block">
+                                    <div
+                                        class="relative p-6 overflow-hidden transition-all duration-300 cursor-pointer group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
+                                        <div
+                                            class="absolute top-0 right-0 w-20 h-20 bg-indigo-200 rounded-full opacity-30 transition-transform duration-300 translate-x-8 -translate-y-8 group-hover:scale-150">
+                                        </div>
+                                        <div class="relative">
+                                            <div class="flex justify-between items-center mb-3">
+                                                <div
+                                                    class="flex justify-center items-center w-10 h-10 bg-indigo-500 rounded-xl shadow-md">
+                                                    <i class="text-lg text-white fa-solid fa-folder-open"></i>
+                                                </div>
+                                                <i class="text-sm text-indigo-400 fa-solid fa-arrow-right"></i>
+                                            </div>
+                                            <p
+                                                class="mb-1 text-xs font-semibold tracking-wider text-indigo-700 uppercase">
+                                                Resume PKL Mahasiswa</p>
+                                            <p class="text-3xl font-bold text-indigo-900">{{ $totalResumeFakultas }}</p>
+                                            <p class="mt-2 text-xs text-indigo-600">Selesai PKL Satu Fakultas</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- ================= SECTION DOSEN (UNIVERSAL) ================= --}}
             <div class="relative">
                 {{-- Badge Dosen Section --}}
@@ -138,22 +243,22 @@
                             {{-- Mahasiswa Aktif --}}
                             <a href="{{ route('dosen.mahasiswa.bimbingan') }}" class="block">
                                 <div
-                                    class="overflow-hidden relative p-6 bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl transition-all duration-300 group hover:shadow-lg hover:-translate-y-1">
+                                    class="relative p-6 overflow-hidden transition-all duration-300 cursor-pointer group bg-gradient-to-br from-emerald-50 to-teal-100 rounded-2xl hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
                                     <div
-                                        class="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full opacity-30 transition-transform duration-300 translate-x-8 -translate-y-8 group-hover:scale-150">
+                                        class="absolute top-0 right-0 w-20 h-20 bg-emerald-200 rounded-full opacity-30 transition-transform duration-300 translate-x-8 -translate-y-8 group-hover:scale-150">
                                     </div>
                                     <div class="relative">
                                         <div class="flex justify-between items-center mb-3">
                                             <div
-                                                class="flex justify-center items-center w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-md">
-                                                <i class="text-lg text-white fa-solid fa-user-graduate"></i>
+                                                class="flex justify-center items-center w-10 h-10 bg-emerald-500 rounded-xl shadow-md">
+                                                <i class="text-lg text-white fa-solid fa-users"></i>
                                             </div>
-                                            <i class="text-sm text-green-400 fa-solid fa-users-viewfinder"></i>
+                                            <i class="text-sm text-emerald-400 fa-solid fa-arrow-trend-up"></i>
                                         </div>
-                                        <p class="mb-1 text-xs font-semibold tracking-wider text-green-700 uppercase">
-                                            Mahasiswa Aktif</p>
-                                        <p class="text-3xl font-bold text-green-900">{{ $mahasiswaCount ?? 0 }}</p>
-                                        <p class="mt-2 text-xs text-green-600">Mahasiswa bimbingan aktif</p>
+                                        <p class="mb-1 text-xs font-semibold tracking-wider text-emerald-700 uppercase">
+                                            Mahasiswa Bimbingan</p>
+                                        <p class="text-3xl font-bold text-emerald-900">{{ $mahasiswaCount }}</p>
+                                        <p class="mt-2 text-xs text-emerald-600">Mahasiswa Aktif Dibimbing</p>
                                     </div>
                                 </div>
                             </a>
@@ -161,30 +266,30 @@
                             {{-- Logbook Pending --}}
                             <a href="{{ route('dosen.logbook.index') }}" class="block">
                                 <div
-                                    class="overflow-hidden relative p-6 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl transition-all duration-300 group hover:shadow-lg hover:-translate-y-1">
+                                    class="relative p-6 overflow-hidden transition-all duration-300 cursor-pointer group bg-gradient-to-br from-amber-50 to-yellow-100 rounded-2xl hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
                                     <div
-                                        class="absolute top-0 right-0 w-20 h-20 bg-amber-200 rounded-full opacity-30 transition-transform duration-300 translate-x-8 -translate-y-8 group-hover:scale-150">
+                                        class="absolute top-0 right-0 w-20 h-20 bg-yellow-200 rounded-full opacity-30 transition-transform duration-300 translate-x-8 -translate-y-8 group-hover:scale-150">
                                     </div>
                                     <div class="relative">
                                         <div class="flex justify-between items-center mb-3">
                                             <div
-                                                class="flex justify-center items-center w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-md">
-                                                <i class="text-lg text-white fa-solid fa-clock"></i>
+                                                class="flex justify-center items-center w-10 h-10 bg-amber-500 rounded-xl shadow-md">
+                                                <i class="text-lg text-white fa-solid fa-book-open"></i>
                                             </div>
-                                            <i class="text-sm text-amber-400 fa-solid fa-hourglass-half"></i>
+                                            <i class="text-sm text-amber-400 fa-solid fa-exclamation"></i>
                                         </div>
                                         <p class="mb-1 text-xs font-semibold tracking-wider text-amber-700 uppercase">
-                                            Logbook Pending</p>
-                                        <p class="text-3xl font-bold text-amber-900">{{ $logbookPendingCount ?? 0 }}</p>
-                                        <p class="mt-2 text-xs text-amber-600">Menunggu persetujuan</p>
+                                            Review Logbook</p>
+                                        <p class="text-3xl font-bold text-amber-900">{{ $logbookPendingCount }}</p>
+                                        <p class="mt-2 text-xs text-amber-600">Perlu Diperiksa</p>
                                     </div>
                                 </div>
                             </a>
 
-                            {{-- Laporan Akhir --}}
+                            {{-- Laporan Akhir Pending --}}
                             <a href="{{ route('dosen.laporan.index') }}" class="block">
                                 <div
-                                    class="overflow-hidden relative p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl transition-all duration-300 group hover:shadow-lg hover:-translate-y-1">
+                                    class="relative p-6 overflow-hidden transition-all duration-300 cursor-pointer group bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
                                     <div
                                         class="absolute top-0 right-0 w-20 h-20 bg-blue-200 rounded-full opacity-30 transition-transform duration-300 translate-x-8 -translate-y-8 group-hover:scale-150">
                                     </div>
@@ -243,7 +348,15 @@
                                 </div>
                             </div>
 
-                            @if ($isKaprodi)
+                            @if (auth()->user()->isPimpinanFakultas())
+                                <div class="flex-shrink-0">
+                                    <div
+                                        class="inline-flex gap-2 items-center px-4 py-2 bg-indigo-50 rounded-xl border border-indigo-200">
+                                        <i class="text-indigo-600 fa-solid fa-graduation-cap"></i>
+                                        <span class="text-sm font-medium text-indigo-700">Role: {{ auth()->user()->isDekan() ? 'Dekan' : 'Wakil Dekan' }}</span>
+                                    </div>
+                                </div>
+                            @elseif ($isKaprodi)
                                 <div class="flex-shrink-0">
                                     <div
                                         class="inline-flex gap-2 items-center px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">

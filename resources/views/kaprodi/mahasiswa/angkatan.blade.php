@@ -7,9 +7,27 @@
 
         {{-- Header Halaman --}}
         <div class="mb-5">
-            <h1 class="text-xl font-bold text-gray-800">
-                Daftar Angkatan Mahasiswa Belum PKL
-            </h1>
+            <div class="flex flex-wrap items-center gap-3">
+                <h1 class="text-xl font-bold text-gray-800">
+                    Daftar Angkatan Mahasiswa Belum PKL
+                </h1>
+                @if (auth()->user()->isPimpinanFakultas())
+                    <span class="px-2.5 py-0.5 text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full">
+                        {{ auth()->user()->isDekan() ? 'Dekan' : 'Wakil Dekan' }} — Satu Fakultas
+                    </span>
+                @elseif (auth()->user()->isKaprodi())
+                    <span class="px-2.5 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
+                        Kaprodi — Satu Program Studi
+                    </span>
+                @endif
+            </div>
+            <p class="mt-1 text-sm text-gray-500">
+                @if (auth()->user()->isPimpinanFakultas())
+                    Rekap mahasiswa yang belum pernah mengajukan atau belum memiliki status PKL aktif di satu fakultas berdasarkan angkatan.
+                @else
+                    Rekap mahasiswa yang belum pernah mengajukan atau belum memiliki status PKL aktif di program studi Anda berdasarkan angkatan.
+                @endif
+            </p>
         </div>
 
         @if ($angkatan->count() > 0)

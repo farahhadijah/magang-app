@@ -39,6 +39,42 @@
                 <form action="{{ route('mitra.penilaian.store', $pkl->id) }}" method="POST" class="p-4 space-y-4 sm:p-6">
                     @csrf
 
+                    {{-- Panduan Konversi Grade --}}
+                    <details class="bg-gray-50 rounded-lg border border-gray-200 group" open>
+                        <summary class="flex justify-between items-center px-4 py-2.5 list-none cursor-pointer">
+                            <span class="text-sm font-semibold text-gray-700">
+                                📊 Panduan Konversi Grade Nilai
+                            </span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+
+                        <div class="grid grid-cols-2 gap-2 px-4 pb-4 sm:grid-cols-7">
+                            @php
+                                $konversi = [
+                                    ['range' => '85-100', 'grade' => 'A', 'color' => 'bg-green-600'],
+                                    ['range' => '80-84', 'grade' => 'AB', 'color' => 'bg-blue-600'],
+                                    ['range' => '75-79', 'grade' => 'B', 'color' => 'bg-indigo-600'],
+                                    ['range' => '68-74', 'grade' => 'BC', 'color' => 'bg-yellow-500'],
+                                    ['range' => '60-67', 'grade' => 'C', 'color' => 'bg-orange-500'],
+                                    ['range' => '50-59', 'grade' => 'D', 'color' => 'bg-orange-600'],
+                                    ['range' => '0-49', 'grade' => 'E', 'color' => 'bg-red-600'],
+                                ];
+                            @endphp
+
+                            @foreach ($konversi as $k)
+                                <div class="flex flex-col items-center p-2 text-center bg-white rounded-lg border border-gray-200 shadow-sm">
+                                    <span class="inline-flex items-center justify-center w-8 h-8 mb-1 text-xs font-bold text-white rounded-full {{ $k['color'] }}">
+                                        {{ $k['grade'] }}
+                                    </span>
+                                    <span class="text-[11px] font-medium text-gray-700">{{ $k['range'] }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </details>
+
                     @php
                         $fields = [
                             'kedisiplinan' => 'Kedisiplinan',

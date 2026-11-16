@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pkl;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -59,7 +60,7 @@ class ResumePklController extends Controller
             $pkl->loadMissing('pengajuanPkl.mahasiswa.prodi');
             $mahasiswaFakultasId = $pkl->pengajuanPkl?->mahasiswa?->prodi?->fakultas_id;
 
-            if (!$fakultasId || (int) $mahasiswaFakultasId !== (int) $fakultasId) {
+            if (! $fakultasId || (int) $mahasiswaFakultasId !== (int) $fakultasId) {
                 abort(403, 'Anda tidak memiliki hak akses untuk melihat resume mahasiswa di luar fakultas Anda.');
             }
         } elseif ($jabatan === 'kaprodi') {
@@ -67,7 +68,7 @@ class ResumePklController extends Controller
             $pkl->loadMissing('pengajuanPkl.mahasiswa');
             $mahasiswaProdiId = $pkl->pengajuanPkl?->mahasiswa?->prodi_id;
 
-            if (!$prodiId || (int) $mahasiswaProdiId !== (int) $prodiId) {
+            if (! $prodiId || (int) $mahasiswaProdiId !== (int) $prodiId) {
                 abort(403, 'Anda tidak memiliki hak akses untuk melihat resume mahasiswa di luar program studi Anda.');
             }
         } else {
@@ -142,10 +143,110 @@ class ResumePklController extends Controller
     public function mahasiswa(Request $request, $tahun)
     {
         $user = auth()->user();
-        $jabatan = strtolower($user->dosen->jabatan ?? '');
+        $dosen = $user->dosen;
+        $jabatan = strtolower($dosen->jabatan ?? '');
         $isPimpinanFakultas = in_array($jabatan, ['dekan', 'wadek']);
         $isKaprodi = $jabatan === 'kaprodi';
 
+        // Khusus Dekan dan Wadek: Pengelompokan awal setelah klik angkatan adalah berdasarkan Program Studi
+        if ($isPimpinanFakultas) {
+            $fakultasId = $dosen?->prodi?->fakultas_id;
+            if (! $fakultasId) {
+                abort(403, 'Pimpinan Fakultas belum terhubung dengan fakultas.');
+            }
+
+            // Jika belum memilih prodi (prodi_id tidak ada), tampilkan pengelompokan prodi untuk angkatan ini
+            if (! $request->filled('prodi_id')) {
+                $search = trim((string) $request->input('search', ''));
+                $prodiQuery = Prodi::where('fakultas_id', $fakultasId)
+                    ->withCount([
+                        'mahasiswa as total_resume_pkl' => function ($q) use ($tahun) {
+                            $q->where('angkatan', $tahun)
+                              ->whereHas('pengajuanPkl.pkl', function ($pklQ) {
+                                  $pklQ->where('status', 'selesai');
+                              });
+                        }
+                    ]);
+
+                if ($search !== '') {
+                    $prodiQuery->where(function ($q) use ($search) {
+                        $q->where('nama', 'like', "%{$search}%")
+                          ->orWhere('kode', 'like', "%{$search}%");
+                    });
+                }
+
+                $prodiList = $prodiQuery->orderBy('nama')->get();
+
+                return view(
+                    'dosen.resume.mahasiswa',
+                    compact('prodiList', 'tahun', 'isKaprodi', 'isPimpinanFakultas', 'jabatan', 'search')
+                );
+            }
+
+            // Jika prodi_id dipilih, validasi bahwa prodi tersebut berada dalam fakultas Dekan/Wadek
+            $selectedProdi = Prodi::where('id', $request->prodi_id)
+                ->where('fakultas_id', $fakultasId)
+                ->firstOrFail();
+
+            $search = trim((string) $request->input('search', ''));
+
+            $query = Pkl::with([
+                'dosen',
+                'pengajuanPkl.mahasiswa.prodi',
+                'pengajuanPkl.tempatPkl',
+                'nilaiPkl',
+                'laporanAkhir',
+                'logbooks',
+                'penilaianMitra',
+                'suratPengantar',
+                'suratBalasan',
+            ])
+                ->where('pkl.status', 'selesai')
+                ->whereHas('pengajuanPkl.mahasiswa', function ($q) use ($tahun, $selectedProdi) {
+                    $q->where('mahasiswa.angkatan', $tahun)
+                      ->where('mahasiswa.prodi_id', $selectedProdi->id);
+                });
+
+            if ($search !== '') {
+                $query->whereHas(
+                    'pengajuanPkl.mahasiswa',
+                    function ($q) use ($search) {
+                        $q->where(function ($inner) use ($search) {
+                            $inner->where(
+                                'mahasiswa.nim',
+                                'like',
+                                '%' . $search . '%'
+                            )
+                            ->orWhere(
+                                'mahasiswa.nama',
+                                'like',
+                                '%' . $search . '%'
+                            );
+                        });
+                    }
+                );
+            }
+
+            $pkls = $query
+                ->orderByDesc('pkl.tgl_selesai')
+                ->paginate(10)
+                ->withQueryString();
+
+            return view(
+                'dosen.resume.mahasiswa',
+                compact(
+                    'pkls',
+                    'selectedProdi',
+                    'tahun',
+                    'isKaprodi',
+                    'isPimpinanFakultas',
+                    'jabatan',
+                    'search'
+                )
+            );
+        }
+
+        // Alur untuk Kaprodi & Dosen Biasa (langsung tampilkan mahasiswa dalam lingkupnya)
         $search = trim((string) $request->input('search', ''));
 
         $query = Pkl::with([

@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 use App\Mail\NotifikasiDosenPembimbing;
 use App\Mail\StatusPengajuanMail;
 use App\Mail\AkunMitraMail;
+use App\Mail\NotifikasiMahasiswaBaruMitraMail;
 use App\Models\EmailLog;
 use Illuminate\Support\Facades\Log;
 class PengajuanPklController extends Controller
@@ -454,6 +455,50 @@ class PengajuanPklController extends Controller
                 ]
             );
         }
+
+        // === TAMBAHAN: Kirim notifikasi ke Mitra jika akun sudah ada sebelumnya ===
+        $emailNotifikasiMitraBerhasil = false;
+        $mitraEksisAda = false;
+        if (! $mitraBaru && ! $emailInstansiKosong) {
+            $tempat = $pengajuan->tempatPkl;
+            if ($tempat && Mitra::where('tempat_pkl_id', $tempat->id)->exists()) {
+                $mitraEksisAda = true;
+                $emailInstansi = strtolower(trim((string) $tempat->email));
+                if ($emailInstansi !== '') {
+                    try {
+                        Mail::to($emailInstansi)->send(
+                            new NotifikasiMahasiswaBaruMitraMail(
+                                namaTempat: $tempat->nama_tempat,
+                                namaMahasiswa: $pengajuan->mahasiswa->nama,
+                                nimMahasiswa: $pengajuan->mahasiswa->nim,
+                                prodiMahasiswa: $pengajuan->mahasiswa->prodi->nama ?? '-',
+                                namaDosen: $dosen->nama,
+                                tglMulai: now()->translatedFormat('d F Y')
+                            )
+                        );
+                        $emailNotifikasiMitraBerhasil = true;
+                        Log::info('Berhasil mengirim email notifikasi mahasiswa baru ke mitra.', [
+                            'pengajuan_id' => $pengajuan->id,
+                            'tempat_pkl_id' => $tempat->id,
+                            'email' => $emailInstansi,
+                        ]);
+                    } catch (\Throwable $e) {
+                        Log::error('Gagal mengirim email notifikasi mahasiswa baru ke mitra.', [
+                            'pengajuan_id' => $pengajuan->id,
+                            'tempat_pkl_id' => $tempat->id,
+                            'email' => $emailInstansi,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                } else {
+                    Log::warning('Email instansi kosong saat kirim notifikasi mahasiswa baru ke mitra.', [
+                        'pengajuan_id' => $pengajuan->id,
+                        'tempat_pkl_id' => $tempat->id,
+                    ]);
+                }
+            }
+        }
+
         $pesan = 'Pengajuan disetujui, surat pengantar PKL diterbitkan, dan notifikasi telah dikirim ke dosen pembimbing.';
         if ($mitraBaru && $emailMitraBerhasil) {
             $pesan .= ' Akun mitra berhasil dibuat dan kredensial dikirim ke email instansi.';
@@ -469,6 +514,18 @@ class PengajuanPklController extends Controller
         }
         if ($emailInstansiKosong) {
             $pesan .= ' Akun mitra belum dibuat karena email instansi belum tersedia.';
+            return redirect()
+                ->route('kaprodi.pengajuan.index')
+                ->with('warning', $pesan);
+        }
+        if ($mitraEksisAda && $emailNotifikasiMitraBerhasil) {
+            $pesan .= ' Notifikasi mahasiswa baru telah dikirim ke email mitra.';
+            return redirect()
+                ->route('kaprodi.pengajuan.index')
+                ->with('success', $pesan);
+        }
+        if ($mitraEksisAda && ! $emailNotifikasiMitraBerhasil) {
+            $pesan .= ' Namun, notifikasi mahasiswa baru ke email mitra gagal dikirim.';
             return redirect()
                 ->route('kaprodi.pengajuan.index')
                 ->with('warning', $pesan);

@@ -57,6 +57,17 @@
                                 fileUrl: '',
                                 title: '',
                                 openModal(url, titleText) {
+                                    if (!url) return;
+                                    const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                                    const cleanUrl = url.split('?')[0].toLowerCase();
+                                    const isPdf = cleanUrl.endsWith('.pdf');
+
+                                    // Fallback mobile: langsung buka PDF di tab baru
+                                    if (isPdf && isMobile) {
+                                        window.open(url, '_blank');
+                                        return;
+                                    }
+
                                     this.fileUrl = url;
                                     this.title = titleText;
                                     this.isOpen = true;
@@ -113,87 +124,98 @@
 
                                 </div>
 
-                                {{-- MODAL INFORMASI (DIPERLUAS & FULL SCREEN) --}}
-                                <div x-show="isOpen" x-cloak @keydown.escape.window="closeModal()"
-                                    class="flex fixed inset-0 z-50 justify-center items-center p-0 backdrop-blur-sm bg-black/70 sm:p-4">
+                                {{-- MODAL INFORMASI (LAZY RENDER & CEPAT) --}}
+                                <template x-if="isOpen">
+                                    <div x-cloak @keydown.escape.window="closeModal()"
+                                        class="flex fixed inset-0 z-50 justify-center items-center p-0 backdrop-blur-sm bg-black/70 sm:p-4">
 
-                                    <div class="absolute inset-0" @click="closeModal()"></div>
+                                        <div class="absolute inset-0" @click="closeModal()"></div>
 
-                                    <div x-show="isOpen" x-transition
-                                        class="relative z-10 flex flex-col w-full h-full sm:h-[90vh] max-w-6xl sm:rounded-2xl overflow-hidden bg-white shadow-2xl">
-
-                                        {{-- Header Modal --}}
                                         <div
-                                            class="flex justify-between items-center px-4 py-3 border-b sm:px-6 sm:py-4 shrink-0">
-                                            <div class="pr-4">
-                                                <h2 class="text-base font-bold text-gray-800 sm:text-lg" x-text="title">
-                                                </h2>
-                                                <p class="mt-1 text-xs text-gray-500">Informasi Sibolang</p>
+                                            class="relative z-10 flex flex-col w-full h-full sm:h-[90vh] max-w-6xl sm:rounded-2xl overflow-hidden bg-white shadow-2xl">
+
+                                            {{-- Header Modal --}}
+                                            <div
+                                                class="flex justify-between items-center px-4 py-3 border-b sm:px-6 sm:py-4 shrink-0">
+                                                <div class="pr-4">
+                                                    <h2 class="text-base font-bold text-gray-800 sm:text-lg" x-text="title">
+                                                    </h2>
+                                                    <p class="mt-1 text-xs text-gray-500">Informasi Sibolang</p>
+                                                </div>
+
+                                                <div class="flex items-center gap-2">
+                                                    <a :href="fileUrl" target="_blank"
+                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                                                        title="Buka di tab baru">
+                                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                                        <span class="hidden sm:inline">Tab Baru</span>
+                                                    </a>
+
+                                                    <button type="button" @click="closeModal()"
+                                                        class="flex flex-shrink-0 justify-center items-center w-8 h-8 text-gray-500 rounded-full transition sm:w-9 sm:h-9 hover:bg-red-100 hover:text-red-600">
+                                                        <i class="text-lg fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <button type="button" @click="closeModal()"
-                                                class="flex flex-shrink-0 justify-center items-center w-8 h-8 text-gray-500 rounded-full transition sm:w-9 sm:h-9 hover:bg-red-100 hover:text-red-600">
-                                                <i class="text-lg fa-solid fa-xmark"></i>
-                                            </button>
-                                        </div>
 
-                                        {{-- Body Modal --}}
-                                        <div class="overflow-hidden flex-1 w-full bg-gray-100">
+                                            {{-- Body Modal --}}
+                                            <div class="overflow-hidden flex-1 w-full bg-gray-100">
 
-                                            {{-- PDF (MENGGUNAKAN TAG OBJECT) --}}
-                                            <template x-if="isPdf()">
-                                                <object x-bind:data="fileUrl" type="application/pdf"
-                                                    class="w-full h-full border-0">
-                                                    <!-- Fallback jika browser benar-benar tidak bisa render PDF (misal HP jadul) -->
+                                                {{-- PDF (IFRAME RINGAN) --}}
+                                                <template x-if="isPdf()">
+                                                    <iframe :src="fileUrl" class="w-full h-full border-0 bg-white" title="Preview PDF">
+                                                        <!-- Fallback -->
+                                                        <div
+                                                            class="flex flex-col justify-center items-center w-full h-full p-6 text-center bg-gray-100">
+                                                            <i
+                                                                class="mb-4 text-4xl text-gray-400 fa-solid fa-file-pdf sm:text-5xl"></i>
+                                                            <p class="text-sm text-gray-600 sm:text-base mb-4">
+                                                                Browser Anda mungkin tidak mendukung pratinjau PDF langsung.
+                                                            </p>
+                                                            <a :href="fileUrl" target="_blank"
+                                                                class="px-5 py-2 text-sm font-semibold text-white rounded-lg transition hover:opacity-90"
+                                                                style="background-color: #1f8a1b;">
+                                                                Buka / Unduh PDF
+                                                            </a>
+                                                        </div>
+                                                    </iframe>
+                                                </template>
+
+                                                {{-- IMAGE --}}
+                                                <template x-if="isImage()">
                                                     <div
-                                                        class="flex flex-col justify-center items-center w-full h-full p-6 text-center bg-gray-100">
+                                                        class="flex overflow-auto justify-center items-center p-3 w-full h-full bg-gray-200 sm:p-6">
+                                                        <img :src="fileUrl" :alt="title"
+                                                            class="object-contain max-w-full max-h-full rounded-lg shadow-md">
+                                                    </div>
+                                                </template>
+
+                                                {{-- OFFICE (Word/Excel/PPT) --}}
+                                                <template x-if="isOffice()">
+                                                    <iframe x-bind:src="viewerSrc()" class="w-full h-full border-0"
+                                                        allowfullscreen></iframe>
+                                                </template>
+
+                                                {{-- UNKNOWN --}}
+                                                <template x-if="isUnknown()">
+                                                    <div
+                                                        class="flex flex-col justify-center items-center p-6 w-full h-full text-center sm:p-10">
                                                         <i
-                                                            class="mb-4 text-4xl text-gray-400 fa-solid fa-file-pdf sm:text-5xl"></i>
-                                                        <p class="text-sm text-gray-600 sm:text-base mb-4">
-                                                            Browser Anda mungkin tidak mendukung pratinjau PDF langsung.
+                                                            class="mb-4 text-4xl text-gray-400 fa-solid fa-file sm:text-5xl"></i>
+                                                        <p class="text-sm text-gray-600 sm:text-base">
+                                                            File tidak dapat ditampilkan langsung.
                                                         </p>
                                                         <a :href="fileUrl" target="_blank"
-                                                            class="px-5 py-2 text-sm font-semibold text-white rounded-lg transition hover:opacity-90"
+                                                            class="px-5 py-2 mt-4 text-sm font-semibold text-white rounded-lg transition hover:opacity-90"
                                                             style="background-color: #1f8a1b;">
-                                                            Buka / Unduh PDF
+                                                            Buka File
                                                         </a>
                                                     </div>
-                                                </object>
-                                            </template>
-
-                                            {{-- IMAGE --}}
-                                            <template x-if="isImage()">
-                                                <div
-                                                    class="flex overflow-auto justify-center items-center p-3 w-full h-full bg-gray-200 sm:p-6">
-                                                    <img :src="fileUrl" :alt="title"
-                                                        class="object-contain max-w-full max-h-full rounded-lg shadow-md">
-                                                </div>
-                                            </template>
-
-                                            {{-- OFFICE (Word/Excel/PPT) --}}
-                                            <template x-if="isOffice()">
-                                                <iframe x-bind:src="viewerSrc()" class="w-full h-full border-0"
-                                                    allowfullscreen></iframe>
-                                            </template>
-
-                                            {{-- UNKNOWN --}}
-                                            <template x-if="isUnknown()">
-                                                <div
-                                                    class="flex flex-col justify-center items-center p-6 w-full h-full text-center sm:p-10">
-                                                    <i
-                                                        class="mb-4 text-4xl text-gray-400 fa-solid fa-file sm:text-5xl"></i>
-                                                    <p class="text-sm text-gray-600 sm:text-base">
-                                                        File tidak dapat ditampilkan langsung.
-                                                    </p>
-                                                    <a :href="fileUrl" target="_blank"
-                                                        class="px-5 py-2 mt-4 text-sm font-semibold text-white rounded-lg transition hover:opacity-90"
-                                                        style="background-color: #1f8a1b;">
-                                                        Buka File
-                                                    </a>
-                                                </div>
-                                            </template>
+                                                </template>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </template>
                             </div>
                         </div>
 

@@ -49,10 +49,23 @@ export function registerAlpineComponents(Alpine) {
         fileType: "",
         title: "",
 
+        isMobile() {
+            return window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        },
+
         openModal(url, title = "") {
+            if (!url) return;
+            const type = this.getFileType(url);
+
+            // Fallback mobile: langsung buka PDF di tab baru agar cepat & ringan
+            if (type === "pdf" && this.isMobile()) {
+                window.open(url, "_blank");
+                return;
+            }
+
             this.fileUrl = url;
             this.title = title;
-            this.fileType = this.getFileType(url);
+            this.fileType = type;
             this.isOpen = true;
 
             document.body.classList.add("overflow-hidden");

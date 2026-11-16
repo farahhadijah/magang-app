@@ -6,13 +6,26 @@ export function registerDocumentViewer(Alpine) {
         fileUrl: "",
         fileType: "",
         title: "",
-        
+
         pdfViewerBaseUrl: '/vendor/pdfjs/web/viewer.html',
 
+        isMobile() {
+            return window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        },
+
         openModal(url, title = "") {
+            if (!url) return;
+            const type = this.getFileType(url);
+
+            // Fallback mobile: Jika PDF dibuka di mobile, langsung buka di tab baru agar cepat & ringan
+            if (type === "pdf" && this.isMobile()) {
+                window.open(url, "_blank");
+                return;
+            }
+
             this.fileUrl = url;
             this.title = title;
-            this.fileType = this.getFileType(url);
+            this.fileType = type;
             this.isOpen = true;
             document.body.classList.add("overflow-hidden");
         },
@@ -45,7 +58,6 @@ export function registerDocumentViewer(Alpine) {
         pdfViewerUrl() {
             if (!this.isPdf()) return "";
             const encodedUrl = encodeURIComponent(this.fileUrl);
-            // Tambahkan disableRange untuk mencegah error CORS
             return `${this.pdfViewerBaseUrl}?file=${encodedUrl}&disableRange=true&disableStream=true`;
         },
 

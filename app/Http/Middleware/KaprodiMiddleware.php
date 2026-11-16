@@ -16,11 +16,19 @@ class KaprodiMiddleware
             abort(403);
         }
 
-        // cek apakah dosen dan jabatan kaprodi (pakai helper model yang case-insensitive)
-        if ($user->role === 'dosen' && $user->isKaprodi()) {
-            return $next($request);
+        // Cek hak akses dosen
+        if ($user->role === 'dosen') {
+            // Kaprodi memiliki akses ke seluruh area kaprodi
+            if ($user->isKaprodi()) {
+                return $next($request);
+            }
+
+            // Dekan & Wadek diizinkan mengakses menu monitoring mahasiswa (Mahasiswa PKL & Mahasiswa Belum PKL)
+            if ($user->isPimpinanFakultas() && $request->routeIs('kaprodi.mahasiswa.*')) {
+                return $next($request);
+            }
         }
 
-        abort(403, 'Anda tidak memiliki akses sebagai Kaprodi');
+        abort(403, 'Anda tidak memiliki hak akses ke halaman ini.');
     }
 }

@@ -2,8 +2,8 @@
     <x-slot name="title">
         Detail Laporan - MagangApp
     </x-slot>
-    @php $pdfSrc = isset($laporan) ? asset('storage/'.$laporan->path_file) : ''; @endphp
-    <div x-data="togglePdf(@js($pdfSrc))" class="py-6 mx-auto space-y-6 max-w-5xl">
+
+    <div x-data="informasiModal" class="py-6 mx-auto space-y-6 max-w-5xl">
         {{-- Flash Message --}}
         @if (session('success'))
             <div class="flex gap-2 items-center p-4 text-green-800 bg-green-50 rounded-xl border border-green-200">
@@ -73,17 +73,25 @@
         {{-- Card File Preview --}}
         <div class="p-6 space-y-4 bg-white rounded-2xl border border-green-100 shadow">
 
-            <h3 class="font-semibold text-green-700">
-                File Laporan
-            </h3>
+            <div>
+                <p class="flex gap-2 items-center mb-2 text-sm font-semibold tracking-wide text-green-800 uppercase">
+                    <i class="w-5 fa-solid fa-file-pdf"></i>
+                    File Laporan
+                </p>
 
-            <button type="button" @click="toggle()"
-                class="inline-flex gap-2 items-center text-sm font-medium text-green-600 hover:text-green-800 hover:underline"
-                x-text="visible ? 'Sembunyikan File PDF' : 'Lihat File PDF'">
-            </button>
+                <button type="button"
+                    @click="openModal(
+                        @js(asset('storage/' . $laporan->path_file)),
+                        'Laporan Akhir - {{ addslashes($pkl->pengajuanPkl->mahasiswa->nama ?? 'Mahasiswa') }}'
+                    )"
+                    class="inline-flex gap-2 items-center font-medium text-green-700 underline hover:text-green-900">
+                    <i class="fa-solid fa-eye"></i>
+                    Lihat File PDF
+                </button>
 
-            <div x-show="visible" x-cloak class="mt-4">
-                <iframe :src="src" class="w-full h-[600px] border rounded-xl"></iframe>
+                <p class="mt-2 text-xs text-gray-500">
+                    Format laporan: PDF
+                </p>
             </div>
 
         </div>
@@ -133,6 +141,77 @@
 
             </div>
         @endif
+
+        {{-- ================= MODAL PREVIEW PDF ================= --}}
+        <template x-if="isOpen">
+            <div x-cloak @keydown.escape.window="closeModal()" @click.self="closeModal()"
+                class="flex fixed inset-0 z-[9999999999] justify-center items-center p-4 bg-black/70">
+
+                <div
+                    class="relative flex flex-col w-full max-w-6xl max-h-[92vh] overflow-hidden bg-white shadow-2xl rounded-2xl">
+
+                    {{-- Header Modal --}}
+                    <div class="flex justify-between items-center px-5 py-4 border-b border-gray-200">
+
+                        <div class="flex gap-3 items-center min-w-0">
+
+                            <div
+                                class="flex flex-shrink-0 justify-center items-center w-10 h-10 bg-green-100 rounded-lg">
+                                <i class="text-green-600 fa-solid fa-file-pdf"></i>
+                            </div>
+
+                            <div class="min-w-0">
+
+                                <h3 class="font-semibold text-gray-800 truncate" x-text="title"></h3>
+
+                                <p class="text-xs text-gray-500">
+                                    Preview Laporan Akhir PDF
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <button type="button" @click="closeModal()"
+                            class="flex flex-shrink-0 justify-center items-center w-9 h-9 text-gray-500 bg-gray-100 rounded-lg transition hover:text-red-600 hover:bg-red-50"
+                            title="Tutup">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+
+                    </div>
+
+
+                    {{-- Isi Preview PDF --}}
+                    <div class="overflow-auto flex-1 p-3 min-h-0 bg-gray-100">
+
+                        <iframe :src="viewerSrc()" title="Preview PDF Laporan Akhir"
+                            class="w-full h-[78vh] bg-white border border-gray-200 rounded-lg" frameborder="0"></iframe>
+
+                    </div>
+
+
+                    {{-- Footer Modal --}}
+                    <div class="flex gap-3 justify-between items-center px-5 py-3 bg-gray-50 border-t border-gray-200">
+
+                        <a :href="fileUrl" target="_blank" rel="noopener noreferrer"
+                            class="inline-flex gap-2 items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 transition hover:bg-gray-100">
+                            <i class="fa-solid fa-up-right-from-square"></i>
+                            Buka File
+                        </a>
+
+                        <button type="button" @click="closeModal()"
+                            class="inline-flex gap-2 items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg transition hover:bg-green-700">
+                            <i class="fa-solid fa-xmark"></i>
+                            Tutup
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </template>
 
     </div>
 </x-app-layout>

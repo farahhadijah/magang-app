@@ -29,7 +29,7 @@ return new class extends Migration
 
             // hasil akhir
             $table->decimal('rata_rata', 5, 2);
-            $table->char('grade', 1);
+            $table->string('grade', 5);
 
             // file pdf sistem
             $table->string('file_pdf')->nullable();

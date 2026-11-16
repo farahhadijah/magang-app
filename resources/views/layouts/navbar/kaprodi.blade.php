@@ -1,31 +1,36 @@
 <div class="space-y-1">
 
-    {{-- ================= VERIFIKASI PKL ================= --}}
-    <a href="{{ route('kaprodi.pengajuan.index') }}"
-        class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800
-       {{ request()->routeIs('kaprodi.pengajuan.index') || request()->routeIs('kaprodi.pengajuan.show') ? 'bg-green-800 text-amber-300' : '' }}">
-        <i class="w-5 fa-solid fa-circle-check"></i>
-        Verifikasi PKL
-    </a>
+    {{-- ================= MENU KHUSUS KAPRODI ================= --}}
+    @if (auth()->user()->isKaprodi())
+        {{-- ================= VERIFIKASI PKL ================= --}}
+        <a href="{{ route('kaprodi.pengajuan.index') }}"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800
+           {{ request()->routeIs('kaprodi.pengajuan.index') || request()->routeIs('kaprodi.pengajuan.show') ? 'bg-green-800 text-amber-300' : '' }}">
+            <i class="w-5 fa-solid fa-circle-check"></i>
+            Verifikasi PKL
+        </a>
 
-    {{-- ================= HISTORI DITOLAK ================= --}}
-    <a href="{{ route('kaprodi.pengajuan.histori') }}"
-        class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800
-       {{ request()->routeIs('kaprodi.pengajuan.histori') ? 'bg-green-800 text-amber-300' : '' }}">
-        <i class="w-5 fa-solid fa-clock-rotate-left"></i>
-        Histori
-    </a>
+        {{-- ================= HISTORI DITOLAK ================= --}}
+        <a href="{{ route('kaprodi.pengajuan.histori') }}"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800
+           {{ request()->routeIs('kaprodi.pengajuan.histori') ? 'bg-green-800 text-amber-300' : '' }}">
+            <i class="w-5 fa-solid fa-clock-rotate-left"></i>
+            Histori
+        </a>
+    @endif
+
+    {{-- ================= MENU MONITORING: KAPRODI, DEKAN, & WADEK ================= --}}
     {{-- ================= MAHASISWA PKL ================= --}}
     <a href="{{ route('kaprodi.mahasiswa.index') }}"
         class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800
-        {{ request()->routeIs('kaprodi.mahasiswa.index') ? 'bg-green-800 text-amber-300' : '' }}">
+        {{ request()->routeIs('kaprodi.mahasiswa.index') || request()->routeIs('kaprodi.mahasiswa.detail') ? 'bg-green-800 text-amber-300' : '' }}">
         <i class="w-5 fa-solid fa-user-graduate"></i>
         Mahasiswa PKL
     </a>
     {{-- ================= MAHASASISWA BELUM PKL ================= --}}
     <a href="{{ route('kaprodi.mahasiswa.angkatan') }}"
         class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition hover:bg-green-800
-    {{ request()->routeIs('kaprodi.mahasiswa.angkatan') ? 'bg-green-800 text-amber-300' : '' }}">
+    {{ request()->routeIs('kaprodi.mahasiswa.angkatan') || request()->routeIs('kaprodi.mahasiswa.belum') ? 'bg-green-800 text-amber-300' : '' }}">
         <i class="w-5 fa-solid fa-user-clock"></i>
         Mahasiswa Belum Mengajukan Pkl
     </a>
