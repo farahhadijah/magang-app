@@ -40,7 +40,7 @@
 </div>
 
 <table>
-<tr><td width="90">Nomor</td><td width="10">:</td><td>{{ $noSurat }}</td></tr>
+<tr><td width="90">Nomor</td><td width="10">:</td><td>{{ $noSurat ?? ('...../UNISLA/PKL/' . date('Y')) }}</td></tr>
 <tr><td>Lampiran</td><td>:</td><td>1 (satu) lembar</td></tr>
 <tr><td>Sifat</td><td>:</td><td>Penting</td></tr>
 <tr>

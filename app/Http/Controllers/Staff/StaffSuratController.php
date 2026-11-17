@@ -37,9 +37,18 @@ class StaffSuratController extends Controller
 
     public function cetak($id)
     {
-        $this->pengajuanProdiQuery()->findOrFail($id);
+        $pengajuan = $this->pengajuanProdiQuery()
+            ->with([
+                'mahasiswa.prodi.fakultas',
+                'tempatPkl',
+            ])
+            ->findOrFail($id);
 
-        return $this->serveSuratPdf((int) $id, inline: false);
+        $noSurat = '...../UNISLA/PKL/' . date('Y');
+
+        return Pdf::loadView('surat.pengantar', compact('pengajuan', 'noSurat'))
+            ->setPaper([0, 0, 595, 935], 'portrait')
+            ->stream('Surat_Pengantar_PKL_' . ($pengajuan->mahasiswa->nim ?? $pengajuan->id) . '.pdf');
     }
 
     
@@ -99,7 +108,7 @@ class StaffSuratController extends Controller
             ])
             ->findOrFail($id);
 
-        $noSurat = '0' . $pengajuan->id . '/UNISLA/PKL/' . date('Y');
+        $noSurat = '...../UNISLA/PKL/' . date('Y');
 
         return Pdf::loadView('surat.pengantar', compact('pengajuan', 'noSurat'))
             ->setPaper([0, 0, 595, 935], 'portrait')

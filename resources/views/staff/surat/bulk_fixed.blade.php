@@ -8,7 +8,7 @@
 
 @foreach($data as $item)
     @php
-        $noSurat = '0'.$item->id.'/UNISLA/PKL/'.date('Y');
+        $noSurat = '...../UNISLA/PKL/'.date('Y');
     @endphp
 
     @include('surat.pengantar', [
