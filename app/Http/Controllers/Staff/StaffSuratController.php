@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Mail\SuratSiapDiambilMail;
 use App\Models\PengajuanPkl;
+use App\Models\SuratPengantar;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -44,7 +45,7 @@ class StaffSuratController extends Controller
             ])
             ->findOrFail($id);
 
-        $noSurat = '...../UNISLA/PKL/' . date('Y');
+        $noSurat = SuratPengantar::generateNomorSurat();
 
         return Pdf::loadView('surat.pengantar', compact('pengajuan', 'noSurat'))
             ->setPaper([0, 0, 595, 935], 'portrait')
@@ -108,7 +109,7 @@ class StaffSuratController extends Controller
             ])
             ->findOrFail($id);
 
-        $noSurat = '...../UNISLA/PKL/' . date('Y');
+        $noSurat = SuratPengantar::generateNomorSurat();
 
         return Pdf::loadView('surat.pengantar', compact('pengajuan', 'noSurat'))
             ->setPaper([0, 0, 595, 935], 'portrait')

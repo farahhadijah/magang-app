@@ -248,7 +248,7 @@ class PengajuanPklController extends Controller
                     'tgl_selesai' => null,
                     'status' => 'aktif',
                 ]);
-                $noSurat = '...../UNISLA/PKL/' . now()->year;
+                $noSurat = SuratPengantar::generateNomorSurat();
                 $kaprodi = Dosen::where('jabatan', 'Kaprodi')
                     ->where('prodi_id', $prodiId)
                     ->where('is_active', 1)

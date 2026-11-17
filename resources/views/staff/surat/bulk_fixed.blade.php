@@ -8,7 +8,7 @@
 
 @foreach($data as $item)
     @php
-        $noSurat = '...../UNISLA/PKL/'.date('Y');
+        $noSurat = \App\Models\SuratPengantar::generateNomorSurat();
     @endphp
 
     @include('surat.pengantar', [
